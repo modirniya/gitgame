@@ -75,7 +75,7 @@ button[disabled] { opacity: .42; cursor: default; }
 .card .face { display: grid; align-content: center; justify-items: center; text-align: center; gap: .25em; padding: .3em .2em; min-width: 0; }
 .card .file { font-weight: 600; font-size: .86em; line-height: 1.2; word-break: break-all; }
 .card .lines { font: 700 2.3em/1 var(--sans); }
-.card .bugtag { position: absolute; left: .45em; right: .45em; bottom: .45em; background: var(--reject); color: #fff; font: 800 .66em/1.8em var(--sans); letter-spacing: .06em; text-align: center; border-radius: .35em; }
+.card .bugtag { position: absolute; right: .35em; top: 2.2em; background: var(--reject); color: #fff; font: 800 .66em/1.8em var(--sans); letter-spacing: .06em; padding: 0 .5em; border-radius: .35em; } /* at the top, so it stays visible when hand rows overlap */
 .card.cmd .face { align-content: start; padding-top: .9em; }
 .card.cmd .name { font-weight: 700; font-size: .95em; line-height: 1.2; }
 .card.cmd .cost { position: absolute; left: .7em; bottom: .6em; font: 600 .62em var(--sans); color: var(--muted); }
@@ -125,3 +125,64 @@ button[disabled] { opacity: .42; cursor: default; }
 .tok { font: 500 12px var(--mono); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; }
 .tok.neg { color: var(--reject); } .tok.pos { color: var(--ok); } .tok.none { color: var(--muted); }
 .fine { font-size: 13px; color: var(--muted); }
+
+/* ---------- I-Start ---------- */
+.start { justify-content: center; gap: 24px; }
+.logo .prompt { font: 500 14px var(--mono); color: var(--muted); }
+.logo h1 { font: 700 40px/1.1 var(--sans); letter-spacing: -.02em; margin-top: 4px; }
+.logo p { font: 500 15px var(--mono); color: var(--you); }
+.pitch { font-size: 18px; line-height: 1.45; }
+.toggle { display: flex; gap: 12px; align-items: center; min-height: 56px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+.toggle input { width: 24px; height: 24px; accent-color: var(--you); flex: none; }
+.toggle b { display: block; } .toggle small { color: var(--muted); font-size: 13px; }
+
+/* ---------- consequence screens ---------- */
+.out { gap: 16px; }
+h1.cmd { font: 700 22px/1.2 var(--mono); letter-spacing: -.01em; overflow-wrap: anywhere; }
+pre.term { margin: 0; font: 12px/1.5 var(--mono); background: #1B2228; color: #D7DEE3; padding: 10px 12px; border-radius: 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
+pre.term.bad { background: #3A1611; color: #FFD9D2; border-left: 4px solid var(--reject); }
+.scene { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 160px; position: relative; }
+.said { font-size: 18px; line-height: 1.45; }
+.then { font-size: 16px; color: var(--muted); }
+.out.bad h1.cmd { color: var(--reject); } .out.good h1.cmd { color: var(--ok); } .out.warn h1.cmd { color: var(--warn); }
+.incident-card { width: min(280px, 100%); background: var(--paper); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--line); }
+.incident-card .band { background: var(--f-readme); color: #fff; font: 700 11px/28px var(--sans); letter-spacing: .12em; text-transform: uppercase; padding: 0 14px; }
+.incident-card h2 { font: 700 24px/1.2 var(--sans); padding: 18px 16px 6px; }
+.incident-card p { padding: 0 16px 20px; font-size: 16px; color: var(--muted); }
+.drawn { display: flex; gap: 12px; justify-content: center; }
+.bigpips .pips i { width: 16px; height: 16px; border-width: 2.5px; }
+.bigpips .pips { gap: 8px; }
+
+/* ---------- I-Hub ---------- */
+.screen[data-screen="I-Hub"] > .body { gap: 10px; padding-top: 10px; padding-bottom: 6px; }
+.mine { display: grid; gap: 6px; }
+.mine-head { display: flex; justify-content: space-between; align-items: baseline; }
+.standing { font: 600 13px var(--mono); } .standing.ok { color: var(--ok); } .standing.behind { color: var(--warn); }
+.zones { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.zone { background: var(--paper); border: 1px dashed var(--line); border-radius: 10px; padding: 6px 8px; min-height: 84px; display: grid; align-content: start; gap: 4px; }
+.zcards { display: flex; flex-wrap: wrap; gap: 4px; }
+.empty { font: 400 12px var(--mono); color: var(--faint); }
+.hintline, .toast, .trap { font-size: 14px; background: var(--warn-soft); border-radius: 10px; padding: 8px 12px; }
+.hintline b { font: 700 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--warn); margin-right: 4px; }
+.toast { background: var(--paper); border: 1px solid var(--line); }
+.trap { background: var(--bot-soft); }
+.hand { padding: 6px 4px 0; display: grid; gap: 0; }
+.hand-row { display: flex; justify-content: center; }
+.hand-row + .hand-row { margin-top: -28px; }
+.hand-row .card + .card { margin-left: var(--overlap, -40px); }
+.hand .card { cursor: pointer; transition: transform .16s var(--ease), box-shadow .16s; }
+.hand .card.selected { transform: translateY(-12px); box-shadow: 0 0 0 3px var(--ink), var(--shadow); z-index: 2; }
+.hand .card.hinted { box-shadow: 0 0 0 3px var(--warn), var(--shadow); }
+.hub-actions { flex-direction: column; gap: 8px; padding-top: 8px; }
+.grid4 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button.op { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 6px; text-align: left; min-height: 64px; padding: 8px 10px; border-radius: 12px; }
+button.op .opname { font: 700 15px var(--mono); }
+button.op .cost { font: 600 11px var(--mono); color: var(--muted); }
+button.op .why { grid-column: 1 / -1; font: 400 12px/1.3 var(--sans); color: var(--muted); }
+button.op.go { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+button.op.go .why, button.op.go .cost { color: color-mix(in srgb, var(--ground) 75%, transparent); }
+button.op.danger .why { color: var(--reject); font-weight: 600; }
+button.op.hinted { box-shadow: 0 0 0 3px var(--warn); }
+button.op.wide { width: 100%; }
+.minor { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.minor button { min-height: 44px; font-size: 14px; padding: 6px; }

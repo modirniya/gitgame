@@ -1,38 +1,45 @@
-// One render function per screen id in the spec (§3). Step 3 of the plan: placeholders that print their event,
-// just enough to play a whole game through the router's queue. Each is replaced by the real screen in step 4.
-import { legalActions } from './engine.js';
-import { esc } from './view.js';
-import { suggestMessages } from './copy.js';
+// One render function per screen id in the spec (§3). This file holds the input screens — the ones that ask one
+// question and return one action — and the registry; outcomes.js holds the screens that show a consequence.
+// A screen is { html(ctx), mount?(el, ctx), auto?(ctx) }, where ctx = { e: event, s: state shown, api, ui }.
+import { legalActions, behindBy, conflictsFor, lines, commitsOnMain, scores } from './engine.js';
+import { strip, standing, handCard, commitCard, esc, scrollStripToTip } from './view.js';
+import { SCREEN, REASON, BRAND } from './copy.js';
+import { OUTCOMES } from './outcomes.js';
+import { HUB } from './hub.js';
 
-const IDS = ['O-Incident', 'O-YourTurn', 'O-Staged', 'O-Committed', 'O-Pushed', 'O-Rejected', 'O-Pulled', 'O-Resolved', 'O-Blamed', 'O-Reverted', 'O-Forced', 'O-Reflog', 'O-TurnSummary', 'O-BotTurn', 'O-BotStep', 'O-Behind', 'O-CI', 'O-Scoreboard'];
-const placeholder = id => ({
-  html: ({ e }) => `<div class="body"><h1>${id}</h1><pre class="evt">${esc(JSON.stringify(e, null, 1))}</pre></div>
-    <div class="actions">${id.startsWith('O-Bot') ? '<button data-skip-bot class="ghost">skip bot</button>' : ''}<button class="primary" data-next>Continue</button></div>`,
-});
-export const SCREENS = Object.fromEntries(IDS.map(id => [id, placeholder(id)]));
+const T = SCREEN;
+export const SCREENS = { ...OUTCOMES, 'I-Hub': HUB };
+const byId = (s, id) => s.main.find(c => c.id === id);
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch { /* private mode */ } } };
 
+// ---------- I-Start ----------
 SCREENS['I-Start'] = {
-  html: () => `<div class="body"><h1>Git Game</h1><label><input type="checkbox" data-guided checked> guided first game</label></div>
-    <div class="actions"><button class="primary" data-new>New game</button></div>`,
-  mount: (el, { api }) => { el.querySelector('[data-new]').onclick = () => api.newGame({ guided: el.querySelector('[data-guided]').checked }); },
-};
-
-// The placeholder hub offers every enabled op with the simplest arguments, so the flow can be walked end to end.
-function simple(o, s) {
-  const p = s.players.you;
-  if (o.key === 'stage') return { type: 'stage', cards: [p.hand.find(c => !c.cmd).id] };
-  if (o.key === 'commit') return { type: 'commit', message: suggestMessages(p.staged)[0] };
-  if (o.key === 'blame' || o.key === 'revert') return { ...o.action, target: o.data.targets[0] };
-  return o.action;
-}
-SCREENS['I-Hub'] = {
-  html: ({ s }) => `<div class="body"><h1>I-Hub</h1></div><div class="actions stack">${legalActions(s).filter(o => o.enabled).map(o => `<button data-op="${o.key}">${o.key}</button>`).join('')}</div>`,
-  mount: (el, { s, api }) => {
-    const opts = legalActions(s);
-    el.querySelectorAll('[data-op]').forEach(b => { b.onclick = () => api.dispatch(simple(opts.find(o => o.key === b.dataset.op), s)); });
+  html: () => {
+    const played = +(store.get('gitgame.games') || 0);
+    return `<div class="body start">
+      <div class="logo"><span class="prompt">$ git init</span><h1>${BRAND.name}</h1><p>${BRAND.tagline}</p></div>
+      <p class="pitch">${T.start.pitch}</p>
+      <label class="toggle"><input type="checkbox" data-guided ${played ? '' : 'checked'}><span><b>${T.start.guided}</b><small>${T.start.guidedNote}</small></span></label>
+    </div>
+    <div class="actions"><button class="primary" data-new>${T.start.go}</button></div>`;
+  },
+  mount(el, { api }) {
+    document.title = `${BRAND.name} · mobile prototype`;
+    const seed = new URLSearchParams(location.search).get('seed');
+    el.querySelector('[data-new]').onclick = () => api.newGame({ guided: el.querySelector('[data-guided]').checked, ...(seed && { seed: +seed }) });
   },
 };
-SCREENS['I-Conflict'] = {
-  html: ({ s }) => `<div class="body"><h1>I-Conflict</h1></div><div class="actions stack">${legalActions(s).filter(o => o.enabled).map(o => `<button data-op="${o.key}">${o.key}</button>`).join('')}</div>`,
-  mount: (el, { s, api }) => { el.querySelectorAll('[data-op]').forEach(b => { b.onclick = () => api.dispatch({ type: 'resolve', strategy: b.dataset.op }); }); },
-};
+
+
+// Placeholders until their group of the plan replaces them.
+const quick = (label, act) => ({
+  html: () => `<div class="body"><h1>${label}</h1></div><div class="actions"><button data-next class="ghost">Cancel</button><button class="primary" data-go>${label}</button></div>`,
+  mount: (el, ctx) => { el.querySelector('[data-go]').onclick = () => ctx.api.dispatch(act(ctx)); },
+});
+SCREENS['I-Stage'] = quick('I-Stage', ({ payload }) => ({ type: 'stage', cards: payload.cards }));
+SCREENS['I-Commit'] = quick('I-Commit', ({ s }) => ({ type: 'commit', message: 'feat: placeholder' }));
+SCREENS['I-Pull'] = quick('I-Pull', () => ({ type: 'pull', rebase: false }));
+SCREENS['I-Conflict'] = quick('I-Conflict', () => ({ type: 'resolve', strategy: 'theirs' }));
+SCREENS['I-Target'] = quick('I-Target', ({ s, payload }) => ({ type: payload.mode, target: legalActions(s).find(o => o.key === payload.mode).data.targets[0] }));
+SCREENS['I-Force'] = quick('I-Force', () => ({ type: 'force' }));
+SCREENS['I-Tag'] = quick('I-Tag', () => ({ type: 'tag' }));
