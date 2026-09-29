@@ -3,7 +3,7 @@
 // scene says what happened and what to do next, in copy.js's words.
 import { behindBy, commitsOnMain, scores, lines, hasBug, RELEASE_AT } from './engine.js';
 import { handCard, commitCard, strip, scrollStripToTip, pips, esc } from './view.js';
-import { SCREEN, INCIDENT, GIT, RECEIPT } from './copy.js';
+import { SCREEN, INCIDENT, GIT, RECEIPT, REASON, BOT_DID, BOT_TITLE } from './copy.js';
 
 const T = SCREEN;
 export const OUTCOMES = {};
@@ -187,8 +187,46 @@ OUTCOMES['O-TurnSummary'] = {
   },
 };
 
+// ---------- the bot's turn: a character you watch think, one op per screen (spec §5) ----------
+const botActions = next => `<div class="actions"><button class="ghost" data-skip-bot data-guide="skip">${T.botTurn.skip}</button><button class="primary" data-next data-guide="botnext">${next}</button></div>`;
+
+OUTCOMES['O-BotTurn'] = {
+  html: ({ e, s }) => `<div class="body out bot">
+      <h1 class="cmd">${T.botTurn.title(e.ops)}</h1>
+      <div class="scene"><div class="avatar" aria-hidden="true">bot</div>${pips(e.ops, 3, 'bot')}</div>
+      <p class="said">${e.behindBy ? T.botTurn.behind(e.behindBy) : T.botTurn.atTip}</p>
+    </div>${botActions('›')}`,
+};
+
+OUTCOMES['O-BotStep'] = {
+  html({ e, s, item }) {
+    const target = e.why.target ? ` ${e.why.target}` : '';
+    const did = e.events.map(x => BOT_DID[x.type]?.(x)).filter(Boolean);
+    const mark = e.events.flatMap(x => x.type === 'PushAccepted' ? x.commits : x.type === 'Reverted' ? [x.revert, x.target] : x.type === 'Blamed' ? [x.target] : []);
+    const left = s.turn === 'bot' && !s.over ? s.ops : 0, of = item.of ?? 3;
+    const bad = e.events.some(x => (x.type === 'Blamed' && x.author === 'you' && x.wasBug) || (x.type === 'ConflictResolved' && x.strategy === 'ours'));
+    return `<div class="body out bot ${bad ? 'bad' : ''}">
+        <h1 class="cmd">${e.op === 'end' ? T.botStep.end : BOT_TITLE[e.op] + target}</h1>
+        <div class="dots" aria-label="${T.botStep.of(of - left, of)}">${Array.from({ length: of }, (_, i) => `<i class="${i < of - left ? 'on' : ''}"></i>`).join('')}<span>${T.botStep.of(of - left, of)}</span></div>
+        <div class="scene">${strip(s, { mark })}</div>
+        <div class="bubble"><span class="avatar small" aria-hidden="true">bot</span><p>${REASON.bot[e.op](e.why)}</p></div>
+        ${did.length ? `<p class="said">${did.join(' ')}</p>` : ''}
+      </div>${botActions('›')}`;
+  },
+  mount: el => scrollStripToTip(el),
+};
+
+OUTCOMES['O-Behind'] = {
+  html: ({ e, s }) => outcome({
+    title: T.behind.title, tone: 'warn', button: T.behind.got, guide: 'behind',
+    scene: strip(s, { mark: s.main.slice(s.players.you.ptr).map(c => c.id) }),
+    said: T.behind.said(behindBy(s, 'you') || e.behindBy),
+  }),
+  mount: el => scrollStripToTip(el),
+};
+
 // Placeholders until their group of the plan replaces them.
-const IDS = ['O-BotTurn', 'O-BotStep', 'O-Behind', 'O-CI', 'O-Scoreboard'];
+const IDS = ['O-CI', 'O-Scoreboard'];
 for (const id of IDS) OUTCOMES[id] = {
   html: ({ e }) => `<div class="body"><h1>${id}</h1><pre class="evt">${esc(JSON.stringify(e, null, 1))}</pre></div>
     <div class="actions">${id.startsWith('O-Bot') ? '<button data-skip-bot class="ghost">skip bot</button>' : ''}<button class="primary" data-next>Continue</button></div>`,

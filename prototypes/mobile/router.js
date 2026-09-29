@@ -19,7 +19,7 @@ export function screensFor(events, carry = {}) {
   for (const e of events) {
     switch (e.type) {
       case 'RoundStarted': out.push({ id: 'O-Incident', event: e }); break;
-      case 'TurnStarted': out.push({ id: e.player === 'you' ? 'O-YourTurn' : 'O-BotTurn', event: e }); break;
+      case 'TurnStarted': out.push({ id: e.player === 'you' ? 'O-YourTurn' : 'O-BotTurn', event: e }); if (e.player === 'bot') carry.botOps = e.ops; break;
       case 'Staged': out.push(...mine(e, 'O-Staged')); break;
       case 'Committed': out.push(...mine(e, 'O-Committed')); break;
       case 'PushAccepted': out.push(...mine(e, 'O-Pushed')); break;
@@ -36,7 +36,7 @@ export function screensFor(events, carry = {}) {
         else if (carry.behind) { out.push(carry.behind); carry.behind = null; }
         break;
       case 'BotActed':
-        out.push({ id: 'O-BotStep', event: e });
+        out.push({ id: 'O-BotStep', event: e, of: carry.botOps });
         out.push(...screensFor(e.events.filter(x => x.type === 'Forced' || x.type === 'ReflogFired'), carry)); // too big to fold into a bubble
         break;
       case 'YouAreBehind': carry.behind = { id: 'O-Behind', event: e }; break;
@@ -113,7 +113,7 @@ function show(item) {
   R.current = item;
   api.emit('enter', item);
   const screen = SCREENS[item.id];
-  const ctx = { e: item.event, s: item.after, before: item.before, payload: item.payload, api, ui: R.ui };
+  const ctx = { e: item.event, s: item.after, before: item.before, payload: item.payload, item, api, ui: R.ui };
   renderFrame(item, api);
   R.root.innerHTML = `<section class="screen" data-screen="${item.id}">${screen.html(ctx)}</section>`;
   R.root.scrollTop = 0;
@@ -121,6 +121,7 @@ function show(item) {
   screen.mount?.(el, ctx);
   const auto = screen.auto?.(ctx) ?? AUTO[item.id];
   if (auto) {
+    el.style.setProperty('--auto', auto + 'ms'); el.classList.add('auto'); // a bar shows the screen will move on by itself
     R.timer = setTimeout(() => api.next('auto'), auto);
     el.addEventListener('click', ev => { if (!ev.target.closest('button')) api.next('tap'); }); // tap anywhere advances early
   }

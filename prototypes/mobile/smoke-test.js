@@ -93,7 +93,7 @@ for (const [label, base, policyFor] of [['smart', 1000, () => st => plan(st, 'yo
   for (let g = 0; g < 150; g++) {
     const seed = base + g, policy = policyFor(seed), carry = {};
     let { state, events } = createGame({ seed, guided: g % 3 === 0 });
-    const ui = { selected: [] }, show = (evs, before, after) => { for (const it of screensFor(evs, carry)) render(it.id, { e: it.event, s: after, before, ui, payload: {} }, `${label} ${seed} r${after.round}`); };
+    const ui = { selected: [] }, show = (evs, before, after) => { for (const it of screensFor(evs, carry)) render(it.id, { e: it.event, s: after, before, ui, payload: {}, item: it }, `${label} ${seed} r${after.round}`); };
     show(events, state, state);
     while (!state.over) {
       const before = state;

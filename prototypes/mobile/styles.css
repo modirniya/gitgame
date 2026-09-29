@@ -233,3 +233,15 @@ button.cell .who b.you { color: var(--you); } button.cell .who b.bot { color: va
 .score-now .you { color: var(--you); } .score-now .bot { color: var(--bot); } .score-now span { color: var(--faint); }
 ol.receipt { margin: 0; padding: 14px 16px 14px 36px; width: 100%; background: var(--paper); border-radius: 12px; border: 1px dashed var(--line); font: 14px/1.7 var(--mono); }
 .stamp:not(.ok):not(.bad) { color: var(--muted); }
+
+/* ---------- the bot ---------- */
+.out.bot h1.cmd { color: var(--bot); }
+.avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--bot); color: #fff; display: grid; place-items: center; font: 700 18px var(--mono); }
+.avatar.small { width: 34px; height: 34px; font-size: 11px; flex: none; }
+.bubble { display: flex; gap: 10px; align-items: flex-start; }
+.bubble p { background: var(--bot-soft); border-radius: 4px 14px 14px 14px; padding: 10px 14px; font-size: 16px; line-height: 1.45; }
+.dots { display: flex; align-items: center; gap: 5px; font: 500 12px var(--mono); color: var(--muted); }
+.dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); } .dots i.on { background: var(--bot); }
+.dots span { margin-left: 6px; }
+.screen.auto::before { content: ""; position: absolute; top: 0; left: 0; height: 3px; background: var(--bot); animation: autobar var(--auto) linear forwards; z-index: 3; }
+@keyframes autobar { from { width: 0; } to { width: 100%; } }
