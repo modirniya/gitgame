@@ -245,3 +245,15 @@ ol.receipt { margin: 0; padding: 14px 16px 14px 36px; width: 100%; background: v
 .dots span { margin-left: 6px; }
 .screen.auto::before { content: ""; position: absolute; top: 0; left: 0; height: 3px; background: var(--bot); animation: autobar var(--auto) linear forwards; z-index: 3; }
 @keyframes autobar { from { width: 0; } to { width: 100%; } }
+
+/* ---------- release ---------- */
+.ci-grid { display: grid; grid-template-columns: repeat(auto-fill, 48px); gap: 8px; justify-content: center; width: 100%; }
+.score { gap: 12px; }
+.winner { font: 700 28px var(--sans); } .winner.you { color: var(--you); } .winner.bot { color: var(--bot); }
+table.scores { width: 100%; border-collapse: collapse; font: 15px var(--mono); font-variant-numeric: tabular-nums; }
+table.scores th, table.scores td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+table.scores th:first-child, table.scores td:first-child { text-align: left; }
+table.scores th.you { color: var(--you); } table.scores th.bot { color: var(--bot); }
+table.scores tfoot td { font-weight: 700; border-top: 2px solid var(--ink); border-bottom: 0; }
+.hands { display: grid; gap: 8px; }
+.hands b.you { color: var(--you); font-family: var(--mono); } .hands b.bot { color: var(--bot); font-family: var(--mono); }

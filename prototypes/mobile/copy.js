@@ -94,7 +94,6 @@ export const GIT = {
   conflict: file => `CONFLICT (content): Merge conflict in ${file}\nAutomatic merge failed; fix conflicts and then commit the result.`,
   forced: (from, to) => `To origin\n + ${from}...${to} main -> main (forced update)`,
   revert: (sha, msg) => `[main ${sha}] ${msg}`,
-  tag: 'git tag -a v1.0 -m "v1.0"',
 };
 
 // Every screen's words. Keys are screen ids; functions take the event or the facts the screen has.
@@ -232,12 +231,16 @@ export const SCREEN = {
   botTurn: { title: ops => `Bot's turn · ${s(ops, 'op')}`, behind: n => `It is ${n} behind you.`, atTip: 'It is at the tip.', skip: 'skip bot' },
   botStep: { of: (i, n) => `op ${i} of ${n}`, skip: 'skip bot', end: 'ends its turn' },
   behind: { title: 'The tip moved', said: n => `You are ${n} behind. Pull before you push.`, got: 'Got it' },
-  ci: { title: 'CI runs', counting: 'Flipping every card on main…', bugs: n => `${s(n, 'bug')} reached production.`, down: 'Production is down: the release fails and the least blame wins.' },
+  ci: {
+    title: 'CI runs', deadline: 'Twelve rounds are up. The release date does not move, so CI runs on whatever is on main.',
+    bugs: n => `${s(n, 'bug')} reached production`, down: 'Four or more bugs: production is down, the release fails and the least blame wins.',
+    ship: 'Fewer than four bugs: the release ships, and every bug still costs its author 3.', score: 'See the score',
+  },
   score: {
     shipped: 'The release shipped.', down: n => `Production is down (${n} bugs). Least blame wins.`,
     win: { you: 'You win.', bot: 'The bot wins.', draw: 'A draw.' },
     rows: { lines: 'lines on main', fixes: 'fixes', blame: 'blame', merge: 'merge tokens', grudge: 'grudges', sin: 'sins' },
-    hands: 'Both hands, revealed', again: 'Play again', replay: 'Replay this seed',
+    hands: 'Both hands, revealed', decidedBy: why => `What decided it: ${why.join('; ')}.`, again: 'Play again', replay: 'Replay this seed',
     decided: {
       merge: (a, b) => `merge tokens (${a} vs ${b}), the rebase tax`, blame: (a, b) => `blame (${a} vs ${b}), bugs that got caught`,
       lines: (a, b) => `lines shipped (${a} vs ${b}), who got more pushes through`, sin: 'a force-push', none: 'A close one on every line.',

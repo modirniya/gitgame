@@ -1,7 +1,7 @@
 // The output screens (spec §3, "O-"): each shows exactly one consequence and moves on by one tap. Titles are the
 // Git command that happened; where Git prints something, the screen prints it too; the coach line under the
 // scene says what happened and what to do next, in copy.js's words.
-import { behindBy, commitsOnMain, scores, lines, hasBug, RELEASE_AT } from './engine.js';
+import { behindBy, commitsOnMain, scores, lines, hasBug, winner, RELEASE_AT } from './engine.js';
 import { handCard, commitCard, strip, scrollStripToTip, pips, esc } from './view.js';
 import { SCREEN, INCIDENT, GIT, RECEIPT, REASON, BOT_DID, BOT_TITLE } from './copy.js';
 
@@ -225,9 +225,48 @@ OUTCOMES['O-Behind'] = {
   mount: el => scrollStripToTip(el),
 };
 
-// Placeholders until their group of the plan replaces them.
-const IDS = ['O-CI', 'O-Scoreboard'];
-for (const id of IDS) OUTCOMES[id] = {
-  html: ({ e }) => `<div class="body"><h1>${id}</h1><pre class="evt">${esc(JSON.stringify(e, null, 1))}</pre></div>
-    <div class="actions">${id.startsWith('O-Bot') ? '<button data-skip-bot class="ghost">skip bot</button>' : ''}<button class="primary" data-next>Continue</button></div>`,
+// ---------- the release ----------
+const FLIP_MS = 250; // spec §4: every face-down card flips in order, 250 ms apart
+OUTCOMES['O-CI'] = {
+  html({ e, s }) {
+    const cells = s.main.filter(c => !c.init).map((c, i) => `<div class="ci-cell" style="--i:${i}">${commitCard(c, { size: 'sm', reveal: true, data: { 'data-anim': 'ci' } })}</div>`).join('');
+    return outcome({
+      title: e.by ? 'git tag v1.0' : T.ci.title, tone: e.productionDown ? 'bad' : 'good', term: e.by ? '' : T.ci.deadline,
+      scene: `<div class="ci-grid">${cells}</div><span class="stamp ${e.bugs ? 'bad' : 'ok'}" data-anim="tally">${T.ci.bugs(e.bugs)}</span>`,
+      said: e.productionDown ? T.ci.down : T.ci.ship, button: T.ci.score, guide: 'ci',
+    });
+  },
+  // Long enough for every flip to land and the tally to be read.
+  auto: ({ e }) => e.flips.length * FLIP_MS + 2600,
+};
+
+OUTCOMES['O-Scoreboard'] = {
+  html({ e, s }) {
+    const sc = scores(s), w = winner(s), you = s.players.you, bot = s.players.bot;
+    const row = k => `<tr><td>${T.score.rows[k]}</td><td>${sc.you[k]}</td><td>${sc.bot[k]}</td></tr>`;
+    const d = T.score.decided, why = [];
+    if (Math.abs(sc.you.merge - sc.bot.merge) >= 2) why.push(d.merge(-sc.you.merge, -sc.bot.merge));
+    if (Math.abs(sc.you.blame - sc.bot.blame) >= 3) why.push(d.blame(-sc.you.blame, -sc.bot.blame));
+    if (Math.abs(sc.you.lines - sc.bot.lines) >= 4) why.push(d.lines(sc.you.lines, sc.bot.lines));
+    if (you.sin || bot.sin) why.push(d.sin);
+    const hand = p => [...p.hand, ...p.staged].map(c => handCard(c, { size: 'sm' })).join('') || `<span class="empty">${T.hub.empty}</span>`;
+    return `<div class="body out score">
+        <h1 class="cmd">${e.productionDown ? T.score.down(e.bugs) : T.score.shipped}</h1>
+        <p class="winner ${w}">${T.score.win[w]}</p>
+        <table class="scores"><thead><tr><th></th><th class="you">you</th><th class="bot">bot</th></tr></thead>
+          <tbody>${['lines', 'fixes', 'blame', 'merge', 'grudge', 'sin'].map(row).join('')}</tbody>
+          <tfoot><tr><td>total</td><td>${sc.you.total}</td><td>${sc.bot.total}</td></tr></tfoot></table>
+        <p class="said">${why.length ? T.score.decidedBy(why) : d.none}</p>
+        <h2 class="k">${T.score.hands}</h2>
+        <div class="hands"><div><b class="you">you</b><div class="zcards">${hand(you)}</div></div><div><b class="bot">bot</b><div class="zcards">${hand(bot)}</div></div></div>
+        <p class="fine">${T.start.seed(s.seed)}</p>
+        <div data-playtest></div>
+      </div>
+      <div class="actions"><button class="ghost" data-replay>${T.score.replay}</button><button class="primary" data-again data-guide="again">${T.score.again}</button></div>`;
+  },
+  mount(el, { s, api }) {
+    try { localStorage.setItem('gitgame.games', String(+(localStorage.getItem('gitgame.games') || 0) + 1)); } catch { /* private mode */ }
+    el.querySelector('[data-again]').onclick = () => api.next();
+    el.querySelector('[data-replay]').onclick = () => api.newGame({ seed: s.seed, guided: s.guided });
+  },
 };

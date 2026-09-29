@@ -224,7 +224,7 @@ const OPS = {
     need(commitsOnMain(s) >= RELEASE_AT, `main needs ${RELEASE_AT} commits`);
     spend(s, 1);
     ev.push({ type: 'Tagged', by: id });
-    release(s, ev);
+    release(s, ev, id);
   },
   endTurn(s, id, a, ev) { need(!s.pending, 'answer the conflict first'); endTurn(s, ev); },
   undo(s, id, a, ev) {
@@ -254,7 +254,7 @@ function pullWith(s, id, rebase, strategy, ev) {
   return { type: 'Pulled', player: id, rebase, mergeTokens: p.merge, incoming, from, to: s.main[s.main.length - 1].id, hadLocal: p.local.length > 0, ptr: p.ptr };
 }
 
-function release(s, ev) {
+function release(s, ev, by = null) {
   s.over = true; s.pending = null;
   const flips = []; let bugs = 0;
   for (const c of s.main) {
@@ -265,7 +265,7 @@ function release(s, ev) {
     flips.push({ id: c.id, author: c.author, wasFaceDown, bug: hasBug(c), counts });
   }
   s.released = { bugs, down: bugs >= PRODUCTION_DOWN_AT };
-  ev.push({ type: 'CIRan', flips, bugs, productionDown: s.released.down });
+  ev.push({ type: 'CIRan', by, flips, bugs, productionDown: s.released.down });
 }
 
 // ---------- the one entry point ----------
