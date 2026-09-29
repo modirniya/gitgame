@@ -1,0 +1,627 @@
+<title>Git Game vs Bot</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --felt: #EEE9DF; --felt-2: #E4DDD0; --paper: #FFFFFF; --ink: #1B2228; --muted: #6B7A86; --faint: #A7B1BA; --line: #D3CBBD;
+    --accent: #D9432F; --bug: #D9432F; --ok: #2E9E6B; --warn: #C7891A; --sel: #1B2228; --tutor: #2E9E6B;
+    --you: #3EC1B3; --bot: #A88BFA;
+    --f-auth: #3EC1B3; --f-api: #A88BFA; --f-css: #F2755C; --f-docker: #4C9BE8; --f-readme: #E9A83B; --cmd: #2F3A44; --incident: #E9A83B;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace; --sans: "IBM Plex Sans", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--felt); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.5; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding-block: 14px 40px; padding-inline: 16px; display: grid; gap: 12px; }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+  header h1 { margin: 0; font: 600 19px/1.2 var(--sans); }
+  header h1 small { display: block; font: 400 12px/1.4 var(--sans); color: var(--muted); }
+  .status { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font: 500 12px var(--mono); color: var(--muted); }
+  .status b { color: var(--ink); }
+  .pill { background: var(--paper); border: 1px solid var(--line); border-radius: 20px; padding: 3px 10px; }
+  .pill.score { border-color: var(--ink); }
+  button { font: 500 13px var(--mono); color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; cursor: pointer; text-align: left; position: relative; }
+  button:hover:not([disabled]) { border-color: var(--muted); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button[disabled] { opacity: .45; cursor: default; }
+  button.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  button.small { padding: 3px 10px; font-size: 12px; }
+  button .why { display: block; font: 400 10.5px/1.3 var(--sans); color: var(--muted); margin-top: 2px; }
+  button.primary .why { color: #cfd6dc; }
+  .why.bad { color: var(--bug) !important; }
+  button.tutor { box-shadow: 0 0 0 3px var(--tutor); }
+  button.tutor::after { content: "← next"; position: absolute; top: -9px; right: 8px; background: var(--tutor); color: #fff; font: 600 9px/14px var(--sans); padding: 0 6px; border-radius: 3px; }
+  button.hinted { box-shadow: 0 0 0 3px var(--warn); }
+
+  .coach { background: var(--paper); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 12px 16px; display: grid; gap: 6px; }
+  .coach.bot { border-left-color: var(--bot); } .coach.tutor { border-left-color: var(--tutor); } .coach.hint { border-left-color: var(--warn); }
+  .coach .tag { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  .coach.bot .tag { color: var(--bot); } .coach.tutor .tag { color: var(--tutor); } .coach.hint .tag { color: var(--warn); }
+  .coach p { margin: 0; font-size: 15px; max-width: 84ch; }
+  .coach .hintline { color: var(--muted); font-size: 13.5px; }
+  code { font-family: var(--mono); font-size: .92em; background: var(--felt-2); padding: 1px 5px; border-radius: 4px; }
+
+  .table { background: var(--felt-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 12px; }
+  .sechead { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+  .sechead h2 { margin: 0; font: 600 12px var(--mono); color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+  .sechead .sub { font: 400 12px var(--mono); color: var(--faint); }
+  .center { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start; }
+  @media (max-width: 760px) { .center { grid-template-columns: 1fr; } }
+  .chain-scroll { overflow-x: auto; padding-bottom: 4px; }
+  .chain { display: flex; gap: 8px; min-width: max-content; padding: 4px 2px; }
+  .slot { display: grid; gap: 3px; justify-items: center; width: 78px; }
+  .slot .who { font: 600 9.5px/1.25 var(--mono); color: var(--muted); text-align: center; }
+  .slot .ptrs { display: flex; gap: 3px; justify-content: center; min-height: 15px; }
+  .ptr { font: 600 9px var(--mono); padding: 1px 6px; border-radius: 10px; color: #fff; background: var(--c); }
+  .tip { font: 600 10px var(--mono); color: var(--accent); min-height: 14px; }
+  .slot.targetable .card { cursor: pointer; box-shadow: 0 0 0 2px var(--warn); }
+  .slot.targetable .card:hover { box-shadow: 0 0 0 3px var(--accent); }
+
+  .card { width: 66px; height: 92px; border-radius: 5px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(0,0,0,.12); position: relative; overflow: hidden; display: grid; grid-template-rows: 13px 1fr; font-family: var(--mono); flex: none; transition: transform .12s; }
+  .card .band { background: var(--c, var(--faint)); color: #fff; font: 600 6.5px/13px var(--sans); padding: 0 4px; letter-spacing: .05em; text-transform: uppercase; }
+  .card .body { display: grid; align-content: center; justify-items: center; gap: 1px; padding: 2px; text-align: center; }
+  .card .file { font: 600 9px var(--mono); }
+  .card .lines { font: 600 21px/1 var(--sans); }
+  .card .bugtag { position: absolute; bottom: 5px; left: 6px; right: 6px; background: var(--bug); color: #fff; font: 700 8px/14px var(--sans); border-radius: 3px; text-align: center; }
+  .card.cmd .body { align-content: start; padding-top: 8px; }
+  .card.cmd .name { font: 600 8.5px/1.2 var(--mono); }
+  .card.cmd .cost { position: absolute; bottom: 5px; left: 6px; font: 600 6.5px var(--sans); color: var(--muted); }
+  .card.back { background: repeating-linear-gradient(135deg, #6B7A86 0 3px, #5C6B77 3px 6px); border-color: #4E5B66; grid-template-rows: 1fr; }
+  .card.back::after { content: "commit"; color: rgba(255,255,255,.55); font: 600 8px var(--mono); display: grid; place-items: center; }
+  .card.small { width: 54px; height: 75px; } .card.small .lines { font-size: 17px; } .card.small .file { font-size: 8px; } .card.small .bugtag { font-size: 7px; line-height: 12px; bottom: 4px; } .card.small.cmd .name { font-size: 7.5px; }
+  .card.over::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent 47%, var(--bug) 47%, var(--bug) 53%, transparent 53%); pointer-events: none; }
+  .card.reverted { opacity: .5; }
+  .card.selectable { cursor: pointer; }
+  .card.selectable:hover { transform: translateY(-2px); }
+  .card.selected { outline: 3px solid var(--sel); outline-offset: 1px; transform: translateY(-4px); }
+  .card.tutorcard { box-shadow: 0 0 0 3px var(--tutor); }
+  .card.new { animation: pop .4s ease-out; }
+  @keyframes pop { from { transform: translateY(-8px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .card.new { animation: none; } .card { transition: none; } }
+  .revert-note { position: absolute; bottom: 4px; left: 4px; right: 4px; font: 600 7px var(--sans); color: var(--ok); text-align: center; }
+  .incident { width: 150px; }
+  .incident .card { width: 150px; height: auto; min-height: 92px; grid-template-rows: 13px auto; }
+  .incident .card .body { align-content: start; justify-items: start; text-align: left; padding: 8px 8px 10px; gap: 4px; }
+  .incident .name { font: 600 11px var(--sans); } .incident .text { font: 400 9.5px/1.35 var(--sans); color: var(--muted); }
+
+  .areas { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .player { background: var(--paper); border: 1px solid var(--line); border-top: 3px solid var(--c); border-radius: 8px; padding: 10px 12px; display: grid; gap: 8px; }
+  .player.active { box-shadow: 0 0 0 2px var(--c); }
+  .player .head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .player .name { font: 600 14px var(--mono); color: var(--c); }
+  .player .st { font: 400 11px var(--mono); color: var(--muted); } .player .st.behind { color: var(--warn); }
+  .player .head .right { margin-left: auto; font: 400 11px var(--mono); color: var(--muted); }
+  .row { display: grid; grid-template-columns: 60px 1fr; gap: 6px; align-items: start; }
+  .row .k { font: 500 10px var(--mono); color: var(--faint); padding-top: 3px; text-transform: uppercase; letter-spacing: .05em; }
+  .cards { display: flex; flex-wrap: wrap; gap: 6px; }
+  .stack { display: grid; gap: 2px; justify-items: center; } .stack .lab { font: 500 9px var(--mono); color: var(--muted); text-align: center; max-width: 64px; }
+  .empty { font: 400 11px var(--mono); color: var(--faint); padding-top: 3px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chip { font: 400 11px var(--mono); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+  .chip.neg { color: var(--bug); border-color: #EBC2BC; } .chip.pos { color: var(--ok); border-color: #BFE0CF; }
+
+  .actions { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .toolbar .sp { flex: 1; }
+  .modal { background: var(--paper); border: 2px solid var(--ink); border-radius: 8px; padding: 12px 14px; display: grid; gap: 8px; }
+  .modal h3 { margin: 0; font: 600 15px var(--sans); }
+  .modal p { margin: 0; }
+  .modal .choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+
+  .lower { display: grid; grid-template-columns: 1fr 320px; gap: 12px; }
+  @media (max-width: 900px) { .lower { grid-template-columns: 1fr; } }
+  .log { background: #FBF9F4; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font: 12px/1.5 var(--mono); max-height: 320px; overflow: auto; }
+  .log .l { white-space: pre-wrap; } .log .round { color: var(--accent); font-weight: 600; margin-top: 6px; } .log .turn { font-weight: 600; margin-top: 4px; }
+  .log .ok { color: var(--ok); } .log .bad { color: var(--bug); } .log .warn { color: var(--warn); } .log .dim { color: var(--muted); }
+  .rules { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 13px; display: grid; gap: 10px; align-content: start; }
+  .rules h3 { margin: 0 0 4px; font: 600 12px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .rules ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+  table.scores { width: 100%; border-collapse: collapse; font: 13px var(--mono); font-variant-numeric: tabular-nums; }
+  table.scores th, table.scores td { text-align: right; padding: 4px 8px; border-bottom: 1px solid var(--line); }
+  table.scores th:first-child, table.scores td:first-child { text-align: left; }
+  table.scores tfoot td { font-weight: 600; border-top: 2px solid var(--ink); }
+  .winner { color: var(--accent); }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Git Game vs Bot <small>Two developers, one <code>main</code>. Most lines with the least blame at the release wins. Prototype — every new game is a fresh shuffle.</small></h1>
+    <div class="status" id="status"></div>
+  </header>
+
+  <div class="coach" id="coach"></div>
+
+  <div class="table">
+    <div class="center">
+      <div>
+        <div class="sechead"><h2>main</h2><span class="sub" id="mainsub"></span></div>
+        <div class="chain-scroll"><div class="chain" id="chain"></div></div>
+      </div>
+      <div class="incident" id="incident"></div>
+    </div>
+    <div class="areas">
+      <div id="bot"></div>
+      <div id="you"></div>
+    </div>
+    <div id="modal" hidden></div>
+    <div class="toolbar" id="toolbar"></div>
+    <div class="actions" id="actions"></div>
+  </div>
+
+  <div class="lower">
+    <div class="log" id="log"></div>
+    <div class="rules">
+      <div>
+        <h3>The rules, short</h3>
+        <ul>
+          <li>Each turn: draw 2, spend <b>3 ops</b>. Unused ops are lost.</li>
+          <li><b>add</b> puts hand cards on your mat; <b>commit</b> turns the mat into one commit; <b>push</b> puts your commits on <code>main</code>.</li>
+          <li><b>You can't push if you're behind.</b> If the bot pushed since your pointer last moved, <b>pull</b> first (1 op, merge token) or <b>pull --rebase</b> (2 ops, clean).</li>
+          <li>Pulling a commit that touches the <b>same file</b> as one of yours is a conflict: keep yours (they lose it, you take a grudge: −1), keep theirs, or pay 1 op to keep both.</li>
+          <li>Commits on <code>main</code> are <b>face-down</b>: everyone sees the file and lines (they were announced), nobody sees whether it's a bug.</li>
+          <li>One card in five is a <b>bug</b>. Only you see yours. Push it and hope. <b>blame</b> flips a commit: a bug costs its author 3.</li>
+          <li><b>push --force</b> erases everything after your pointer. Take a sin. A <b>reflog</b> in the victim's hand undoes it for free.</li>
+          <li>At <b>10 commits</b> anyone can <b>tag v1.0</b>; the game also ends after 12 rounds. Every card is flipped; each bug costs 3.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Score</h3>
+        <ul>
+          <li>+ lines of your clean commits on <code>main</code></li>
+          <li>+1 per revert you played</li>
+          <li>−3 per bug of yours flipped, −1 per merge token, −1 per grudge against you, −1 per sin</li>
+          <li>4 or more bugs in production: the release fails and the <em>least</em> blame wins</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- deck ----------
+const FILES = { 'auth.js': 'var(--f-auth)', 'api.py': 'var(--f-api)', 'styles.css': 'var(--f-css)', 'Dockerfile': 'var(--f-docker)', 'README.md': 'var(--f-readme)' };
+const CMD_COST = { 'git blame': 1, 'revert': 1, 'push --force': 1, 'reflog': 0 };
+const INCIDENTS = [
+  { id: 'sodown', name: 'Stack Overflow Is Down', text: 'No command cards this round.' },
+  { id: 'standup', name: 'Standup Ran Long', text: 'Everyone has 2 ops this round instead of 3.' },
+  { id: 'flaky', name: 'Flaky CI', text: 'The first push this round rolls a die. On 1 or 2 it is rejected; the op is spent.' },
+  { id: 'hackathon', name: 'Hackathon', text: 'Everyone has 4 ops this round.' },
+  { id: 'quiet', name: 'Quiet Tuesday', text: 'Nothing special. Get some work done.' },
+  { id: 'quiet2', name: 'Coffee Machine Fixed', text: 'Nothing special. Morale is high.' },
+];
+const RELEASE_AT = 10, MAX_ROUNDS = 12;
+const label = c => c.cmd ? c.cmd : `${c.file} +${c.lines}`;
+const lines = c => c.cards.reduce((a, x) => a + x.lines, 0);
+function buildDeck() {
+  const d = [];
+  for (const f of Object.keys(FILES)) {
+    let seen3 = false;
+    for (const n of [1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8]) {
+      let bug = n === 6 || (n === 3 && !seen3); if (n === 3) seen3 = true;
+      if (n === 8 && (f === 'auth.js' || f === 'api.py')) bug = true;
+      d.push({ file: f, lines: n, bug });
+    }
+  }
+  for (const [cmd, count] of [['git blame', 5], ['revert', 4], ['push --force', 3], ['reflog', 3]]) for (let i = 0; i < count; i++) d.push({ cmd });
+  for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+  return d;
+}
+
+// ---------- state ----------
+const P = { you: { name: 'You', color: 'var(--you)' }, bot: { name: 'Bot', color: 'var(--bot)' } };
+let S, history = [], tutorialOn = true, gen = 0;
+function newGame() {
+  gen++;
+  S = { deck: buildDeck(), main: [{ id: 'c0', init: true, cards: [], flipped: true }], round: 0, turn: 'you', ops: 0, incident: null, rolled: false, log: [], coach: { cls: '', tag: 'welcome', text: '', hint: '' }, mode: 'play', pending: null, selected: [], over: false, players: {}, nextId: 1, newIds: [], tutorial: tutorialOn ? 0 : -1, botBusy: false, hint: null, gen };
+  for (const id of ['you', 'bot']) S.players[id] = { id, hand: [], staged: [], local: [], ptr: 1, merge: 0, sin: 0, grudges: 0, blame: 0, fixes: 0 };
+  for (let i = 0; i < 5; i++) { draw('you'); draw('bot'); }
+  if (S.tutorial >= 0) {
+    // In a guided game the bot starts with a commit ready, so its first turn is "pull, push" and the
+    // player's second turn opens behind the tip — the lesson the guide exists to teach.
+    const b = S.players.bot; const i = b.hand.findIndex(c => !c.cmd && !c.bug);
+    if (i >= 0) b.local.push({ id: 'B' + S.nextId++, author: 'bot', cards: b.hand.splice(i, 1), flipped: false });
+  }
+  history = [];
+  startRound();
+  if (S.tutorial >= 0) tutorCoach(); else coach('', 'new game', 'Fresh shuffle. Your hand is at the bottom; the bot goes after you.', 'Press <b>hint</b> any time to see what a good player would do and why.');
+  render();
+}
+function draw(id) { const p = S.players[id]; if (S.deck.length) p.hand.push(S.deck.shift()); }
+const log = (cls, text) => S.log.push({ cls, text });
+const coach = (cls, tag, text, hint = '') => { S.coach = { cls, tag, text, hint }; };
+const commits = () => S.main.length - 1;
+const behindBy = p => S.main.length - p.ptr;
+const files = c => new Set(c.cards.map(x => x.file));
+const isBug = c => !c.overwritten && !c.reverted && c.cards.some(x => x.bug);
+const hasCmd = (p, n) => p.hand.some(c => c.cmd === n);
+const takeCmd = (p, n) => { const i = p.hand.findIndex(c => c.cmd === n); return i >= 0 ? p.hand.splice(i, 1)[0] : null; };
+const opsFor = () => S.incident.id === 'standup' ? 2 : S.incident.id === 'hackathon' ? 4 : 3;
+
+function startRound() {
+  S.round++; S.rolled = false;
+  S.incident = INCIDENTS[Math.floor(Math.random() * INCIDENTS.length)];
+  if (S.round === 1 && S.tutorial >= 0) S.incident = INCIDENTS.find(i => i.id === 'quiet'); // the guided first turn assumes 3 ops and no die
+  log('round', `── Round ${S.round} · ${S.incident.name} ──`);
+  beginTurn('you');
+}
+function beginTurn(id) {
+  S.turn = id; draw(id); draw(id);
+  S.ops = opsFor(); S.selected = []; S.mode = 'play'; S.hint = null; S.newIds = [];
+  log('turn', `${P[id].name}: draws 2, ${S.ops} ops`);
+  if (id === 'you') {
+    history = [];
+    if (tutorExpect() === 'pull' && !behindBy(S.players.you)) {
+      // the bot pulled and committed but ran out of ops before pushing, so the "you are behind" lesson has to wait
+      S.tutorial = TUTORIAL.findIndex((s, i) => i > S.tutorial && s.expect === 'select');
+      coach('tutor', `guided game · step ${S.tutorial + 1} of ${TUTORIAL.length}`, 'The bot pulled to catch up with you and committed, but ran out of ops before it could push. So you are <em>still at the tip</em> — a free push this turn. That luck won\'t last: the moment it pushes, you are the one who is behind. <b>Click a card</b> in your hand.', '<button class="small" id="skiptutor">skip the guide</button>');
+    } else if (S.tutorial >= 0) tutorCoach();
+  }
+}
+function finishYourTurn() {
+  if (S.over) return;
+  if (tutorExpect() === 'watch') { coach('tutor', 'guided game', TUTORIAL[S.tutorial].text, ''); S.tutorial++; }
+  S.ops = 0; beginTurn('bot'); render(); S.botBusy = true; const g = gen; setTimeout(() => botStepTimed(g), 700);
+}
+function finishBotTurn() {
+  S.botBusy = false;
+  if (S.over) { render(); return; }
+  if (S.round >= MAX_ROUNDS) { log('warn', 'The deadline arrives. CI runs whether main is ready or not.'); release(); coach('', 'deadline', 'Twelve rounds are up. The release date does not move, so CI ran on whatever was on <code>main</code>.', ''); render(); return; }
+  startRound(); render();
+}
+
+// ---------- ops ----------
+function spend(n) { S.ops -= n; }
+function doAdd(id, cards) {
+  const p = S.players[id];
+  for (const c of cards) { const i = p.hand.indexOf(c); if (i >= 0) p.staged.push(...p.hand.splice(i, 1)); }
+  spend(1); log('dim', `  git add → ${cards.map(label).join(', ')} onto the mat`);
+  if (id === 'you') coach('', 'staged', `${cards.map(label).join(' and ')} on your mat. Not a commit yet.`, `<b>commit</b> turns everything on the mat into one commit${cards.length > 1 ? ' — one big commit worth ' + cards.reduce((a, c) => a + c.lines, 0) + ' lines, and one blame if any of it is a bug' : ''}.`);
+}
+function doCommit(id) {
+  const p = S.players[id]; if (!p.staged.length) return;
+  const c = { id: (id === 'you' ? 'Y' : 'B') + S.nextId++, author: id, cards: p.staged.splice(0), flipped: false };
+  p.local.push(c); spend(1);
+  log('ok', `  git commit → ${c.id} (${c.cards.map(label).join(' + ')})${id === 'you' && c.cards.some(x => x.bug) ? '   ← a bug; only you know' : ''}`);
+  if (id === 'you') coach('', 'committed', `<code>${c.id}</code> is on your local branch, worth ${lines(c)} lines once it reaches <code>main</code>.${c.cards.some(x => x.bug) ? ' It contains a bug. Nobody knows that but you — until someone flips it.' : ''}`, behindBy(p) ? `You are ${behindBy(p)} behind the tip, so a push would be rejected. <b>Pull</b> first.` : 'You are at the tip: <b>push</b> now, before the bot moves it.');
+}
+function doPush(id) {
+  const p = S.players[id]; const name = P[id].name;
+  if (!p.local.length) return;
+  spend(1);
+  if (behindBy(p)) { log('bad', `  git push → ! [rejected] non-fast-forward — ${name} is ${behindBy(p)} behind`); if (id === 'you') coach('', 'rejected', `Rejected, op spent. The bot pushed since your pointer last moved, so <code>main</code> has history you haven't seen, and Git won't let you push over it.`, 'This is the whole game. <b>Pull</b> to catch up (1 op, merge token) or <b>pull --rebase</b> (2 ops, clean), then push.'); return; }
+  if (S.incident.id === 'flaky' && !S.rolled) { S.rolled = true; const r = 1 + Math.floor(Math.random() * 6); log(r <= 2 ? 'bad' : 'warn', `  Flaky CI: ${name} rolls a ${r} → ${r <= 2 ? 'red build, push rejected' : 'green'}`); if (r <= 2) { if (id === 'you') coach('', 'flaky', `CI was flaky and you rolled a ${r}. Push rejected, op spent, nothing you could have done.`, 'Incidents are the luck in this game. The die is rolled only once per round, so the bot pushes safely now.'); return; } }
+  const ids = p.local.map(c => c.id);
+  for (const c of p.local) { S.main.push(c); S.newIds.push(c.id); }
+  p.local = []; p.ptr = S.main.length;
+  log('ok', `  git push → ${ids.join(', ')} on main (${commits()} commits)`);
+  if (id === 'you') { const sc = scores(); coach('', 'pushed', `Pushed. <code>${ids.join(', ')}</code> is face-down at the end of <code>main</code>: everyone can see the file and the lines, nobody can see whether it's a bug. The bot is now behind you and must pull before it can push.`, commits() >= RELEASE_AT ? (sc.you.total >= sc.bot.total ? '<code>main</code> has reached the release size and you are ahead. <b>tag v1.0</b> ends the game now.' : '<code>main</code> has reached the release size, but you are behind on points. The bot will tag it the moment it is ahead on its turn.') : 'Your pointer is at the tip. If you have ops left, stage the next card.'); }
+}
+function conflictsFor(p) {
+  const incoming = S.main.slice(p.ptr).filter(c => !c.overwritten && !c.revertOf);
+  const out = [];
+  for (const mine of p.local) for (const theirs of incoming) { const shared = [...files(mine)].filter(f => files(theirs).has(f)); if (shared.length) out.push({ mine, theirs, shared }); }
+  return out;
+}
+function doPull(id, rebase, strategy) {
+  const p = S.players[id]; const name = P[id].name;
+  const cost = rebase ? 2 : 1;
+  const conflicts = conflictsFor(p);
+  const incoming = S.main.slice(p.ptr);
+  spend(cost + (conflicts.length && strategy === 'resolve' ? 1 : 0));
+  log('dim', `  git pull${rebase ? ' --rebase' : ''} → pointer moves past ${incoming.map(c => c.id).join(', ')}`);
+  for (const { mine, theirs, shared } of conflicts) {
+    if (theirs.overwritten || !p.local.includes(mine)) continue;
+    log('warn', `  CONFLICT on ${shared.join(', ')}: ${mine.id} vs ${theirs.id} → ${strategy}`);
+    if (strategy === 'ours') { theirs.overwritten = true; theirs.flipped = true; p.grudges++; log('bad', `    ${theirs.id} crossed out — ${P[theirs.author].name} loses ${lines(theirs)} lines and holds a grudge against ${name}`); }
+    else if (strategy === 'theirs') { p.local = p.local.filter(c => c !== mine); log('bad', `    ${mine.id} discarded`); }
+    else log('ok', '    both kept (+1 op)');
+  }
+  p.ptr = S.main.length;
+  if (rebase) log('ok', '  rebased — no merge token'); else { p.merge++; log('warn', `  merge token (${p.merge})`); }
+  if (id === 'you') {
+    const c = conflicts.length ? ` Conflict resolved <b>${strategy}</b>.` : '';
+    coach('', 'pulled', `You are up to date.${c}${rebase ? ' Rebase cost 2 ops and left no merge token.' : ` The plain pull cost 1 op and a merge token (−1 at the end); you have ${p.merge}.`}`, p.local.length ? 'You are at the tip with commits to push: <b>push</b> now.' : 'Nothing to push yet. Add and commit.');
+  }
+}
+function doForce(id) {
+  const p = S.players[id]; const name = P[id].name; takeCmd(p, 'push --force');
+  const before = p.ptr; const erased = S.main.slice(p.ptr);
+  S.main = S.main.slice(0, p.ptr); for (const c of p.local) { S.main.push(c); S.newIds.push(c.id); }
+  p.local = []; p.sin++; spend(1);
+  for (const q of Object.values(S.players)) q.ptr = Math.min(q.ptr, before); // everyone's pointer is now at or before the rewrite point
+  p.ptr = S.main.length;
+  log('bad', `  git push --force → main rewound; ${erased.map(c => c.id).join(', ') || 'nothing'} erased. +1 sin for ${name}`);
+  const restored = [];
+  // one reflog in a victim's hand restores everything of theirs that was erased, in order
+  const victims = [...new Set(erased.map(c => c.author))].filter(a => a && a !== id);
+  const reflogged = new Set(victims.filter(v => takeCmd(S.players[v], 'reflog')));
+  for (const c of erased) {
+    const owner = S.players[c.author]; if (!owner) continue;
+    if (reflogged.has(c.author)) { S.main.push(c); S.newIds.push(c.id); owner.ptr = S.main.length; restored.push(c.id); }
+    else if (c.revertOf) { const t = S.main.find(x => x.id === c.revertOf); if (t) t.reverted = false; owner.fixes = Math.max(0, owner.fixes - 1); log('warn', `  the revert of ${c.revertOf} is gone — that bug is live again`); }
+    else if (c.overwritten) log('dim', `  ${c.id} was already crossed out; it stays gone`);
+    else { owner.local.unshift(c); log('warn', `  ${c.id} goes back to ${P[owner.id].name}'s local branch`); }
+  }
+  for (const v of reflogged) log('ok', `  ${P[v].name} plays reflog (free, out of turn) → ${erased.filter(c => c.author === v).map(c => c.id).join(', ')} back on top of main`);
+  if (id === 'you') coach('', 'forced', `You rewrote <code>main</code>. ${erased.length ? erased.map(c => c.id).join(', ') + ' erased.' : 'Nothing was ahead of you, so nothing was erased — a sin for nothing.'}${restored.length ? ` The bot held <code>reflog</code>: ${restored.join(', ')} came straight back on top, and now <em>you</em> are behind.` : ''}`, 'A sin is −1 at the end. Worth it if you erased more than that.');
+  else coach('bot', 'the bot force-pushed', `${erased.length ? erased.map(c => c.id).join(', ') + ' were erased from main.' : 'It rewrote main.'}${restored.length ? ` You held <code>reflog</code>, so ${restored.join(', ')} came straight back on top. Free, out of turn.` : erased.some(c => c.author === 'you' && !c.overwritten && !c.revertOf) ? ' Your commit is back on your local branch and you are behind again. No reflog in your hand this time.' : ''}`, 'Force-push is the nuke. Keep a reflog in hand when the bot might hold one of these.');
+}
+function doBlame(id, target) {
+  const p = S.players[id]; takeCmd(p, 'git blame'); spend(1);
+  target.flipped = true;
+  if (isBug(target)) { S.players[target.author].blame += 3; target.blamed = true; log('bad', `  git blame ${target.id} → BUG. ${P[target.author].name} −3`); if (id === 'you') coach('', 'caught', `<code>${target.id}</code> was a bug. ${target.author === 'you' ? 'It was yours, so <em>you</em> take −3.' : 'The bot takes −3.'} The card stays face-up.`, 'A flipped bug can be neutralised with a <b>revert</b> card: +1 for whoever fixes it.'); else coach('bot', 'the bot blamed you', `It flipped your <code>${target.id}</code>: a bug. −3 for you.`, 'Big commits attract blame. Bugs are only worth pushing if they can survive unflipped to the release.'); }
+  else { log('ok', `  git blame ${target.id} → clean`); if (id === 'you') coach('', 'clean', `<code>${target.id}</code> was clean. An op and a card for nothing.`, 'Blame the commits that look too good: big line counts from someone in a hurry.'); else coach('bot', 'the bot blamed you', `It flipped your <code>${target.id}</code>. Clean. It wasted a card.`, ''); }
+}
+function doRevert(id, target) {
+  const p = S.players[id]; takeCmd(p, 'revert'); spend(1);
+  target.reverted = true;
+  const rv = { id: target.id + '⁻', author: id, cards: [], revertOf: target.id, flipped: true };
+  S.main.push(rv); S.newIds.push(rv.id); p.ptr = S.main.length; p.fixes++; // requires being at the tip: a revert is a commit that gets pushed
+  log('ok', `  git revert ${target.id} → revert on top of main; ${target.id} no longer counts. +1 for ${P[id].name}`);
+  if (id === 'you') coach('', 'reverted', `<code>${target.id}</code> is neutralised and you get +1 for the fix.`, 'A revert is a commit on main, so the bot is now behind you.');
+}
+function doTag(id) { spend(1); log('ok', `  git tag v1.0 by ${P[id].name} → CI runs`); release(); }
+function release() {
+  S.over = true; S.mode = 'over';
+  log('round', '── Release · CI flips every card ──');
+  let bugs = 0;
+  for (const c of S.main) {
+    if (c.init || c.revertOf) continue; c.flipped = true;
+    if (c.overwritten || c.reverted) continue;
+    if (c.cards.some(x => x.bug)) { bugs++; if (!c.blamed) { c.blamed = true; S.players[c.author].blame += 3; log('bad', `  ${c.id} → BUG → ${P[c.author].name} −3`); } }
+  }
+  S.released = { bugs, down: bugs >= 4 };
+  log(bugs >= 4 ? 'bad' : 'ok', `  ${bugs} bug${bugs === 1 ? '' : 's'} reached production → ${bugs >= 4 ? 'PRODUCTION DOWN — least blame wins' : 'the release ships'}`);
+}
+function scores() {
+  // While the game runs, a face-down bug counts as clean — otherwise the live score would give hidden bugs away.
+  const out = {};
+  for (const [id, p] of Object.entries(S.players)) {
+    let ln = 0;
+    for (const c of S.main) { if (c.init || c.revertOf || c.author !== id || c.overwritten || c.reverted || (c.flipped && c.cards.some(x => x.bug))) continue; ln += lines(c); }
+    out[id] = { lines: ln, fixes: p.fixes, blame: -p.blame, merge: -p.merge, grudge: -p.grudges, sin: -p.sin, total: ln + p.fixes - p.blame - p.merge - p.grudges - p.sin };
+  }
+  return out;
+}
+
+// ---------- policy: used by the bot and by the hint button ----------
+function plan(id) {
+  const p = S.players[id], o = S.players[id === 'you' ? 'bot' : 'you'];
+  const behind = behindBy(p); const noCmd = S.incident.id === 'sodown';
+  const sc = scores();
+  if (p.local.length && !behind) return { op: 'push', why: `You are at the tip with ${p.local.map(c => c.id).join(', ')} ready. Push before the other side moves the tip.` };
+  if (commits() >= RELEASE_AT && S.ops >= 1 && sc[id].total >= sc[o.id].total) return { op: 'tag', why: `main has ${commits()} commits and you are ${sc[id].total > sc[o.id].total ? 'ahead' : 'level'} ${sc[id].total} to ${sc[o.id].total}. End it now, before the other side gets ahead.` };
+  if (p.local.length && behind && hasCmd(p, 'push --force') && !noCmd && behind >= 2 && S.main.slice(p.ptr).some(c => c.author === o.id && lines(c) >= 4)) return { op: 'force', why: `${behind} of the other side's commits are ahead of you and you hold push --force. Erasing them costs one sin and a lot of their points — unless they hold reflog.` };
+  if (behind && (p.local.length || S.ops >= 2)) {
+    const conf = conflictsFor(p); let strategy = null;
+    if (conf.length) { const m = conf[0].mine, t = conf[0].theirs; strategy = m.cards.some(x => x.bug) ? 'theirs' : (S.ops >= 3 ? 'resolve' : lines(m) >= lines(t) ? 'ours' : 'theirs'); }
+    const rebase = S.ops >= 3 && p.merge >= 1 && !(conf.length && strategy === 'resolve');
+    const why = `You are ${behind} behind, so nothing can be pushed until you catch up. ${rebase ? 'Rebase: 2 ops, no merge token — you already have ' + p.merge + '.' : 'A plain pull is 1 op and a merge token.'}${conf.length ? ` There is a conflict on ${conf[0].shared.join(', ')}: ${strategy === 'resolve' ? 'you can afford to keep both' : strategy === 'ours' ? 'yours is bigger, keep it and accept the grudge' : strategy === 'theirs' && conf[0].mine.cards.some(x => x.bug) ? 'yours is a bug anyway, let it go' : 'theirs is bigger; dropping yours is cheaper than a grudge'}.` : ''}`;
+    return { op: rebase ? 'rebase' : 'pull', strategy, why };
+  }
+  const oppBig = S.main.filter(c => !c.init && !c.revertOf && c.author === o.id && !c.flipped && !c.overwritten).sort((a, z) => lines(z) - lines(a))[0];
+  if (!noCmd && hasCmd(p, 'git blame') && oppBig && lines(oppBig) >= 5 && !p.staged.length) return { op: 'blame', target: oppBig, why: `${oppBig.id} is ${lines(oppBig)} lines from the other side and still face-down. Big commits are where bugs hide; a hit is −3 for them.` };
+  if (!noCmd && hasCmd(p, 'revert') && !behind) { const own = S.main.find(c => c.author === id && c.flipped && isBug(c)); if (own) return { op: 'revert', target: own, why: `Your ${own.id} is a flipped bug and you are at the tip. Reverting it earns +1 and stops it counting again at release.` }; }
+  if (p.staged.length) return { op: 'commit', why: `The mat has ${p.staged.map(label).join(' + ')}. Commit it so it can be pushed.` };
+  const clean = p.hand.filter(c => !c.cmd && !c.bug).sort((a, z) => z.lines - a.lines);
+  const bugs = p.hand.filter(c => !c.cmd && c.bug).sort((a, z) => a.lines - z.lines);
+  if (clean.length) { const pick = S.ops >= 3 && clean.length >= 2 ? clean.slice(0, 2) : [clean[0]]; return { op: 'add', cards: pick, why: pick.length > 1 ? `Two clean cards and enough ops to commit and push this turn: stage both for one ${pick.reduce((a, c) => a + c.lines, 0)}-line commit.` : `${label(pick[0])} is your biggest clean card. Stage it.` }; }
+  if (bugs.length) return { op: 'add', cards: [bugs[0]], why: `Only bugs left in hand. Push the smallest one and hope nobody flips it: ${label(bugs[0])}.` };
+  return { op: 'end', why: 'Nothing useful to do. End the turn.' };
+}
+function execute(id, pl) {
+  switch (pl.op) {
+    case 'tag': doTag(id); break;
+    case 'push': doPush(id); break;
+    case 'force': doForce(id); break;
+    case 'pull': doPull(id, false, pl.strategy); break;
+    case 'rebase': doPull(id, true, pl.strategy); break;
+    case 'blame': doBlame(id, pl.target); break;
+    case 'revert': doRevert(id, pl.target); break;
+    case 'commit': doCommit(id); break;
+    case 'add': doAdd(id, pl.cards); break;
+  }
+}
+
+// ---------- bot ----------
+function botStep() {
+  if (S.over || S.ops <= 0) return false;
+  const pl = plan('bot');
+  if (pl.op === 'end') return false;
+  const b = S.players.bot; const behind = behindBy(b);
+  const sc = scores();
+  const text = {
+    tag: `main has ${commits()} commits and the bot is ahead ${sc.bot.total} to ${sc.you.total}, so it tagged the release before you could catch up.`,
+    push: `It was at the tip with ${b.local.map(c => c.id).join(', ')} ready, so it pushed. main moved; you are now behind and must pull before you can push.`,
+    force: '',
+    pull: `It was ${behind} behind, so it pulled (1 op, one merge token).${pl.strategy ? ` It hit a conflict and chose <b>${pl.strategy}</b>.` : ''}`,
+    rebase: `It was ${behind} behind, so it rebased (2 ops, no merge token — it already has ${b.merge}).${pl.strategy ? ` It hit a conflict and chose <b>${pl.strategy}</b>.` : ''}`,
+    blame: '',
+    revert: `Its own ${pl.target ? pl.target.id : 'commit'} was a flipped bug, so it reverted it: +1 and no blame at release.`,
+    commit: `It committed what was on its mat.`,
+    add: pl.cards ? (pl.cards.length > 1 ? `It staged two cards for one bigger commit — it can afford to commit and push this turn.` : `It staged a card.`) : 'It staged a card.',
+  }[pl.op];
+  execute('bot', pl);
+  if (text) coach('bot', `bot · ${S.ops} ops left`, text, '');
+  return true;
+}
+function botStepTimed(g) {
+  if (g !== gen) return; // a "new game" was started while this timer was pending
+  if (botStep()) { render(); setTimeout(() => botStepTimed(g), S.over ? 0 : 1100); }
+  else { if (!S.over) { S.ops = 0; log('dim', '  bot ends turn'); } setTimeout(() => { if (g === gen) finishBotTurn(); }, 500); }
+}
+function botTurnSync() { while (botStep()) {} S.ops = 0; }
+
+// ---------- tutorial ----------
+const TUTORIAL = [
+  { expect: 'select', text: 'Welcome. This is a guided first game; after two turns you are on your own. Start by <b>clicking a commit card in your hand</b> — pick one without a BUG tag.' },
+  { expect: 'add', text: 'Now press <b>git add</b>. That moves the card onto your staging mat, face down. One op.' },
+  { expect: 'commit', text: 'Press <b>git commit</b>. Everything on the mat becomes one commit on your local branch. One op.' },
+  { expect: 'push', text: 'Press <b>git push</b>. Your pointer is at the tip, so the push will be accepted and your commit lands on <code>main</code>. That was your whole first turn: three ops.' },
+  { expect: 'watch', text: 'Watch the bot. It committed something while you were reading, so it already has a commit ready — but your push just put it behind. It will pull to catch up, then push. When it pushes, <code>main</code> moves and <em>you</em> are the one behind.' },
+  { expect: 'pull', text: 'You are behind the tip now — look at the warning under your name. A push would be rejected. Press <b>git pull</b> (1 op, merge token) or <b>git pull --rebase</b> (2 ops, no token) to catch up. Try the plain pull.' },
+  { expect: 'select', text: 'Up to date. Now build your next commit: <b>click a card</b> in your hand.' },
+  { expect: 'add', text: 'Press <b>git add</b>.' },
+  { expect: 'commit', text: 'Press <b>git commit</b>. That is your third op — you cannot push until next turn, and by then the bot may have moved the tip again. That tension is the game.' },
+  { expect: 'done', text: 'You know the loop now: pull if behind, add, commit, push. From here on it is your game. Use <b>hint</b> whenever you are stuck, and <b>undo</b> to try things. Watch for the bot\'s big commits — that is where <b>git blame</b> pays off.' },
+];
+function tutorCoach() { if (S.tutorial < 0 || S.tutorial >= TUTORIAL.length) return; coach('tutor', `guided game · step ${S.tutorial + 1} of ${TUTORIAL.length}`, TUTORIAL[S.tutorial].text, '<button class="small" id="skiptutor">skip the guide</button>'); }
+function tutorAdvance(action) {
+  if (S.tutorial < 0 || S.tutorial >= TUTORIAL.length) return;
+  const step = TUTORIAL[S.tutorial];
+  if (step.expect === action || (step.expect === 'pull' && action === 'rebase')) {
+    S.tutorial++;
+    if (S.tutorial < TUTORIAL.length && TUTORIAL[S.tutorial].expect !== 'watch') tutorCoach();
+    if (S.tutorial >= TUTORIAL.length - 1) { tutorCoach(); S.tutorial = TUTORIAL.length; }
+  }
+}
+function tutorExpect() { return S.tutorial >= 0 && S.tutorial < TUTORIAL.length ? TUTORIAL[S.tutorial].expect : null; }
+
+// ---------- undo ----------
+function snapshot() { history.push(JSON.stringify({ S: { ...S, pending: null, hint: null } })); if (history.length > 20) history.shift(); }
+function undo() { if (!history.length) return; S = JSON.parse(history.pop()).S; S.mode = 'play'; S.pending = null; coach('', 'undone', 'Back to before your last op. Nothing the bot does is undoable — only your own turn.', ''); render(); }
+
+// ---------- rendering ----------
+const $ = id => document.getElementById(id);
+const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+function cardHTML(c, opts = {}) {
+  const cls = ['card', opts.small ? 'small' : '', opts.sel ? 'selected' : '', opts.selectable ? 'selectable' : '', opts.tutor ? 'tutorcard' : ''].join(' ');
+  if (c.cmd) return `<div class="${cls} cmd" style="--c:var(--cmd)" data-i="${opts.i ?? ''}"><div class="band">command</div><div class="body"><div class="name">${esc(c.cmd)}</div></div><div class="cost">${CMD_COST[c.cmd] === 0 ? 'free · auto' : '1 op'}</div></div>`;
+  return `<div class="${cls}" style="--c:${FILES[c.file]}" data-i="${opts.i ?? ''}"><div class="band">commit</div><div class="body"><div class="file">${c.file}</div><div class="lines">+${c.lines}</div></div>${c.bug ? '<div class="bugtag">BUG</div>' : ''}</div>`;
+}
+function commitHTML(c) {
+  const cls = ['card', c.overwritten ? 'over' : '', c.reverted ? 'reverted' : '', S.newIds.includes(c.id) ? 'new' : ''].join(' ');
+  if (c.init) return `<div class="card" style="--c:var(--faint)"><div class="band">main</div><div class="body"><div class="file">initial<br>commit</div></div></div>`;
+  if (c.revertOf) return `<div class="${cls} cmd" style="--c:var(--cmd)"><div class="band">command</div><div class="body"><div class="name">revert</div></div><div class="revert-note">${c.revertOf} neutralised</div></div>`;
+  if (!c.flipped) return `<div class="${cls} back"></div>`;
+  const x = c.cards[0];
+  return `<div class="${cls}" style="--c:${FILES[x.file]}"><div class="band">commit</div><div class="body"><div class="file">${x.file}</div><div class="lines">+${x.lines}</div></div>${c.cards.some(y => y.bug) ? '<div class="bugtag">BUG</div>' : ''}</div>`;
+}
+function render() {
+  const you = S.players.you, bot = S.players.bot; const sc = scores();
+  $('status').innerHTML = `<span class="pill">round <b>${S.round}</b>/${MAX_ROUNDS}</span><span class="pill">${S.turn === 'you' ? 'your turn' : 'bot\'s turn'} · <b>${S.ops}</b> ops left</span><span class="pill">main <b>${commits()}</b>/${RELEASE_AT}</span><span class="pill score">if CI ran now: you <b>${sc.you.total}</b> · bot <b>${sc.bot.total}</b></span>`;
+  $('coach').className = 'coach ' + (S.coach.cls || '');
+  $('coach').innerHTML = `<div class="tag">${esc(S.coach.tag)}</div><p>${S.coach.text}</p>${S.coach.hint ? `<p class="hintline">${S.coach.hint}</p>` : ''}`;
+  const sk = $('skiptutor'); if (sk) sk.onclick = () => { S.tutorial = -1; tutorialOn = false; coach('', 'guide off', 'You are on your own. Hint and undo are in the toolbar.', ''); render(); };
+  $('mainsub').textContent = `${commits()} commit${commits() === 1 ? '' : 's'} · release at ${RELEASE_AT}`;
+  $('chain').innerHTML = S.main.map((c, i) => {
+    const targetable = (S.mode === 'blame' && !c.init && !c.revertOf && !c.flipped && !c.overwritten) || (S.mode === 'revert' && c.flipped && isBug(c) && !c.init && !c.revertOf);
+    const who = c.init ? '' : c.revertOf ? P[c.author].name : `${c.cards.map(label).join(' + ')}<br>${P[c.author].name}`;
+    const ptrs = Object.values(S.players).filter(p => p.ptr === i + 1).map(p => `<span class="ptr" style="--c:${P[p.id].color}">${P[p.id].name}</span>`).join('');
+    return `<div class="slot ${targetable ? 'targetable' : ''}" data-id="${c.id}"><div class="tip">${i === S.main.length - 1 ? 'tip' : ''}</div>${commitHTML(c)}<div class="who">${who}</div><div class="ptrs">${ptrs}</div></div>`;
+  }).join('');
+  document.querySelectorAll('.slot.targetable').forEach(el => el.onclick = () => { const c = S.main.find(x => x.id === el.dataset.id); if (S.mode === 'blame') { doBlame('you', c); history = []; /* what's flipped stays flipped */ } else { snapshot(); doRevert('you', c); } S.mode = 'play'; after(); });
+  const scr = document.querySelector('.chain-scroll'); scr.scrollLeft = scr.scrollWidth;
+  $('incident').innerHTML = S.incident ? `<div class="sechead"><h2>incident · round ${S.round}</h2></div><div class="card" style="--c:var(--incident)"><div class="band">incident</div><div class="body"><div class="name">${S.incident.name}</div><div class="text">${S.incident.text}</div></div></div>` : '';
+  const toks = p => { const t = []; if (p.merge) t.push(`<span class="chip neg">merge ×${p.merge} (−${p.merge})</span>`); if (p.sin) t.push(`<span class="chip neg">sin ×${p.sin} (−${p.sin})</span>`); if (p.grudges) t.push(`<span class="chip neg">grudge ×${p.grudges} (−${p.grudges})</span>`); if (p.blame) t.push(`<span class="chip neg">blame −${p.blame}</span>`); if (p.fixes) t.push(`<span class="chip pos">fixes +${p.fixes}</span>`); return t.join('') || '<span class="empty">none</span>'; };
+  const stacks = arr => arr.length ? arr.map(c => `<div class="stack"><div class="card small back"></div><div class="lab">${c.id} · ${c.cards.map(label).join(' + ')}</div></div>`).join('') : '<span class="empty">nothing to push</span>';
+  $('bot').innerHTML = `<div class="player ${S.turn === 'bot' ? 'active' : ''}" style="--c:var(--bot)">
+    <div class="head"><span class="name">Bot</span><span class="st ${behindBy(bot) ? 'behind' : ''}">${behindBy(bot) ? `${behindBy(bot)} behind` : 'at the tip'}</span><span class="right">${bot.hand.length} cards in hand · ${S.over ? 'hand: ' + bot.hand.map(label).join(', ') : 'you can\'t see them'}</span></div>
+    <div class="row"><span class="k">mat</span><div class="cards">${bot.staged.length ? `<div class="stack"><div class="card small back"></div><div class="lab">${bot.staged.length} card${bot.staged.length > 1 ? 's' : ''}</div></div>` : '<span class="empty">empty</span>'}</div></div>
+    <div class="row"><span class="k">local</span><div class="cards">${stacks(bot.local)}</div></div>
+    <div class="row"><span class="k">tokens</span><div class="chips">${toks(bot)}</div></div></div>`;
+  const texp = tutorExpect(); const hint = S.hint;
+  const hand = you.hand.map((c, i) => cardHTML(c, { i, sel: S.selected.includes(i), selectable: !c.cmd && S.turn === 'you' && S.mode === 'play' && !S.over, tutor: (texp === 'select' && !c.cmd && !c.bug && !S.selected.length) || (hint && hint.op === 'add' && hint.cards.includes(c)) })).join('') || '<span class="empty">empty</span>';
+  $('you').innerHTML = `<div class="player ${S.turn === 'you' ? 'active' : ''}" style="--c:var(--you)">
+    <div class="head"><span class="name">You</span><span class="st ${behindBy(you) ? 'behind' : ''}">${behindBy(you) ? `${behindBy(you)} behind the tip — push would be rejected` : 'at the tip — push is safe'}</span><span class="right">${you.hand.length} cards in hand</span></div>
+    <div class="row"><span class="k">hand</span><div class="cards" id="hand">${hand}</div></div>
+    <div class="row"><span class="k">mat</span><div class="cards">${you.staged.length ? `<div class="stack"><div class="card small back"></div><div class="lab">${you.staged.map(label).join(' + ')}</div></div>` : '<span class="empty">empty — select cards in your hand, then add</span>'}</div></div>
+    <div class="row"><span class="k">local</span><div class="cards">${stacks(you.local)}</div></div>
+    <div class="row"><span class="k">tokens</span><div class="chips">${toks(you)}</div></div></div>`;
+  document.querySelectorAll('#hand .card.selectable').forEach(el => el.onclick = () => { const i = +el.dataset.i; if (S.selected.includes(i)) S.selected = S.selected.filter(x => x !== i); else S.selected.push(i); S.hint = null; tutorAdvance('select'); render(); });
+  renderToolbar(); renderActions();
+  $('log').innerHTML = S.log.map(l => `<div class="l ${l.cls}">${esc(l.text)}</div>`).join('');
+  $('log').scrollTop = $('log').scrollHeight;
+}
+function renderToolbar() {
+  const T = $('toolbar');
+  T.innerHTML = `<button class="small" id="hintbtn" ${S.turn !== 'you' || S.over || S.mode !== 'play' ? 'disabled' : ''}>hint — what would a good player do?</button><button class="small" id="undobtn" ${!history.length || S.turn !== 'you' || S.over ? 'disabled' : ''}>undo my last op</button><span class="sp"></span><button class="small" id="guidebtn">${tutorialOn ? 'guide: on for new games' : 'guide: off'}</button><button class="small" id="newgame">new game (fresh shuffle)</button>`;
+  $('newgame').onclick = newGame;
+  $('undobtn').onclick = undo;
+  $('guidebtn').onclick = () => { tutorialOn = !tutorialOn; render(); };
+  $('hintbtn').onclick = () => {
+    const pl = plan('you'); S.hint = pl;
+    const name = { tag: 'git tag v1.0', push: 'git push', force: 'git push --force', pull: 'git pull', rebase: 'git pull --rebase', blame: 'git blame' + (pl.target ? ' on ' + pl.target.id : ''), revert: 'git revert' + (pl.target ? ' on ' + pl.target.id : ''), commit: 'git commit', add: 'select ' + (pl.cards || []).map(label).join(' + ') + ', then git add', end: 'end turn' }[pl.op];
+    coach('hint', 'hint', `<b>${name}</b>${pl.strategy ? ` (conflict: ${pl.strategy})` : ''}. ${pl.why}`, 'The highlighted button (or cards) is the suggestion. You don\'t have to take it.');
+    if (pl.op === 'add') S.selected = pl.cards.map(c => S.players.you.hand.indexOf(c));
+    render();
+  };
+}
+function renderActions() {
+  const you = S.players.you; const A = $('actions'); const M = $('modal');
+  M.hidden = true; M.innerHTML = '';
+  if (S.over) {
+    const sc = scores(); const yp = S.players.you, bp = S.players.bot;
+    const w = S.released.down
+      ? (yp.blame < bp.blame ? `You win with less blame (${yp.blame} vs ${bp.blame}).` : yp.blame > bp.blame ? `The bot wins with less blame (${bp.blame} vs ${yp.blame}).` : 'Equal blame: a draw.')
+      : (sc.you.total > sc.bot.total ? 'You win.' : sc.you.total < sc.bot.total ? 'The bot wins.' : 'A draw.');
+    const row = (k, lab) => `<tr><td>${lab}</td><td>${sc.you[k]}</td><td>${sc.bot[k]}</td></tr>`;
+    const yourBugs = S.main.filter(c => c.author === 'you' && !c.revertOf && c.cards.some(x => x.bug)).length, botBugs = S.main.filter(c => c.author === 'bot' && !c.revertOf && c.cards.some(x => x.bug)).length;
+    const decided = [];
+    if (Math.abs(sc.you.merge - sc.bot.merge) >= 2) decided.push(`merge tokens (${-sc.you.merge} vs ${-sc.bot.merge}) — the rebase tax`);
+    if (Math.abs(sc.you.blame - sc.bot.blame) >= 3) decided.push(`blame (${-sc.you.blame} vs ${-sc.bot.blame}) — bugs that got caught`);
+    if (Math.abs(sc.you.lines - sc.bot.lines) >= 4) decided.push(`lines shipped (${sc.you.lines} vs ${sc.bot.lines}) — who got more pushes through`);
+    if (sc.you.sin || sc.bot.sin) decided.push('sins — a force-push');
+    M.hidden = false; M.innerHTML = `<h3>${S.released.down ? `Production is down (${S.released.bugs} bugs). The release fails; least blame wins.` : 'The release shipped.'} ${w}</h3><div style="overflow-x:auto"><table class="scores"><thead><tr><th></th><th style="color:var(--you)">You</th><th style="color:var(--bot)">Bot</th></tr></thead><tbody>${row('lines', 'lines on main')}${row('fixes', 'fixes')}${row('blame', 'blame')}${row('merge', 'merge tokens')}${row('grudge', 'grudges (−1 each)')}${row('sin', 'sins')}</tbody><tfoot><tr><td>total</td><td class="${sc.you.total >= sc.bot.total ? 'winner' : ''}">${sc.you.total}</td><td class="${sc.bot.total >= sc.you.total ? 'winner' : ''}">${sc.bot.total}</td></tr></tfoot></table></div>
+      <p>Every card on <code>main</code> is now face-up. You pushed ${yourBugs} bug${yourBugs === 1 ? '' : 's'}, the bot pushed ${botBugs}. ${decided.length ? 'What decided it: ' + decided.join('; ') + '.' : 'A close one on every line.'}</p><button class="primary" id="again">play again — fresh shuffle</button>`;
+    $('again').onclick = newGame; A.innerHTML = ''; return;
+  }
+  if (S.turn !== 'you') { A.innerHTML = '<button disabled>bot is playing… (one op at a time; watch the coach panel)</button>'; return; }
+  if (S.mode === 'conflict') {
+    const { rebase, conflicts } = S.pending; const c = conflicts[0]; const base = rebase ? 2 : 1;
+    const many = conflicts.length > 1;
+    const list = conflicts.map(k => `your <code>${k.mine.id}</code> (${k.mine.cards.map(label).join(' + ')}) vs the bot's <code>${k.theirs.id}</code> (${k.theirs.cards.map(label).join(' + ')}) on ${k.shared.join(', ')}`).join('; ');
+    const theirLines = conflicts.reduce((a, k) => a + lines(k.theirs), 0), myLines = [...new Set(conflicts.map(k => k.mine))].reduce((a, m) => a + lines(m), 0);
+    M.hidden = false; M.innerHTML = `<h3>Merge conflict${many ? 's' : ''} on ${[...new Set(conflicts.flatMap(k => k.shared))].join(', ')}</h3><p>${list[0].toUpperCase() + list.slice(1)}. Git can't merge them for you. Pick a strategy${many ? ' — it applies to all of them' : ''}.</p>
+      <div class="choices">
+        <button data-s="ours">-X ours — keep mine<span class="why">The bot's commit${many ? 's are' : ' is'} crossed out: ${theirLines} lines gone. You take ${many ? conflicts.length + ' grudges' : 'a grudge'}: −1 each for you at the end.</span></button>
+        <button data-s="theirs">-X theirs — drop mine<span class="why">Your commit${myLines !== lines(c.mine) ? 's' : ''} (${myLines} lines) discarded. Safe, sad.</span></button>
+        <button data-s="resolve" ${S.ops >= base + 1 ? '' : 'disabled'}>resolve by hand — keep both<span class="why">Costs 1 extra op (${base + 1} total).${S.ops >= base + 1 ? '' : ' You can\'t afford it this turn.'}</span></button>
+        <button data-s="cancel">cancel the pull</button></div>`;
+    M.querySelectorAll('button').forEach(b => b.onclick = () => { const s = b.dataset.s; S.mode = 'play'; if (s !== 'cancel') { snapshot(); doPull('you', rebase, s); tutorAdvance(rebase ? 'rebase' : 'pull'); } S.pending = null; after(); });
+    A.innerHTML = ''; return;
+  }
+  if (S.mode === 'blame' || S.mode === 'revert') {
+    M.hidden = false; M.innerHTML = `<h3>${S.mode === 'blame' ? 'Click a face-down commit on main to flip it' : 'Click a flipped bug on main to revert it'}</h3><button id="cancel" class="small">cancel</button>`;
+    $('cancel').onclick = () => { S.mode = 'play'; render(); }; A.innerHTML = ''; return;
+  }
+  const behind = behindBy(you); const noCmd = S.incident.id === 'sodown';
+  const selCards = S.selected.map(i => you.hand[i]).filter(Boolean);
+  const texp = tutorExpect(); const hint = S.hint;
+  const btn = (id, txt, why, dis, cls = '') => `<button id="${id}" class="${cls} ${texp === id || (texp === 'pull' && id === 'rebase') ? 'tutor' : ''} ${hint && hint.op === id ? 'hinted' : ''}" ${dis ? 'disabled' : ''}>${txt}<span class="why ${cls === 'danger' ? 'bad' : ''}">${why}</span></button>`;
+  const flakyNote = S.incident.id === 'flaky' && !S.rolled ? ' First push this round rolls the die.' : '';
+  const conf = conflictsFor(you);
+  A.innerHTML = [
+    btn('add', `git add (1 op)`, selCards.length ? `Put ${selCards.map(label).join(', ')} on your mat.` : 'Select one or more commit cards in your hand first.', !selCards.length || S.ops < 1, selCards.length ? 'primary' : ''),
+    btn('commit', `git commit (1 op)`, you.staged.length ? `Turn ${you.staged.map(label).join(' + ')} into one commit worth ${you.staged.reduce((a, c) => a + c.lines, 0)} lines.` : 'Nothing on your mat yet.', !you.staged.length || S.ops < 1, you.staged.length ? 'primary' : ''),
+    btn('push', `git push (1 op)`, !you.local.length ? 'Nothing to push. Commit something first.' : behind ? `Will be REJECTED: you are ${behind} behind. Pull first.` : `Puts ${you.local.map(c => c.id).join(', ')} on main.${flakyNote}`, !you.local.length || S.ops < 1, !you.local.length ? '' : behind ? 'danger' : 'primary'),
+    btn('pull', `git pull (1 op)`, !behind ? 'Already up to date.' : `Catch up ${behind} commit${behind > 1 ? 's' : ''}. Takes a merge token (−1).${conf.length ? ' CONFLICT ahead: you will choose a strategy.' : ''}`, !behind || S.ops < 1, behind && you.local.length ? 'primary' : ''),
+    btn('rebase', `git pull --rebase (2 ops)`, !behind ? 'Already up to date.' : `Catch up with clean history, no merge token.${conf.length ? ' CONFLICT ahead: you will choose a strategy.' : ''}`, !behind || S.ops < 2),
+    btn('blame', `git blame (1 op, card)`, !hasCmd(you, 'git blame') ? 'You don\'t hold a blame card.' : noCmd ? 'Stack Overflow is down: no command cards this round.' : !S.main.some(c => !c.init && !c.revertOf && !c.flipped && !c.overwritten) ? 'Every commit on main is already face-up.' : 'Flip one face-down commit on main. A bug costs its author −3. This cannot be undone.', !hasCmd(you, 'git blame') || noCmd || S.ops < 1 || !S.main.some(c => !c.init && !c.revertOf && !c.flipped && !c.overwritten)),
+    btn('revert', `git revert (1 op, card)`, !hasCmd(you, 'revert') ? 'You don\'t hold a revert card.' : noCmd ? 'No command cards this round.' : !S.main.some(c => c.flipped && isBug(c)) ? 'No flipped bug on main to revert.' : behind ? 'A revert is a commit you push, so you must be at the tip. Pull first.' : 'Neutralise a flipped bug on main. +1 for you.', !hasCmd(you, 'revert') || noCmd || S.ops < 1 || !S.main.some(c => c.flipped && isBug(c)) || behind),
+    btn('force', `git push --force (1 op, card)`, !hasCmd(you, 'push --force') ? 'You don\'t hold a force card.' : noCmd ? 'No command cards this round.' : !behind ? 'Nothing is ahead of you to erase; a plain push will do.' : `Rewind main to your pointer, erasing ${behind} commit${behind === 1 ? '' : 's'}, and push yours on top. +1 sin. If the bot holds reflog, its commits come straight back.`, !hasCmd(you, 'push --force') || noCmd || S.ops < 1 || !behind, 'danger'),
+    btn('tag', `git tag v1.0 (1 op)`, commits() >= RELEASE_AT ? 'End the game now. CI flips every card.' : `Main needs ${RELEASE_AT} commits (has ${commits()}).`, commits() < RELEASE_AT || S.ops < 1, commits() >= RELEASE_AT ? 'primary' : ''),
+    btn('end', `end turn`, S.ops ? `Give up your remaining ${S.ops} op${S.ops > 1 ? 's' : ''}.` : 'No ops left.', false),
+  ].join('');
+  const act = (id, fn, irreversible = false) => { $(id).onclick = () => { snapshot(); S.hint = null; fn(); if (irreversible) history = []; tutorAdvance(id); after(); }; };
+  act('add', () => { doAdd('you', selCards); S.selected = []; });
+  act('commit', () => doCommit('you'));
+  act('push', () => doPush('you'), S.incident.id === 'flaky' && !S.rolled); // a die roll can't be taken back
+  act('force', () => doForce('you'));
+  act('tag', () => doTag('you'));
+  $('pull').onclick = () => startPull(false);
+  $('rebase').onclick = () => startPull(true);
+  $('blame').onclick = () => { S.mode = 'blame'; S.hint = null; coach('', 'git blame', 'Click a face-down commit on <code>main</code> to flip it. The bot\'s big ones are the tempting targets.', ''); render(); };
+  $('revert').onclick = () => { S.mode = 'revert'; S.hint = null; render(); };
+  $('end').onclick = () => { S.hint = null; log('dim', '  you end your turn'); finishYourTurn(); };
+}
+function startPull(rebase) {
+  const conf = conflictsFor(S.players.you);
+  if (conf.length) { S.mode = 'conflict'; S.pending = { rebase, conflicts: conf }; render(); return; }
+  snapshot(); S.hint = null; doPull('you', rebase, null); tutorAdvance(rebase ? 'rebase' : 'pull'); after();
+}
+function after() {
+  render();
+  if (S.over) return;
+  if (S.ops <= 0 && S.mode === 'play') { const g = gen; setTimeout(() => { if (g === gen && S.turn === 'you' && S.ops <= 0 && !S.over) { log('dim', '  out of ops — turn ends'); finishYourTurn(); } }, 900); }
+}
+newGame();
+</script>

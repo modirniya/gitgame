@@ -13,6 +13,7 @@ These rules exist because this codebase is written quickly, largely with AI assi
 ├── server/      Elixir / Phoenix — the remote (Phase 1)
 ├── web/         Vite client — the terminal (Phase 1–2)
 ├── tabletop/    Print-and-play files (Phase 5)
+├── prototypes/  Throwaway experiments, one folder each; deleted at Phase 2 (ADR-0001)
 ├── scripts/     Repository maintenance scripts, each self-documenting
 └── .github/     Issue and PR templates, workflows
 ```

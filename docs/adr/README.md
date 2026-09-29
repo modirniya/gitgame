@@ -28,3 +28,4 @@ Copy [template.md](template.md).
 | ADR | Title | Status |
 |---|---|---|
 | [0000](0000-project-charter.md) | Project charter | Accepted |
+| [0001](0001-prototypes-are-disposable.md) | Prototypes are disposable; specs carry over | Accepted |
