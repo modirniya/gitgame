@@ -90,8 +90,38 @@ OUTCOMES['O-Rejected'] = {
   mount: el => { scrollStripToTip(el); buzz(); },
 };
 
+OUTCOMES['O-Resolved'] = {
+  html({ e, s, before }) {
+    const old = id => before.players.you.local.find(c => c.id === id) || before.main.find(c => c.id === id);
+    const scene = {
+      ours: e.crossedOut.map(id => commitCard(s.main.find(c => c.id === id), { size: 'lg', data: { 'data-anim': 'cross' } })).join(''),
+      theirs: e.discarded.map(id => commitCard(old(id), { size: 'lg', faceUp: true, cls: 'gone', data: { 'data-anim': 'drop' } })).join(''),
+      resolve: s.players.you.local.map(c => commitCard(c, { size: 'lg', faceUp: true })).join(''),
+    }[e.strategy];
+    const lost = e.crossedOut.reduce((a, id) => a + lines(s.main.find(c => c.id === id)), 0);
+    return outcome({
+      title: e.strategy === 'resolve' ? 'resolved by hand' : `-X ${e.strategy}`, tone: e.strategy === 'ours' ? 'warn' : '',
+      scene: `<div class="spread">${scene}</div>`,
+      said: e.strategy === 'ours' ? T.resolved.ours(e.crossedOut, lost) : e.strategy === 'theirs' ? T.resolved.theirs(e.discarded) : T.resolved.resolve,
+    });
+  },
+};
+
+OUTCOMES['O-Pulled'] = {
+  html({ e, s }) {
+    const term = e.rebase ? GIT.rebase : e.hadLocal ? GIT.merge : GIT.fastForward(e.from, e.to);
+    return outcome({
+      title: e.rebase ? 'git pull --rebase' : 'git pull', term, tone: 'good',
+      scene: `${strip(s, { mark: e.incoming })}<div class="token-line" data-anim="token">${e.rebase ? '<span class="tok pos">rebased: clean</span>' : `<span class="tok neg">+1 merge token (${e.mergeTokens})</span>`}</div>`,
+      said: `${T.pulled.said} ${e.rebase ? T.pulled.rebase : T.pulled.plain(e.mergeTokens)}`,
+      then: s.players.you.local.length ? T.pulled.push : T.pulled.nothing,
+    });
+  },
+  mount: el => scrollStripToTip(el),
+};
+
 // Placeholders until their group of the plan replaces them.
-const IDS = ['O-Pulled', 'O-Resolved', 'O-Blamed', 'O-Reverted', 'O-Forced', 'O-Reflog', 'O-TurnSummary', 'O-BotTurn', 'O-BotStep', 'O-Behind', 'O-CI', 'O-Scoreboard'];
+const IDS = ['O-Blamed', 'O-Reverted', 'O-Forced', 'O-Reflog', 'O-TurnSummary', 'O-BotTurn', 'O-BotStep', 'O-Behind', 'O-CI', 'O-Scoreboard'];
 for (const id of IDS) OUTCOMES[id] = {
   html: ({ e }) => `<div class="body"><h1>${id}</h1><pre class="evt">${esc(JSON.stringify(e, null, 1))}</pre></div>
     <div class="actions">${id.startsWith('O-Bot') ? '<button data-skip-bot class="ghost">skip bot</button>' : ''}<button class="primary" data-next>Continue</button></div>`,

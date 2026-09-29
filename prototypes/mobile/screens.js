@@ -3,7 +3,7 @@
 // A screen is { html(ctx), mount?(el, ctx), auto?(ctx) }, where ctx = { e: event, s: state shown, api, ui }.
 import { legalActions, behindBy, conflictsFor, lines, commitsOnMain, scores } from './engine.js';
 import { strip, standing, handCard, commitCard, esc, scrollStripToTip } from './view.js';
-import { SCREEN, REASON, BRAND, suggestMessages } from './copy.js';
+import { SCREEN, REASON, BRAND, GIT, suggestMessages } from './copy.js';
 import { LAZY_MESSAGES } from './engine.js';
 import { OUTCOMES } from './outcomes.js';
 import { HUB } from './hub.js';
@@ -82,13 +82,48 @@ SCREENS['I-Commit'] = {
   },
 };
 
+// ---------- I-Pull: plain pull or rebase, with the conflict (if any) announced on both ----------
+SCREENS['I-Pull'] = {
+  html({ s }) {
+    const opts = legalActions(s), p = s.players.you;
+    const incoming = s.main.slice(p.ptr).map(c => c.id), conf = conflictsFor(s, 'you');
+    const choice = (key, name, whyText) => {
+      const o = opts.find(x => x.key === key);
+      return `<button class="choice" data-pull="${key}" data-guide="${key}" ${o.enabled ? '' : 'disabled'}><span class="opname">${name}</span>
+        <span class="why">${o.enabled ? whyText : T.hub.no[o.reason]}</span>${conf.length && o.enabled ? `<span class="why bad">${T.pull.conflict(conf[0].shared[0])}</span>` : ''}</button>`;
+    };
+    return `<div class="body ask"><h1 class="cmd">${T.pull.title}</h1>${strip(s, { mark: incoming })}
+      <p class="said">${T.pull.said(incoming.length, incoming)}</p></div>
+      <div class="actions stack">${choice('pull', T.pull.plain, T.pull.plainWhy)}${choice('rebase', T.pull.rebase, T.pull.rebaseWhy)}${cancel(T.pull.cancel)}</div>`;
+  },
+  mount(el, { api }) {
+    scrollStripToTip(el);
+    el.querySelectorAll('[data-pull]').forEach(b => b.onclick = () => api.dispatch({ type: 'pull', rebase: b.dataset.pull === 'rebase' }));
+  },
+};
+
+// ---------- I-Conflict: the one question Git can't answer for you ----------
+SCREENS['I-Conflict'] = {
+  html({ s, e }) {
+    const p = s.players.you, k = e.conflicts[0], file = k.shared[0];
+    const mine = [...new Set(e.conflicts.map(x => x.mine))].map(id => p.local.find(c => c.id === id));
+    const theirs = e.conflicts.map(x => byId(s, x.theirs));
+    const myLines = mine.reduce((a, c) => a + lines(c), 0), theirLines = theirs.reduce((a, c) => a + lines(c), 0);
+    const base = e.rebase ? 2 : 1;
+    const btn = (key, name, whyText) => { const ok = e.affordable.includes(key); return `<button class="choice" data-s="${key}" data-guide="${key}" ${ok ? '' : 'disabled'}><span class="opname">${name}</span><span class="why">${ok ? whyText : T.conflict.cantAfford}</span></button>`; };
+    return `<div class="body ask bad"><h1 class="cmd">CONFLICT</h1><pre class="term bad">${esc(GIT.conflict(file))}</pre>
+      <div class="scene clash" data-anim="clash">${commitCard(mine[0], { size: 'lg', faceUp: true, cls: 'mine' })}<span class="clash-file">${esc(file)}</span>${commitCard(theirs[0], { size: 'lg', cls: 'theirs' })}</div>
+      <p class="said">${T.conflict.said(k.mine, k.theirs)}</p></div>
+      <div class="actions stack">${btn('ours', T.conflict.ours, T.conflict.oursWhy(theirLines))}${btn('theirs', T.conflict.theirs, T.conflict.theirsWhy(myLines))}${btn('resolve', T.conflict.resolve, T.conflict.resolveWhy(base + 1))}</div>`;
+  },
+  mount(el, { api }) { el.querySelectorAll('[data-s]').forEach(b => b.onclick = () => api.dispatch({ type: 'resolve', strategy: b.dataset.s })); },
+};
+
 // Placeholders until their group of the plan replaces them.
 const quick = (label, act) => ({
   html: () => `<div class="body"><h1>${label}</h1></div><div class="actions"><button data-next class="ghost">Cancel</button><button class="primary" data-go>${label}</button></div>`,
   mount: (el, ctx) => { el.querySelector('[data-go]').onclick = () => ctx.api.dispatch(act(ctx)); },
 });
-SCREENS['I-Pull'] = quick('I-Pull', () => ({ type: 'pull', rebase: false }));
-SCREENS['I-Conflict'] = quick('I-Conflict', () => ({ type: 'resolve', strategy: 'theirs' }));
 SCREENS['I-Target'] = quick('I-Target', ({ s, payload }) => ({ type: payload.mode, target: legalActions(s).find(o => o.key === payload.mode).data.targets[0] }));
 SCREENS['I-Force'] = quick('I-Force', () => ({ type: 'force' }));
 SCREENS['I-Tag'] = quick('I-Tag', () => ({ type: 'tag' }));

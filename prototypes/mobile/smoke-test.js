@@ -3,6 +3,8 @@
 import { createGame, apply, legalActions, behindBy, winner } from './engine.js';
 import { plan, botStep } from './bot.js';
 import { REASON } from './copy.js';
+import { screensFor } from './router.js';
+import { SCREENS } from './screens.js';
 
 const failures = [];
 const fail = msg => { if (failures.length < 10) console.error('FAIL', msg); failures.push(msg); };
@@ -78,6 +80,39 @@ run('fuzz', 200, 9000, randomPlayer, true); // random on both sides reaches stat
 // the bot should be beatable by a competent player (~3:1) and crush a random one (~20:1), as in play-vs-bot
 check(smart.wins.you / smart.wins.bot > 1.8, 'a competent player should beat the bot about 3:1');
 check(random.wins.bot / Math.max(1, random.wins.you) > 10, 'a random player should lose about 20:1');
+
+// (f) every screen renders, in node, for every event of real games — the input screens with the payload the hub
+// would open them with. html() is a pure string builder, so a broken screen shows up here without a browser.
+const OPENS = { stage: a => ['I-Stage', { cards: a.cards }], commit: () => ['I-Commit', {}], pull: () => ['I-Pull', {}], blame: () => ['I-Target', { mode: 'blame' }], revert: () => ['I-Target', { mode: 'revert' }], force: () => ['I-Force', {}], tag: () => ['I-Tag', {}] };
+const rendered = new Map();
+function render(id, ctx, where) {
+  try { const html = SCREENS[id].html(ctx); check(typeof html === 'string' && !/undefined|NaN|\[object/.test(html.replace(/data-[a-z-]+="[^"]*"/g, '')), `${id} rendered undefined/NaN at ${where}`); rendered.set(id, (rendered.get(id) || 0) + 1); }
+  catch (e) { fail(`${id} threw at ${where}: ${e.stack.split('\n').slice(0, 2).join(' | ')}`); }
+}
+for (const [label, base, policyFor] of [['smart', 1000, () => st => plan(st, 'you').action], ['random', 5000, randomPlayer]]) {
+  for (let g = 0; g < 150; g++) {
+    const seed = base + g, policy = policyFor(seed), carry = {};
+    let { state, events } = createGame({ seed, guided: g % 3 === 0 });
+    const ui = { selected: [] }, show = (evs, before, after) => { for (const it of screensFor(evs, carry)) render(it.id, { e: it.event, s: after, before, ui, payload: {} }, `${label} ${seed} r${after.round}`); };
+    show(events, state, state);
+    while (!state.over) {
+      const before = state;
+      if (state.turn === 'you' && !state.pending) render('I-Hub', { s: state, before, ui }, `${label} ${seed}`);
+      const r = state.turn === 'bot' ? botStep(state) : { action: policy(state) };
+      if (!r.events) {
+        const open = OPENS[r.action.type]?.(r.action);
+        if (open) render(open[0], { s: state, before, ui, payload: open[1] }, `${label} ${seed}`);
+        const { strategy, ...asked } = r.action; // the player never pre-declares: I-Conflict asks, as in the UI
+        Object.assign(r, apply(state, r.action.type === 'pull' ? asked : r.action));
+        if (r.state.pending) { show(r.events, before, r.state); const mid = r.state; Object.assign(r, apply(mid, { type: 'resolve', strategy: strategy || 'theirs' })); state = mid; }
+      }
+      state = r.state; show(r.events, before, state);
+    }
+  }
+}
+const unrendered = Object.keys(SCREENS).filter(id => id !== 'I-Start' && !rendered.has(id));
+check(!unrendered.length, 'screens never rendered: ' + unrendered.join(', '));
+console.log('screens ', [...rendered].map(([k, v]) => `${k}:${v}`).join(' '));
 
 // (d) event coverage: every event type in spec §2 is emitted at least once
 const SPEC_EVENTS = ['RoundStarted', 'TurnStarted', 'Staged', 'Committed', 'PushAccepted', 'PushRejected', 'Pulled', 'ConflictDetected', 'ConflictResolved', 'Blamed', 'Reverted', 'Forced', 'ReflogFired', 'Tagged', 'TurnEnded', 'BotActed', 'YouAreBehind', 'CIRan'];

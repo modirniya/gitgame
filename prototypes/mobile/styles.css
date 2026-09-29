@@ -203,3 +203,12 @@ button.chip { min-height: 44px; font: 13px var(--mono); padding: 6px 10px; borde
 .zone.ghostzone .k { align-self: flex-start; }
 .stack-from { display: flex; gap: 6px; justify-content: center; min-height: 0; }
 .scene .strip-wrap { width: 100%; }
+button.choice { display: grid; gap: 2px; text-align: left; min-height: 64px; padding: 10px 14px; }
+button.choice .opname { font: 700 16px var(--mono); }
+button.choice .why { font: 400 13px/1.35 var(--sans); color: var(--muted); }
+button.choice .why.bad { color: var(--reject); font-weight: 600; }
+.clash { flex-direction: row; gap: 10px; min-height: 150px; }
+.clash-file { font: 700 13px var(--mono); color: var(--reject); background: var(--reject-soft); padding: 4px 8px; border-radius: 8px; }
+.card.gone { opacity: .35; filter: grayscale(1); }
+.token-line { display: flex; justify-content: center; }
+.token-line .tok { font-size: 14px; padding: 4px 10px; }
