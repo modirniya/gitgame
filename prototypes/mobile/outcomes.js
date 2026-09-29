@@ -144,8 +144,40 @@ OUTCOMES['O-Reverted'] = {
   },
 };
 
+// Force-push: the erased cards fall off main; whatever the reflog brings back is the next screen's story.
+OUTCOMES['O-Forced'] = {
+  html({ e, s, before }) {
+    const erased = e.erased.map(id => before.main.find(c => c.id === id));
+    const mine = e.player === 'you', returned = e.returned.some(id => s.players.you.local.some(c => c.id === id));
+    // main as the force left it: a reflog fires in the same instant, but that is the next screen's story
+    const n = e.from + e.pushed.length, clamp = p => ({ ...p, ptr: Math.min(p.ptr, n) });
+    const view = { ...s, main: s.main.slice(0, n), players: { you: clamp(s.players.you), bot: clamp(s.players.bot) } };
+    return outcome({
+      title: 'git push --force', tone: 'bad', term: GIT.forced(e.oldTip, e.newTip),
+      scene: `${strip(view, { mark: e.pushed })}
+        <div class="zone ghostzone fallen" data-zone="erased"><span class="k">erased</span>${erased.map(c => commitCard(c, { size: 'md', cls: 'fallen', data: { 'data-anim': 'fall' } })).join('')}</div>
+        <span class="stamp bad">+1 sin · ${e.player}</span>`,
+      said: mine ? T.forced.you(e.erased) : T.forced.bot(e.erased, returned),
+      then: mine ? T.forced.youThen : T.forced.botThen,
+    });
+  },
+  mount: el => { scrollStripToTip(el); buzz(); },
+};
+
+OUTCOMES['O-Reflog'] = {
+  html({ e, s }) {
+    const mine = e.victim === 'you';
+    return outcome({
+      title: 'git reflog', tone: mine ? 'good' : 'warn',
+      scene: strip(s, { mark: e.restored }),
+      said: mine ? T.reflog.you(e.restored) : T.reflog.bot(e.restored), then: mine ? T.reflog.youThen : T.reflog.botThen,
+    });
+  },
+  mount: el => scrollStripToTip(el),
+};
+
 // Placeholders until their group of the plan replaces them.
-const IDS = ['O-Forced', 'O-Reflog', 'O-TurnSummary', 'O-BotTurn', 'O-BotStep', 'O-Behind', 'O-CI', 'O-Scoreboard'];
+const IDS = ['O-TurnSummary', 'O-BotTurn', 'O-BotStep', 'O-Behind', 'O-CI', 'O-Scoreboard'];
 for (const id of IDS) OUTCOMES[id] = {
   html: ({ e }) => `<div class="body"><h1>${id}</h1><pre class="evt">${esc(JSON.stringify(e, null, 1))}</pre></div>
     <div class="actions">${id.startsWith('O-Bot') ? '<button data-skip-bot class="ghost">skip bot</button>' : ''}<button class="primary" data-next>Continue</button></div>`,

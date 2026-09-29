@@ -137,10 +137,23 @@ SCREENS['I-Target'] = {
   },
 };
 
+// ---------- I-Force: the warning, with the actual cards that would be erased ----------
+SCREENS['I-Force'] = {
+  html({ s }) {
+    const p = s.players.you, erased = s.main.slice(p.ptr);
+    return ask({
+      title: T.force.title, tone: 'bad',
+      scene: `<div class="spread">${erased.map(c => `<div class="labelled">${commitCard(c, { size: 'md' })}<span class="who"><b class="${c.author}">${c.author}</b> ${esc(c.revertOf ? 'revert' : c.cards.map(x => `${x.file} +${x.lines}`).join(' + '))}</span></div>`).join('')}</div>`,
+      said: T.force.said(erased.length), warn: T.force.sin, then: T.force.reflog,
+      buttons: `${cancel(T.force.cancel)}<button class="danger primary" data-go data-guide="force">${T.force.go}</button>`,
+    });
+  },
+  mount(el, { api }) { el.querySelector('[data-go]').onclick = () => api.dispatch({ type: 'force' }); },
+};
+
 // Placeholders until their group of the plan replaces them.
 const quick = (label, act) => ({
   html: () => `<div class="body"><h1>${label}</h1></div><div class="actions"><button data-next class="ghost">Cancel</button><button class="primary" data-go>${label}</button></div>`,
   mount: (el, ctx) => { el.querySelector('[data-go]').onclick = () => ctx.api.dispatch(act(ctx)); },
 });
-SCREENS['I-Force'] = quick('I-Force', () => ({ type: 'force' }));
 SCREENS['I-Tag'] = quick('I-Tag', () => ({ type: 'tag' }));

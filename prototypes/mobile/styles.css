@@ -223,3 +223,9 @@ button.cell .who b.you { color: var(--you); } button.cell .who b.bot { color: va
 .revert-stack { position: relative; width: 114px; height: 152px; }
 .revert-stack > .card { position: absolute; top: 0; left: 0; }
 .revert-stack > .card + .card { top: 18px; left: 18px; }
+.labelled { display: grid; justify-items: center; gap: 4px; width: 76px; }
+.labelled .who { font: 500 9.5px/1.25 var(--mono); color: var(--muted); text-align: center; }
+.labelled .who b.you { color: var(--you); } .labelled .who b.bot { color: var(--bot); }
+.zone.fallen { border-color: var(--reject); }
+.card.fallen { opacity: .6; transform: rotate(-6deg) translateY(6px); }
+.card.fallen:nth-child(odd) { transform: rotate(5deg) translateY(2px); }
