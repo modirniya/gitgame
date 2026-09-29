@@ -1,0 +1,94 @@
+{
+  "brand": { "name": "Git Game", "marker": "BRAND", "note": "Working name; see docs/branding.md before changing." },
+  "version": "0.1",
+  "notes": [
+    "Source of truth for the tabletop deck. docs/design/base-rules.md describes the rules; this file describes the physical cards.",
+    "tabletop/build.py turns this file into the print-and-play PDF. Change this file, rebuild, commit both.",
+    "Commit and command cards are shuffled into ONE draw deck. Incidents, tickets and roles are separate small decks."
+  ],
+
+  "files": [
+    { "name": "auth.js",    "color": "#3EC1B3" },
+    { "name": "api.py",     "color": "#A88BFA" },
+    { "name": "styles.css", "color": "#F2755C" },
+    { "name": "Dockerfile", "color": "#4C9BE8" },
+    { "name": "README.md",  "color": "#E9A83B" }
+  ],
+
+  "commit_cards": {
+    "lines_per_file": [1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8],
+    "bugs": {
+      "every_file": [3, 6],
+      "extra": [ { "file": "auth.js", "lines": 8 }, { "file": "api.py", "lines": 8 } ]
+    },
+    "note": "60 cards, 12 bugs (20%). A bug is printed on the card face; only its holder sees it. Bugs sit on tempting sizes on purpose."
+  },
+
+  "command_cards": [
+    { "name": "git blame", "count": 5, "cost": 1,
+      "text": "Flip one commit on main. If it holds a bug, its author takes -3 blame now. The commit stays face-up." },
+    { "name": "git bisect", "count": 2, "cost": 1,
+      "text": "Point at a range of main. If any bug is in it, its owner must say which half it is in. Halve until found, then flip it: -3 to its author." },
+    { "name": "cherry-pick", "count": 3, "cost": 1,
+      "text": "Copy one commit from main onto your local branch (use a spare card as the copy). The original author stays the author, including for blame." },
+    { "name": "push --force", "count": 3, "cost": 1,
+      "text": "Overwrite main with your local branch. Every commit after your pointer is erased and goes back to its owner's local branch. Take a Sin token." },
+    { "name": "reflog", "count": 3, "cost": 0,
+      "text": "Play at any time, even on someone else's turn, right after a push --force: the erased commits come back on top of main. Free to play." },
+    { "name": "revert", "count": 4, "cost": 1,
+      "text": "Choose a face-up bug on main. Put this card on top of it as a revert: it no longer counts as a bug at release. +1 for you." },
+    { "name": "stash", "count": 2, "cost": 1,
+      "text": "Set up to 3 cards from your hand aside, face down. They are safe from any discard effect. Take them back for free on a later turn." },
+    { "name": "commit --amend", "count": 2, "cost": 1,
+      "text": "Swap one card in your last unpushed commit with a card from your hand. On a commit that is already on main: +1 Sin." },
+    { "name": "rebase -i", "count": 3, "cost": 1,
+      "text": "Squash two or more of your unpushed commits into one. +2 lines for clean history. A bug found inside a squashed commit costs -5 instead of -3." },
+    { "name": "checkout <sha>", "count": 3, "cost": 1,
+      "text": "Target a player. They are in Detached HEAD: their next commit is discarded unless they first spend 1 op on git switch -c." }
+  ],
+
+  "incidents": [
+    { "name": "Friday Deploy",           "text": "Everyone must push this round. Anyone who doesn't loses 1 op next round." },
+    { "name": "left-pad Unpublished",    "text": "Every Dockerfile commit on main becomes a bug. Flip them face-up now." },
+    { "name": "Merge Freeze",            "text": "Nobody can push this round." },
+    { "name": "Flaky CI",                "text": "The next push this round rolls a die. On 1 or 2 it is rejected; the op is spent." },
+    { "name": "Standup Ran Long",        "text": "Everyone has 2 ops this round instead of 3." },
+    { "name": "Stack Overflow Is Down",  "text": "No command cards this round." },
+    { "name": "Hackathon",               "text": "Everyone has 4 ops this round." },
+    { "name": "Security Audit",          "text": "Going around the table, each player flips one commit on main that is not their own. Blame applies." }
+  ],
+
+  "tickets": {
+    "bonus": 3,
+    "cards": [
+      { "name": "Linear History Purist", "text": "Finish the game with zero merge tokens." },
+      { "name": "Owns Auth",             "text": "Have three auth.js commits on main at release." },
+      { "name": "Release Manager",       "text": "Be the player who tags v1.0." },
+      { "name": "Chaos Agent",           "text": "At release, each of your bugs on main scores +3 for you instead of -3." },
+      { "name": "Documentation Hero",    "text": "Have three README.md commits on main at release." },
+      { "name": "Small Batches",         "text": "Never make a commit with more than one card in it." }
+    ]
+  },
+
+  "roles": [
+    { "name": "The Intern",          "text": "Once per game, push without being up to date. Start with 2 extra cards. The first blame against you is ignored: they're learning." },
+    { "name": "The Rebase Zealot",   "text": "pull --rebase costs you 1 op. Plain pull costs you 2." },
+    { "name": "The Senior Reviewer", "text": "Once per round, secretly peek at any face-down commit on main." },
+    { "name": "The 10x Dev",         "text": "You have 4 ops per turn. Every commit you make must hold at least 3 cards." }
+  ],
+
+  "setup": {
+    "starting_hand": 5,
+    "draw_per_turn": 2,
+    "ops_per_turn": 3,
+    "release_at_commits": { "2": 10, "3": 12, "4": 15, "5": 15 },
+    "production_down_at_bugs": 4
+  },
+
+  "tokens": {
+    "merge":  { "count": 20, "text": "-1" },
+    "grudge": { "count": 12, "text": "-1" },
+    "sin":    { "count": 10, "text": "-1" },
+    "pointer_colors": ["#3EC1B3", "#A88BFA", "#F2755C", "#4C9BE8", "#E9A83B"]
+  }
+}

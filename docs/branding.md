@@ -22,7 +22,7 @@ User-facing strings never hard-code the name. Each codebase has exactly one plac
 
 - Server: a `Brand` module (`GitGame.Brand.name/0`, `domain/0`) — `# BRAND`
 - Web: `web/src/brand.js` exporting `name`, `domain` — `// BRAND`
-- Rules data: a `brand` key at the top of the rules config — `# BRAND`
+- Rules data: a `brand` key at the top of `rules/deck.json` with `"marker": "BRAND"` (JSON has no comments)
 - Docs and templates: use the name directly (they are prose), but only in canonical spellings.
 
 Everything else reads from those. Module namespaces (`GitGame.*`) are the accepted exception: renaming them is a mechanical search-and-replace, made safe by rule 1.

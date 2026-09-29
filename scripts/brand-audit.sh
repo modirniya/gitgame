@@ -14,7 +14,7 @@ exclude=(':!LICENSE')
 
 # Canonical: "Git Game" (prose), "GitGame" (identifiers), "gitgame" (slugs, domain).
 # Anything else that looks like the name is a violation.
-all=$(git grep -n -i -E 'git ?[-_]?game' -- . "${exclude[@]}" || true)
+all=$(git grep -n -I -i -E 'git ?[-_]?game' -- . "${exclude[@]}" || true)
 # A line may opt out by carrying the marker 'brand-audit: ignore' (used where wrong spellings are quoted on purpose).
 bad=$(printf '%s\n' "$all" | grep -v 'brand-audit: ignore' | grep -v -E 'Git Game|GitGame|gitgame|GITGAME_' | grep -i -E 'git ?[-_]?game' || true)
 
@@ -23,7 +23,7 @@ if (( ! quiet )); then
   printf '%s\n' "$all"
   echo
   echo "== Definitions marked BRAND =="
-  git grep -n -E '(#|//|<!--) ?BRAND' -- . || echo "(none yet — added when server/, web/, rules/ exist)"
+  git grep -n -I -E '(#|//|<!--|") ?BRAND' -- . || echo "(none yet — added when server/, web/, rules/ exist)"
   echo
 fi
 

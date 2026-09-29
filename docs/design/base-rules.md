@@ -4,6 +4,12 @@
 
 This is the game as designed for a table: 2–5 players, about 45 minutes, everyone works on the same repo, and only one player's name ends up on the release. The online game derives from it — [round-resolution.md](round-resolution.md) replaces turns with days and packs and pre-declares every choice that would need a live answer. Where the two disagree, the online doc wins for the online game, and this doc wins for the box.
 
+## Components
+
+The exact deck lives in [`rules/deck.json`](../../rules/deck.json); the printable version is built from it into [`tabletop/print-and-play.pdf`](../../tabletop/print-and-play.pdf). In summary: 60 commit cards (5 files × 12 sizes, 12 of them bugs), 30 command cards, 8 incidents, 6 secret tickets, 4 optional roles, one initial-commit card, and merge / grudge / sin tokens.
+
+**Setup:** the initial commit starts `main`; every pointer starts on it. Commit and command cards are shuffled into one draw deck; each player gets 5 cards and one face-down secret ticket. The release comes at 10 commits with 2 players, 12 with 3, 15 with 4 or 5.
+
 ## The core idea
 
 Each player is a developer racing to ship code to a shared `main`. The central rule comes straight from Git:
@@ -59,7 +65,7 @@ When you pull, check whether any of your unpushed commits touch the **same file*
 |---|---|
 | `cherry-pick` | Copy any pushed commit onto your branch. Git keeps the original author on a cherry-pick, so if you copied a bug the blame lands on them, not you |
 | `push --force` | Overwrite remote `main` with your branch, erasing everyone's commits since your pointer. Take a **Sin token** |
-| `reflog` | Counter: undo a force push or `reset --hard` instantly. Played out of turn |
+| `reflog` | Counter, free to play, even out of turn: undo a force push. Erased commits return on top of `main` |
 | `git blame` | Flip one commit on `main`. If it's a bug, its author takes −3 now |
 | `git bisect` | Choose a range of `main`. The owner of any bug in it must say whether the bug is in the first or second half. Repeat until found |
 | `revert` | Neutralise a bug by adding an inverse commit on top. +1 for fixing it |
@@ -78,6 +84,8 @@ Flip one every round:
 - **Flaky CI:** the next player to push rolls a die; on 1–2 the push is rejected
 - **Standup Ran Long:** everyone gets 2 ops this round
 - **Stack Overflow Is Down:** no command cards this round
+- **Hackathon:** everyone gets 4 ops this round
+- **Security Audit:** each player flips one commit on `main` that isn't theirs; blame applies
 
 ## The release
 
@@ -90,7 +98,9 @@ Once `main` has 15 commits, any player may play `git tag v1.0`. That triggers **
    - *Linear History Purist:* zero merge tokens
    - *Owns Auth:* 3 `auth.js` commits on `main`
    - *Release Manager:* be the one who tags v1.0
-   - *Chaos Agent:* 2 of your bugs reach production uncaught
+   - *Chaos Agent:* each of your bugs on `main` scores +3 instead of −3
+   - *Documentation Hero:* 3 `README.md` commits on `main`
+   - *Small Batches:* never commit more than one card at a time
 
 ## Optional roles
 

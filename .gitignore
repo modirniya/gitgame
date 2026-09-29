@@ -7,6 +7,10 @@ erl_crash.dump
 .elixir_ls/
 .fetch
 
+# --- Python (tabletop generator) ---
+.venv/
+__pycache__/
+
 # --- Node / web ---
 node_modules/
 dist/
