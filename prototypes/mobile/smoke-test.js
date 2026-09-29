@@ -1,6 +1,8 @@
 // Smoke test for the mobile prototype: `node smoke-test.js`. Plays games through apply() only — no DOM — and
 // checks the invariants the screens rely on. Exits non-zero on any failure, so "green" means exit code 0.
 import { createGame, apply, legalActions, behindBy, winner } from './engine.js';
+import { plan, botStep } from './bot.js';
+import { REASON } from './copy.js';
 
 const failures = [];
 const fail = msg => { if (failures.length < 10) console.error('FAIL', msg); failures.push(msg); };
@@ -24,16 +26,17 @@ function randomAction(s, r) {
   return o.action;
 }
 
-// Plays one game to the end; `policy(state)` chooses every action. Returns the action list and the event log.
-function play(seed, policy, { guided = false, onApply } = {}) {
+// Plays one game to the end. `policy(state)` chooses the player's actions; the bot plays through botStep unless
+// `both` is set, in which case the policy plays both sides. Returns the action list and the event log.
+function play(seed, policy, { guided = false, both = false, onApply } = {}) {
   let { state, events } = createGame({ seed, guided });
   const log = [...events], actions = [];
   let guard = 0;
   while (!state.over) {
     if (++guard > 5000) throw new Error('game did not finish, seed ' + seed);
-    const action = policy(state);
-    const r = apply(state, action);
-    actions.push(action); log.push(...r.events); state = r.state;
+    const r = state.turn === 'bot' && !both ? botStep(state) : { action: policy(state) };
+    if (!r.events) Object.assign(r, apply(state, r.action));
+    actions.push(r.action); log.push(...r.events); state = r.state;
     for (const id of ['you', 'bot']) { const ptr = state.players[id].ptr; if (ptr < 1 || ptr > state.main.length) throw new Error(`pointer out of range: ${id} ${ptr}/${state.main.length}, seed ${seed}`); }
     onApply?.(state, r.events, action);
   }
@@ -48,17 +51,19 @@ function replay(seed, actions, guided = false) {
 
 // (a) + (b) + (c): many games, pointer invariant after every action, determinism from seed + actions
 const seen = new Set();
-function run(label, N, seedBase, policyFor) {
+const flatten = log => log.flatMap(e => e.type === 'BotActed' ? e.events : [e]);
+function run(label, N, seedBase, policyFor, both = false) {
   const st = { games: 0, errors: 0, wins: { you: 0, bot: 0, draw: 0 }, tagged: 0, deadline: 0, down: 0 };
   for (let g = 0; g < N; g++) {
     const seed = seedBase + g;
     try {
-      const { state, actions, log } = play(seed, policyFor(seed));
-      for (const e of log) seen.add(e.type);
+      const { state, actions, log } = play(seed, policyFor(seed), { both });
+      for (const e of [...log, ...flatten(log)]) seen.add(e.type);
       const again = replay(seed, actions);
-      check(JSON.stringify(again.log) === JSON.stringify(log), `${label} seed ${seed}: replay produced a different event log`);
+      check(JSON.stringify(again.log) === JSON.stringify(flatten(log)), `${label} seed ${seed}: replay produced a different event log`);
+      for (const e of log) if (e.type === 'BotActed') check(typeof REASON.bot[e.op]?.(e.why) === 'string', `${label} seed ${seed}: no bot copy for ${e.op}`);
       st.games++;
-      if (log.some(e => e.type === 'Tagged')) st.tagged++; else st.deadline++;
+      if (flatten(log).some(e => e.type === 'Tagged')) st.tagged++; else st.deadline++;
       if (state.released.down) st.down++;
       st.wins[winner(state)]++;
     } catch (e) { st.errors++; fail(`${label} seed ${seed}: ${e.stack.split('\n').slice(0, 3).join(' | ')}`); }
@@ -66,11 +71,16 @@ function run(label, N, seedBase, policyFor) {
   console.log(label.padEnd(8), JSON.stringify(st));
   return st;
 }
-const randomBoth = seed => { const r = testRng(seed * 7919); return s => randomAction(s, r); };
-run('random', 800, 1000, randomBoth);
+const randomPlayer = seed => { const r = testRng(seed * 7919); return s => randomAction(s, r); };
+const smart = run('smart', 400, 1000, () => s => plan(s, 'you').action);
+const random = run('random', 400, 5000, randomPlayer);
+run('fuzz', 200, 9000, randomPlayer, true); // random on both sides reaches states the bot never would
+// the bot should be beatable by a competent player (~3:1) and crush a random one (~20:1), as in play-vs-bot
+check(smart.wins.you / smart.wins.bot > 1.8, 'a competent player should beat the bot about 3:1');
+check(random.wins.bot / Math.max(1, random.wins.you) > 10, 'a random player should lose about 20:1');
 
 // (d) event coverage: every event type in spec §2 is emitted at least once
-const SPEC_EVENTS = ['RoundStarted', 'TurnStarted', 'Staged', 'Committed', 'PushAccepted', 'PushRejected', 'Pulled', 'ConflictDetected', 'ConflictResolved', 'Blamed', 'Reverted', 'Forced', 'ReflogFired', 'Tagged', 'TurnEnded', 'YouAreBehind', 'CIRan'];
+const SPEC_EVENTS = ['RoundStarted', 'TurnStarted', 'Staged', 'Committed', 'PushAccepted', 'PushRejected', 'Pulled', 'ConflictDetected', 'ConflictResolved', 'Blamed', 'Reverted', 'Forced', 'ReflogFired', 'Tagged', 'TurnEnded', 'BotActed', 'YouAreBehind', 'CIRan'];
 const missing = SPEC_EVENTS.filter(t => !seen.has(t));
 check(!missing.length, 'events never emitted: ' + missing.join(', '));
 console.log('events  ', [...seen].sort().join(' '));
