@@ -107,7 +107,7 @@ export const SCREEN = {
   incident: { title: n => `Round ${n} of 12`, got: 'Got it' },
   yourTurn: {
     title: ops => `Your turn · ${s(ops, 'op')}`,
-    drew: 'You drew two cards.',
+    drew: n => `You drew ${n === 2 ? 'two cards' : s(n, 'card')}.`,
     atTip: 'You are at the tip: a push would be accepted.',
     behind: n => `You are ${n} behind: a push would be rejected. Pull first.`,
     play: 'Play',
@@ -142,7 +142,7 @@ export const SCREEN = {
     bug: 'Contains a bug. Nobody knows that but you, until someone flips it.',
     big: 'One big commit scores more at once, but one bug inside and git blame penalises all of it.',
   },
-  staged: { title: 'git add', said: n => `${s(n, 'card')} on your mat. Not a commit yet.` },
+  staged: { title: 'git add', said: n => `${s(n, 'card')} on your mat. Not a commit yet.`, then: 'git commit turns the whole mat into one commit.' },
   commit: {
     title: 'git commit', label: 'Commit message', commit: 'Commit · 1 op', cancel: 'Cancel',
     rule: 'Commit messages are read by git log a year from now. "fix", "wip" or "asdf" draws a bug.',
@@ -154,6 +154,7 @@ export const SCREEN = {
     lazy: ' The lazy message drew a bug into it.',
     behind: n => `You are ${n} behind the tip, so a push would be rejected. Pull first.`,
     atTip: 'You are at the tip: push now, before the bot moves it.',
+    lastOp: 'That was your last op. It goes out next turn, if the bot hasn’t moved the tip by then.',
   },
   pushed: {
     said: ids => `Pushed. ${ids.map(c).join(', ')} ${ids.length > 1 ? 'are' : 'is'} face-down at the end of main: everyone sees the file and the lines, nobody sees whether it is a bug.`,
@@ -192,6 +193,7 @@ export const SCREEN = {
     plain: n => `The plain pull cost 1 op and a merge token (−1 at the end); you have ${n}.`,
     rebase: 'The rebase cost 2 ops and left no merge token.',
     push: 'You are at the tip with commits to push: push now.',
+    lastOp: 'That was your last op; push first thing next turn, before the bot moves the tip again.',
     nothing: 'Nothing to push yet. Add and commit.',
   },
   target: {
@@ -203,7 +205,7 @@ export const SCREEN = {
     bugThen: 'A flipped bug can be neutralised with git revert: +1 for whoever fixes it.',
     clean: sha => `${c(sha)} was clean. An op and a card for nothing.`,
     cleanThen: 'Blame the commits that look too good: big line counts from someone in a hurry.',
-    stamp: { bug: 'BUG', clean: 'clean' },
+    stamp: { clean: 'clean' },
   },
   reverted: { said: sha => `${c(sha)} is neutralised and you get +1 for the fix.`, then: 'A revert is a commit on main, so the bot is now behind you.' },
   force: {
@@ -288,4 +290,21 @@ export const GUIDE = {
   pull: { text: 'You are behind the tip now, so a push would be rejected. Tap git pull.', 'I-Pull': 'Plain pull: 1 op and a merge token. Rebase: 2 ops, clean. Try the plain pull.', 'I-Conflict': 'Your commit and the bot’s touch the same file. Pick one: every choice has a price.' },
   skippedPull: 'The bot caught up with you and committed, but ran out of ops before it could push, so you are still at the tip. That luck won’t last. Tap a card to build your next commit.',
   done: { text: 'You know the loop: pull if behind, add, commit, push. From here it is your game. Hint shows what a good player would do; the table tab shows everything on the table.' },
+};
+
+// Words printed on the cards and the frame, and the Git commands screens are titled with.
+export const LABEL = {
+  you: 'you', bot: 'bot', yours: 'yours', theirs: 'the bot’s', lines: n => s(n, 'line'), total: 'total',
+  card: { commit: 'commit', command: 'command', bug: 'BUG', lazyBug: 'BUG · lazy msg', main: 'main', initial: 'initial<br>commit', revert: 'revert', reflogCost: 'free · fires itself', cost: n => s(n, 'op'), incident: 'incident' },
+  strip: { main: 'main', commits: (n, of) => `${n}/${of} commits`, tip: 'tip' },
+  standing: { behind: n => `${n} behind the tip`, ok: 'at the tip' },
+  branch: 'your branch', prompt: '$ git init', erased: 'erased',
+  status: { round: 'r', main: 'main', table: 'table', score: 'live score', openTable: 'open the table', ops: n => `${s(n, 'op')} left` },
+  tokens: { merge: n => `merge ×${n}`, grudge: n => `grudge ×${n}`, sin: n => `sin ×${n}`, blame: n => `blame −${n}`, fixes: n => `fixes +${n}` },
+  counts: (hand, staged, local) => `${s(hand, 'card')} in hand · ${s(staged, 'card')} staged · ${s(local, 'commit')} to push`,
+  stamp: { rebased: 'rebased: clean', merge: n => `+1 merge token (${n})`, fix: '+1 fix', sin: who => `+1 sin · ${who}`, blameHit: who => `BUG · −3 ${who}` },
+};
+export const COMMAND = {
+  push: 'git push', pull: 'git pull', rebase: 'git pull --rebase', force: 'git push --force', reflog: 'git reflog', tag: 'git tag v1.0',
+  blame: sha => `git blame ${sha}`, revert: sha => `git revert ${sha}`, conflict: 'CONFLICT', strategy: k => k === 'resolve' ? 'resolved by hand' : `-X ${k}`,
 };

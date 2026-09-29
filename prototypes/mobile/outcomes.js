@@ -2,8 +2,8 @@
 // Git command that happened; where Git prints something, the screen prints it too; the coach line under the
 // scene says what happened and what to do next, in copy.js's words.
 import { behindBy, commitsOnMain, scores, lines, hasBug, winner, RELEASE_AT } from './engine.js';
-import { handCard, commitCard, strip, scrollStripToTip, pips, esc } from './view.js';
-import { SCREEN, INCIDENT, GIT, RECEIPT, REASON, BOT_DID, BOT_TITLE } from './copy.js';
+import { handCard, commitCard, strip, scrollStripToTip, pips, esc, WHO } from './view.js';
+import { SCREEN, INCIDENT, GIT, RECEIPT, REASON, BOT_DID, BOT_TITLE, LABEL, COMMAND } from './copy.js';
 
 const T = SCREEN;
 export const OUTCOMES = {};
@@ -25,7 +25,7 @@ OUTCOMES['O-Incident'] = {
     const inc = INCIDENT[e.incident];
     return outcome({
       title: T.incident.title(e.round), button: T.incident.got,
-      scene: `<div class="incident-card" data-anim="deal"><div class="band">incident</div><h2>${esc(inc.name)}</h2><p>${esc(inc.text)}</p></div>`,
+      scene: `<div class="incident-card" data-anim="deal"><div class="band">${LABEL.card.incident}</div><h2>${esc(inc.name)}</h2><p>${esc(inc.text)}</p></div>`,
     });
   },
 };
@@ -35,17 +35,18 @@ OUTCOMES['O-YourTurn'] = {
     title: T.yourTurn.title(e.ops), button: T.yourTurn.play, tone: e.behindBy ? 'warn' : '',
     scene: `<div class="drawn">${e.drawn.map((c, i) => handCard(c, { size: 'lg', data: { 'data-anim': 'draw', style: `--i:${i}` } })).join('')}</div>
       <div class="bigpips">${pips(e.ops, 3, 'you')}</div>`,
-    said: e.drawn.length ? T.yourTurn.drew : '',
+    said: e.drawn.length ? T.yourTurn.drew(e.drawn.length) : '',
     then: e.behindBy ? T.yourTurn.behind(behindBy(s, 'you')) : T.yourTurn.atTip,
   }),
 };
 
 const buzz = () => { try { navigator.vibrate?.(18); } catch { /* no haptics */ } }; // spec §4: a light tap on reject and blame-hit
+const opsLeft = s => s.turn === 'you' && !s.over ? s.ops : 0; // after your last op the state has moved on to the bot's turn
 const findCommit = (s, id) => s.main.find(c => c.id === id) || s.players.you.local.find(c => c.id === id);
 
 OUTCOMES['O-Staged'] = {
   html: ({ e }) => outcome({
-    title: T.staged.title, said: T.staged.said(e.cards.length),
+    title: T.staged.title, said: T.staged.said(e.cards.length), then: T.staged.then,
     scene: `<div class="zone big" data-zone="mat">${e.cards.map((c, i) => handCard(c, { size: 'md', data: { 'data-anim': 'stage', style: `--i:${i}` } })).join('')}</div>`,
   }),
 };
@@ -59,7 +60,7 @@ OUTCOMES['O-Committed'] = {
       scene: `<div class="stack-from">${staged.map((x, i) => handCard(x, { size: 'md', data: { 'data-anim': 'stack', style: `--i:${i}` } })).join('')}</div>
         ${commitCard(c, { size: 'xl', faceUp: true, data: { 'data-anim': 'commit' } })}`,
       said: T.committed.said(c.id, lines(c)) + (e.hasBug ? (e.lazy && !c.cards.some(x => x.bug) ? T.committed.lazy : T.committed.bug) : ''),
-      then: behind ? T.committed.behind(behind) : T.committed.atTip,
+      then: behind ? T.committed.behind(behind) : opsLeft(s) ? T.committed.atTip : T.committed.lastOp,
       tone: e.hasBug ? 'bad' : '',
     });
   },
@@ -70,7 +71,7 @@ OUTCOMES['O-Pushed'] = {
     const sc = scores(s);
     const tag = commitsOnMain(s) >= RELEASE_AT ? (sc.you.total >= sc.bot.total ? T.pushed.tagAhead : T.pushed.tagBehind) : T.pushed.then;
     return outcome({
-      title: 'git push', tone: 'good', term: GIT.push(e.from, e.commits[e.commits.length - 1]),
+      title: COMMAND.push, tone: 'good', term: GIT.push(e.from, e.commits[e.commits.length - 1]),
       scene: `${strip(s, { mark: e.commits })}<div class="zone ghostzone" data-zone="local"><span class="k">${T.hub.local}</span></div>`,
       said: (e.roll ? T.pushed.die(e.roll) + ' ' : '') + T.pushed.said(e.commits), then: tag, guide: 'pushed',
     });
@@ -82,7 +83,7 @@ OUTCOMES['O-Rejected'] = {
   html({ e, s }) {
     const flaky = e.reason === 'flaky';
     return outcome({
-      title: 'git push', tone: 'bad', term: flaky ? T.rejected.flakyBanner(e.roll) : GIT.rejected,
+      title: COMMAND.push, tone: 'bad', term: flaky ? T.rejected.flakyBanner(e.roll) : GIT.rejected,
       scene: `${strip(s)}<div class="zone ghostzone" data-zone="local">${s.players.you.local.map(c => commitCard(c, { size: 'md', faceUp: true, data: { 'data-anim': 'bounce' } })).join('')}</div>`,
       said: flaky ? T.rejected.flaky(e.roll) : T.rejected.said, then: flaky ? T.rejected.flakyThen : T.rejected.then,
     });
@@ -100,7 +101,7 @@ OUTCOMES['O-Resolved'] = {
     }[e.strategy];
     const lost = e.crossedOut.reduce((a, id) => a + lines(s.main.find(c => c.id === id)), 0);
     return outcome({
-      title: e.strategy === 'resolve' ? 'resolved by hand' : `-X ${e.strategy}`, tone: e.strategy === 'ours' ? 'warn' : '',
+      title: COMMAND.strategy(e.strategy), tone: e.strategy === 'ours' ? 'warn' : '',
       scene: `<div class="spread">${scene}</div>`,
       said: e.strategy === 'ours' ? T.resolved.ours(e.crossedOut, lost) : e.strategy === 'theirs' ? T.resolved.theirs(e.discarded) : T.resolved.resolve,
     });
@@ -111,10 +112,10 @@ OUTCOMES['O-Pulled'] = {
   html({ e, s }) {
     const term = e.rebase ? GIT.rebase : e.hadLocal ? GIT.merge : GIT.fastForward(e.from, e.to);
     return outcome({
-      title: e.rebase ? 'git pull --rebase' : 'git pull', term, tone: 'good',
-      scene: `${strip(s, { mark: e.incoming })}<div class="token-line" data-anim="token">${e.rebase ? '<span class="tok pos">rebased: clean</span>' : `<span class="tok neg">+1 merge token (${e.mergeTokens})</span>`}</div>`,
+      title: e.rebase ? COMMAND.rebase : COMMAND.pull, term, tone: 'good',
+      scene: `${strip(s, { mark: e.incoming })}<div class="token-line" data-anim="token">${e.rebase ? `<span class="tok pos">${LABEL.stamp.rebased}</span>` : `<span class="tok neg">${LABEL.stamp.merge(e.mergeTokens)}</span>`}</div>`,
       said: `${T.pulled.said} ${e.rebase ? T.pulled.rebase : T.pulled.plain(e.mergeTokens)}`,
-      then: s.players.you.local.length ? T.pulled.push : T.pulled.nothing,
+      then: !s.players.you.local.length ? T.pulled.nothing : opsLeft(s) ? T.pulled.push : T.pulled.lastOp,
     });
   },
   mount: el => scrollStripToTip(el),
@@ -124,8 +125,8 @@ OUTCOMES['O-Blamed'] = {
   html({ e, s }) {
     const c = s.main.find(x => x.id === e.target);
     return outcome({
-      title: `git blame ${e.target}`, tone: e.wasBug ? 'bad' : '',
-      scene: `${commitCard(c, { size: 'xl', reveal: true, data: { 'data-anim': 'flip' } })}<span class="stamp ${e.wasBug ? 'bad' : 'ok'}">${e.wasBug ? `${T.blamed.stamp.bug} · −3 ${e.author}` : T.blamed.stamp.clean}</span>`,
+      title: COMMAND.blame(e.target), tone: e.wasBug ? 'bad' : '',
+      scene: `${commitCard(c, { size: 'xl', reveal: true, data: { 'data-anim': 'flip' } })}<span class="stamp ${e.wasBug ? 'bad' : 'ok'}">${e.wasBug ? LABEL.stamp.blameHit(WHO[e.author]) : T.blamed.stamp.clean}</span>`,
       said: e.wasBug ? T.blamed.bug(e.target, e.author) : T.blamed.clean(e.target),
       then: e.wasBug ? T.blamed.bugThen : T.blamed.cleanThen,
     });
@@ -137,8 +138,8 @@ OUTCOMES['O-Reverted'] = {
   html({ e, s }) {
     const t = s.main.find(x => x.id === e.target), rv = s.main.find(x => x.id === e.revert);
     return outcome({
-      title: `git revert ${e.target}`, tone: 'good', term: GIT.revert(rv.id, rv.message),
-      scene: `<div class="revert-stack">${commitCard(t, { size: 'lg' })}${commitCard(rv, { size: 'lg', data: { 'data-anim': 'land' } })}</div><span class="stamp ok">+1 fix</span>`,
+      title: COMMAND.revert(e.target), tone: 'good', term: GIT.revert(rv.id, rv.message),
+      scene: `<div class="revert-stack">${commitCard(t, { size: 'lg' })}${commitCard(rv, { size: 'lg', data: { 'data-anim': 'land' } })}</div><span class="stamp ok">${LABEL.stamp.fix}</span>`,
       said: T.reverted.said(e.target), then: T.reverted.then,
     });
   },
@@ -153,10 +154,10 @@ OUTCOMES['O-Forced'] = {
     const n = e.from + e.pushed.length, clamp = p => ({ ...p, ptr: Math.min(p.ptr, n) });
     const view = { ...s, main: s.main.slice(0, n), players: { you: clamp(s.players.you), bot: clamp(s.players.bot) } };
     return outcome({
-      title: 'git push --force', tone: 'bad', term: GIT.forced(e.oldTip, e.newTip),
+      title: COMMAND.force, tone: 'bad', term: GIT.forced(e.oldTip, e.newTip),
       scene: `${strip(view, { mark: e.pushed })}
-        <div class="zone ghostzone fallen" data-zone="erased"><span class="k">erased</span>${erased.map(c => commitCard(c, { size: 'md', cls: 'fallen', data: { 'data-anim': 'fall' } })).join('')}</div>
-        <span class="stamp bad">+1 sin · ${e.player}</span>`,
+        <div class="zone ghostzone fallen" data-zone="erased"><span class="k">${LABEL.erased}</span>${erased.map(c => commitCard(c, { size: 'md', cls: 'fallen', data: { 'data-anim': 'fall' } })).join('')}</div>
+        <span class="stamp bad">${LABEL.stamp.sin(WHO[e.player])}</span>`,
       said: mine ? T.forced.you(e.erased) : T.forced.bot(e.erased, returned),
       then: mine ? T.forced.youThen : T.forced.botThen,
     });
@@ -168,7 +169,7 @@ OUTCOMES['O-Reflog'] = {
   html({ e, s }) {
     const mine = e.victim === 'you';
     return outcome({
-      title: 'git reflog', tone: mine ? 'good' : 'warn',
+      title: COMMAND.reflog, tone: mine ? 'good' : 'warn',
       scene: strip(s, { mark: e.restored }),
       said: mine ? T.reflog.you(e.restored) : T.reflog.bot(e.restored), then: mine ? T.reflog.youThen : T.reflog.botThen,
     });
@@ -193,7 +194,7 @@ const botActions = next => `<div class="actions"><button class="ghost" data-skip
 OUTCOMES['O-BotTurn'] = {
   html: ({ e, s }) => `<div class="body out bot">
       <h1 class="cmd">${T.botTurn.title(e.ops)}</h1>
-      <div class="scene"><div class="avatar" aria-hidden="true">bot</div>${pips(e.ops, 3, 'bot')}</div>
+      <div class="scene"><div class="avatar" aria-hidden="true">${LABEL.bot}</div>${pips(e.ops, 3, 'bot')}</div>
       <p class="said">${e.behindBy ? T.botTurn.behind(e.behindBy) : T.botTurn.atTip}</p>
     </div>${botActions('›')}`,
 };
@@ -209,7 +210,7 @@ OUTCOMES['O-BotStep'] = {
         <h1 class="cmd">${e.op === 'end' ? T.botStep.end : BOT_TITLE[e.op] + target}</h1>
         <div class="dots" aria-label="${T.botStep.of(of - left, of)}">${Array.from({ length: of }, (_, i) => `<i class="${i < of - left ? 'on' : ''}"></i>`).join('')}<span>${T.botStep.of(of - left, of)}</span></div>
         <div class="scene">${strip(s, { mark })}</div>
-        <div class="bubble"><span class="avatar small" aria-hidden="true">bot</span><p>${REASON.bot[e.op](e.why)}</p></div>
+        <div class="bubble"><span class="avatar small" aria-hidden="true">${LABEL.bot}</span><p>${REASON.bot[e.op](e.why)}</p></div>
         ${did.length ? `<p class="said">${did.join(' ')}</p>` : ''}
       </div>${botActions('›')}`;
   },
@@ -232,7 +233,7 @@ OUTCOMES['O-CI'] = {
     const counts = new Set(e.flips.filter(f => f.counts).map(f => f.id));
     const cells = s.main.filter(c => !c.init).map(c => `<div class="ci-cell">${commitCard(c, { size: 'sm', reveal: true, cls: counts.has(c.id) ? 'counts' : '', data: { 'data-anim': 'ci' } })}</div>`).join('');
     return outcome({
-      title: e.by ? 'git tag v1.0' : T.ci.title, tone: e.productionDown ? 'bad' : 'good', term: e.by ? '' : T.ci.deadline,
+      title: e.by ? COMMAND.tag : T.ci.title, tone: e.productionDown ? 'bad' : 'good', term: e.by ? '' : T.ci.deadline,
       scene: `<div class="ci-grid">${cells}</div><span class="stamp ${e.bugs ? 'bad' : 'ok'}" data-anim="tally">${T.ci.bugs(e.bugs)}</span>`,
       said: e.productionDown ? T.ci.down : T.ci.ship, button: T.ci.score, guide: 'ci',
     });
@@ -244,7 +245,8 @@ OUTCOMES['O-CI'] = {
 OUTCOMES['O-Scoreboard'] = {
   html({ e, s }) {
     const sc = scores(s), w = winner(s), you = s.players.you, bot = s.players.bot;
-    const row = k => `<tr><td>${T.score.rows[k]}</td><td>${sc.you[k]}</td><td>${sc.bot[k]}</td></tr>`;
+    const n = v => String(v).replace('-', '−');
+    const row = k => `<tr><td>${T.score.rows[k]}</td><td>${n(sc.you[k])}</td><td>${n(sc.bot[k])}</td></tr>`;
     const d = T.score.decided, why = [];
     if (Math.abs(sc.you.merge - sc.bot.merge) >= 2) why.push(d.merge(-sc.you.merge, -sc.bot.merge));
     if (Math.abs(sc.you.blame - sc.bot.blame) >= 3) why.push(d.blame(-sc.you.blame, -sc.bot.blame));
@@ -254,12 +256,12 @@ OUTCOMES['O-Scoreboard'] = {
     return `<div class="body out score">
         <h1 class="cmd">${e.productionDown ? T.score.down(e.bugs) : T.score.shipped}</h1>
         <p class="winner ${w}">${T.score.win[w]}</p>
-        <table class="scores"><thead><tr><th></th><th class="you">you</th><th class="bot">bot</th></tr></thead>
+        <table class="scores"><thead><tr><th></th><th class="you">${LABEL.you}</th><th class="bot">${LABEL.bot}</th></tr></thead>
           <tbody>${['lines', 'fixes', 'blame', 'merge', 'grudge', 'sin'].map(row).join('')}</tbody>
-          <tfoot><tr><td>total</td><td>${sc.you.total}</td><td>${sc.bot.total}</td></tr></tfoot></table>
+          <tfoot><tr><td>${LABEL.total}</td><td>${n(sc.you.total)}</td><td>${n(sc.bot.total)}</td></tr></tfoot></table>
         <p class="said">${why.length ? T.score.decidedBy(why) : d.none}</p>
         <h2 class="k">${T.score.hands}</h2>
-        <div class="hands"><div><b class="you">you</b><div class="zcards">${hand(you)}</div></div><div><b class="bot">bot</b><div class="zcards">${hand(bot)}</div></div></div>
+        <div class="hands"><div><b class="you">${LABEL.you}</b><div class="zcards">${hand(you)}</div></div><div><b class="bot">${LABEL.bot}</b><div class="zcards">${hand(bot)}</div></div></div>
         <p class="fine">${T.start.seed(s.seed)}</p>
         <div data-playtest></div>
       </div>

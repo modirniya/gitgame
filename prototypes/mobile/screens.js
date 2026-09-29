@@ -2,8 +2,8 @@
 // question and return one action — and the registry; outcomes.js holds the screens that show a consequence.
 // A screen is { html(ctx), mount?(el, ctx), auto?(ctx) }, where ctx = { e: event, s: state shown, api, ui }.
 import { legalActions, behindBy, conflictsFor, lines, commitsOnMain, scores } from './engine.js';
-import { strip, standing, handCard, commitCard, esc, scrollStripToTip } from './view.js';
-import { SCREEN, REASON, BRAND, GIT, suggestMessages } from './copy.js';
+import { strip, handCard, commitCard, commitLabel, esc, scrollStripToTip, WHO } from './view.js';
+import { SCREEN, BRAND, GIT, LABEL, COMMAND, suggestMessages } from './copy.js';
 import { LAZY_MESSAGES } from './engine.js';
 import { OUTCOMES } from './outcomes.js';
 import { HUB } from './hub.js';
@@ -18,7 +18,7 @@ SCREENS['I-Start'] = {
   html: () => {
     const played = +(store.get('gitgame.games') || 0);
     return `<div class="body start">
-      <div class="logo"><span class="prompt">$ git init</span><h1>${BRAND.name}</h1><p>${BRAND.tagline}</p></div>
+      <div class="logo"><span class="prompt">${LABEL.prompt}</span><h1>${BRAND.name}</h1><p>${BRAND.tagline}</p></div>
       <p class="pitch">${T.start.pitch}</p>
       <label class="toggle"><input type="checkbox" data-guided ${played ? '' : 'checked'}><span><b>${T.start.guided}</b><small>${T.start.guidedNote}</small></span></label>
     </div>
@@ -111,11 +111,11 @@ SCREENS['I-Conflict'] = {
     const myLines = mine.reduce((a, c) => a + lines(c), 0), theirLines = theirs.reduce((a, c) => a + lines(c), 0);
     const base = e.rebase ? 2 : 1;
     const btn = (key, name, whyText) => { const ok = e.affordable.includes(key); return `<button class="choice" data-s="${key}" data-guide="${key}" ${ok ? '' : 'disabled'}><span class="opname">${name}</span><span class="why">${ok ? whyText : T.conflict.cantAfford}</span></button>`; };
-    return `<div class="body ask bad"><h1 class="cmd">CONFLICT</h1><pre class="term bad">${esc(GIT.conflict(file))}</pre>
+    return `<div class="body ask bad"><h1 class="cmd">${COMMAND.conflict}</h1><pre class="term bad">${esc(GIT.conflict(file))}</pre>
       <div class="scene clash" data-anim="clash">
-        <div class="labelled">${commitCard(mine[0], { size: 'lg', faceUp: true })}<span class="who"><b class="you">yours</b> ${lines(mine[0])} lines</span></div>
+        <div class="labelled">${commitCard(mine[0], { size: 'lg', faceUp: true })}<span class="who"><b class="you">${LABEL.yours}</b> ${LABEL.lines(lines(mine[0]))}</span></div>
         <span class="clash-file">${esc(file)}</span>
-        <div class="labelled">${commitCard(theirs[0], { size: 'lg' })}<span class="who"><b class="bot">the bot's</b> ${lines(theirs[0])} lines</span></div></div>
+        <div class="labelled">${commitCard(theirs[0], { size: 'lg' })}<span class="who"><b class="bot">${LABEL.theirs}</b> ${LABEL.lines(lines(theirs[0]))}</span></div></div>
       <p class="said">${T.conflict.said(k.mine, k.theirs)}</p></div>
       <div class="actions stack">${btn('ours', T.conflict.ours, T.conflict.oursWhy(theirLines))}${btn('theirs', T.conflict.theirs, T.conflict.theirsWhy(myLines))}${btn('resolve', T.conflict.resolve, T.conflict.resolveWhy(base + 1))}</div>`;
   },
@@ -128,8 +128,8 @@ SCREENS['I-Target'] = {
     const mode = payload.mode, targets = legalActions(s).find(o => o.key === mode).data.targets;
     const cells = s.main.map(c => {
       const t = targets.includes(c.id);
-      return `<button class="cell ${t ? 'target' : ''}" data-target="${c.id}" data-guide="target" ${t ? '' : 'disabled'} aria-label="${esc(c.init ? 'initial commit' : c.id)}">
-        ${commitCard(c, { size: 'md' })}<span class="who"><b class="${c.author}">${c.author || ''}</b> ${c.init ? '' : esc(c.revertOf ? 'revert' : c.cards.map(x => `${x.file} +${x.lines}`).join(' + '))}</span></button>`;
+      return `<button class="cell ${t ? 'target' : ''}" data-target="${c.id}" data-guide="target" ${t ? '' : 'disabled'} aria-label="${esc(c.id)}">
+        ${commitCard(c, { size: 'md' })}<span class="who">${c.init ? '' : `<b class="${c.author}">${WHO[c.author]}</b> ${esc(commitLabel(c))}`}</span></button>`;
     }).join('');
     return `<div class="body ask"><h1 class="cmd">${T.target[mode]}</h1><p class="said">${T.target[mode + 'Said']}</p><div class="cells">${cells}</div></div>
       <div class="actions">${cancel(T.target.cancel)}</div>`;
@@ -146,7 +146,7 @@ SCREENS['I-Force'] = {
     const p = s.players.you, erased = s.main.slice(p.ptr);
     return ask({
       title: T.force.title, tone: 'bad',
-      scene: `<div class="spread">${erased.map(c => `<div class="labelled">${commitCard(c, { size: 'md' })}<span class="who"><b class="${c.author}">${c.author}</b> ${esc(c.revertOf ? 'revert' : c.cards.map(x => `${x.file} +${x.lines}`).join(' + '))}</span></div>`).join('')}</div>`,
+      scene: `<div class="spread">${erased.map(c => `<div class="labelled">${commitCard(c, { size: 'md' })}<span class="who"><b class="${c.author}">${WHO[c.author]}</b> ${esc(commitLabel(c))}</span></div>`).join('')}</div>`,
       said: T.force.said(erased.length), warn: T.force.sin, then: T.force.reflog,
       buttons: `${cancel(T.force.cancel)}<button class="danger primary" data-go data-guide="force">${T.force.go}</button>`,
     });
@@ -159,7 +159,7 @@ SCREENS['I-Tag'] = {
   html({ s }) {
     const sc = scores(s);
     return ask({
-      title: T.tag.title, scene: `<div class="score-now"><b class="you">you ${sc.you.total}</b><span>·</span><b class="bot">bot ${sc.bot.total}</b></div>`,
+      title: T.tag.title, scene: `<div class="score-now"><b class="you">${LABEL.you} ${sc.you.total}</b><span>·</span><b class="bot">${LABEL.bot} ${sc.bot.total}</b></div>`,
       said: T.tag.said(commitsOnMain(s)), then: sc.you.total >= sc.bot.total ? T.tag.ahead : T.tag.behind,
       buttons: `<button class="ghost" data-next>${T.tag.later}</button><button class="primary" data-go data-guide="tag">${T.tag.go}</button>`,
     });

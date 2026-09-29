@@ -4,7 +4,7 @@
 import { legalActions } from './engine.js';
 import { plan } from './bot.js';
 import { strip, standing, handCard, commitCard, scrollStripToTip } from './view.js';
-import { SCREEN, REASON } from './copy.js';
+import { SCREEN, REASON, LABEL } from './copy.js';
 
 const T = SCREEN;
 const CORE = ['stage', 'commit', 'push', 'pull'];
@@ -23,7 +23,7 @@ function opButton(o, ui, s, extra = '') {
   const danger = (o.key === 'push' && o.data.behind) || o.key === 'force';
   const hinted = ui.hint && (ui.hint.action.type === o.action.type) ? 'hinted' : '';
   return `<button class="op ${enabled && !danger ? 'go' : ''} ${danger ? 'danger' : ''} ${hinted} ${extra}" data-op="${o.key}" data-guide="${o.key}" ${enabled ? '' : 'disabled'}>
-    <span class="opname">${T.hub.op[o.key]}</span><span class="cost">${o.cost} op</span><span class="why">${why(o, ui, s)}</span></button>`;
+    <span class="opname">${T.hub.op[o.key]}</span><span class="cost">${LABEL.card.cost(o.cost)}</span><span class="why">${why(o, ui, s)}</span></button>`;
 }
 function handHTML(s, ui) {
   const hand = [...s.players.you.hand].sort((a, z) => (!!a.cmd - !!z.cmd) || String(a.file).localeCompare(z.file) || a.lines - z.lines);
@@ -38,7 +38,7 @@ function mineHTML(s) {
   const p = s.players.you;
   const staged = p.staged.length ? p.staged.map(c => handCard(c, { size: 'sm' })).join('') : `<span class="empty">${T.hub.empty}</span>`;
   const local = p.local.length ? p.local.map(c => commitCard(c, { size: 'sm', faceUp: true })).join('') : `<span class="empty">${T.hub.empty}</span>`;
-  return `<div class="mine"><div class="mine-head"><span class="k">your branch</span>${standing(s)}</div>
+  return `<div class="mine"><div class="mine-head"><span class="k">${LABEL.branch}</span>${standing(s)}</div>
     <div class="zones"><div class="zone" data-zone="mat"><span class="k">${T.hub.mat}</span><div class="zcards">${staged}</div></div>
     <div class="zone" data-zone="local"><span class="k">${T.hub.local}</span><div class="zcards">${local}</div></div></div></div>`;
 }
