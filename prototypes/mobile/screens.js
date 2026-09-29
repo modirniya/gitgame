@@ -119,11 +119,28 @@ SCREENS['I-Conflict'] = {
   mount(el, { api }) { el.querySelectorAll('[data-s]').forEach(b => b.onclick = () => api.dispatch({ type: 'resolve', strategy: b.dataset.s })); },
 };
 
+// ---------- I-Target: main enlarged, the commits you may blame (face-down) or revert (flipped bugs) lit ----------
+SCREENS['I-Target'] = {
+  html({ s, payload }) {
+    const mode = payload.mode, targets = legalActions(s).find(o => o.key === mode).data.targets;
+    const cells = s.main.map(c => {
+      const t = targets.includes(c.id);
+      return `<button class="cell ${t ? 'target' : ''}" data-target="${c.id}" data-guide="target" ${t ? '' : 'disabled'} aria-label="${esc(c.init ? 'initial commit' : c.id)}">
+        ${commitCard(c, { size: 'md' })}<span class="who"><b class="${c.author}">${c.author || ''}</b> ${c.init ? '' : esc(c.revertOf ? 'revert' : c.cards.map(x => `${x.file} +${x.lines}`).join(' + '))}</span></button>`;
+    }).join('');
+    return `<div class="body ask"><h1 class="cmd">${T.target[mode]}</h1><p class="said">${T.target[mode + 'Said']}</p><div class="cells">${cells}</div></div>
+      <div class="actions">${cancel(T.target.cancel)}</div>`;
+  },
+  mount(el, { api, payload }) {
+    el.querySelectorAll('.cell.target').forEach(b => b.onclick = () => api.dispatch({ type: payload.mode, target: b.dataset.target }));
+    el.querySelector('.cell.target:last-of-type')?.scrollIntoView({ block: 'nearest' });
+  },
+};
+
 // Placeholders until their group of the plan replaces them.
 const quick = (label, act) => ({
   html: () => `<div class="body"><h1>${label}</h1></div><div class="actions"><button data-next class="ghost">Cancel</button><button class="primary" data-go>${label}</button></div>`,
   mount: (el, ctx) => { el.querySelector('[data-go]').onclick = () => ctx.api.dispatch(act(ctx)); },
 });
-SCREENS['I-Target'] = quick('I-Target', ({ s, payload }) => ({ type: payload.mode, target: legalActions(s).find(o => o.key === payload.mode).data.targets[0] }));
 SCREENS['I-Force'] = quick('I-Force', () => ({ type: 'force' }));
 SCREENS['I-Tag'] = quick('I-Tag', () => ({ type: 'tag' }));

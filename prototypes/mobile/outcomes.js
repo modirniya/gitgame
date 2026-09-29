@@ -120,8 +120,32 @@ OUTCOMES['O-Pulled'] = {
   mount: el => scrollStripToTip(el),
 };
 
+OUTCOMES['O-Blamed'] = {
+  html({ e, s }) {
+    const c = s.main.find(x => x.id === e.target);
+    return outcome({
+      title: `git blame ${e.target}`, tone: e.wasBug ? 'bad' : '',
+      scene: `${commitCard(c, { size: 'xl', reveal: true, data: { 'data-anim': 'flip' } })}<span class="stamp ${e.wasBug ? 'bad' : 'ok'}">${e.wasBug ? `${T.blamed.stamp.bug} · −3 ${e.author}` : T.blamed.stamp.clean}</span>`,
+      said: e.wasBug ? T.blamed.bug(e.target, e.author) : T.blamed.clean(e.target),
+      then: e.wasBug ? T.blamed.bugThen : T.blamed.cleanThen,
+    });
+  },
+  mount: (el, { e }) => { if (e.wasBug) buzz(); },
+};
+
+OUTCOMES['O-Reverted'] = {
+  html({ e, s }) {
+    const t = s.main.find(x => x.id === e.target), rv = s.main.find(x => x.id === e.revert);
+    return outcome({
+      title: `git revert ${e.target}`, tone: 'good', term: GIT.revert(rv.id, rv.message),
+      scene: `<div class="revert-stack">${commitCard(t, { size: 'lg' })}${commitCard(rv, { size: 'lg', data: { 'data-anim': 'land' } })}</div><span class="stamp ok">+1 fix</span>`,
+      said: T.reverted.said(e.target), then: T.reverted.then,
+    });
+  },
+};
+
 // Placeholders until their group of the plan replaces them.
-const IDS = ['O-Blamed', 'O-Reverted', 'O-Forced', 'O-Reflog', 'O-TurnSummary', 'O-BotTurn', 'O-BotStep', 'O-Behind', 'O-CI', 'O-Scoreboard'];
+const IDS = ['O-Forced', 'O-Reflog', 'O-TurnSummary', 'O-BotTurn', 'O-BotStep', 'O-Behind', 'O-CI', 'O-Scoreboard'];
 for (const id of IDS) OUTCOMES[id] = {
   html: ({ e }) => `<div class="body"><h1>${id}</h1><pre class="evt">${esc(JSON.stringify(e, null, 1))}</pre></div>
     <div class="actions">${id.startsWith('O-Bot') ? '<button data-skip-bot class="ghost">skip bot</button>' : ''}<button class="primary" data-next>Continue</button></div>`,

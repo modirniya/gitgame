@@ -212,3 +212,14 @@ button.choice .why.bad { color: var(--reject); font-weight: 600; }
 .card.gone { opacity: .35; filter: grayscale(1); }
 .token-line { display: flex; justify-content: center; }
 .token-line .tok { font-size: 14px; padding: 4px 10px; }
+.cells { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 10px 6px; }
+button.cell { display: grid; justify-items: center; gap: 4px; padding: 6px 2px; min-height: 44px; background: transparent; border: 2px solid transparent; border-radius: 12px; }
+button.cell[disabled] { opacity: .35; }
+button.cell.target { border-color: var(--warn); background: var(--warn-soft); }
+button.cell .who { font: 500 9.5px/1.25 var(--mono); color: var(--muted); text-align: center; }
+button.cell .who b.you { color: var(--you); } button.cell .who b.bot { color: var(--bot); }
+.stamp { font: 800 16px var(--mono); letter-spacing: .06em; padding: 4px 12px; border-radius: 8px; border: 2px solid currentColor; transform: rotate(-4deg); }
+.stamp.bad { color: var(--reject); } .stamp.ok { color: var(--ok); }
+.revert-stack { position: relative; width: 114px; height: 152px; }
+.revert-stack > .card { position: absolute; top: 0; left: 0; }
+.revert-stack > .card + .card { top: 18px; left: 18px; }
