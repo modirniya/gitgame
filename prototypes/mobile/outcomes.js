@@ -1,12 +1,13 @@
 // The output screens (spec §3, "O-"): each shows exactly one consequence and moves on by one tap. Titles are the
 // Git command that happened; where Git prints something, the screen prints it too; the coach line under the
 // scene says what happened and what to do next, in copy.js's words.
-import { behindBy } from './engine.js';
-import { handCard, pips, esc } from './view.js';
-import { SCREEN, INCIDENT } from './copy.js';
+import { behindBy, commitsOnMain, scores, lines, hasBug, RELEASE_AT } from './engine.js';
+import { handCard, commitCard, strip, scrollStripToTip, pips, esc } from './view.js';
+import { SCREEN, INCIDENT, GIT } from './copy.js';
 
 const T = SCREEN;
 export const OUTCOMES = {};
+export { buzz, findCommit };
 
 // The one layout every consequence uses: title, optional terminal output, the scene, what happened, what next.
 export function outcome({ title, tone = '', term = '', scene = '', said = '', then = '', button = 'Continue', guide = 'continue', extra = '' }) {
@@ -39,8 +40,58 @@ OUTCOMES['O-YourTurn'] = {
   }),
 };
 
+const buzz = () => { try { navigator.vibrate?.(18); } catch { /* no haptics */ } }; // spec §4: a light tap on reject and blame-hit
+const findCommit = (s, id) => s.main.find(c => c.id === id) || s.players.you.local.find(c => c.id === id);
+
+OUTCOMES['O-Staged'] = {
+  html: ({ e }) => outcome({
+    title: T.staged.title, said: T.staged.said(e.cards.length),
+    scene: `<div class="zone big" data-zone="mat">${e.cards.map((c, i) => handCard(c, { size: 'md', data: { 'data-anim': 'stage', style: `--i:${i}` } })).join('')}</div>`,
+  }),
+};
+
+OUTCOMES['O-Committed'] = {
+  html({ e, s, before }) {
+    const c = findCommit(s, e.commit), staged = before.players.you.staged;
+    const behind = behindBy(s, 'you');
+    return outcome({
+      title: T.commit.title, term: GIT.commit(c.id, c.message, new Set(c.cards.map(x => x.file)).size, lines(c)),
+      scene: `<div class="stack-from">${staged.map((x, i) => handCard(x, { size: 'md', data: { 'data-anim': 'stack', style: `--i:${i}` } })).join('')}</div>
+        ${commitCard(c, { size: 'xl', faceUp: true, data: { 'data-anim': 'commit' } })}`,
+      said: T.committed.said(c.id, lines(c)) + (e.hasBug ? (e.lazy && !c.cards.some(x => x.bug) ? T.committed.lazy : T.committed.bug) : ''),
+      then: behind ? T.committed.behind(behind) : T.committed.atTip,
+      tone: e.hasBug ? 'bad' : '',
+    });
+  },
+};
+
+OUTCOMES['O-Pushed'] = {
+  html({ e, s }) {
+    const sc = scores(s);
+    const tag = commitsOnMain(s) >= RELEASE_AT ? (sc.you.total >= sc.bot.total ? T.pushed.tagAhead : T.pushed.tagBehind) : T.pushed.then;
+    return outcome({
+      title: 'git push', tone: 'good', term: GIT.push(e.from, e.commits[e.commits.length - 1]),
+      scene: `${strip(s, { mark: e.commits })}<div class="zone ghostzone" data-zone="local"><span class="k">${T.hub.local}</span></div>`,
+      said: (e.roll ? T.pushed.die(e.roll) + ' ' : '') + T.pushed.said(e.commits), then: tag, guide: 'pushed',
+    });
+  },
+  mount: el => scrollStripToTip(el),
+};
+
+OUTCOMES['O-Rejected'] = {
+  html({ e, s }) {
+    const flaky = e.reason === 'flaky';
+    return outcome({
+      title: 'git push', tone: 'bad', term: flaky ? T.rejected.flakyBanner(e.roll) : GIT.rejected,
+      scene: `${strip(s)}<div class="zone ghostzone" data-zone="local">${s.players.you.local.map(c => commitCard(c, { size: 'md', faceUp: true, data: { 'data-anim': 'bounce' } })).join('')}</div>`,
+      said: flaky ? T.rejected.flaky(e.roll) : T.rejected.said, then: flaky ? T.rejected.flakyThen : T.rejected.then,
+    });
+  },
+  mount: el => { scrollStripToTip(el); buzz(); },
+};
+
 // Placeholders until their group of the plan replaces them.
-const IDS = ['O-Staged', 'O-Committed', 'O-Pushed', 'O-Rejected', 'O-Pulled', 'O-Resolved', 'O-Blamed', 'O-Reverted', 'O-Forced', 'O-Reflog', 'O-TurnSummary', 'O-BotTurn', 'O-BotStep', 'O-Behind', 'O-CI', 'O-Scoreboard'];
+const IDS = ['O-Pulled', 'O-Resolved', 'O-Blamed', 'O-Reverted', 'O-Forced', 'O-Reflog', 'O-TurnSummary', 'O-BotTurn', 'O-BotStep', 'O-Behind', 'O-CI', 'O-Scoreboard'];
 for (const id of IDS) OUTCOMES[id] = {
   html: ({ e }) => `<div class="body"><h1>${id}</h1><pre class="evt">${esc(JSON.stringify(e, null, 1))}</pre></div>
     <div class="actions">${id.startsWith('O-Bot') ? '<button data-skip-bot class="ghost">skip bot</button>' : ''}<button class="primary" data-next>Continue</button></div>`,

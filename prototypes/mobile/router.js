@@ -41,7 +41,7 @@ export function screensFor(events, carry = {}) {
         break;
       case 'YouAreBehind': carry.behind = { id: 'O-Behind', event: e }; break;
       case 'CIRan': carry.behind = null; out.push({ id: 'O-CI', event: e }, { id: 'O-Scoreboard', event: e }); break;
-      // Tagged, DieRolled and Undone are shown inside the screens around them (O-CI, O-Pushed, the hub).
+      // Tagged and Undone are shown inside the screens around them (O-CI, O-Pushed, the hub).
     }
   }
   return out;

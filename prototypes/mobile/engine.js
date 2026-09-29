@@ -69,10 +69,11 @@ function buildDeck(s) {
 export function createGame({ seed = 1, guided = false } = {}) {
   const s = {
     seed: seed >>> 0, guided, rng: seed >>> 0, nextId: 1, deck: [],
-    main: [{ id: 'c0', init: true, author: null, cards: [], flipped: true }],
+    main: [],
     round: 0, turn: 'you', ops: 0, incident: null, rolled: false, pending: null, over: false, released: null,
     players: {}, undo: [], turnOps: [], turnStartScore: null, behindShown: false,
   };
+  s.main.push({ id: sha(s), init: true, author: null, cards: [], flipped: true, message: 'Initial commit' });
   s.deck = buildDeck(s);
   for (const id of ['you', 'bot']) s.players[id] = { hand: [], staged: [], local: [], ptr: 1, merge: 0, sin: 0, grudges: 0, blame: 0, fixes: 0 };
   for (let i = 0; i < 5; i++) { draw(s, 'you'); draw(s, 'bot'); }
@@ -146,16 +147,16 @@ const OPS = {
     need(p.local.length, 'nothing to push');
     spend(s, 1);
     const behind = behindBy(s, id);
+    let roll;
     if (behind) return { type: 'PushRejected', player: id, reason: 'non-fast-forward', behindBy: behind, commits: p.local.map(c => c.id) };
     if (s.incident === 'flaky' && !s.rolled) {
       s.rolled = true; s.undo = []; // a die roll can't be taken back
-      const roll = 1 + Math.floor(rand(s) * 6);
+      roll = 1 + Math.floor(rand(s) * 6);
       if (roll <= 2) return { type: 'PushRejected', player: id, reason: 'flaky', roll, behindBy: 0, commits: p.local.map(c => c.id) };
-      ev.push({ type: 'DieRolled', player: id, roll });
     }
-    const ids = p.local.map(c => c.id);
+    const ids = p.local.map(c => c.id), from = s.main[s.main.length - 1].id;
     s.main.push(...p.local); p.local = []; p.ptr = s.main.length;
-    ev.push({ type: 'PushAccepted', player: id, commits: ids, mainSize: commitsOnMain(s) });
+    ev.push({ type: 'PushAccepted', player: id, commits: ids, from, mainSize: commitsOnMain(s), ...(roll && { roll }) });
     tipMoved(s, id, ev);
   },
   pull(s, id, a, ev) {
@@ -200,7 +201,7 @@ const OPS = {
     need(!noCommands(s), 'no command cards this round');
     need(behindBy(s, id) > 0, 'nothing ahead of you to erase');
     takeCmd(p, 'push --force'); spend(s, 1); s.undo = []; // it reveals whether the other side holds reflog
-    const before = p.ptr, erased = s.main.slice(before), pushed = p.local.map(c => c.id);
+    const before = p.ptr, erased = s.main.slice(before), pushed = p.local.map(c => c.id), oldTip = s.main[s.main.length - 1].id;
     s.main = s.main.slice(0, before); s.main.push(...p.local); p.local = []; p.sin++;
     for (const q of Object.values(s.players)) q.ptr = Math.min(q.ptr, before); // every pointer is now at or before the rewrite
     p.ptr = s.main.length;
@@ -215,7 +216,7 @@ const OPS = {
       else if (c.revertOf) { const t = byId(s, c.revertOf); if (t) t.reverted = false; owner.fixes = Math.max(0, owner.fixes - 1); revived.push(c.revertOf); }
       else if (!c.overwritten) { owner.local.unshift(c); returned.push(c.id); }
     }
-    ev.push({ type: 'Forced', player: id, erased: erased.map(c => c.id), pushed, returned, revived, sin: p.sin, from: before });
+    ev.push({ type: 'Forced', player: id, erased: erased.map(c => c.id), pushed, returned, revived, sin: p.sin, from: before, oldTip, newTip: s.main[before - 1 + pushed.length].id });
     for (const v of reflogged) ev.push({ type: 'ReflogFired', victim: v, restored: erased.filter(c => c.author === v).map(c => c.id) });
     tipMoved(s, id, ev);
   },
@@ -236,7 +237,7 @@ const OPS = {
 };
 
 function pullWith(s, id, rebase, strategy, ev) {
-  const p = s.players[id], conflicts = conflictsFor(s, id), incoming = s.main.slice(p.ptr).map(c => c.id);
+  const p = s.players[id], conflicts = conflictsFor(s, id), incoming = s.main.slice(p.ptr).map(c => c.id), from = s.main[p.ptr - 1].id;
   need(!conflicts.length || ['ours', 'theirs', 'resolve'].includes(strategy), 'pick a strategy');
   spend(s, (rebase ? 2 : 1) + (conflicts.length && strategy === 'resolve' ? 1 : 0));
   const crossedOut = [], discarded = [];
@@ -250,7 +251,7 @@ function pullWith(s, id, rebase, strategy, ev) {
   if (conflicts.length) ev.push({ type: 'ConflictResolved', player: id, strategy, crossedOut, discarded, grudges, extraOp: strategy === 'resolve' });
   p.ptr = s.main.length;
   if (!rebase) p.merge++;
-  return { type: 'Pulled', player: id, rebase, mergeTokens: p.merge, incoming, ptr: p.ptr };
+  return { type: 'Pulled', player: id, rebase, mergeTokens: p.merge, incoming, from, to: s.main[s.main.length - 1].id, hadLocal: p.local.length > 0, ptr: p.ptr };
 }
 
 function release(s, ev) {
@@ -278,7 +279,7 @@ export function apply(state, action) {
   const main = OPS[action.type](s, id, action, ev);
   if (main) ev.push(main);
   if (!['endTurn', 'undo'].includes(action.type) && s.turn === id && !s.over) {
-    s.turnOps.push(...ev.filter(e => !['ConflictDetected', 'DieRolled', 'YouAreBehind'].includes(e.type)));
+    s.turnOps.push(...ev.filter(e => !['ConflictDetected', 'YouAreBehind'].includes(e.type)));
     if (!s.pending && s.ops <= 0) endTurn(s, ev); // unused ops are lost; with none left the turn is over
   }
   return { state: s, events: ev };

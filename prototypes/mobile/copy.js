@@ -263,13 +263,12 @@ export const RECEIPT = {
 export const BOT_DID = {
   Staged: e => `${s(e.cards, 'card')} face-down on its mat.`,
   Committed: () => 'Its mat is now one commit on its local branch, face-down.',
-  PushAccepted: e => `${s(e.commits.length, 'commit')} landed on main.`,
+  PushAccepted: e => `${e.roll ? `Flaky CI: it rolled a ${e.roll}, green. ` : ''}${s(e.commits.length, 'commit')} landed on main.`,
   PushRejected: e => e.reason === 'flaky' ? `CI was flaky: it rolled a ${e.roll}. Rejected.` : 'Rejected: it was behind.',
   Pulled: e => e.rebase ? 'Rebased: up to date, no token.' : `Pulled: up to date, merge token ${e.mergeTokens}.`,
   ConflictResolved: e => e.strategy === 'ours' ? `Your ${e.crossedOut.map(c).join(', ')} crossed out: you lose those lines, and it takes a grudge.` : e.strategy === 'theirs' ? 'It dropped its own commit.' : 'It kept both, by hand.',
   Blamed: e => e.author !== 'you' ? `Its own ${c(e.target)}: ${e.wasBug ? 'a bug, −3 for it' : 'clean'}.` : e.wasBug ? `Your ${c(e.target)} was a bug. −3 for you.` : `Your ${c(e.target)} was clean. It wasted a card.`,
   Reverted: e => `${c(e.target)} neutralised: +1 for it.`,
   Tagged: () => 'CI runs now.',
-  DieRolled: e => `Flaky CI: it rolled a ${e.roll}. Green.`,
 };
 export const BOT_TITLE = { push: 'git push', tag: 'git tag v1.0', force: 'git push --force', pull: 'git pull', rebase: 'git pull --rebase', blame: 'git blame', revert: 'git revert', commit: 'git commit', stageTwo: 'git add', stageOne: 'git add', end: 'done' };

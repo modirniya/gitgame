@@ -186,3 +186,20 @@ button.op.hinted { box-shadow: 0 0 0 3px var(--warn); }
 button.op.wide { width: 100%; }
 .minor { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .minor button { min-height: 44px; font-size: 14px; padding: 6px; }
+
+/* ---------- question screens ---------- */
+.ask { gap: 16px; }
+.spread { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.spread.tight { gap: 6px; }
+.warnline { font-size: 15px; font-weight: 600; color: var(--reject); background: var(--reject-soft); border-radius: 10px; padding: 8px 12px; }
+.warnline:has([data-lazy][hidden]) { display: none; }
+.msg { display: grid; gap: 6px; }
+.msg input { font: 16px var(--mono); padding: 12px; min-height: 48px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; }
+.msg input:focus { outline: 3px solid var(--you); outline-offset: 1px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+button.chip { min-height: 44px; font: 13px var(--mono); padding: 6px 10px; border-radius: 22px; text-align: left; }
+.zone.big { min-height: 120px; width: 100%; display: flex; gap: 8px; justify-content: center; align-items: center; }
+.zone.ghostzone { width: 100%; min-height: 110px; display: flex; gap: 8px; justify-content: center; align-items: center; background: transparent; }
+.zone.ghostzone .k { align-self: flex-start; }
+.stack-from { display: flex; gap: 6px; justify-content: center; min-height: 0; }
+.scene .strip-wrap { width: 100%; }

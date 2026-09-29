@@ -95,7 +95,7 @@ console.log('events  ', [...seen].sort().join(' '));
   you.ptr = 3; bot.ptr = 1; bot.local = [{ id: 'b1', author: 'bot', cards: [{ file: 'README.md', lines: 2 }], flipped: false }];
   s.turn = 'bot'; s.ops = 3; s.incident = 'quiet';
   const r = apply(s, { type: 'force' });
-  check(r.state.main.map(c => c.id).join(' ') === 'c0 b1 y1 y2', 'reflog: main should be c0 b1 y1 y2, got ' + r.state.main.map(c => c.id).join(' '));
+  check(r.state.main.slice(1).map(c => c.id).join(' ') === 'b1 y1 y2', 'reflog: main should be init b1 y1 y2, got ' + r.state.main.map(c => c.id).join(' '));
   check(r.state.players.you.hand.length === 0 && behindBy(r.state, 'bot') === 2, 'reflog: card spent, bot 2 behind');
   check(r.events.map(e => e.type).join() === 'Forced,ReflogFired', 'reflog: events ' + r.events.map(e => e.type).join());
 }
