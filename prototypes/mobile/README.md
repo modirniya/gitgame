@@ -22,6 +22,7 @@ Add `?seed=123` to replay a shuffle; `?debug` exposes the router as `window.gitg
 - `view.js` — the card (one component at every size), the `main` strip, pointer chips, ops pips.
 - `screens.js` — one render function per screen id in the spec.
 - `hub.js`, `outcomes.js` — the hub, and the output screens (screens.js holds the input screens and the registry).
+- `guide.js` — the guided first game: a pure step reducer plus the overlay that highlights one element and says one sentence.
 - `motion.js` — the animations of spec §4, FLIP for card movement, off under `prefers-reduced-motion`.
 - `index.html`, `styles.css` — the shell and every style, light and dark.
 - `smoke-test.js` — the test above.

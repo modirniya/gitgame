@@ -131,6 +131,7 @@ function show(item) {
   }
   el.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => api.next('tap')));
   el.querySelectorAll('[data-skip-bot]').forEach(b => b.addEventListener('click', () => api.skipBot()));
+  api.emit('shown', item, el);
 }
 
 export function start(root) {

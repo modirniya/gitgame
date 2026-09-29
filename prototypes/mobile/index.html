@@ -18,6 +18,8 @@
   <div id="guide" class="guide" hidden></div>
   <script type="module">
     import { start, api } from './router.js';
+    import { install as guide } from './guide.js';
+    guide(api);
     start(document.getElementById('screen'));
     // ?debug exposes the router to the console, for driving a game to a given screen when checking a screen by hand
     if (new URLSearchParams(location.search).has('debug')) window.gitgame = api;

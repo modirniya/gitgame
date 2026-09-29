@@ -5,6 +5,7 @@ import { plan, botStep } from './bot.js';
 import { REASON } from './copy.js';
 import { screensFor } from './router.js';
 import { SCREENS } from './screens.js';
+import { createGuide, advance, expecting } from './guide.js';
 
 const failures = [];
 const fail = msg => { if (failures.length < 10) console.error('FAIL', msg); failures.push(msg); };
@@ -119,6 +120,33 @@ const SPEC_EVENTS = ['RoundStarted', 'TurnStarted', 'Staged', 'Committed', 'Push
 const missing = SPEC_EVENTS.filter(t => !seen.has(t));
 check(!missing.length, 'events never emitted: ' + missing.join(', '));
 console.log('events  ', [...seen].sort().join(' '));
+
+// (e) the guided first game: the player follows the guide; the pull lesson must land in >95% of seeds, and the
+// guide must always reach its last step.
+{
+  let lesson = 0, skipped = 0, completed = 0; const N = 500;
+  for (let seed = 1; seed <= N; seed++) {
+    let { state } = createGame({ seed, guided: true });
+    check(state.incident === 'quiet', `guided seed ${seed}: round 1 should be a quiet incident`);
+    let g = createGuide(), selected = [], guard = 0, sawPull = false;
+    const feed = evs => { for (const e of evs) if (e.type === 'TurnStarted' && e.player === 'you') { g = advance(g, { type: 'turn', player: 'you', behindBy: e.behindBy }); if (expecting(g) === 'pull') sawPull = true; } };
+    const act = a => { const r = apply(state, a); state = r.state; g = advance(g, { type: 'action', action: a }); feed(r.events); };
+    while (expecting(g) !== 'done' && !state.over && guard++ < 200) {
+      if (state.turn === 'bot') { const r = botStep(state); state = r.state; feed(r.events.flatMap(e => e.type === 'BotActed' ? e.events : [e])); continue; }
+      const want = expecting(g), p = state.players.you;
+      if (want === 'select') { const c = p.hand.find(x => !x.cmd && !x.bug) || p.hand.find(x => !x.cmd); if (!c) { act({ type: 'endTurn' }); continue; } selected = [c.id]; g = advance(g, { type: 'select', card: c }); }
+      else if (want === 'add' && state.ops >= 1) act({ type: 'stage', cards: selected });
+      else if (want === 'commit' && state.ops >= 1) act({ type: 'commit', message: 'feat: guided' });
+      else if (want === 'push' && state.ops >= 1) act({ type: 'push' });
+      else if (want === 'pull' && state.ops >= 1) { act({ type: 'pull', rebase: false }); if (state.pending) state = apply(state, { type: 'resolve', strategy: 'theirs' }).state; }
+      else act({ type: 'endTurn' });
+    }
+    if (expecting(g) === 'done') completed++; else fail(`guided seed ${seed}: guide stuck at ${expecting(g)}`);
+    if (sawPull) lesson++; else if (g.skippedPull) skipped++;
+  }
+  check(lesson / N > 0.95, `guided: the pull lesson landed in only ${lesson}/${N} seeds`);
+  console.log('guided  ', JSON.stringify({ seeds: N, completed, pullLesson: lesson, skippedToSelect: skipped }));
+}
 
 // the reflog rule: one card restores everything of the victim's that was erased, and is spent
 {

@@ -60,7 +60,7 @@ export const HUB = {
   },
   mount(el, ctx) {
     const { s, api, ui } = ctx;
-    const again = () => { el.innerHTML = HUB.html(ctx); HUB.mount(el, ctx); api.emit('render', api.current); };
+    const again = () => { el.innerHTML = HUB.html(ctx); HUB.mount(el, ctx); api.emit('shown', api.current, el); };
     scrollStripToTip(el); fitHand(el);
     ui.toast = null;
     el.querySelectorAll('[data-card]').forEach(card => card.onclick = () => {

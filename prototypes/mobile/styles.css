@@ -264,3 +264,11 @@ table.scores tfoot td { font-weight: 700; border-top: 2px solid var(--ink); bord
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .screen.auto::before { display: none; }
 }
+
+/* ---------- guide layer ---------- */
+.guide-bubble { background: var(--ok-soft); border: 2px solid var(--ok); border-radius: 14px; padding: 10px 12px; display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; }
+.guide-bubble .guide-step { font: 700 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ok); }
+.guide-bubble p { grid-column: 1 / -1; font-size: 15px; line-height: 1.4; }
+.guide-bubble button { grid-row: 1; grid-column: 2; min-height: 36px; font-size: 13px; padding: 4px 10px; }
+.guide-target { outline: 3px solid var(--ok) !important; outline-offset: 3px; animation: guide-pulse 1.4s ease-in-out infinite; }
+@keyframes guide-pulse { 50% { outline-color: color-mix(in srgb, var(--ok) 35%, transparent); } }

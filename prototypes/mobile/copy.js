@@ -276,3 +276,16 @@ export const BOT_DID = {
   Tagged: () => 'CI runs now.',
 };
 export const BOT_TITLE = { push: 'git push', tag: 'git tag v1.0', force: 'git push --force', pull: 'git pull', rebase: 'git pull --rebase', blame: 'git blame', revert: 'git revert', commit: 'git commit', stageTwo: 'git add', stageOne: 'git add', end: 'done' };
+
+// The guided first game: one sentence per step, sometimes worded for the screen it appears on.
+export const GUIDE = {
+  step: (i, n) => `guide · ${i} of ${n}`, skip: 'skip the guide', gotIt: 'Got it',
+  select: { text: 'Welcome. Tap a card in your hand to pick it: one without a BUG tag.' },
+  add: { text: 'Now tap git add. It moves the card onto your staging mat. One op.', 'I-Stage': 'Tap Add. The card goes onto your mat, face down.' },
+  commit: { text: 'Tap git commit. Everything on the mat becomes one commit on your local branch.', 'I-Commit': 'Keep the message or write your own, then tap Commit. One op.' },
+  push: { text: 'Tap git push. You are at the tip, so it will be accepted and your commit lands on main. That is your whole turn: three ops.' },
+  watch: { text: 'Watch the bot. It already had a commit ready, but your push put it behind: it has to pull before it can push. When it pushes, you are the one behind.' },
+  pull: { text: 'You are behind the tip now, so a push would be rejected. Tap git pull.', 'I-Pull': 'Plain pull: 1 op and a merge token. Rebase: 2 ops, clean. Try the plain pull.', 'I-Conflict': 'Your commit and the bot’s touch the same file. Pick one: every choice has a price.' },
+  skippedPull: 'The bot caught up with you and committed, but ran out of ops before it could push, so you are still at the tip. That luck won’t last. Tap a card to build your next commit.',
+  done: { text: 'You know the loop: pull if behind, add, commit, push. From here it is your game. Hint shows what a good player would do; the table tab shows everything on the table.' },
+};
