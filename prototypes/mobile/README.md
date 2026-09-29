@@ -6,6 +6,8 @@
 
 **Spec:** [docs/design/event-screens.md](../../docs/design/event-screens.md). **Plan:** [PLAN.md](PLAN.md).
 
+**Run:** `python3 -m http.server` in this folder, then open http://localhost:8000 at phone size (ES modules need a server; `file://` won't load them).
+
 **Test:** `node smoke-test.js` (auto-plays 800 games through the pure engine and checks the event stream).
 
 ## Files
@@ -13,6 +15,11 @@
 - `engine.js` — the rules as a pure function: `createGame({ seed, guided })`, `apply(state, action) → { state, events }`, `scores`, `legalActions`.
 - `bot.js` — `plan(state, id)` returns `{ action, why }`, the desktop policy; `botStep(state)` plays one op and wraps it in a `BotActed` event.
 - `copy.js` — every string the player reads, keyed by event or reason.
+- `router.js` — `screensFor(events)` maps events to screens; the queue, auto-advance and "skip bot".
+- `frame.js` — the status bar and the Table sheet, drawn from the state of the screen being shown.
+- `view.js` — the card (one component at every size), the `main` strip, pointer chips, ops pips.
+- `screens.js` — one render function per screen id in the spec.
+- `index.html`, `styles.css` — the shell and every style, light and dark.
 - `smoke-test.js` — the test above.
 
 ## Findings

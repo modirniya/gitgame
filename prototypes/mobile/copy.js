@@ -71,3 +71,11 @@ export const REASON = {
     end: () => 'Nothing useful left to do. End the turn.',
   },
 };
+
+export const TABLE = {
+  title: 'The table',
+  close: 'Close',
+  incident: 'incident',
+  noTokens: 'no tokens',
+  fine: 'Commits on main are face-down: everyone saw the file and the lines when they were pushed, nobody sees whether one is a bug until it is flipped.',
+};
