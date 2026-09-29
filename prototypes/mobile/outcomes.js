@@ -229,7 +229,8 @@ OUTCOMES['O-Behind'] = {
 const FLIP_MS = 250; // spec §4: every face-down card flips in order, 250 ms apart
 OUTCOMES['O-CI'] = {
   html({ e, s }) {
-    const cells = s.main.filter(c => !c.init).map((c, i) => `<div class="ci-cell" style="--i:${i}">${commitCard(c, { size: 'sm', reveal: true, data: { 'data-anim': 'ci' } })}</div>`).join('');
+    const counts = new Set(e.flips.filter(f => f.counts).map(f => f.id));
+    const cells = s.main.filter(c => !c.init).map(c => `<div class="ci-cell">${commitCard(c, { size: 'sm', reveal: true, cls: counts.has(c.id) ? 'counts' : '', data: { 'data-anim': 'ci' } })}</div>`).join('');
     return outcome({
       title: e.by ? 'git tag v1.0' : T.ci.title, tone: e.productionDown ? 'bad' : 'good', term: e.by ? '' : T.ci.deadline,
       scene: `<div class="ci-grid">${cells}</div><span class="stamp ${e.bugs ? 'bad' : 'ok'}" data-anim="tally">${T.ci.bugs(e.bugs)}</span>`,

@@ -112,7 +112,10 @@ SCREENS['I-Conflict'] = {
     const base = e.rebase ? 2 : 1;
     const btn = (key, name, whyText) => { const ok = e.affordable.includes(key); return `<button class="choice" data-s="${key}" data-guide="${key}" ${ok ? '' : 'disabled'}><span class="opname">${name}</span><span class="why">${ok ? whyText : T.conflict.cantAfford}</span></button>`; };
     return `<div class="body ask bad"><h1 class="cmd">CONFLICT</h1><pre class="term bad">${esc(GIT.conflict(file))}</pre>
-      <div class="scene clash" data-anim="clash">${commitCard(mine[0], { size: 'lg', faceUp: true, cls: 'mine' })}<span class="clash-file">${esc(file)}</span>${commitCard(theirs[0], { size: 'lg', cls: 'theirs' })}</div>
+      <div class="scene clash" data-anim="clash">
+        <div class="labelled">${commitCard(mine[0], { size: 'lg', faceUp: true })}<span class="who"><b class="you">yours</b> ${lines(mine[0])} lines</span></div>
+        <span class="clash-file">${esc(file)}</span>
+        <div class="labelled">${commitCard(theirs[0], { size: 'lg' })}<span class="who"><b class="bot">the bot's</b> ${lines(theirs[0])} lines</span></div></div>
       <p class="said">${T.conflict.said(k.mine, k.theirs)}</p></div>
       <div class="actions stack">${btn('ours', T.conflict.ours, T.conflict.oursWhy(theirLines))}${btn('theirs', T.conflict.theirs, T.conflict.theirsWhy(myLines))}${btn('resolve', T.conflict.resolve, T.conflict.resolveWhy(base + 1))}</div>`;
   },

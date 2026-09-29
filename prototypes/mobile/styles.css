@@ -84,7 +84,7 @@ button[disabled] { opacity: .42; cursor: default; }
 
 /* A commit has two sides so it can flip in 3D: the hatch back (with its hash) and the printed face. */
 .card.commit { background: none; border: 0; box-shadow: none; overflow: visible; display: block; perspective: calc(var(--w) * 8); }
-.card.commit .flipper { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform var(--t) var(--ease); }
+.card.commit .flipper { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 600ms ease-in-out; }
 .card.commit.up .flipper { transform: rotateY(180deg); }
 .card.commit .side { position: absolute; inset: 0; border-radius: calc(var(--w) * .09); overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 1px solid var(--line); box-shadow: var(--shadow); }
 .card.commit .back { background: repeating-linear-gradient(135deg, var(--back-1) 0 .3em, var(--back-2) .3em .6em); border-color: var(--back-2); display: grid; place-items: center; }
@@ -223,7 +223,7 @@ button.cell .who b.you { color: var(--you); } button.cell .who b.bot { color: va
 .revert-stack { position: relative; width: 114px; height: 152px; }
 .revert-stack > .card { position: absolute; top: 0; left: 0; }
 .revert-stack > .card + .card { top: 18px; left: 18px; }
-.labelled { display: grid; justify-items: center; gap: 4px; width: 76px; }
+.labelled { display: grid; justify-items: center; gap: 4px; min-width: 76px; }
 .labelled .who { font: 500 9.5px/1.25 var(--mono); color: var(--muted); text-align: center; }
 .labelled .who b.you { color: var(--you); } .labelled .who b.bot { color: var(--bot); }
 .zone.fallen { border-color: var(--reject); }
@@ -257,3 +257,10 @@ table.scores th.you { color: var(--you); } table.scores th.bot { color: var(--bo
 table.scores tfoot td { font-weight: 700; border-top: 2px solid var(--ink); border-bottom: 0; }
 .hands { display: grid; gap: 8px; }
 .hands b.you { color: var(--you); font-family: var(--mono); } .hands b.bot { color: var(--bot); font-family: var(--mono); }
+
+/* ---------- motion ---------- */
+.card.commit.counts.landed .side.front { box-shadow: 0 0 0 3px var(--reject), var(--shadow); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .screen.auto::before { display: none; }
+}

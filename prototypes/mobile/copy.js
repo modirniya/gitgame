@@ -87,7 +87,8 @@ export const TABLE = {
 export const GIT = {
   commit: (sha, msg, files, n) => `[main ${sha}] ${msg}\n ${s(files, 'file')} changed, ${s(n, 'insertion')}(+)`,
   push: (from, to) => `To origin\n   ${from}..${to}  main -> main`,
-  rejected: `To origin\n ! [rejected]        main -> main (non-fast-forward)\nerror: failed to push some refs to 'origin'\nhint: Updates were rejected because the tip of your current branch is behind\nhint: its remote counterpart. If you want to integrate the remote changes,\nhint: use 'git pull' before pushing again.`,
+  // Git goes on with four "hint:" lines; the coach line under the scene says the same in one sentence.
+  rejected: `To origin\n ! [rejected]        main -> main (non-fast-forward)\nerror: failed to push some refs to 'origin'`,
   merge: "Merge made by the 'ort' strategy.",
   fastForward: (from, to) => `Updating ${from}..${to}\nFast-forward`,
   rebase: 'Successfully rebased and updated refs/heads/main.',

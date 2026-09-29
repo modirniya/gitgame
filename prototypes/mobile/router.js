@@ -6,6 +6,7 @@ import { createGame, apply } from './engine.js';
 import { botStep } from './bot.js';
 import { SCREENS } from './screens.js';
 import { renderFrame } from './frame.js';
+import { animate, clearFlights } from './motion.js';
 
 export const AUTO = { 'O-BotTurn': 1000, 'O-BotStep': 1200, 'O-Staged': 900 }; // ms; O-CI sets its own from the number of flips
 // What "skip bot" still shows: the tip moving past you, your commits being erased or restored, and the end.
@@ -88,6 +89,7 @@ export const api = {
   next(how = 'tap') {
     clearTimeout(R.timer);
     if (R.current) api.emit('leave', R.current, how);
+    R.current = null; // next() recurses while the bot plays; the screen is left once
     if (R.queue.length) return show(R.queue.shift());
     const s = R.game;
     if (!s || s.over) return show({ id: 'I-Start', before: s, after: s });
@@ -110,6 +112,7 @@ export const api = {
 };
 
 function show(item) {
+  clearFlights();
   R.current = item;
   api.emit('enter', item);
   const screen = SCREENS[item.id];
@@ -119,6 +122,7 @@ function show(item) {
   R.root.scrollTop = 0;
   const el = R.root.firstElementChild;
   screen.mount?.(el, ctx);
+  animate(el, item);
   const auto = screen.auto?.(ctx) ?? AUTO[item.id];
   if (auto) {
     el.style.setProperty('--auto', auto + 'ms'); el.classList.add('auto'); // a bar shows the screen will move on by itself

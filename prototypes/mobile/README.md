@@ -8,6 +8,8 @@
 
 **Run:** `python3 -m http.server` in this folder, then open http://localhost:8000 at phone size (ES modules need a server; `file://` won't load them).
 
+Add `?seed=123` to replay a shuffle; `?debug` exposes the router as `window.gitgame` for driving a game from the console.
+
 **Test:** `node smoke-test.js` (auto-plays 800 games through the pure engine and checks the event stream).
 
 ## Files
@@ -19,6 +21,8 @@
 - `frame.js` — the status bar and the Table sheet, drawn from the state of the screen being shown.
 - `view.js` — the card (one component at every size), the `main` strip, pointer chips, ops pips.
 - `screens.js` — one render function per screen id in the spec.
+- `hub.js`, `outcomes.js` — the hub, and the output screens (screens.js holds the input screens and the registry).
+- `motion.js` — the animations of spec §4, FLIP for card movement, off under `prefers-reduced-motion`.
 - `index.html`, `styles.css` — the shell and every style, light and dark.
 - `smoke-test.js` — the test above.
 

@@ -17,8 +17,10 @@
   <div id="sheet" class="sheet" hidden></div>
   <div id="guide" class="guide" hidden></div>
   <script type="module">
-    import { start } from './router.js';
+    import { start, api } from './router.js';
     start(document.getElementById('screen'));
+    // ?debug exposes the router to the console, for driving a game to a given screen when checking a screen by hand
+    if (new URLSearchParams(location.search).has('debug')) window.gitgame = api;
   </script>
 </body>
 </html>
