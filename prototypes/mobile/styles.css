@@ -75,7 +75,7 @@ button[disabled] { opacity: .42; cursor: default; }
 .card .face { display: grid; align-content: center; justify-items: center; text-align: center; gap: .25em; padding: .3em .2em; min-width: 0; }
 .card .file { font-weight: 600; font-size: .86em; line-height: 1.2; word-break: break-all; }
 .card .lines { font: 700 2.3em/1 var(--sans); }
-.card .bugtag { position: absolute; right: .35em; top: 2.2em; background: var(--reject); color: #fff; font: 800 .66em/1.8em var(--sans); letter-spacing: .06em; padding: 0 .5em; border-radius: .35em; } /* at the top, so it stays visible when hand rows overlap */
+.card .bugtag { position: absolute; left: .35em; top: 2.2em; background: var(--reject); color: #fff; font: 800 .66em/1.8em var(--sans); letter-spacing: .06em; padding: 0 .5em; border-radius: .35em; } /* top left: the one corner an overlapping hand never covers */
 .card.cmd .face { align-content: start; padding-top: .9em; }
 .card.cmd .name { font-weight: 700; font-size: .95em; line-height: 1.2; }
 .card.cmd .cost { position: absolute; left: .7em; bottom: .6em; font: 600 .62em var(--sans); color: var(--muted); }
@@ -100,7 +100,7 @@ button[disabled] { opacity: .42; cursor: default; }
 .strip::-webkit-scrollbar { display: none; }
 .slot { flex: none; width: 64px; display: grid; justify-items: center; gap: 3px; scroll-snap-align: end; }
 .slot .tipmark { font: 700 10px/13px var(--mono); color: var(--reject); height: 13px; }
-.slot .who { font: 500 9.5px/1.25 var(--mono); color: var(--muted); text-align: center; height: 24px; width: 100%; overflow: hidden; }
+.slot .who { font: 500 9.5px/1.25 var(--mono); color: var(--muted); text-align: center; height: 36px; width: 100%; overflow: hidden; } /* author, file, lines: three short lines */
 .slot .who b.you { color: var(--you); } .slot .who b.bot { color: var(--bot); }
 .slot .ptrs { display: flex; gap: 2px; min-height: 18px; }
 .slot.hidden { visibility: hidden; }
@@ -269,6 +269,14 @@ table.scores tfoot td { font-weight: 700; border-top: 2px solid var(--ink); bord
 .guide-bubble { background: var(--ok-soft); border: 2px solid var(--ok); border-radius: 14px; padding: 10px 12px; display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; }
 .guide-bubble .guide-step { font: 700 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ok); }
 .guide-bubble p { grid-column: 1 / -1; font-size: 15px; line-height: 1.4; }
-.guide-bubble button { grid-row: 1; grid-column: 2; min-height: 36px; font-size: 13px; padding: 4px 10px; }
+.guide-bubble button { grid-row: 1; grid-column: 2; min-height: 44px; font-size: 13px; padding: 4px 12px; }
 .guide-target { outline: 3px solid var(--ok) !important; outline-offset: 3px; animation: guide-pulse 1.4s ease-in-out infinite; }
 @keyframes guide-pulse { 50% { outline-color: color-mix(in srgb, var(--ok) 35%, transparent); } }
+.playtest { font-size: 13px; }
+.playtest summary { min-height: 44px; display: flex; align-items: center; color: var(--muted); font: 600 12px var(--mono); cursor: pointer; }
+.playtest table { width: 100%; border-collapse: collapse; font: 11px var(--mono); font-variant-numeric: tabular-nums; }
+.playtest th, .playtest td { padding: 3px 2px; border-bottom: 1px solid var(--line); text-align: right; }
+.playtest th { font-weight: 600; color: var(--muted); vertical-align: bottom; }
+.hand-row.small + .hand-row.small { margin-top: -20px; }
+.incident-note { font-size: 13px; color: var(--muted); line-height: 1.35; }
+.incident-note .k { color: var(--warn); margin-right: 4px; }

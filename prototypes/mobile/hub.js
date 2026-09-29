@@ -3,8 +3,8 @@
 // The reasons come from the engine's legalActions, so the hub never restates the rules.
 import { legalActions } from './engine.js';
 import { plan } from './bot.js';
-import { strip, standing, handCard, commitCard, scrollStripToTip } from './view.js';
-import { SCREEN, REASON, LABEL } from './copy.js';
+import { strip, standing, handCard, commitCard, scrollStripToTip, cardLabel, esc } from './view.js';
+import { SCREEN, REASON, LABEL, INCIDENT } from './copy.js';
 
 const T = SCREEN;
 const CORE = ['stage', 'commit', 'push', 'pull'];
@@ -20,25 +20,30 @@ function why(o, ui, s) {
 function opButton(o, ui, s, extra = '') {
   const noSel = o.key === 'stage' && !ui.selected.some(id => s.players.you.hand.find(c => c.id === id && !c.cmd));
   const enabled = o.enabled && !noSel;
-  const danger = (o.key === 'push' && o.data.behind) || o.key === 'force';
+  const danger = enabled && ((o.key === 'push' && o.data.behind) || o.key === 'force');
   const hinted = ui.hint && (ui.hint.action.type === o.action.type) ? 'hinted' : '';
-  return `<button class="op ${enabled && !danger ? 'go' : ''} ${danger ? 'danger' : ''} ${hinted} ${extra}" data-op="${o.key}" data-guide="${o.key}" ${enabled ? '' : 'disabled'}>
+  const label = `${T.hub.op[o.key]}, ${LABEL.card.cost(o.cost)}: ${why(o, ui, s)}`;
+  return `<button class="op ${enabled && !danger ? 'go' : ''} ${danger ? 'danger' : ''} ${hinted} ${extra}" data-op="${o.key}" data-guide="${o.key}" aria-label="${esc(label)}" ${enabled ? '' : 'disabled'}>
     <span class="opname">${T.hub.op[o.key]}</span><span class="cost">${LABEL.card.cost(o.cost)}</span><span class="why">${why(o, ui, s)}</span></button>`;
 }
 function handHTML(s, ui) {
   const hand = [...s.players.you.hand].sort((a, z) => (!!a.cmd - !!z.cmd) || String(a.file).localeCompare(z.file) || a.lines - z.lines);
-  const rows = hand.length > 6 ? [hand.slice(0, Math.ceil(hand.length / 2)), hand.slice(Math.ceil(hand.length / 2))] : [hand];
+  // Up to 12 cards: full-size, in rows of at most 6. More (hands grow by about one card a turn): the strip-sized card
+  // in rows of 7. Either way every card keeps a visible slice of at least 44 px to tap.
+  const big = hand.length <= 12, per = big ? Math.ceil(hand.length / Math.ceil(hand.length / 6)) : 7;
+  const rows = []; for (let i = 0; i < hand.length; i += per) rows.push(hand.slice(i, i + per));
   const hintCards = ui.hint?.action.type === 'stage' ? ui.hint.action.cards : [];
-  return rows.map(r => `<div class="hand-row">${r.map(c => handCard(c, {
-    size: 'lg', cls: [ui.selected.includes(c.id) ? 'selected' : '', hintCards.includes(c.id) ? 'hinted' : ''].join(' '),
-    data: { 'data-card': c.id, 'data-guide': c.cmd ? 'command' : c.bug ? 'bugcard' : 'card', role: 'button', 'aria-pressed': ui.selected.includes(c.id) },
+  return rows.map(r => `<div class="hand-row ${big ? '' : 'small'}">${r.map(c => handCard(c, {
+    size: big ? 'lg' : 'md', cls: [ui.selected.includes(c.id) ? 'selected' : '', hintCards.includes(c.id) ? 'hinted' : ''].join(' '),
+    data: { 'data-card': c.id, 'data-guide': c.cmd ? 'command' : c.bug ? 'bugcard' : 'card', role: 'button', 'aria-pressed': ui.selected.includes(c.id), 'aria-label': cardLabel(c) + (c.bug ? `, ${LABEL.card.bug}` : '') },
   })).join('')}</div>`).join('');
 }
 function mineHTML(s) {
   const p = s.players.you;
   const staged = p.staged.length ? p.staged.map(c => handCard(c, { size: 'sm' })).join('') : `<span class="empty">${T.hub.empty}</span>`;
   const local = p.local.length ? p.local.map(c => commitCard(c, { size: 'sm', faceUp: true })).join('') : `<span class="empty">${T.hub.empty}</span>`;
-  return `<div class="mine"><div class="mine-head"><span class="k">${LABEL.branch}</span>${standing(s)}</div>
+  return `<div class="mine"><p class="incident-note"><span class="k">${LABEL.card.incident}</span> ${INCIDENT[s.incident].name} — ${INCIDENT[s.incident].text}</p>
+    <div class="mine-head"><span class="k">${LABEL.branch}</span>${standing(s)}</div>
     <div class="zones"><div class="zone" data-zone="mat"><span class="k">${T.hub.mat}</span><div class="zcards">${staged}</div></div>
     <div class="zone" data-zone="local"><span class="k">${T.hub.local}</span><div class="zcards">${local}</div></div></div></div>`;
 }

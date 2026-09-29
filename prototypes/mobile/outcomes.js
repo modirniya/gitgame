@@ -3,6 +3,7 @@
 // scene says what happened and what to do next, in copy.js's words.
 import { behindBy, commitsOnMain, scores, lines, hasBug, winner, RELEASE_AT } from './engine.js';
 import { handCard, commitCard, strip, scrollStripToTip, pips, esc, WHO } from './view.js';
+import { summary } from './playtest.js';
 import { SCREEN, INCIDENT, GIT, RECEIPT, REASON, BOT_DID, BOT_TITLE, LABEL, COMMAND } from './copy.js';
 
 const T = SCREEN;
@@ -269,6 +270,7 @@ OUTCOMES['O-Scoreboard'] = {
   },
   mount(el, { s, api }) {
     try { localStorage.setItem('gitgame.games', String(+(localStorage.getItem('gitgame.games') || 0) + 1)); } catch { /* private mode */ }
+    el.querySelector('[data-playtest]').innerHTML = summary();
     el.querySelector('[data-again]').onclick = () => api.next();
     el.querySelector('[data-replay]').onclick = () => api.newGame({ seed: s.seed, guided: s.guided });
   },

@@ -20,7 +20,7 @@ SCREENS['I-Start'] = {
     return `<div class="body start">
       <div class="logo"><span class="prompt">${LABEL.prompt}</span><h1>${BRAND.name}</h1><p>${BRAND.tagline}</p></div>
       <p class="pitch">${T.start.pitch}</p>
-      <label class="toggle"><input type="checkbox" data-guided ${played ? '' : 'checked'}><span><b>${T.start.guided}</b><small>${T.start.guidedNote}</small></span></label>
+      <label class="toggle"><input type="checkbox" data-guided aria-label="${T.start.guided}" ${played ? '' : 'checked'}><span><b>${T.start.guided}</b><small>${T.start.guidedNote}</small></span></label>
     </div>
     <div class="actions"><button class="primary" data-new>${T.start.go}</button></div>`;
   },
@@ -89,7 +89,7 @@ SCREENS['I-Pull'] = {
     const incoming = s.main.slice(p.ptr).map(c => c.id), conf = conflictsFor(s, 'you');
     const choice = (key, name, whyText) => {
       const o = opts.find(x => x.key === key);
-      return `<button class="choice" data-pull="${key}" data-guide="${key}" ${o.enabled ? '' : 'disabled'}><span class="opname">${name}</span>
+      return `<button class="choice" data-pull="${key}" data-guide="${key}" aria-label="${esc(`${name}: ${o.enabled ? whyText : T.hub.no[o.reason]}`)}" ${o.enabled ? '' : 'disabled'}><span class="opname">${name}</span>
         <span class="why">${o.enabled ? whyText : T.hub.no[o.reason]}</span>${conf.length && o.enabled ? `<span class="why bad">${T.pull.conflict(conf[0].shared[0])}</span>` : ''}</button>`;
     };
     return `<div class="body ask"><h1 class="cmd">${T.pull.title}</h1>${strip(s, { mark: incoming })}
@@ -110,7 +110,7 @@ SCREENS['I-Conflict'] = {
     const theirs = e.conflicts.map(x => byId(s, x.theirs));
     const myLines = mine.reduce((a, c) => a + lines(c), 0), theirLines = theirs.reduce((a, c) => a + lines(c), 0);
     const base = e.rebase ? 2 : 1;
-    const btn = (key, name, whyText) => { const ok = e.affordable.includes(key); return `<button class="choice" data-s="${key}" data-guide="${key}" ${ok ? '' : 'disabled'}><span class="opname">${name}</span><span class="why">${ok ? whyText : T.conflict.cantAfford}</span></button>`; };
+    const btn = (key, name, whyText) => { const ok = e.affordable.includes(key); return `<button class="choice" data-s="${key}" data-guide="${key}" aria-label="${esc(`${name}: ${ok ? whyText : T.conflict.cantAfford}`)}" ${ok ? '' : 'disabled'}><span class="opname">${name}</span><span class="why">${ok ? whyText : T.conflict.cantAfford}</span></button>`; };
     return `<div class="body ask bad"><h1 class="cmd">${COMMAND.conflict}</h1><pre class="term bad">${esc(GIT.conflict(file))}</pre>
       <div class="scene clash" data-anim="clash">
         <div class="labelled">${commitCard(mine[0], { size: 'lg', faceUp: true })}<span class="who"><b class="you">${LABEL.yours}</b> ${LABEL.lines(lines(mine[0]))}</span></div>
