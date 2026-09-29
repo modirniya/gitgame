@@ -7,7 +7,7 @@ Throwaway software that exists to answer a question. **Nothing in this directory
 | Prototype | Question it answers | Status |
 |---|---|---|
 | [play-vs-bot/](play-vs-bot/) | Can one person understand the game by playing it against a bot, with a guide and hints? | Done. Single-file desktop page with a real resolver, a scripted bot, a guided first game, hints, undo and a live score. `node smoke-test.js` auto-plays 800 games. |
-| [mobile/](mobile/) | Does one-event-per-screen on a phone make the game clearer and more fun than the table view? | Planned. See [mobile/PLAN.md](mobile/PLAN.md); spec in [docs/design/event-screens.md](../docs/design/event-screens.md). |
+| [mobile/](mobile/) | Does one-event-per-screen on a phone make the game clearer and more fun than the table view? | Built; awaiting a human playtest. Every screen of [the spec](../docs/design/event-screens.md) against the bot, with animations, the guided game and a playtest recorder. Provisional answer: clearer for the moments, too slow for the routine (about 105 screens a game). Findings, including three rule findings, in its README. |
 
 ## Rules for this directory
 
