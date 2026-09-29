@@ -229,3 +229,7 @@ button.cell .who b.you { color: var(--you); } button.cell .who b.bot { color: va
 .zone.fallen { border-color: var(--reject); }
 .card.fallen { opacity: .6; transform: rotate(-6deg) translateY(6px); }
 .card.fallen:nth-child(odd) { transform: rotate(5deg) translateY(2px); }
+.score-now { display: flex; gap: 12px; font: 700 28px var(--mono); }
+.score-now .you { color: var(--you); } .score-now .bot { color: var(--bot); } .score-now span { color: var(--faint); }
+ol.receipt { margin: 0; padding: 14px 16px 14px 36px; width: 100%; background: var(--paper); border-radius: 12px; border: 1px dashed var(--line); font: 14px/1.7 var(--mono); }
+.stamp:not(.ok):not(.bad) { color: var(--muted); }

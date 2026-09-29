@@ -151,9 +151,15 @@ SCREENS['I-Force'] = {
   mount(el, { api }) { el.querySelector('[data-go]').onclick = () => api.dispatch({ type: 'force' }); },
 };
 
-// Placeholders until their group of the plan replaces them.
-const quick = (label, act) => ({
-  html: () => `<div class="body"><h1>${label}</h1></div><div class="actions"><button data-next class="ghost">Cancel</button><button class="primary" data-go>${label}</button></div>`,
-  mount: (el, ctx) => { el.querySelector('[data-go]').onclick = () => ctx.api.dispatch(act(ctx)); },
-});
-SCREENS['I-Tag'] = quick('I-Tag', () => ({ type: 'tag' }));
+// ---------- I-Tag: end the game now? ----------
+SCREENS['I-Tag'] = {
+  html({ s }) {
+    const sc = scores(s);
+    return ask({
+      title: T.tag.title, scene: `<div class="score-now"><b class="you">you ${sc.you.total}</b><span>·</span><b class="bot">bot ${sc.bot.total}</b></div>`,
+      said: T.tag.said(commitsOnMain(s)), then: sc.you.total >= sc.bot.total ? T.tag.ahead : T.tag.behind,
+      buttons: `<button class="ghost" data-next>${T.tag.later}</button><button class="primary" data-go data-guide="tag">${T.tag.go}</button>`,
+    });
+  },
+  mount(el, { api }) { el.querySelector('[data-go]').onclick = () => api.dispatch({ type: 'tag' }); },
+};

@@ -3,7 +3,7 @@
 // scene says what happened and what to do next, in copy.js's words.
 import { behindBy, commitsOnMain, scores, lines, hasBug, RELEASE_AT } from './engine.js';
 import { handCard, commitCard, strip, scrollStripToTip, pips, esc } from './view.js';
-import { SCREEN, INCIDENT, GIT } from './copy.js';
+import { SCREEN, INCIDENT, GIT, RECEIPT } from './copy.js';
 
 const T = SCREEN;
 export const OUTCOMES = {};
@@ -176,8 +176,19 @@ OUTCOMES['O-Reflog'] = {
   mount: el => scrollStripToTip(el),
 };
 
+OUTCOMES['O-TurnSummary'] = {
+  html: ({ e }) => {
+    const rows = e.summary.filter(x => RECEIPT[x.type]).map(x => `<li>${esc(RECEIPT[x.type](x))}</li>`).join('');
+    const d = e.scoreDelta.you;
+    return outcome({
+      title: T.summary.title, button: T.summary.watch, guide: 'watch',
+      scene: `<ol class="receipt">${rows || `<li>${T.summary.none}</li>`}</ol><span class="stamp ${d > 0 ? 'ok' : d < 0 ? 'bad' : ''}">${T.summary.delta(d)}</span>`,
+    });
+  },
+};
+
 // Placeholders until their group of the plan replaces them.
-const IDS = ['O-TurnSummary', 'O-BotTurn', 'O-BotStep', 'O-Behind', 'O-CI', 'O-Scoreboard'];
+const IDS = ['O-BotTurn', 'O-BotStep', 'O-Behind', 'O-CI', 'O-Scoreboard'];
 for (const id of IDS) OUTCOMES[id] = {
   html: ({ e }) => `<div class="body"><h1>${id}</h1><pre class="evt">${esc(JSON.stringify(e, null, 1))}</pre></div>
     <div class="actions">${id.startsWith('O-Bot') ? '<button data-skip-bot class="ghost">skip bot</button>' : ''}<button class="primary" data-next>Continue</button></div>`,
