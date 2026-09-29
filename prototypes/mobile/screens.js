@@ -64,7 +64,7 @@ SCREENS['I-Commit'] = {
     return ask({
       title: T.commit.title,
       scene: `<div class="spread tight">${p.staged.map(c => handCard(c, { size: 'md' })).join('')}</div>`,
-      said: `<label class="msg"><span class="k">${T.commit.label}</span><input data-msg type="text" value="${esc(first)}" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"></label>
+      said: `<label class="msg"><span class="k">${T.commit.label}</span><input data-msg type="text" value="${esc(first)}" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go"></label>
         <span class="chips">${[first, second].map(m => `<button class="chip" data-chip="${esc(m)}">${esc(m)}</button>`).join('')}</span>`,
       warn: `<span data-lazy hidden>${T.commit.lazyWarn}</span>`,
       then: T.commit.rule,
@@ -78,7 +78,7 @@ SCREENS['I-Commit'] = {
     el.querySelectorAll('[data-chip]').forEach(b => b.onclick = () => { input.value = b.dataset.chip; check(); });
     const go = () => api.dispatch({ type: 'commit', message: input.value.trim() || 'Initial work' });
     el.querySelector('[data-go]').onclick = go;
-    input.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); } };
+    input.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); go(); } }; // the message is the last thing asked
   },
 };
 

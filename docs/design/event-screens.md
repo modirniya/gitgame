@@ -87,6 +87,7 @@ Not separate screens: a **guide layer** on the frame. It highlights the one elem
 ## 4. Visual language
 
 - **Baseline viewport** 390 × 844 (iPhone 14/15 class), portrait only. Works to 360 wide. Safe-area insets respected. Touch targets ≥ 44 pt. No horizontal page scroll; only the `main` strip scrolls sideways, with snap.
+- **Bigger screens** keep the event screen phone-shaped, because one question or one consequence at a time is the point. From 600 px wide the column widens, cards grow, and the hub's four ops sit in one row. From about 1000 × 560 the Table stops being a sheet and becomes a panel beside the screen, with `main` laid out in full (wrapping, not scrolling) and a log of what has happened. Enter answers with the primary button; Escape cancels, closes the sheet or skips the bot.
 - **Cards** are the printed cards ([`rules/deck.json`](../../rules/deck.json)): a colored band per file, Courier-style file name, big `+N`, a red BUG tag on the face. Hand cards 96 × 134; strip cards 64 × 90; face-down back is a neutral hatch. The same component at every size.
 - **`main`** is a horizontal strip: initial commit at the left, tip at the right with a `tip` marker, each slot labelled with file + lines + author (the announced log), pointer chips beneath. The strip auto-scrolls to the tip on change.
 - **Player colors**: you teal, bot violet (from the deck's file palette family). Semantic: reject red, ok green, warn amber. Light theme on a warm neutral ground; dark theme with the same tokens.

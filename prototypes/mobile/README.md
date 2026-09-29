@@ -8,6 +8,8 @@
 
 **Run:** `python3 -m http.server` in this folder, then open http://localhost:8000 on a phone, or at phone size. ES modules need a server; `file://` won't load them. To play on a phone on the same Wi-Fi, open `http://<this machine's IP>:8000`.
 
+It also adapts to bigger screens. From 600 px wide (an iPad in portrait) it uses one wider column with bigger cards and the four ops in one row. From 1000 × 560 (a laptop, an iPad in landscape) the Table becomes a permanent panel on the left, with `main` laid out in full, both players and a log of what happened, and the event screen stays on the right. With a keyboard, Enter answers with the screen's primary button and Escape cancels, closes the sheet or skips the bot.
+
 Add `?seed=123` to replay a shuffle, and `?debug` to expose the router as `window.gitgame` for driving a game from the console. The scoreboard's "playtest numbers" and `window.gitgamePlaytest()` show what `playtest.js` recorded on the device.
 
 **Test:** `node smoke-test.js`. It plays 800 games against the bot (400 competent, 400 random) plus 200 random-vs-random through the pure engine. It checks the pointer invariant after every action, replays every game from its seed, and checks event coverage. It renders every screen for every event of 300 games and walks the guided game over 500 seeds. It runs in about 20 s and exits non-zero on any failure.
@@ -18,7 +20,7 @@ Add `?seed=123` to replay a shuffle, and `?debug` to expose the router as `windo
 - `bot.js`: `plan(state, id)` returns `{ action, why }` (the desktop policy); `botStep(state)` plays one op and wraps it in a `BotActed` event.
 - `copy.js`: every string the player reads, keyed by event or reason, including Git's own output.
 - `router.js`: `screensFor(events)` maps events to screens; the queue, auto-advance and "skip bot".
-- `frame.js`: the status bar and the Table sheet, drawn from the state of the screen being shown.
+- `frame.js`: the status bar, and the Table as a sheet (phone) or a panel with a log (wide screens), drawn from the state of the screen being shown.
 - `view.js`: the card (one component at every size), the `main` strip, pointer chips, ops pips.
 - `screens.js`, `hub.js`, `outcomes.js`: the input screens and the registry, the hub, and the output screens.
 - `guide.js`: the guided first game, as a pure step reducer plus the overlay that highlights one element and says one sentence.
@@ -84,6 +86,10 @@ Structurally it is redundant from game one: O-YourTurn says "You are 1 behind: a
 - **Cards crossing into a scrolling strip must fly on a layer above it**, or the strip clips them. All motion is transform-only (FLIP), so nothing jumps.
 - **The hub is the crowded screen.** At 375 × 812 with a two-row hand and the guide bubble, "your branch" scrolls under the hand; at 740 tall it is worse. Merging the round-ceremony screens doesn't help here; the hub needs a denser `main` strip or a collapsible branch area.
 - **The BUG tag must sit where overlapping cards can't cover it** (top left). Otherwise a bug in the middle of the hand is invisible.
+
+### Bigger screens
+
+This was added after the plan, on request. It was checked in the built-in browser at 768 × 1024 (iPad portrait), 1024 × 768 (iPad landscape, dark) and 1280 × 800 (laptop): no sideways scroll, the screen fills the height, the hand's row count follows the width (one row of 9 full-size cards on an iPad in portrait), Enter and Escape work, and the phone layout is unchanged. One consequence for the open questions: where the Table is a permanent panel nobody needs to open it, so question 3 (do people open the Table?) can only be measured on phones.
 
 ### The mobile check (step 8)
 

@@ -9,13 +9,13 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- The frame: a status bar, the screen the router renders into, the Table sheet and the guide layer. -->
+  <!-- The frame: a status bar, the Table panel (wide screens only), the screen the router renders into, and the Table sheet. -->
   <div id="app">
     <header id="status" class="status" hidden></header>
+    <aside id="table-pane" class="table-pane" aria-label="the table"></aside>
     <main id="screen"></main>
   </div>
   <div id="sheet" class="sheet" hidden></div>
-  <div id="guide" class="guide" hidden></div>
   <script type="module">
     import { start, api } from './router.js';
     import { install as guide } from './guide.js';

@@ -41,14 +41,14 @@ export const chip = id => `<span class="ptr ${id}" data-ptr="${id}">${WHO[id]}</
 
 // `main` as a horizontal strip: initial commit at the left, the tip at the right, each slot labelled with what was
 // announced (file, lines, author) and the pointers beneath. opts.target marks tappable commits; opts.mark highlights.
-export function strip(s, { target = [], mark = [], hide = [], extra = '' } = {}) {
+export function strip(s, { target = [], mark = [], hide = [], extra = '', wrap = false } = {}) {
   const slots = s.main.map((c, i) => {
     const ptrs = ['you', 'bot'].filter(id => s.players[id].ptr === i + 1).map(chip).join('');
     const who = c.init ? '' : `<b class="${c.author}">${WHO[c.author]}</b> ${esc(c.revertOf ? LABEL.card.revert : commitLabel(c))}`;
     const cls = [target.includes(c.id) ? 'target' : '', mark.includes(c.id) ? 'mark' : '', hide.includes(c.id) ? 'hidden' : ''].join(' ');
     return `<div class="slot ${cls}" data-slot="${c.id}"><div class="tipmark">${i === s.main.length - 1 ? LABEL.strip.tip : ''}</div>${commitCard(c, { size: 'md' })}<div class="who">${who}</div><div class="ptrs">${ptrs}</div></div>`;
   }).join('');
-  return `<div class="strip-wrap"><div class="strip-head"><span>${LABEL.strip.main}</span><span>${LABEL.strip.commits(commitsOnMain(s), RELEASE_AT)}</span></div><div class="strip" data-strip>${slots}${extra}</div></div>`;
+  return `<div class="strip-wrap"><div class="strip-head"><span>${LABEL.strip.main}</span><span>${LABEL.strip.commits(commitsOnMain(s), RELEASE_AT)}</span></div><div class="strip ${wrap ? 'wrap' : ''}" data-strip>${slots}${extra}</div></div>`;
 }
 // Keep the tip in view: the strip scrolls sideways, the page never does.
 export function scrollStripToTip(root) { root.querySelectorAll('[data-strip]').forEach(el => { el.scrollLeft = el.scrollWidth; }); }

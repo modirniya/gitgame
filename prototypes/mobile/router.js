@@ -5,7 +5,7 @@
 import { createGame, apply } from './engine.js';
 import { botStep } from './bot.js';
 import { SCREENS } from './screens.js';
-import { renderFrame } from './frame.js';
+import { renderFrame, logItems, refreshPane } from './frame.js';
 import { animate, clearFlights } from './motion.js';
 
 export const AUTO = { 'O-BotTurn': 1000, 'O-BotStep': 1200, 'O-Staged': 900 }; // ms; O-CI sets its own from the number of flips
@@ -56,7 +56,7 @@ function enqueue(events, before, after) {
   for (const item of screensFor(events, R.carry)) {
     if (item.id === 'O-Incident') round = item.event.round;
     const owner = item.event?.player ?? (['O-BotStep', 'O-Behind'].includes(item.id) ? 'bot' : after.turn);
-    if (R.skipping && !MUST_SEE.has(item.id)) continue;
+    if (R.skipping && !MUST_SEE.has(item.id)) { logItems([item]); continue; } // skipped, but still in the log
     R.queue.push({ ...item, before, after, round, owner });
   }
   api.emit('events', events);
@@ -106,6 +106,7 @@ export const api = {
   skipBot() {
     api.emit('skip', R.current);
     R.skipping = true;
+    logItems(R.queue.filter(item => !MUST_SEE.has(item.id)));
     R.queue = R.queue.filter(item => MUST_SEE.has(item.id));
     api.next('skip');
   },
@@ -116,8 +117,8 @@ function show(item) {
   R.current = item;
   api.emit('enter', item);
   const screen = SCREENS[item.id];
-  const ctx = { e: item.event, s: item.after, before: item.before, payload: item.payload, item, api, ui: R.ui };
   renderFrame(item, api);
+  const ctx = { e: item.event, s: item.after, before: item.before, payload: item.payload, item, api, ui: R.ui, layout: layout() };
   R.root.innerHTML = `<section class="screen" data-screen="${item.id}">${screen.html(ctx)}</section>`;
   R.root.scrollTop = 0;
   const el = R.root.firstElementChild;
@@ -134,7 +135,31 @@ function show(item) {
   api.emit('shown', item, el);
 }
 
+// The screen's width and the card sizes in force (styles.css sets them per breakpoint), for layouts that must count.
+function layout() {
+  const css = getComputedStyle(document.documentElement), px = (v, d) => parseFloat(css.getPropertyValue(v)) || d;
+  return { width: R.root.clientWidth || 390, lg: px('--card-lg', 96), md: px('--card-md', 64) };
+}
+
+// A keyboard on a laptop or an iPad: Enter answers with the screen's primary button, Escape backs out — closes the
+// sheet, cancels a question, or skips the bot. Touch never needs these.
+function onKey(ev) {
+  if (ev.metaKey || ev.ctrlKey || ev.altKey || ev.defaultPrevented) return;
+  const sheet = document.getElementById('sheet'), q = sel => R.root.querySelector(sel);
+  if (ev.key === 'Escape') {
+    if (!sheet.hidden) return sheet.querySelector('[data-close]')?.click();
+    return (q('[data-guide=cancel]') || q('.actions button.ghost[data-next]') || q('[data-skip-bot]'))?.click();
+  }
+  if (ev.key === 'Enter' && sheet.hidden && !['INPUT', 'BUTTON', 'TEXTAREA'].includes(ev.target.tagName)) {
+    const b = q('.actions button.primary:not([disabled])');
+    if (b) { ev.preventDefault(); b.click(); }
+  }
+}
+
 export function start(root) {
   R.root = root;
+  document.addEventListener('keydown', onKey);
+  // Crossing a breakpoint changes the card sizes and whether the Table is a panel, so redraw the screen and the panel.
+  let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { refreshPane(); if (R.current?.id === 'I-Hub') show(R.current); }, 150); });
   show({ id: 'I-Start', before: null, after: null });
 }

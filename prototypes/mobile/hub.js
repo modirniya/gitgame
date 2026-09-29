@@ -26,11 +26,14 @@ function opButton(o, ui, s, extra = '') {
   return `<button class="op ${enabled && !danger ? 'go' : ''} ${danger ? 'danger' : ''} ${hinted} ${extra}" data-op="${o.key}" data-guide="${o.key}" aria-label="${esc(label)}" ${enabled ? '' : 'disabled'}>
     <span class="opname">${T.hub.op[o.key]}</span><span class="cost">${LABEL.card.cost(o.cost)}</span><span class="why">${why(o, ui, s)}</span></button>`;
 }
-function handHTML(s, ui) {
+// How many cards of width w fit in a row of the hand, each keeping a visible slice of at least 44 px (plus a margin).
+const perRow = (room, w) => Math.max(1, Math.floor((room - w) / 46) + 1);
+function handHTML(s, ui, layout) {
   const hand = [...s.players.you.hand].sort((a, z) => (!!a.cmd - !!z.cmd) || String(a.file).localeCompare(z.file) || a.lines - z.lines);
-  // Up to 12 cards: full-size, in rows of at most 6. More (hands grow by about one card a turn): the strip-sized card
-  // in rows of 7. Either way every card keeps a visible slice of at least 44 px to tap.
-  const big = hand.length <= 12, per = big ? Math.ceil(hand.length / Math.ceil(hand.length / 6)) : 7;
+  // Full-size cards in at most two balanced rows; a hand too big for that (hands grow by about one card a turn) drops
+  // to the strip-sized card. The width decides: 6 full-size cards a row on a phone, 10 or more on a tablet.
+  const room = layout.width - 8, twoRows = Math.ceil(hand.length / perRow(room, layout.lg)) <= 2;
+  const big = twoRows, per = big ? Math.ceil(hand.length / Math.max(1, Math.ceil(hand.length / perRow(room, layout.lg)))) : perRow(room, layout.md);
   const rows = []; for (let i = 0; i < hand.length; i += per) rows.push(hand.slice(i, i + per));
   const hintCards = ui.hint?.action.type === 'stage' ? ui.hint.action.cards : [];
   return rows.map(r => `<div class="hand-row ${big ? '' : 'small'}">${r.map(c => handCard(c, {
@@ -49,7 +52,7 @@ function mineHTML(s) {
 }
 
 export const HUB = {
-  html({ s, ui }) {
+  html({ s, ui, layout = { width: 390, lg: 96, md: 64 } }) {
     ui.selected = (ui.selected || []).filter(id => s.players.you.hand.some(c => c.id === id));
     const opts = Object.fromEntries(legalActions(s).map(o => [o.key, o]));
     const selCmd = s.players.you.hand.find(c => c.cmd && ui.selected.includes(c.id));
@@ -57,7 +60,7 @@ export const HUB = {
     const tag = opts.tag.enabled ? opButton(opts.tag, ui, s, 'wide') : '';
     const note = ui.toast ? `<p class="toast">${ui.toast}</p>` : ui.hint ? `<p class="hintline"><b>${T.hub.hint}</b> ${REASON.you[ui.hint.why.key](ui.hint.why)}</p>` : '';
     return `<div class="body hub">${strip(s)}${mineHTML(s)}</div>
-      <div class="hand" data-hand>${handHTML(s, ui)}</div>
+      <div class="hand" data-hand>${handHTML(s, ui, layout)}</div>
       <div class="actions hub-actions">${note}${tag}${cmdRow}
         <div class="grid4">${CORE.map(k => opButton(opts[k], ui, s)).join('')}</div>
         <div class="minor"><button class="ghost" data-hint>${T.hub.hint}</button><button class="ghost" data-undo data-guide="undo" ${opts.undo.enabled ? '' : 'disabled'}>${T.hub.undo}</button><button class="ghost" data-op="endTurn" data-guide="endTurn">${T.hub.end}</button></div>

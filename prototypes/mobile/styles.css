@@ -10,6 +10,7 @@
   --back-1: #6B7A86; --back-2: #5C6B77; --shadow: 0 1px 2px rgb(0 0 0 / .14), 0 2px 8px rgb(0 0 0 / .06);
   --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --card-xl: 132px; --card-lg: 96px; --card-md: 64px; --card-sm: 44px; /* bigger screens raise these below */
   --gutter: 16px; --r: 14px; --t: 460ms; --ease: cubic-bezier(.2, .8, .2, 1);
 }
 @media (prefers-color-scheme: dark) {
@@ -70,7 +71,7 @@ button[disabled] { opacity: .42; cursor: default; }
 .card { --w: 64px; width: var(--w); height: calc(var(--w) * 1.4); font-size: calc(var(--w) * .145); flex: none; position: relative;
   border-radius: calc(var(--w) * .09); background: var(--paper); border: 1px solid var(--line); box-shadow: var(--shadow);
   display: grid; grid-template-rows: 1.4em 1fr; overflow: hidden; font-family: var(--mono); color: var(--ink); user-select: none; }
-.card.xl { --w: 132px; } .card.lg { --w: 96px; } .card.md { --w: 64px; } .card.sm { --w: 44px; }
+.card.xl { --w: var(--card-xl); } .card.lg { --w: var(--card-lg); } .card.md { --w: var(--card-md); } .card.sm { --w: var(--card-sm); }
 .card .band { background: var(--c); color: #fff; font: 700 .6em/2.35em var(--sans); letter-spacing: .1em; text-transform: uppercase; padding: 0 .7em; white-space: nowrap; overflow: hidden; }
 .card .face { display: grid; align-content: center; justify-items: center; text-align: center; gap: .25em; padding: .3em .2em; min-width: 0; }
 .card .file { font-weight: 600; font-size: .86em; line-height: 1.2; word-break: break-all; }
@@ -98,7 +99,7 @@ button[disabled] { opacity: .42; cursor: default; }
 .strip-head { display: flex; justify-content: space-between; padding: 0 12px 2px; font: 600 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .strip { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; padding: 2px 12px 4px; scrollbar-width: none; overscroll-behavior-x: contain; }
 .strip::-webkit-scrollbar { display: none; }
-.slot { flex: none; width: 64px; display: grid; justify-items: center; gap: 3px; scroll-snap-align: end; }
+.slot { flex: none; width: var(--card-md); display: grid; justify-items: center; gap: 3px; scroll-snap-align: end; }
 .slot .tipmark { font: 700 10px/13px var(--mono); color: var(--reject); height: 13px; }
 .slot .who { font: 500 9.5px/1.25 var(--mono); color: var(--muted); text-align: center; height: 36px; width: 100%; overflow: hidden; } /* author, file, lines: three short lines */
 .slot .who b.you { color: var(--you); } .slot .who b.bot { color: var(--bot); }
@@ -220,7 +221,7 @@ button.cell .who { font: 500 9.5px/1.25 var(--mono); color: var(--muted); text-a
 button.cell .who b.you { color: var(--you); } button.cell .who b.bot { color: var(--bot); }
 .stamp { font: 800 16px var(--mono); letter-spacing: .06em; padding: 4px 12px; border-radius: 8px; border: 2px solid currentColor; transform: rotate(-4deg); }
 .stamp.bad { color: var(--reject); } .stamp.ok { color: var(--ok); }
-.revert-stack { position: relative; width: 114px; height: 152px; }
+.revert-stack { position: relative; width: calc(var(--card-lg) + 18px); height: calc(var(--card-lg) * 1.4 + 18px); }
 .revert-stack > .card { position: absolute; top: 0; left: 0; }
 .revert-stack > .card + .card { top: 18px; left: 18px; }
 .labelled { display: grid; justify-items: center; gap: 4px; min-width: 76px; }
@@ -247,7 +248,7 @@ ol.receipt { margin: 0; padding: 14px 16px 14px 36px; width: 100%; background: v
 @keyframes autobar { from { width: 0; } to { width: 100%; } }
 
 /* ---------- release ---------- */
-.ci-grid { display: grid; grid-template-columns: repeat(auto-fill, 48px); gap: 8px; justify-content: center; width: 100%; }
+.ci-grid { display: grid; grid-template-columns: repeat(auto-fill, calc(var(--card-sm) + 4px)); gap: 8px; justify-content: center; width: 100%; }
 .score { gap: 12px; }
 .winner { font: 700 28px var(--sans); } .winner.you { color: var(--you); } .winner.bot { color: var(--bot); }
 table.scores { width: 100%; border-collapse: collapse; font: 15px var(--mono); font-variant-numeric: tabular-nums; }
@@ -280,3 +281,48 @@ table.scores tfoot td { font-weight: 700; border-top: 2px solid var(--ink); bord
 .hand-row.small + .hand-row.small { margin-top: -20px; }
 .incident-note { font-size: 13px; color: var(--muted); line-height: 1.35; }
 .incident-note .k { color: var(--warn); margin-right: 4px; }
+
+/* ---------- bigger screens ----------
+   Tablet portrait: one wider column, bigger cards, the four ops in one row (the spec's "one row of big actions").
+   Laptop, iPad landscape: two panes. The Table stops being a sheet and becomes a panel beside the screen, with main
+   laid out in full and a log, because there is room to keep the shared view in sight. The event screen keeps its
+   phone shape on the right: one question or one consequence at a time is the thing being tested. */
+.table-pane { display: none; }
+@media (hover: hover) {
+  button:hover:not([disabled]) { border-color: var(--muted); }
+  button.primary:hover:not([disabled]), button.op.go:hover:not([disabled]) { filter: brightness(1.15); }
+  .hand .card:hover:not(.selected) { transform: translateY(-6px); }
+  button.cell.target:hover { background: color-mix(in srgb, var(--warn) 25%, var(--paper)); }
+}
+@media (min-width: 600px) {
+  :root { --card-xl: 156px; --card-lg: 112px; --card-md: 72px; --card-sm: 50px; --gutter: 24px; }
+  #app { max-width: 760px; }
+  .status { gap: 14px; font-size: 13px; }
+  .screen > .body > *, .screen > .actions { width: 100%; max-width: 660px; margin-inline: auto; }
+  .grid4 { grid-template-columns: repeat(4, 1fr); }
+  h1.cmd { font-size: 26px; } .said { font-size: 20px; } .then { font-size: 17px; }
+  .sheet-card { max-width: 760px; }
+  .zone { min-height: 100px; }
+}
+@media (min-width: 1000px) and (min-height: 560px) {
+  #app.in-game { max-width: 1480px; grid-template-columns: minmax(0, 1fr) clamp(460px, 38vw, 560px); grid-template-rows: auto 1fr;
+    grid-template-areas: "status status" "pane screen"; }
+  #app.in-game .status { grid-area: status; }
+  #app.in-game #screen { grid-area: screen; border-left: 1px solid var(--line); }
+  #app.in-game .table-pane { grid-area: pane; display: flex; flex-direction: column; gap: 16px; min-height: 0; overflow-y: auto; padding: 20px 28px 28px; }
+  #app.in-game .st-table { display: none; }
+  /* main is on the left for the whole game, so the hub doesn't draw it a second time */
+  #app.in-game .screen[data-screen="I-Hub"] .strip-wrap, #app.in-game .incident-note { display: none; }
+  #app.in-game .grid4 { grid-template-columns: 1fr 1fr; }
+  #app.in-game .screen > .body > *, #app.in-game .screen > .actions { max-width: none; }
+}
+.pane-title { font: 600 13px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.strip.wrap { flex-wrap: wrap; overflow: visible; row-gap: 12px; padding-bottom: 8px; }
+.table-pane .people { grid-template-columns: 1fr 1fr; }
+.table-pane .strip-wrap { padding: 12px 4px 8px; }
+.log ol { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; font-size: 14px; }
+.log li { padding: 6px 10px; border-radius: 8px; background: var(--paper); border-left: 3px solid var(--line); }
+.log li.you { border-left-color: var(--you); } .log li.bot { border-left-color: var(--bot); }
+.log li.round { border-left-color: var(--warn); background: transparent; font: 600 12px var(--mono); color: var(--muted); }
+.log li.none { color: var(--muted); }
+.log b.you { color: var(--you); font-family: var(--mono); } .log b.bot { color: var(--bot); font-family: var(--mono); }

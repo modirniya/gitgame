@@ -308,3 +308,12 @@ export const COMMAND = {
   push: 'git push', pull: 'git pull', rebase: 'git pull --rebase', force: 'git push --force', reflog: 'git reflog', tag: 'git tag v1.0',
   blame: sha => `git blame ${sha}`, revert: sha => `git revert ${sha}`, conflict: 'CONFLICT', strategy: k => k === 'resolve' ? 'resolved by hand' : `-X ${k}`,
 };
+
+// The log in the Table panel on wide screens: one line per consequence, newest first.
+export const LOG = {
+  title: 'What happened', empty: 'Nothing yet.',
+  round: (n, incident) => `round ${n} · ${incident}`,
+  you: line => `<b class="you">${LABEL.you}</b> ${line}`,
+  bot: (cmd, did) => `<b class="bot">${LABEL.bot}</b> ${cmd}${did ? ` — ${did}` : ''}`,
+  ci: (bugs, down) => `CI: ${s(bugs, 'bug')} reached production${down ? '; production is down' : ''}`,
+};
