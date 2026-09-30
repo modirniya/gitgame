@@ -23,6 +23,8 @@ defmodule GitGame.Game do
               armed: []
   end
 
+  @type t :: %__MODULE__{}
+
   @enforce_keys [:rules, :seed, :seats, :players, :main, :draw_pile, :next_commit]
   defstruct @enforce_keys ++ [day: 0, incident: nil, rolled: false, released: nil]
 
@@ -77,6 +79,10 @@ defmodule GitGame.Game do
       end)
     end)
   end
+
+  @doc "The game with one player's side of the table replaced."
+  def put_player(%__MODULE__{} = game, id, %Player{} = p),
+    do: %{game | players: Map.put(game.players, id, p)}
 
   @doc "How many commits on `main` the player hasn't pulled."
   def behind_by(%__MODULE__{main: main, players: players}, id),
