@@ -45,4 +45,32 @@ describe("the remote", () => {
     });
     await expect(api.fetchView("g1")).rejects.toThrow(/unable to access the remote/);
   });
+
+  it("watches a game: every signal is a refetch, and the stream closes after the release", () => {
+    let source;
+    class Source {
+      constructor(url) {
+        this.url = url;
+        this.listeners = {};
+        this.closed = false;
+        source = this;
+      }
+      addEventListener(type, f) {
+        this.listeners[type] = f;
+      }
+      close() {
+        this.closed = true;
+      }
+    }
+
+    const signals = [];
+    remote(async () => ({})).live("g1", () => signals.push("refetch"), Source);
+    expect(source.url).toBe("/api/games/g1/live");
+
+    source.listeners.refetch({ data: '{"over":false}' });
+    expect(source.closed).toBe(false);
+    source.listeners.refetch({ data: '{"over":true}' });
+    expect(signals).toEqual(["refetch", "refetch"]);
+    expect(source.closed).toBe(true);
+  });
 });

@@ -41,6 +41,21 @@ export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
     fetchView: (id, player) =>
       call(fetcher, `/games/${encodeURIComponent(id)}${player ? `?player=${encodeURIComponent(player)}` : ""}`),
 
+    /**
+     * Watch a game: `signal()` runs whenever the remote says to refetch, which it does on connecting and after every
+     * write; the stream closes itself after the release. The browser's EventSource reconnects on its own, and a
+     * reconnect is just one more refetch. Returns a function that stops watching.
+     */
+    live: (id, signal, Source = globalThis.EventSource) => {
+      if (!Source) return () => {};
+      const source = new Source(`/api/games/${encodeURIComponent(id)}/live`);
+      source.addEventListener("refetch", (e) => {
+        signal();
+        if (JSON.parse(e.data).over) source.close();
+      });
+      return () => source.close();
+    },
+
     /** Send, or replace, today's pack. `version` is the one the pack was written against. */
     sendPack: (id, { player, version, ops, discard = [] }) =>
       call(fetcher, `/games/${encodeURIComponent(id)}/packs`, {
