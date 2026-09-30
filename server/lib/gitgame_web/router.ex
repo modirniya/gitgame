@@ -16,6 +16,7 @@ defmodule GitGameWeb.Router do
     get "/session", PlayerController, :show
     delete "/session", PlayerController, :delete
 
+    get "/games", GameController, :index
     post "/games", GameController, :create
     get "/games/:id", GameController, :show
     get "/games/:id/days/:day", GameController, :day

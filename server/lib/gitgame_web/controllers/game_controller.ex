@@ -14,7 +14,10 @@ defmodule GitGameWeb.GameController do
 
   action_fallback GitGameWeb.FallbackController
 
-  plug :signed_in when action in [:create, :send_pack]
+  plug :signed_in when action in [:index, :create, :send_pack]
+
+  # Your games (M9c): the ones waiting on your pack first.
+  def index(conn, _params), do: json(conn, %{games: Games.list_for(conn.assigns.player.id)})
 
   # {"hotseat": ["raj"], "bots": ["bot"], "day_length": "live", "seed": 42}: you take the first seat, under your
   # handle; the people named in `hotseat` sit at your device, and you hold their seats too.

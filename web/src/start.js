@@ -4,6 +4,7 @@
 import { el } from "./dom.js";
 import { name } from "./brand.js";
 import { whoami } from "./whoami.js";
+import { gamesList } from "./games.js";
 
 const LENGTHS = [
   ["live", "live · 60s days"],
@@ -57,6 +58,14 @@ export function startScreen({ remote, go, me, failure = null, notice = "", signO
     }
   }
 
+  // your games arrive after the screen: a slow list never holds up "play the bot now"
+  const yours = el("div", {});
+  if (me)
+    remote.listGames().then(
+      (games) => yours.replaceChildren(gamesList(games) ?? ""),
+      () => {},
+    );
+
   const play = el("button", { class: "primary", disabled: !me, onclick: quick }, "play the bot now");
   const room = el("button", { disabled: !me, onclick: invite }, "invite someone");
 
@@ -84,6 +93,7 @@ export function startScreen({ remote, go, me, failure = null, notice = "", signO
     el("p", { class: "lede" }, "A card game about Git. Ship commits to main; survive push --force."),
     el("div", { class: "start-actions" }, play, room),
     error,
+    yours,
     el("details", { class: "more" }, el("summary", {}, "more: set up a game by hand"), form()),
   );
 

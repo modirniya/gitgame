@@ -115,9 +115,11 @@ Private rooms by link, and a game against the bot in one tap (charter priority 2
   - `POST /api/rooms` opens a room with you as its host. `GET /api/rooms/:code` shows it, `POST .../join` joins it, `PATCH` lets the host change the bots and day length, and `POST .../start` lets the host start the game: every member takes a seat under their handle, in the order they joined, then the bots.
   - A room is full at five seats, members and bots together, and is closed once started. `GET /api/rooms/:code/live` says `refetch` whenever it changes, and ends when the game starts.
 - [x] **M9b · Rooms in the client.** The start screen's first button plays the bot now, in one tap; the second opens a room and shows its link to share. The room screen lists who is in, lets the host set bots and start, and takes everyone to the game when it starts. The hotseat form stays, under "more".
-- [ ] **M9c · Your games.** `GET /api/games` lists the games you hold a seat in, and whether your pack is in for today; the start screen lists them, those waiting on you first.
+- [x] **M9c · Your games.** `GET /api/games` lists the games you hold a seat in, and whether your pack is in for today; the start screen lists them, those waiting on you first.
 
 *Done when:* one browser opens a room, a second opens its link and joins, the host starts, and both play the same game from their own seats, which a test does through the API; and a first visit reaches a game against the bot in one tap.
+
+*Met 2026-09-30.* `RoomControllerTest` plays a room from open to a closed day with two devices. By hand: a room opened in the browser, a second device joined by its code, and the host's screen showed them at once; the host started and both held their own seats; and "play the bot now" went from the start screen to a game in one tap.
 
 ### After M9
 

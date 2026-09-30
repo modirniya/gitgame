@@ -654,3 +654,33 @@ details.more summary {
   overflow-wrap: anywhere;
   color: var(--you);
 }
+
+/* ---------- your games ---------- */
+
+.your-games ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.your-games li {
+  display: grid;
+  padding: 8px 10px;
+  border-left: 3px solid var(--line);
+  background: var(--raised);
+  border-radius: 4px;
+}
+.your-games li.due {
+  border-left-color: var(--warn);
+}
+.your-games li.done {
+  opacity: 0.7;
+}
+.your-games .status {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.your-games li.due .status {
+  color: var(--warn);
+}

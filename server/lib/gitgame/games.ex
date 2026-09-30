@@ -126,6 +126,73 @@ defmodule GitGame.Games do
     end
   end
 
+  @doc """
+  The games `player_id` holds a seat in, as the list of your games shows them: those waiting on a pack of yours first
+  (soonest deadline first), then games under way, then finished ones (latest first). At most `limit`.
+  """
+  def list_for(player_id, limit \\ 20) do
+    # the most recent games first; finished ones beyond these fall off the list
+    ids =
+      Repo.all(
+        from s in Seat,
+          join: r in Record,
+          on: r.id == s.game_id,
+          where: s.player_id == ^player_id,
+          group_by: r.id,
+          order_by: [desc: r.inserted_at],
+          limit: ^(limit * 2),
+          select: r.id
+      )
+
+    yours =
+      Repo.all(
+        from s in Seat,
+          where: s.game_id in ^ids and s.player_id == ^player_id,
+          select: {s.game_id, s.seat}
+      )
+      |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+
+    Repo.all(from r in Record, where: r.id in ^ids)
+    |> Enum.map(&summary(&1, fold(&1, events(&1.id)), yours[&1.id]))
+    |> Enum.sort_by(&{rank(&1), &1.sort})
+    |> Enum.take(limit)
+    |> Enum.map(&Map.delete(&1, :sort))
+  end
+
+  defp summary(record, state, held) do
+    game = state.game
+    yours = Enum.filter(record.seats, &(&1 in held))
+
+    waiting =
+      if game.released,
+        do: [],
+        else: Enum.reject(yours, &(&1 in state.sent or game.players[&1].left))
+
+    %{
+      id: record.id,
+      seats: record.seats,
+      bots: record.bots,
+      yours: yours,
+      day: game.day,
+      final_day: game.final_day,
+      day_length: record.day_length,
+      deadline: if(game.released, do: nil, else: state.deadline),
+      released: game.released != nil,
+      waiting_on_you: waiting,
+      scores:
+        game |> GitGame.Release.scores() |> Map.new(fn {seat, score} -> {seat, score.total} end),
+      sort:
+        if(game.released,
+          do: -DateTime.to_unix(record.inserted_at, :microsecond),
+          else: DateTime.to_unix(state.deadline, :microsecond)
+        )
+    }
+  end
+
+  defp rank(%{released: true}), do: 2
+  defp rank(%{waiting_on_you: [_ | _]}), do: 0
+  defp rank(_), do: 1
+
   @doc "Stores `player`'s pack for the open day, replacing any earlier one. `json` is the pack as it arrived."
   def send_pack(id, player, version, json) do
     locked(id, fn record, state ->

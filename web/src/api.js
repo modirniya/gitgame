@@ -66,6 +66,9 @@ export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
         body: JSON.stringify({ hotseat, bots, day_length: dayLength, ...(seed != null && { seed }) }),
       }),
 
+    /** Your games (M9c): every game this device's player holds a seat in, those waiting on their pack first. */
+    listGames: () => call(fetcher, "/games").then((r) => r.games),
+
     /** The game from a seat this device holds (`seat`, or its first), or the table's view if it holds none. */
     fetchView: (id, seat) =>
       call(fetcher, `/games/${encodeURIComponent(id)}${seat ? `?seat=${encodeURIComponent(seat)}` : ""}`),
