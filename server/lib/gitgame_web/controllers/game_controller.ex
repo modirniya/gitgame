@@ -22,6 +22,15 @@ defmodule GitGameWeb.GameController do
   def create(_conn, _),
     do: {:error, :invalid, "a game is created with \"seats\": a list of 2 to 5 players"}
 
+  # ?player=ana: ana's view, with her cards. Until sign-in (M8) the table trusts the name, as a hotseat game does.
+  def show(conn, %{"id" => id, "player" => player}) do
+    with {:ok, id} <- uuid(id), {:ok, state} <- Games.load(id) do
+      if player in state.game.seats,
+        do: json(conn, View.for_player(state, id, player)),
+        else: {:error, :not_a_player, "fatal: #{player} is not in this game"}
+    end
+  end
+
   def show(conn, %{"id" => id}) do
     with {:ok, id} <- uuid(id),
          {:ok, state} <- Games.load(id),

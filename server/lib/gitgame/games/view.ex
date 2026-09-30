@@ -3,12 +3,15 @@ defmodule GitGame.Games.View do
   What everyone at the table may see of a game (round-resolution §4: `fetch` shows `main`, every pointer, who has sent
   today's pack, and the day logs). A face-down commit shows only what was announced when it was pushed: its author,
   files, lines and message; whether it is a bug shows only once it is flipped. Hands, staging areas and local branches
-  appear as counts. The per-viewer view, with your own cards and the day logs, is M6's.
+  appear as counts. `for_player/3` adds your own side of the table; the day logs come projected for the reader
+  (`GitGame.Games.Projection`), so nothing in either view is anything its reader couldn't see at a real table.
   """
   alias GitGame.{Game, Release}
+  alias GitGame.Games.Projection
 
   def public(%{game: %Game{} = game, version: version, sent: sent} = state, id) do
-    %{
+    logs(state, nil)
+    |> Map.merge(%{
       id: id,
       version: version,
       day: game.day,
@@ -23,6 +26,34 @@ defmodule GitGame.Games.View do
       main: Enum.map(game.main, &commit/1),
       players: Map.new(game.seats, &{&1, player(game, &1)}),
       scores: Release.scores(game)
+    })
+  end
+
+  @doc "The public view, plus `viewer`'s own cards, branch and traps, with the day logs as `viewer` may see them."
+  def for_player(%{game: %Game{} = game} = state, id, viewer) do
+    p = game.players[viewer]
+
+    state
+    |> public(id)
+    |> Map.merge(logs(state, viewer))
+    |> Map.put(:you, %{
+      player: viewer,
+      hand: p.hand,
+      staged: p.staged,
+      local: p.local,
+      armed: p.armed,
+      left: p.left
+    })
+  end
+
+  defp logs(state, viewer) do
+    %{
+      days:
+        Enum.map(
+          Map.get(state, :days, []),
+          &%{day: &1.day, log: Projection.events(&1.log, viewer)}
+        ),
+      today: Projection.events(Map.get(state, :opened, []), viewer)
     }
   end
 

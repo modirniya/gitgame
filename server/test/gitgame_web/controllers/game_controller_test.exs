@@ -91,4 +91,26 @@ defmodule GitGameWeb.GameControllerTest do
     assert %{"error" => _} =
              conn |> post(~p"/api/games/#{id}/packs", %{"ops" => []}) |> json_response(422)
   end
+
+  test "GET ?player= shows that player their own cards, and nobody else's", %{conn: conn} do
+    %{"id" => id} = create(conn)
+    ana = conn |> get(~p"/api/games/#{id}?player=ana") |> json_response(200)
+    raj = conn |> get(~p"/api/games/#{id}?player=raj") |> json_response(200)
+
+    assert %{"player" => "ana", "hand" => hand, "staged" => [], "local" => [], "armed" => []} =
+             ana["you"]
+
+    assert length(hand) == 7
+    raj_cards = Enum.map(raj["you"]["hand"], & &1["id"])
+    refute Enum.any?(raj_cards, &(inspect(ana) =~ ~s("#{&1}")))
+
+    # today's draw: ana sees her own cards, and only how many raj drew
+    assert %{"cards" => [_, _]} =
+             Enum.find(ana["today"], &(&1["type"] == "drew" and &1["player"] == "ana"))
+
+    assert %{"count" => 2} =
+             Enum.find(ana["today"], &(&1["type"] == "drew" and &1["player"] == "raj"))
+
+    assert %{"error" => _} = conn |> get(~p"/api/games/#{id}?player=kim") |> json_response(403)
+  end
 end
