@@ -12,26 +12,45 @@ defmodule GitGame.Games do
   push to a remote that has moved on.
   """
   import Ecto.Query
-  alias GitGame.{Game, Repo, Resolver, Rules}
-  alias GitGame.Games.{CloseDay, Event, Pack, Record}
+  alias GitGame.{Bot, Game, Repo, Resolver, Rules}
+  alias GitGame.Games.{CloseDay, Event, Pack, Record, View}
 
   # Seeds stay below 2^53, so they survive a round trip through JSON numbers in any client.
   @max_seed 9_007_199_254_740_991
   @stale "! [rejected]        main -> main (fetch first)"
 
-  @doc "A new game for `seats`, with the rules as they are now. Options: `:day_length` (default \"live\"), `:seed`."
+  @doc """
+  A new game for `seats`, with the rules as they are now. Options: `:day_length` (default "live"), `:seed`, and
+  `:bots`, the seats a bot plays. A bot sends its pack the moment each day opens, so a game of bots alone plays itself
+  to the release as soon as it is created.
+  """
   def create(seats, opts \\ []) do
     maps = Rules.read_maps!()
     rules = Rules.from_maps!(maps["deck"], maps["online"])
     length = Keyword.get(opts, :day_length, "live")
     seed = Keyword.get_lazy(opts, :seed, fn -> :rand.uniform(@max_seed) end)
+    bots = Keyword.get(opts, :bots, [])
 
-    with :ok <- check_new(rules, seed, seats, length) do
+    with :ok <- check_new(rules, seed, seats, length),
+         :ok <-
+           if(bots -- seats == [],
+             do: :ok,
+             else: {:error, :invalid, "fatal: every bot must have a seat"}
+           ) do
       Repo.transaction(fn ->
-        record = Repo.insert!(%Record{seed: seed, seats: seats, day_length: length, rules: maps})
+        record =
+          Repo.insert!(%Record{
+            seed: seed,
+            seats: seats,
+            day_length: length,
+            rules: maps,
+            bots: bots
+          })
+
         created = Repo.insert!(%Event{game_id: record.id, seq: 1, type: "game_created", day: 0})
         schedule_close(record.id, 1, deadline(created.inserted_at, rules, length))
-        %{id: record.id, version: 1}
+        send_bot_packs(record)
+        %{id: record.id, version: fold(record, events(record.id)).version}
       end)
     end
   end
@@ -113,10 +132,26 @@ defmodule GitGame.Games do
     after_close = fold(record, events(record.id))
 
     # The next day's deadline is scheduled in the transaction that opens the day, unless the game just ended.
-    unless after_close.game.released,
-      do: schedule_close(record.id, after_close.game.day, after_close.deadline)
+    unless after_close.game.released do
+      schedule_close(record.id, after_close.game.day, after_close.deadline)
+      send_bot_packs(record)
+    end
 
     {:ok, %{day: state.game.day, version: seq, already_closed: false, closed: true}}
+  end
+
+  # Each bot still in the game writes its pack from its own view, exactly what a person in its seat would see, and
+  # sends it through the same door as anyone's. The state is folded afresh for each: a bot's pack can close the day.
+  defp send_bot_packs(record) do
+    for bot <- record.bots do
+      state = fold(record, events(record.id))
+      p = state.game.players[bot]
+
+      unless state.game.released || p.left || bot in state.sent do
+        pack = state |> View.for_player(record.id, bot) |> Bot.write_pack()
+        {:ok, _} = store_pack(record, state, bot, pack)
+      end
+    end
   end
 
   defp everyone_sent?(state),

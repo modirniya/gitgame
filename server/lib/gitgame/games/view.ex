@@ -6,7 +6,7 @@ defmodule GitGame.Games.View do
   appear as counts. `for_player/3` adds your own side of the table; the day logs come projected for the reader
   (`GitGame.Games.Projection`), so nothing in either view is anything its reader couldn't see at a real table.
   """
-  alias GitGame.{Game, Release}
+  alias GitGame.{Game, Release, Resolver}
   alias GitGame.Games.Projection
 
   def public(%{game: %Game{} = game, version: version, sent: sent} = state, id) do
@@ -17,6 +17,11 @@ defmodule GitGame.Games.View do
       day: game.day,
       final_day: game.final_day,
       day_length: game.length,
+      # what's on the table for today: the budget the incident allows, whether command cards may be played
+      budget: Resolver.budget(game),
+      commands_allowed: not match?(%{effect: %{kind: :no_commands}}, game.incident),
+      release_at: game.rules.release_at[length(game.seats)],
+      hand_limit: game.rules.hand_limit,
       # when the open day closes if not every pack is in first; nil once the game is over
       deadline: if(game.released, do: nil, else: state[:deadline]),
       incident: game.incident && Map.take(game.incident, [:id, :name, :text]),

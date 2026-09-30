@@ -9,6 +9,7 @@ defmodule GitGame.Games.Record do
     field :seats, {:array, :string}
     field :day_length, :string
     field :rules, :map
+    field :bots, {:array, :string}, default: []
     timestamps()
   end
 end
