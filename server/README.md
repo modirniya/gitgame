@@ -43,13 +43,13 @@ JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has
 
 ## Linking GitHub
 
-Anonymous play needs nothing. To let players link GitHub, create a GitHub OAuth app whose callback URL is the address people reach the game at plus `/api/auth/github/callback` (in development, `http://localhost:5173/api/auth/github/callback`, since the Vite server proxies `/api` here), and start the server with its credentials:
+Anonymous play needs nothing. To let players link GitHub in development, create a GitHub OAuth app whose callback URL is `http://localhost:5173/api/auth/github/callback` (the Vite server proxies `/api` here), and start the server with its credentials:
 
 ```bash
 GITGAME_GITHUB_CLIENT_ID=... GITGAME_GITHUB_CLIENT_SECRET=... mix phx.server
 ```
 
-The tests never reach GitHub: `test/support/github_stub.ex` stands in for it.
+A GitHub OAuth app has one callback URL, so production has an app of its own ("Turning on the optional features", below). The tests never reach GitHub: `test/support/github_stub.ex` stands in for it.
 
 ## The beta report
 
@@ -71,28 +71,88 @@ The root `Dockerfile` builds the whole game into one image: the web client, the 
 | `PHX_HOST` | the host people reach the game at, e.g. `gitgame.online` |
 | `PORT` | where it listens (default 4000) |
 | `GITGAME_GITHUB_CLIENT_ID`, `GITGAME_GITHUB_CLIENT_SECRET` | optional: linking GitHub |
-| `GITGAME_SMTP_RELAY`, `GITGAME_SMTP_PORT`, `GITGAME_SMTP_USERNAME`, `GITGAME_SMTP_PASSWORD` | optional: reminders by email and the daily digest, through any SMTP provider (TLS always); in development emails are written to the log |
+| `GITGAME_SMTP_RELAY`, `GITGAME_SMTP_PORT`, `GITGAME_SMTP_USERNAME`, `GITGAME_SMTP_PASSWORD` | optional: reminders by email and the daily digest, through any SMTP provider that takes STARTTLS (port 587 unless `GITGAME_SMTP_PORT` says otherwise; port 465's implicit TLS doesn't work), sent from `Git Game <play@gitgame.online>`; in development emails are written to the log |
 | `GITGAME_VAPID_PUBLIC_KEY`, `GITGAME_VAPID_PRIVATE_KEY`, `GITGAME_VAPID_SUBJECT` | optional: reminders by Web Push; `mix gitgame.vapid_keys` makes a pair, and changing it later unsubscribes every browser |
 
-Behind a proxy, the proxy must terminate TLS and pass on `x-forwarded-proto`. Without Docker, the same release is `MIX_ENV=prod mix release`, once `web/dist/` has been copied into `priv/static/` and `rules/` into `priv/rules/` (see the `Dockerfile`), then `bin/migrate` and `bin/server`. Where it runs is M11's decision; CI builds the image and plays a game against it on every pull request.
+Behind a proxy, the proxy must terminate TLS and pass on `x-forwarded-proto`. Without Docker, the same release is `MIX_ENV=prod mix release`, once `web/dist/` has been copied into `priv/static/` and `rules/` into `priv/rules/` (see the `Dockerfile`), then `bin/migrate` and `bin/server`. It runs on Fly.io (below); CI builds the image and plays a game against it on every pull request.
 
 ## Deploying (Fly.io)
 
-The beta runs on Fly.io ([ADR-0007](../docs/adr/0007-where-the-beta-runs.md)), configured by the root `fly.toml` and deployed by `.github/workflows/deploy.yml` when a `v*` tag is pushed ([workflow.md](../docs/workflow.md), releases). Setting it up once needs the maintainer's Fly account:
+The beta runs on Fly.io ([ADR-0007](../docs/adr/0007-where-the-beta-runs.md)), configured by the root `fly.toml` and deployed by `.github/workflows/deploy.yml` when a `v*` tag is pushed ([workflow.md](../docs/workflow.md), releases). It was set up once, on 2026-09-30, from the maintainer's Fly account:
 
-1. **The app.** `fly apps create gitgame` (or another free name, then change `app` in `fly.toml`). Check `primary_region` in `fly.toml` is near the first players (`fly platform regions`).
-2. **The database.** Create a Fly Managed Postgres cluster and attach it to the app, which sets `DATABASE_URL` as a secret. The commands are in Fly's own documentation, since its Postgres CLI changes; confirm the backup terms while there (ADR-0007).
-3. **The secrets.** In the same `fly secrets set` call:
-   - `SECRET_KEY_BASE=$(mix phx.gen.secret)`;
-   - the VAPID pair from `mix gitgame.vapid_keys`, with `GITGAME_VAPID_SUBJECT=mailto:` and a real address;
-   - `GITGAME_SMTP_*` from the email provider;
-   - `GITGAME_GITHUB_CLIENT_ID` and `GITGAME_GITHUB_CLIENT_SECRET` from a GitHub OAuth app whose callback is `https://gitgame.online/api/auth/github/callback`.
-   Each is optional except the first two; without one, that feature is off.
-4. **The domain.** `fly certs add gitgame.online`, and the DNS records it asks for.
-5. **Deploys.** `fly tokens create deploy`, stored in the repository as the secret `FLY_API_TOKEN` (`gh secret set FLY_API_TOKEN`).
-6. **A release.** Follow [workflow.md](../docs/workflow.md): move *Unreleased* in the changelog under a version, commit `chore(release): vX.Y.Z`, then tag and push the tag. The workflow deploys it, migrations run first, and it checks `https://gitgame.online/api/health`.
+- **The app** is `gitgame-online` ("gitgame" was taken), in `lax`.
+- **The database** is `gitgame`, with a user of its own that isn't a superuser, on the existing Postgres app `rps-db` ([ADR-0008](../docs/adr/0008-the-beta-shares-a-postgres.md)). Its `DATABASE_URL` is a secret of the app, over Fly's private network (`rps-db.flycast`, IPv6, hence `ECTO_IPV6` in `fly.toml`).
+- **`SECRET_KEY_BASE`** is a secret of the app (`mix phx.gen.secret`).
+- **The domain:** `fly certs add gitgame.online`, and the DNS records it asked for (`fly certs show gitgame.online -a gitgame-online`).
+- **Deploys:** a deploy token (`fly tokens create deploy`) in the repository's secret `FLY_API_TOKEN`.
+
+**A release.** Follow [workflow.md](../docs/workflow.md): move *Unreleased* in the changelog under a version, commit `chore(release): vX.Y.Z`, then tag and push the tag. The workflow deploys it, migrations run first, and it checks `https://gitgame.online/api/health`.
 
 Behind Fly's proxy the server reads who asked from `fly-client-ip`, so the rate limits count people, not the proxy.
+
+### Turning on the optional features
+
+Each is off until its secrets are set, and each is set with `fly secrets set`, run from the repository root. Setting secrets restarts the app's machine with them, on the image it already runs: nothing from `main` is deployed. `fly secrets list -a gitgame-online` shows which are set, never their values.
+
+#### GitHub sign-in
+
+1. Create an OAuth app at https://github.com/settings/applications/new (or under an organization: Settings → Developer settings → OAuth Apps):
+   - **Application name:** `Git Game`
+   - **Homepage URL:** `https://gitgame.online`
+   - **Authorization callback URL:** `https://gitgame.online/api/auth/github/callback`
+   - **Enable Device Flow:** off.
+2. On the app's page, copy the **Client ID**, then **Generate a new client secret** and copy it (GitHub shows it once).
+3. Set both:
+
+   ```bash
+   fly secrets set -a gitgame-online GITGAME_GITHUB_CLIENT_ID=<client id> GITGAME_GITHUB_CLIENT_SECRET=<client secret>
+   ```
+
+4. Try it. Open https://gitgame.online: "link GitHub" is now beside your handle. Tap it; GitHub asks for no scopes, only your public profile, and you come back with your login and avatar. Open the site in a second browser, link the same account there, and the first browser's games are listed.
+
+#### Email reminders (SMTP)
+
+Emails come from `Git Game <play@gitgame.online>` (`GitGame.Mailer.from/0`), so the provider must be allowed to send for `gitgame.online`. Which provider is the maintainer's choice ([ADR-0006](../docs/adr/0006-notifications-web-push-and-email.md): the provider is configuration). It needs SMTP submission with **STARTTLS on port 587**, and a username and password: the server always upgrades to TLS and always logs in, and port 465's implicit TLS won't work.
+
+1. In the provider, add `gitgame.online` as a sending domain. At gitgame.online's DNS host, add the records it gives, beside the A and AAAA records Fly's certificate uses (leave those as they are):
+   - **SPF:** a TXT record on `gitgame.online`: `v=spf1 include:<the provider's SPF domain> ~all`. A name has one SPF record: if one exists, add the `include:` to it.
+   - **DKIM:** the provider's records, usually CNAME or TXT records at `<selector>._domainkey.gitgame.online`.
+   - **DMARC:** a TXT record on `_dmarc.gitgame.online`: `v=DMARC1; p=none`, to begin with. Tighten it to `p=quarantine` once the provider shows mail passing.
+   - A bounce (Return-Path) CNAME, if the provider asks for one.
+
+   Wait until the provider shows the domain as verified; `dig +short TXT gitgame.online` and `dig +short TXT _dmarc.gitgame.online` show what DNS says. Sending needs no MX record, and nothing receives mail sent to `play@gitgame.online`.
+2. Make SMTP credentials in the provider, and set them:
+
+   ```bash
+   fly secrets set -a gitgame-online GITGAME_SMTP_RELAY=<smtp host> GITGAME_SMTP_PORT=587 GITGAME_SMTP_USERNAME=<username> GITGAME_SMTP_PASSWORD=<password>
+   ```
+
+3. Try it. "reminders by email" now appears on the start screen. Give an address you read, and the confirmation arrives from `play@gitgame.online`: check it isn't in spam, and that its headers say `spf=pass` and `dkim=pass`. Its link brings you back with the address confirmed. Then try a reminder (below). Every email after the confirmation has an unsubscribe link and a one-click `List-Unsubscribe` header. The digest, for players who choose it, goes at 08:00 UTC.
+
+#### Push reminders (Web Push)
+
+1. See whether push is on: `curl -s -o /dev/null -w '%{http_code}\n' https://gitgame.online/api/push` prints `200` if it is, `404` if not.
+2. If not, make a key pair and set it, with an address you read as the subject (push services write to it if something is wrong):
+
+   ```bash
+   cd server && mix gitgame.vapid_keys
+   fly secrets set -a gitgame-online GITGAME_VAPID_PUBLIC_KEY=<public key> GITGAME_VAPID_PRIVATE_KEY=<private key> GITGAME_VAPID_SUBJECT=mailto:<address>
+   ```
+
+   Changing the pair later unsubscribes every browser. Without `GITGAME_VAPID_SUBJECT`, the subject is `mailto:hello@gitgame.online`, and nothing receives mail there.
+3. Use a browser that takes push:
+   - Chrome, Edge or Firefox, on a computer or Android;
+   - Safari on a Mac;
+   - on an iPhone or iPad, only from the Home Screen (Share → Add to Home Screen, iOS 16.4 or later), not in a Safari tab.
+
+#### Trying a reminder
+
+Reminders go only in games with 24-hour days: one when a day opens, and one when a quarter of it is left, at most one per game a day on each channel.
+
+1. On https://gitgame.online, open "more: set up a game by hand". Choose 1 bot and "correspondence · 24h days", then tap `git init`.
+2. Write a pack and send it. The bot's pack is already in, so the day closes and the next one opens at once.
+3. For push: tap "remind me when my pack is due", below "send pack", and allow notifications. It turns into "reminders are on".
+4. Send the next day's pack. The day after it opens at once, and so does its reminder: a push notification ("your pack is due"), and an email if a confirmed address takes one per game. Tapping either opens the game, and the beta report counts the visit as one that came from a notification.
 
 ## Before you push
 
