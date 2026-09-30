@@ -1,0 +1,22 @@
+{
+  "name": "gitgame-web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "The terminal: the web client for the remote in ../server.",
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "jsdom": "^30.1.1",
+    "prettier": "^3.9.9",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  }
+}

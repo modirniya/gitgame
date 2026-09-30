@@ -20,6 +20,7 @@ Every document in `docs/` starts with a status line like the one above. The stat
 | [design/phase-1-plan.md](design/phase-1-plan.md) | The build plan from rules v0.2 to the beta: milestones, what each must show before it counts as done, and open items. |
 | [../rules/deck.json](../rules/deck.json) · [../tabletop/](../tabletop/README.md) | The physical deck as data, and the print-and-play built from it. |
 | [../prototypes/](../prototypes/README.md) | Throwaway experiments and what they found. |
+| [../server/](../server/README.md) · [../web/](../web/README.md) | The remote (Elixir/Phoenix) and the terminal (the web client): how to run each. |
 
 ## How we work
 

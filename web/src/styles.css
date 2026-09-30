@@ -1,0 +1,313 @@
+/* The terminal (charter decision 14) on the screen spec's visual language (event-screens §4): monospace, a dark
+   ground by default and a warm light one on request, the deck's file colors on the cards, phone-shaped from 360 px
+   and wider from 600 px. Semantic colors only ever mean one thing: red a rejection or a bug, green accepted, amber a
+   warning. */
+
+:root {
+  --ground: #14161a;
+  --raised: #1d2026;
+  --line: #2c3038;
+  --ink: #e6e3dc;
+  --muted: #8a8f99;
+  --you: #3ec1b3;
+  --other: #a88bfa;
+  --ok: #5ec27a;
+  --reject: #f0605d;
+  --warn: #e9a83b;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --ground: #f4f1ea;
+    --raised: #fffdf8;
+    --line: #ddd7cb;
+    --ink: #22201c;
+    --muted: #6f6a60;
+    --ok: #2f8f4e;
+    --reject: #c8322f;
+    --warn: #a86a00;
+    color-scheme: light;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 15px/1.45 var(--mono);
+  /* `--force` must read as two hyphens, as it does in a real terminal */
+  font-variant-ligatures: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+}
+
+h1,
+h2 {
+  font-size: 1rem;
+  margin: 0 0 8px;
+}
+h1 {
+  font-size: 1.6rem;
+}
+h1::before {
+  content: "$ ";
+  color: var(--you);
+}
+
+a {
+  color: var(--you);
+}
+.muted,
+.lede {
+  color: var(--muted);
+}
+.error {
+  color: var(--reject);
+  min-height: 1.45em;
+  white-space: pre-wrap;
+}
+
+/* ---------- forms ---------- */
+
+form {
+  display: grid;
+  gap: 6px;
+}
+label {
+  color: var(--muted);
+  margin-top: 8px;
+}
+input,
+select,
+button {
+  font: inherit;
+  color: inherit;
+  min-height: 44px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--raised);
+  padding: 0 12px;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+button.primary {
+  background: var(--you);
+  border-color: var(--you);
+  color: var(--ground);
+  font-weight: 700;
+}
+:focus-visible {
+  outline: 2px solid var(--you);
+  outline-offset: 2px;
+}
+
+/* ---------- cards ---------- */
+
+.card {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: none;
+  width: 96px;
+  height: 134px;
+  padding: 14px 8px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--raised);
+  color: var(--ink);
+  text-align: left;
+  overflow: hidden;
+}
+.card .band {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 8px;
+  background: var(--band, var(--muted));
+}
+.card .file {
+  font-size: 0.75rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.card .big {
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+.card.command .big {
+  font-size: 0.95rem;
+}
+.card .bug {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: var(--reject);
+  color: var(--ground);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.card.selected {
+  border-color: var(--you);
+  box-shadow: 0 0 0 2px var(--you);
+  transform: translateY(-8px);
+}
+
+.card.strip {
+  width: 64px;
+  height: 90px;
+  padding: 10px 5px 5px;
+}
+.card.strip .big {
+  font-size: 1.1rem;
+}
+.card.strip .file,
+.card.strip .author {
+  font-size: 0.6rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card.down {
+  background: repeating-linear-gradient(135deg, var(--raised) 0 6px, var(--line) 6px 7px);
+}
+.card.bug {
+  border-color: var(--reject);
+}
+.card.overwritten .big,
+.card.reverted .big {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+.card.tip {
+  border-color: var(--ink);
+}
+.card.pickable {
+  border-color: var(--warn);
+  box-shadow: 0 0 0 2px var(--warn);
+}
+.card.initial {
+  justify-content: center;
+  align-items: center;
+  color: var(--muted);
+}
+
+/* ---------- the table ---------- */
+
+.table header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.table .incident {
+  color: var(--warn);
+}
+
+ol.strip {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 8px 0 4px;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+ol.strip li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  scroll-snap-align: end;
+}
+.pointers {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 1.2em;
+}
+.chip {
+  font-size: 0.65rem;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: var(--other);
+  color: var(--ground);
+}
+.chip.you {
+  background: var(--you);
+}
+
+ol.seats {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+.seat {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 8px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--other);
+  background: var(--raised);
+  border-radius: 4px;
+}
+.seat.you {
+  border-left-color: var(--you);
+}
+.seat.left {
+  opacity: 0.55;
+}
+.seat .who {
+  font-weight: 700;
+}
+.seat .score {
+  font-weight: 700;
+  text-align: right;
+}
+.seat .facts,
+.seat .sent {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* ---------- the hand ---------- */
+
+.hand .cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+@media (min-width: 600px) {
+  #app {
+    max-width: 640px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

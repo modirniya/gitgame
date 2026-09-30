@@ -1,8 +1,9 @@
 # CI: the checks a pull request must pass before review (docs/workflow.md: "CI must pass").
-# Two jobs. The prototypes' smoke tests: the mobile one plays 800 games against the bot through the pure engine,
+# Three jobs. The prototypes' smoke tests: the mobile one plays 800 games against the bot through the pure engine,
 # replays each from its seed, renders every screen for every event, and walks the guided game; the packs one checks
 # the online resolver's rules and plays 480 simulated games. They need only node. The server job formats, compiles
 # with warnings as errors, and tests the Elixir app against a real Postgres, since every game is an event log there.
+# The web job checks the client's formatting, runs its tests and builds it.
 name: ci
 
 on:
@@ -68,3 +69,22 @@ jobs:
       - run: mix format --check-formatted
       - run: mix compile --warnings-as-errors
       - run: mix test
+
+  web:
+    name: web format, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm test
+      - run: npm run build
