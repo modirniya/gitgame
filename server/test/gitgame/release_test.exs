@@ -35,6 +35,11 @@ defmodule GitGame.ReleaseTest do
 
     assert {:failed, ^game, [%{message: "error: main has 9 commits; v1.0 needs 10"}]} =
              Ops.run(game, "ana", %{op: :tag})
+
+    one = game_with(rules, filler(1))
+
+    assert {:failed, _, [%{message: "error: main has 1 commit; v1.0 needs 10"}]} =
+             Ops.run(one, "ana", %{op: :tag})
   end
 
   test "tag at the release size runs CI: every commit face-up, unblamed live bugs counted once",

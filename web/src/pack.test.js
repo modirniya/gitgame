@@ -93,6 +93,7 @@ describe("what the hub offers", () => {
     expect(a.force).toBeNull(); // ana holds a force card and is 1 behind
     expect(a.blame).toBe("no git blame card");
     expect(a.tag).toBe("main has 2 commits; v1.0 needs 10");
+    expect(actions(view({ main: view().main.slice(0, 2) }), []).tag).toBe("main has 1 commit; v1.0 needs 10");
   });
 
   it("closes command cards on a day that forbids them", () => {

@@ -7,6 +7,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Fixed
+- "main has 1 commits": the tag's reason and its error now say "1 commit".
+
 ## [0.1.1] - 2026-09-30
 
 Fixes found playing the live site as a newcomer would.
