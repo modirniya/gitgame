@@ -83,7 +83,7 @@ The charter's exit: *a full game can be played and replayed from its log.*
 
 Rough until Phase 1 is done; each needs its details written before it starts.
 
-- **M8 · Identity:** GitHub OAuth, with anonymous play as the fallback and a nudge to link (charter decision 15). This needs the RPS auth code the charter lifts, or an ADR to write it fresh.
+- **M8 · Identity:** GitHub OAuth, with anonymous play as the fallback and a nudge to link (charter decision 15). Written fresh, without Firebase, per [ADR-0005](../adr/0005-sign-in-written-fresh.md): players and server-side sessions, with seats owned by players.
 - **M9 · Rooms:** private rooms by link, invites, and quick "play the bot now" (charter priority 2: a game in five seconds).
 - **M10 · Notifications:** push, email and the daily digest; "your pack is due" is the retention loop (charter decision 16).
 - **M11 · Hosting:** an ADR choosing the host (none is chosen yet), then deploy from tags, never branches ([workflow.md](../workflow.md)).
@@ -93,6 +93,6 @@ Rough until Phase 1 is done; each needs its details written before it starts.
 ## Open items
 
 - [x] **Merging:** branch protection needs a review the maintainer can't give on their own PRs. Decided 2026-09-29: PRs are squash-merged with `--admin` once CI passes, and the maintainer is told what merged.
-- [ ] **RPS and PlayLounge:** the charter lifts auth, the FCM notifier and the client skeleton from them. Where they are is needed by M8.
+- [ ] **RPS and PlayLounge:** the charter lifts the FCM notifier and the client skeleton from them. Where they are is needed by M10. Sign-in no longer comes from RPS ([ADR-0005](../adr/0005-sign-in-written-fresh.md)).
 - [ ] **Hosting:** chosen by ADR before M11.
 - [ ] **Playtest question 3** (bot-authored packs for absent players): the beta's to answer; M5 makes empty packs the default.
