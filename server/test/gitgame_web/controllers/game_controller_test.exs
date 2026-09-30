@@ -113,4 +113,69 @@ defmodule GitGameWeb.GameControllerTest do
 
     assert %{"error" => _} = conn |> get(~p"/api/games/#{id}?player=kim") |> json_response(403)
   end
+
+  describe "bots (charter decision 12)" do
+    test "a game of bots plays itself to the release through the API alone", %{conn: conn} do
+      game =
+        conn
+        |> post(~p"/api/games", %{
+          "seats" => ["hal", "eve"],
+          "bots" => ["hal", "eve"],
+          "seed" => 7
+        })
+        |> json_response(201)
+
+      assert %{"released" => %{"production_down" => _}} = game
+      assert length(game["days"]) <= game["final_day"]
+    end
+
+    test "a person plays a bot through the API: each pack sent closes the day, since the bot has already sent",
+         %{conn: conn} do
+      %{"id" => id} =
+        conn
+        |> post(~p"/api/games", %{"seats" => ["ana", "bot"], "bots" => ["bot"], "seed" => 7})
+        |> json_response(201)
+
+      final = play_as_ana(conn, id, 0)
+
+      assert final["released"]
+
+      assert Enum.any?(final["days"], fn day ->
+               Enum.any?(day["log"], &(&1["player"] == "bot" and &1["type"] == "push_accepted"))
+             end)
+    end
+
+    test "a bot must have a seat", %{conn: conn} do
+      assert %{"error" => "fatal: every bot must have a seat"} =
+               conn
+               |> post(~p"/api/games", %{"seats" => ["ana", "raj"], "bots" => ["hal"]})
+               |> json_response(422)
+    end
+  end
+
+  # ana ships her biggest card every day, the way a script calling the API would.
+  defp play_as_ana(conn, id, day) do
+    view = conn |> get(~p"/api/games/#{id}?player=ana") |> json_response(200)
+
+    if view["released"] || day > 20 do
+      view
+    else
+      card =
+        view["you"]["hand"]
+        |> Enum.filter(&(&1["kind"] == "commit"))
+        |> Enum.max_by(& &1["lines"], fn -> nil end)
+
+      build =
+        if card, do: [%{"op" => "add", "cards" => [card["id"]]}, %{"op" => "commit"}], else: []
+
+      body = %{
+        "player" => "ana",
+        "version" => view["version"],
+        "ops" => [%{"op" => "pull"}, %{"op" => "push"}] ++ build
+      }
+
+      conn |> post(~p"/api/games/#{id}/packs", body) |> json_response(202)
+      play_as_ana(conn, id, day + 1)
+    end
+  end
 end

@@ -119,8 +119,9 @@ defmodule GitGame.Resolver do
   end
 
   # The day's ops budget: the rules' budget, unless the incident says otherwise (Standup Ran Long, Hackathon).
-  defp budget(%Game{incident: %{effect: %{kind: :ops, ops: ops}}}), do: ops
-  defp budget(game), do: game.rules.ops_budget
+  @doc "The day's ops budget: the rules' budget, unless the incident says otherwise."
+  def budget(%Game{incident: %{effect: %{kind: :ops, ops: ops}}}), do: ops
+  def budget(game), do: game.rules.ops_budget
 
   defp run_pack(game, id, pack, log) do
     opened = %{type: :pack_opened, player: id, budget: budget(game), ops: length(pack.ops)}

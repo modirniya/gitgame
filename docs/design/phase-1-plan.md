@@ -64,8 +64,8 @@ The charter's exit: *a full game can be played and replayed from its log.*
 
 ### M6 · Views and bots
 - [x] A per-viewer projection of state and events (`GitGame.Games.Projection`, `View.for_player/3`, `GET /api/games/:id?player=`). Another player's hand, staged cards, hidden bugs and armed traps appear only as counts; a property test checks that no view ever contains another player's private data.
-- [ ] `GitGame.Bot` writes a day's pack from the viewer's own projection, never the full state. It writes a defensive pull before every push and force-pushes over a single big commit when it holds the card (the packs prototype's v0.2 finding), so solo players meet the reflog moment.
-- [ ] A game can be created with bots in any seat.
+- [x] `GitGame.Bot` writes a day's pack from the viewer's own projection, never the full state, as JSON through the same door as anyone's. It writes a defensive pull before every push and force-pushes over a single big commit when it holds the card (the packs prototype's v0.2 finding), so solo players meet the reflog moment.
+- [x] A game can be created with bots in any seat (`bots` on `POST /api/games`). A bot sends its pack the moment each day opens; with batching (ADR-0003) that costs it nothing.
 
 *Done when:* a bot-vs-bot game plays to the release through the API alone, and a human-vs-bot game can be played by a script calling the API.
 

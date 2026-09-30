@@ -50,5 +50,7 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - Per-player views (M6a): `GET /api/games/:id?player=ana` shows ana her own hand, staging area, local branch and traps, and every day log as she may see it: others' draws, staged cards and hand-limit discards as counts, their commits as "committed", their traps not at all, and a failed local op without the message that would name their cards. A property test checks, over generated games, that no view ever names another player's private card or trap, or says whether a face-down commit is a bug.
 
+- Bots (M6b): `GitGame.Bot` writes a day's pack from its own view only, as the same JSON a client sends, playing the policy the simulations found (a pull before every push, declared conflict strategies, blame, revert, force-push over one big commit, arming reflog). `POST /api/games` takes `bots`; a bot sends its pack as each day opens, so a game of bots plays itself out at once.
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.

@@ -11,7 +11,7 @@ defmodule GitGameWeb.GameController do
 
   def create(conn, %{"seats" => seats} = params) when is_list(seats) do
     opts =
-      [day_length: Map.get(params, "day_length", "live")] ++
+      [day_length: Map.get(params, "day_length", "live"), bots: List.wrap(params["bots"])] ++
         if(is_integer(params["seed"]), do: [seed: params["seed"]], else: [])
 
     with {:ok, %{id: id}} <- Games.create(seats, opts), {:ok, state} <- Games.load(id) do
