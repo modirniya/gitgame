@@ -3,6 +3,7 @@
 // editor writes first), send; then, the next day, what the day did. A player's first game is guided; the guide can
 // be skipped at any step, and is gone for good once the second day has been explained.
 import { el } from "./dom.js";
+import { price } from "./pack.js";
 
 /**
  * The step for `view` and the pack being written: `{target, text}`, where `target` is what to highlight (a card's id,
@@ -26,7 +27,15 @@ export function guideStep(view, draft) {
     }
     if (!ops.includes("commit"))
       return { target: "commit", text: "Commit it: one commit on your own branch. Nobody else sees it yet." };
-    if (!ops.includes("push"))
+    // a short day (Standup Ran Long: 2 ops) is spent by add and commit, and a push past the budget doesn't run
+    const { rows, spent } = price(view, draft.ops);
+    const push = rows.find((r) => r.op.op === "push");
+    if (push ? !push.runs : spent + view.costs.ops.push > view.budget)
+      return {
+        target: "send",
+        text: `Only ${view.budget} ops today, and they're spent: your commit waits on your branch, to push another day. Send your pack.`,
+      };
+    if (!push)
       return {
         target: "push",
         text: "Push it to main. If the bot pushes first, your push is rejected; watch what gets written first.",
