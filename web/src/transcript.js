@@ -6,7 +6,7 @@ import { el } from "./dom.js";
  * One moment's lines. A moment that isn't a command (a draw, an absence) is a comment, `# raj sent no pack today`, as
  * a shell would print it; one with nothing to print (the incident, CI) is left to its screen.
  */
-export function lines(m, you) {
+export function lines(m, you, { why = true } = {}) {
   const mine = m.player === you;
   const cls = `lines${m.tone ? ` ${m.tone}` : ""}${mine ? " mine" : ""}`;
 
@@ -20,6 +20,7 @@ export function lines(m, you) {
     { class: cls },
     el("div", { class: "prompt" }, el("span", { class: "who" }, `${m.player}@main`), " $ ", m.command),
     m.output.map((line) => el("div", { class: "out" }, line)),
+    why && m.why && el("div", { class: "note" }, `# ${m.why}`),
   );
 }
 

@@ -12,6 +12,10 @@ defmodule GitGame.Bot do
   - force-push over even one big commit of someone else's (with batching, waiting to be two behind never comes);
   - tag once `main` is the release size and it is not behind on points;
   - arm a `reflog` whenever it holds one.
+
+  Each op carries a `why` (M14b), which everyone at the table reads beside the bot's command, so a why says only what
+  anyone could see: the ops themselves, `main`, whether the bot was behind. Never its hand, and never whether its own
+  face-down commit is a bug.
   """
 
   @messages %{
@@ -77,7 +81,13 @@ defmodule GitGame.Bot do
 
     if commits >= s.view.release_at and scores[s.me].total >= Enum.max(others, fn -> 0 end) do
       s = if s.you.local != [], do: s |> pull() |> push(), else: s
-      s |> add(%{"op" => "tag"}, 1) |> Map.put(:done, true)
+
+      s
+      |> add(
+        %{"op" => "tag", "why" => "main is the size of a release, and it isn't behind on points"},
+        1
+      )
+      |> Map.put(:done, true)
     else
       s
     end
@@ -93,7 +103,16 @@ defmodule GitGame.Bot do
 
     if commands?(s, "force") and s.you.local != [] and s.pub.behind >= 1 and
          Enum.any?(ahead, &(&1.lines >= 4)),
-       do: s |> add(%{"op" => "force"}, 1) |> Map.merge(%{pushing: true, forced: true}),
+       do:
+         s
+         |> add(
+           %{
+             "op" => "force",
+             "why" => "someone else's big commit is ahead of it: it overwrites main"
+           },
+           1
+         )
+         |> Map.merge(%{pushing: true, forced: true}),
        else: s
   end
 
@@ -103,7 +122,7 @@ defmodule GitGame.Bot do
   defp ship(s) do
     cond do
       s.you.local != [] -> s |> pull() |> push()
-      s.pub.behind > 0 and s.left >= 3 -> pull(s)
+      s.pub.behind > 0 and s.left >= 3 -> pull(s, "main has moved: it catches up")
       true -> s
     end
   end
@@ -120,7 +139,16 @@ defmodule GitGame.Bot do
       |> Enum.max_by(& &1.lines, fn -> nil end)
 
     if (commands?(s, "blame") and target) && target.lines >= 5,
-      do: add(s, %{"op" => "blame", "target" => target.id}, 1),
+      do:
+        add(
+          s,
+          %{
+            "op" => "blame",
+            "target" => target.id,
+            "why" => "it blames the biggest face-down commit on main"
+          },
+          1
+        ),
       else: s
   end
 
@@ -137,7 +165,16 @@ defmodule GitGame.Bot do
     at_tip = s.pub.behind == 0 or s.pulled
 
     if (commands?(s, "revert") and own) && at_tip,
-      do: add(s, %{"op" => "revert", "target" => own.id}, 1),
+      do:
+        add(
+          s,
+          %{
+            "op" => "revert",
+            "target" => own.id,
+            "why" => "its own bug is face-up on main: it reverts it"
+          },
+          1
+        ),
       else: s
   end
 
@@ -162,7 +199,12 @@ defmodule GitGame.Bot do
           commit(s, s.you.staged)
 
         pick != [] ->
-          s |> add(%{"op" => "add", "cards" => Enum.map(pick, & &1.id)}, 1) |> commit(pick)
+          s
+          |> add(
+            %{"op" => "add", "cards" => Enum.map(pick, & &1.id), "why" => "it builds a commit"},
+            1
+          )
+          |> commit(pick)
 
         true ->
           s
@@ -174,7 +216,7 @@ defmodule GitGame.Bot do
 
   defp arm(s) do
     if "reflog" not in s.you.armed and Enum.any?(s.you.hand, &(&1[:command] == "reflog")),
-      do: add(s, %{"op" => "arm", "trap" => "reflog"}, 0),
+      do: add(s, %{"op" => "arm", "trap" => "reflog", "why" => "a trap, face-down"}, 0),
       else: s
   end
 
@@ -188,24 +230,43 @@ defmodule GitGame.Bot do
 
   defp commit(s, cards) do
     before = length(s.ops)
-    s = add(s, %{"op" => "commit", "message" => message(cards)}, 1)
+
+    s =
+      add(
+        s,
+        %{"op" => "commit", "message" => message(cards), "why" => "it commits what it staged"},
+        1
+      )
+
     if length(s.ops) > before, do: Map.put(s, :committed, true), else: s
   end
 
-  defp push(s), do: s |> add(%{"op" => "push"}, 1) |> Map.put(:pushing, true)
+  defp push(s),
+    do:
+      s
+      |> add(%{"op" => "push", "why" => "it ships what it has committed"}, 1)
+      |> Map.put(:pushing, true)
 
   # A pull costs nothing if nothing moved; if the bot is behind it pays for a plain pull, or a rebase when it already
   # holds a merge token and can afford one, and it declares a strategy for any conflict it can see coming.
-  defp pull(%{pulled: true} = s), do: s
+  defp pull(s, why \\ nil)
+  defp pull(%{pulled: true} = s, _why), do: s
 
-  defp pull(s) do
+  defp pull(s, why) do
     behind = s.pub.behind
     rebase = behind > 0 and s.pub.tokens.merge >= 1 and s.left >= 3
     {strategy, extra} = strategy(s)
     cost = if behind > 0, do: if(rebase, do: 2, else: 1) + extra, else: 0
 
+    why =
+      why ||
+        if(behind > 0,
+          do: "main has moved: it pulls before it pushes",
+          else: "it pulls first, in case someone pushes before it"
+        )
+
     op =
-      %{"op" => "pull", "rebase" => rebase}
+      %{"op" => "pull", "rebase" => rebase, "why" => why}
       |> then(&if(strategy, do: Map.put(&1, "strategy", strategy), else: &1))
 
     before = length(s.ops)

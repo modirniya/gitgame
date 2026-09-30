@@ -66,6 +66,30 @@ defmodule GitGame.ResolverTest do
     assert Game.commits_on_main(game) == 1
   end
 
+  test "an op's why goes on its own events, and never on another player's (M14b)", %{rules: rules} do
+    game =
+      day_one(rules, %{"ana" => [%{id: "f1", kind: :command, command: "force"}], "raj" => []})
+
+    # raj's commit is ahead of ana's pointer, and raj has a reflog armed
+    raj_commit = %{
+      id: "r1c",
+      author: "raj",
+      cards: [card("r1", "api.py", 5)],
+      flipped: false,
+      message: ""
+    }
+
+    game = %{game | main: game.main ++ [raj_commit]}
+    game = Game.put_player(game, "raj", %{game.players["raj"] | pointer: 2, armed: ["reflog"]})
+
+    why = "someone else's big commit is ahead of it: it overwrites main"
+    {_game, log} = Resolver.close_day(game, [{"ana", [%{op: :force, why: why}]}])
+
+    assert %{why: ^why} = Enum.find(log, &(&1.type == :forced))
+    assert %{player: "raj"} = fired = Enum.find(log, &(&1.type == :reflog_fired))
+    refute Map.has_key?(fired, :why)
+  end
+
   test "an op that no longer fits is not run, and the pack stops there", %{rules: rules} do
     game =
       day_one(rules, %{"ana" => [card("a1", "auth.js", 4), card("a2", "api.py", 2)], "raj" => []})

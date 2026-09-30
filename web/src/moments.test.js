@@ -191,3 +191,41 @@ describe("a whole game", () => {
     expect(screens.at(-1)).toBe("ci");
   });
 });
+
+describe("the bot, one step at a time (M14b)", () => {
+  const botDay = [
+    { type: "pack_opened", player: "bot", budget: 3, ops: 4 },
+    { type: "staged", player: "bot", count: 2, why: "it builds a commit" },
+    { type: "committed", player: "bot", commit: "2887386", why: "it commits what it staged" },
+    {
+      type: "pull_up_to_date",
+      player: "bot",
+      message: "Already up to date.",
+      why: "it pulls first, in case someone pushes before it",
+    },
+    {
+      type: "push_accepted",
+      player: "bot",
+      commits: ["2887386"],
+      message: "   a..b  main -> main",
+      why: "it ships what it has committed",
+    },
+    { type: "pack_closed", player: "bot", spent: 3 },
+  ];
+
+  it("gives each of the bot's ops a screen with its reasoning, folding staging into the commit", () => {
+    const ms = moments(botDay, { you: "ana", bots: ["bot"] }).moments;
+    expect(ms.filter((m) => m.screen).map((m) => [m.kind, m.why])).toEqual([
+      ["committed", "it commits what it staged"],
+      ["pull_noop", "it pulls first, in case someone pushes before it"],
+      ["pushed", "it ships what it has committed"],
+    ]);
+    // routine steps move on by themselves; the big moments wait for a tap
+    expect(ms.filter((m) => m.screen).map((m) => m.bot)).toEqual([true, true, true]);
+  });
+
+  it("a person's ops, or a game without bots, keep the old rule", () => {
+    const ms = moments(botDay, { you: "ana" }).moments;
+    expect(ms.filter((m) => m.screen).map((m) => m.kind)).toEqual(["pushed"]);
+  });
+});

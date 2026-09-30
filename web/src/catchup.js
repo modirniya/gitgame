@@ -13,7 +13,7 @@ export function catchup(view, memory = {}) {
   const queue = [];
 
   for (const day of view.days.filter((d) => d.day > read)) {
-    const r = moments(day.log, { you: view.you.player, seen });
+    const r = moments(day.log, { you: view.you.player, seen, bots: view.bots ?? [] });
     seen = r.seen;
     queue.push(...r.moments.filter((m) => m.screen));
   }

@@ -136,28 +136,32 @@ defmodule GitGame.Resolver do
             {:halt, {g, left, events}}
 
           cost > left ->
-            {:halt,
-             {g, left,
-              events ++
-                [
-                  %{
-                    type: :op_skipped,
-                    player: id,
-                    op: op.op,
-                    message: "not run: it costs #{cost} and #{left} is left"
-                  }
-                ]}}
+            skipped = %{
+              type: :op_skipped,
+              player: id,
+              op: op.op,
+              message: "not run: it costs #{cost} and #{left} is left"
+            }
+
+            {:halt, {g, left, events ++ with_why([skipped], id, op)}}
 
           true ->
             {result, g, happened} = Ops.run(g, id, op)
             spent = if result == :failed and not g.rules.failed_op_costs, do: 0, else: cost
-            {:cont, {g, left - spent, events ++ happened}}
+            {:cont, {g, left - spent, events ++ with_why(happened, id, op)}}
         end
       end)
 
     {game,
      log ++ [opened | events] ++ [%{type: :pack_closed, player: id, spent: budget(game) - left}]}
   end
+
+  # An op may say why it was played (a bot's reasoning, M14b); its own events carry that, and nobody else's: a reflog
+  # that fires inside someone's force-push is its owner's event, not theirs.
+  defp with_why(events, id, %{why: why}) when is_binary(why),
+    do: Enum.map(events, &if(&1[:player] == id, do: Map.put(&1, :why, why), else: &1))
+
+  defp with_why(events, _id, _op), do: events
 
   # At the end of the day nobody keeps more than the hand limit. The pack may say what to give up; whatever it doesn't
   # cover goes by a fixed, public rule: the smallest commit cards first, bugs before clean ones, command cards last.

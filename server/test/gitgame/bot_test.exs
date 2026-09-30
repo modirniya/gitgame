@@ -76,12 +76,49 @@ defmodule GitGame.BotTest do
     ]
 
     pack = Bot.write_pack(view(hand: [cmd("b1", "blame")], main: main, pointer: 3))
-    assert Enum.any?(pack["ops"], &(&1 == %{"op" => "blame", "target" => "t2"}))
+    assert Enum.any?(pack["ops"], &match?(%{"op" => "blame", "target" => "t2"}, &1))
   end
 
   test "arms a reflog it holds, for free" do
     pack = Bot.write_pack(view(hand: [cmd("r1", "reflog")]))
-    assert List.last(pack["ops"]) == %{"op" => "arm", "trap" => "reflog"}
+    assert %{"op" => "arm", "trap" => "reflog"} = List.last(pack["ops"])
+  end
+
+  test "every op says why, in a sentence that names nothing only the bot can see (M14b)" do
+    whys =
+      for seed <- 1..100, op <- play_packs(seed), reduce: MapSet.new() do
+        whys ->
+          assert is_binary(op["why"]), "#{inspect(op)} says nothing"
+          MapSet.put(whys, op["why"])
+      end
+
+    # a handful of fixed sentences, nothing put into them: so no card, file or bug can be in one
+    assert MapSet.size(whys) in 5..12
+    for why <- whys, do: refute(why =~ ~r/\.(js|py|css|md)|Dockerfile|bug in|clean/)
+  end
+
+  # every op of the bot's packs over one game against the chaos player
+  defp play_packs(seed) do
+    game = Game.new(@rules, seed, ["p1", "p2"])
+    {game, _} = Resolver.open_day(game)
+    collect(game, :rand.seed_s(:exsss, seed), [])
+  end
+
+  defp collect(%Game{released: r}, _rand, ops) when r != nil, do: ops
+
+  defp collect(game, rand, ops) do
+    {chaos, rand} = GitGame.Chaos.packs(game, rand)
+
+    json =
+      View.for_player(%{game: game, version: 1, days: [], opened: [], sent: []}, "g", "p1")
+      |> Bot.write_pack()
+
+    {:ok, pack} = Pack.decode(json, 4)
+
+    {game, _} =
+      Resolver.close_day(game, [{"p1", pack} | Enum.reject(chaos, &(elem(&1, 0) == "p1"))])
+
+    collect(game, rand, ops ++ json["ops"])
   end
 
   # Bots against each other and against the chaos player, without the database: the same views, the same door.
