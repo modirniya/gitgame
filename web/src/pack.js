@@ -7,6 +7,7 @@
 // estimates from what you can see.
 
 const files = (cards) => [...new Set(cards.map((c) => c.file))];
+const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 /** Your side of the table as the view shows it, before any op of the pack. */
 function start(view) {
@@ -181,7 +182,10 @@ export function actions(view, ops, selected = []) {
       has("force") && !commands && s.behind > 0,
       commands ?? (has("force") ? "nothing ahead of your pointer" : "no push --force card"),
     ),
-    tag: why(commits >= view.release_at, `main has ${view.main.length - 1} commits; v1.0 needs ${view.release_at}`),
+    tag: why(
+      commits >= view.release_at,
+      `main has ${plural(view.main.length - 1, "commit")}; v1.0 needs ${view.release_at}`,
+    ),
     arm: why(
       has("reflog") && !s.armed.includes("reflog"),
       has("reflog") ? "a reflog is already armed" : "no reflog card",
@@ -197,7 +201,6 @@ export function consequences(view, ops, selected = []) {
   const { left: s } = price(view, ops);
   const picked = s.hand.filter((c) => selected.includes(c.id) && c.kind === "commit");
   const lines = (cards) => cards.reduce((n, c) => n + c.lines, 0);
-  const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
   return {
     add:

@@ -20,7 +20,8 @@ defmodule GitGame.Release do
     have = Game.commits_on_main(game)
 
     if have < size do
-      failed(game, player, :tag, "error: main has #{have} commits; v1.0 needs #{size}")
+      commits = if have == 1, do: "1 commit", else: "#{have} commits"
+      failed(game, player, :tag, "error: main has #{commits}; v1.0 needs #{size}")
     else
       {game, ci} = ci(game, player)
       {:ok, game, [%{type: :tagged, player: player, message: "git tag -a v1.0"}, ci]}
