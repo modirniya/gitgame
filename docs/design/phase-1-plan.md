@@ -165,6 +165,7 @@ Where the beta runs, and how a version gets there: deployed from tags, never bra
 ## Open items
 
 - [x] **Merging:** branch protection needs a review the maintainer can't give on their own PRs. Decided 2026-09-29: PRs are squash-merged with `--admin` once CI passes, and the maintainer is told what merged.
-- [ ] **RPS and PlayLounge:** the charter lifts the FCM notifier and the client skeleton from them. Where they are is needed by M10. Sign-in no longer comes from RPS ([ADR-0005](../adr/0005-sign-in-written-fresh.md)).
-- [ ] **Hosting:** chosen by ADR before M11.
+- [x] **RPS and PlayLounge:** no longer needed. Sign-in ([ADR-0005](../adr/0005-sign-in-written-fresh.md)) and notifications ([ADR-0006](../adr/0006-notifications-web-push-and-email.md)) were written fresh, and the client (M7) was written against the specs.
+- [x] **Hosting:** Fly.io, [ADR-0007](../adr/0007-where-the-beta-runs.md) (2026-09-30).
+- [ ] **Checks only a deployment can make:** a real push to a real browser (the embedded test browser runs no service workers), an email through the real SMTP provider, linking a real GitHub account, and the service worker's offline copy. Each is built and tested against a stand-in; each gets tried once on gitgame.online.
 - [ ] **Playtest question 3** (bot-authored packs for absent players): the beta's to answer; M5 makes empty packs the default.
