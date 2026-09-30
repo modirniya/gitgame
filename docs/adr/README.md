@@ -32,3 +32,4 @@ Copy [template.md](template.md).
 | [0002](0002-beta-before-human-playtest.md) | Ship a beta before the human playtest | Accepted |
 | [0003](0003-batch-packs-at-the-deadline.md) | Resolve a day's packs together, at the deadline | Accepted |
 | [0004](0004-the-event-log-stores-inputs.md) | The event log stores what players did, not what the rules made of it | Accepted |
+| [0005](0005-sign-in-written-fresh.md) | Sign-in written fresh: GitHub OAuth and anonymous players, no Firebase | Proposed |
