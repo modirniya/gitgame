@@ -12,7 +12,7 @@ defmodule GitGame.Games do
   push to a remote that has moved on.
   """
   import Ecto.Query
-  alias GitGame.{Bot, Game, Repo, Resolver, Rules}
+  alias GitGame.{Bot, Game, Notifications, Repo, Resolver, Rules}
   alias GitGame.Signal
   alias GitGame.Games.{CloseDay, Event, Pack, Record, Seat, View}
 
@@ -54,7 +54,9 @@ defmodule GitGame.Games do
             do: Repo.insert!(%Seat{game_id: record.id, seat: seat, player_id: player_id})
 
         created = Repo.insert!(%Event{game_id: record.id, seq: 1, type: "game_created", day: 0})
-        schedule_close(record.id, 1, deadline(created.inserted_at, rules, length))
+        deadline = deadline(created.inserted_at, rules, length)
+        schedule_close(record.id, 1, deadline)
+        Notifications.day_opened(record.id, 1, deadline, rules.day_seconds[length])
         send_bot_packs(record)
         %{id: record.id, version: fold(record, events(record.id)).version}
       end)
@@ -260,9 +262,15 @@ defmodule GitGame.Games do
 
     after_close = fold(record, events(record.id))
 
-    # The next day's deadline is scheduled in the transaction that opens the day, unless the game just ended.
-    unless after_close.game.released do
+    # The next day's deadline is scheduled in the transaction that opens the day, unless the game just ended; so are
+    # the day's reminders, or the release's news (ADR-0006).
+    seconds = after_close.game.rules.day_seconds[record.day_length]
+
+    if after_close.game.released do
+      Notifications.released(record.id, state.game.day, seconds)
+    else
       schedule_close(record.id, after_close.game.day, after_close.deadline)
+      Notifications.day_opened(record.id, after_close.game.day, after_close.deadline, seconds)
       send_bot_packs(record)
     end
 

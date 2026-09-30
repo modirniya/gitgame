@@ -14,18 +14,21 @@ const remote = makeRemote();
 // is `{player, link_github}` once settled, or null if the remote couldn't be reached (the screens say so themselves).
 let me = null;
 let failure = null;
+// A link from a notification says so (`?via=notification`, ADR-0006), and the beta counts that visit apart (M12).
+const params = new URLSearchParams(location.search);
+const via = params.get("via");
 const signedIn = remote
-  .me()
+  .me(via)
   .then((m) => m ?? remote.join())
   .then(
     (m) => (me = m),
     (e) => (failure = e),
   );
 
-// Back from GitHub without a link (refused, or the trip broke): say so once, and take it out of the address.
-const params = new URLSearchParams(location.search);
+// Back from GitHub without a link (refused, or the trip broke): say so once. Either way, what the address said is
+// taken out of it, so a reload doesn't count or say it again.
 let notice = params.get("github") === "failed" ? "GitHub wasn't linked: the trip there and back didn't finish." : "";
-if (notice) history.replaceState(null, "", location.pathname + location.hash);
+if (notice || via) history.replaceState(null, "", location.pathname + location.hash);
 
 async function signOut() {
   await remote.signOut();

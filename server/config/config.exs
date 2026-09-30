@@ -9,7 +9,10 @@ import Config
 
 # The rules the game is played by (docs/design/round-resolution.md). A release will need them copied in: see M11.
 # Days close on a clock: one Oban job per day, at its deadline (docs/design/phase-1-plan.md, M5).
-config :gitgame, Oban, repo: GitGame.Repo, queues: [days: 10]
+config :gitgame, Oban, repo: GitGame.Repo, queues: [days: 10, notifications: 5]
+
+# The ways a notification reaches a player (GitGame.Notifications.Channel, ADR-0006).
+config :gitgame, notification_channels: []
 
 config :gitgame, rules_dir: Path.expand("../../rules", __DIR__)
 
