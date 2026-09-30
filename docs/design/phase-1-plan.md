@@ -63,7 +63,7 @@ The charter's exit: *a full game can be played and replayed from its log.*
 *Done when:* a scripted 60s game runs to its release unattended, with one player going absent, and the same game at 24h does too under a fake clock.
 
 ### M6 · Views and bots
-- [ ] A per-viewer projection of state and events. Another player's hand, staged cards, hidden bugs and armed traps appear only as counts; a property test checks that no view ever contains another player's private data.
+- [x] A per-viewer projection of state and events (`GitGame.Games.Projection`, `View.for_player/3`, `GET /api/games/:id?player=`). Another player's hand, staged cards, hidden bugs and armed traps appear only as counts; a property test checks that no view ever contains another player's private data.
 - [ ] `GitGame.Bot` writes a day's pack from the viewer's own projection, never the full state. It writes a defensive pull before every push and force-pushes over a single big commit when it holds the card (the packs prototype's v0.2 finding), so solo players meet the reflog moment.
 - [ ] A game can be created with bots in any seat.
 
