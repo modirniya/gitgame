@@ -23,6 +23,15 @@ end
 config :gitgame, GitGameWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
+# Reminders by Web Push (ADR-0006) are on when the deployment's VAPID keys are in the environment
+# (`mix gitgame.vapid_keys` makes a pair), and off otherwise.
+if public = System.get_env("GITGAME_VAPID_PUBLIC_KEY") do
+  config :gitgame, :push,
+    public_key: public,
+    private_key: System.fetch_env!("GITGAME_VAPID_PRIVATE_KEY"),
+    subject: System.get_env("GITGAME_VAPID_SUBJECT", "mailto:hello@gitgame.online")
+end
+
 # Linking GitHub (ADR-0005) is on when the OAuth app's credentials are in the environment, and off otherwise:
 # anonymous play needs nothing.
 if client_id = System.get_env("GITGAME_GITHUB_CLIENT_ID") do

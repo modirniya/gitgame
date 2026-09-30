@@ -31,3 +31,47 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(event.request).then((hit) => hit || caches.match("/index.html"))),
   );
 });
+
+// Reminders (ADR-0006): a push carries nothing, so the worker fetches this player's games and shows what waits on
+// them; every push must show a notification (userVisibleOnly), so there is a plain one if nothing is found.
+self.addEventListener("push", (event) => event.waitUntil(remind()));
+
+async function remind() {
+  let games = [];
+  try {
+    const response = await fetch("/api/games", { headers: { accept: "application/json" } });
+    if (response.ok) games = (await response.json()).games;
+  } catch {
+    // offline: the plain notification below still says something happened
+  }
+
+  const due = games.find((g) => g.waiting_on_you.length > 0);
+  const done = !due && games.find((g) => g.released);
+  const game = due || done;
+  const title = due ? "your pack is due" : done ? "v1.0 has shipped" : "news from your games";
+  const body = due
+    ? `day ${due.day} of ${due.final_day}: send your pack before the day closes`
+    : done
+      ? "the game is over: see how it went, and replay it"
+      : "open the game to see";
+
+  return self.registration.showNotification(title, {
+    body,
+    icon: "/icon.svg",
+    tag: game ? game.id : "games",
+    data: { url: game ? `/?via=notification#/g/${game.id}` : "/?via=notification" },
+  });
+}
+
+// Tapping a reminder opens its game, in a window of the game if one is open.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(open(event.notification.data.url));
+});
+
+async function open(url) {
+  for (const client of await self.clients.matchAll({ type: "window" })) {
+    if ("navigate" in client) return (await client.navigate(url)).focus();
+  }
+  return self.clients.openWindow(url);
+}

@@ -11,6 +11,7 @@ import { transcript } from "./transcript.js";
 import { momentScreen } from "./screens.js";
 import { catchup, recall, remember } from "./catchup.js";
 import { nudge } from "./whoami.js";
+import { remindButton } from "./remind.js";
 
 const fresh = () => ({ ops: [], selected: [], picking: null });
 
@@ -27,6 +28,8 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
   let alive = true;
   let s = { view: null, draft: fresh(), sending: false, error: "", tableOpen: false, queue: [], at: 0, handoff: null };
   let pending = null;
+  // made once, so re-rendering doesn't ask the browser again
+  let remind = null;
 
   function set(patch) {
     s = { ...s, ...patch };
@@ -89,6 +92,8 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
         : you
           ? hub({ view, draft: s.draft, change: (draft) => set({ draft }), send, sending: s.sending, error: s.error })
           : el("p", { class: "muted" }, "# you hold no seat in this game: this is what the table sees"),
+      // once a pack is in, in a game whose days are long enough to be reminded of
+      you && view.reminders && view.sent_today.includes(you) && (remind ??= remindButton(remote)),
       el(
         "button",
         {

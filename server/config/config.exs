@@ -12,7 +12,7 @@ import Config
 config :gitgame, Oban, repo: GitGame.Repo, queues: [days: 10, notifications: 5]
 
 # The ways a notification reaches a player (GitGame.Notifications.Channel, ADR-0006).
-config :gitgame, notification_channels: []
+config :gitgame, notification_channels: [GitGame.Notifications.PushChannel]
 
 config :gitgame, rules_dir: Path.expand("../../rules", __DIR__)
 

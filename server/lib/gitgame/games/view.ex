@@ -23,6 +23,8 @@ defmodule GitGame.Games.View do
       release_at: game.rules.release_at[length(game.seats)],
       hand_limit: game.rules.hand_limit,
       max_ops: game.rules.pack_max_ops,
+      # whether this game's days are long enough to be reminded of (ADR-0006)
+      reminders: GitGame.Notifications.worth?(game.rules.day_seconds[game.length]),
       # how a pull settles a conflict when its pack declares no strategy
       default_strategy: game.rules.default_conflict_strategy,
       # what each op costs under this game's rules, for a client to show before the pack is sent; some are free when

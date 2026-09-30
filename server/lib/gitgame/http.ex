@@ -1,9 +1,11 @@
-defmodule GitGame.GitHub.HTTP do
+defmodule GitGame.HTTP do
   @moduledoc """
-  How Assent reaches GitHub: Erlang's own `:httpc`, verifying GitHub's certificate against the operating system's CA
-  store (`:public_key.cacerts_get/0`) with the standard HTTPS hostname check. Assent's bundled adapters need extra
-  packages for that (`:certifi` and `:ssl_verify_fun` for `:httpc`), or, for Req in Assent 0.3.1, report the
-  request's headers as the response's, which breaks GitHub's form-encoded token response. This is the whole adapter.
+  How the server makes its few requests out, to GitHub (linking, through Assent) and to browsers' push services
+  (reminders): Erlang's own `:httpc`, verifying the server's certificate against the operating system's CA store
+  (`:public_key.cacerts_get/0`) with the standard HTTPS hostname check. It speaks `Assent.HTTPAdapter`, so Assent can
+  use it as it is. Assent's bundled adapters need extra packages for that (`:certifi` and `:ssl_verify_fun` for
+  `:httpc`), or, for Req in Assent 0.3.1, report the request's headers as the response's, which breaks GitHub's
+  form-encoded token response. This is the whole adapter.
   """
   @behaviour Assent.HTTPAdapter
   alias Assent.HTTPAdapter.HTTPResponse

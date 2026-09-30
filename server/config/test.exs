@@ -38,6 +38,15 @@ config :gitgame, Oban, testing: :manual
 # the client's page, as a build would leave it, whether or not this machine has built the client
 config :gitgame, client_page: Path.expand("../test/support/client_page.html", __DIR__)
 
+# Web Push in tests: a key pair made for the tests alone, and a stand-in for the push services
+# (test/support/push_stub.ex).
+config :gitgame, :push,
+  public_key:
+    "BA0m0yWoDPJ5ewgHvOv2qRWIRSgtJofwlPVc4EfjDJOkTqsbZuNLzKsjVBsh5zcExflcdBrGJJbmF0PgMK-qrjk",
+  private_key: "EnD1G-53mcmkPyBG1d_Q74ZzV9SzvfqVlSSLYH0S-WA",
+  subject: "mailto:tests@example.com",
+  http: GitGame.PushStub
+
 # notifications in tests reach the test that sent them (test/support/test_channel.ex)
 config :gitgame, notification_channels: [GitGame.TestChannel]
 
