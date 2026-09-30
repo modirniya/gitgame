@@ -171,8 +171,9 @@ defmodule GitGame.Ops.Commands do
         {update_in(game.players[commit.author].fixes, &max(&1 - 1, 0)), returned,
          revived ++ [commit.revert_of]}
 
+      # overwritten by a conflict earlier: it stays gone, and its cards leave play
       commit[:overwritten] ->
-        {game, returned, revived}
+        {GitGame.Game.discard(game, commit.cards), returned, revived}
 
       true ->
         {update_in(game.players[commit.author].local, &(&1 ++ [commit])), returned ++ [commit.id],

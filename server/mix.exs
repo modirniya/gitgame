@@ -40,6 +40,7 @@ defmodule GitGame.MixProject do
   defp deps do
     [
       {:phoenix, "~> 1.8.15"},
+      {:stream_data, "~> 1.4", only: :test},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.13"},
       {:postgrex, ">= 0.0.0"},
