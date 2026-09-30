@@ -55,7 +55,22 @@ defmodule GitGame.Rules do
 
   @doc "Reads and validates the rules in `dir`, by default the repository's `rules/`."
   def load!(dir \\ Application.fetch_env!(:gitgame, :rules_dir)) do
-    from_maps!(read!(Path.join(dir, "deck.json")), read!(Path.join(dir, "online.json")))
+    %{"deck" => deck, "online" => online} = read_maps!(dir)
+    from_maps!(deck, online)
+  end
+
+  @doc """
+  The two rules files as decoded JSON, checked by building the rules from them: what a new game stores as its
+  snapshot, so a later change to the files never changes a game already under way (ADR-0004).
+  """
+  def read_maps!(dir \\ Application.fetch_env!(:gitgame, :rules_dir)) do
+    maps = %{
+      "deck" => read!(Path.join(dir, "deck.json")),
+      "online" => read!(Path.join(dir, "online.json"))
+    }
+
+    from_maps!(maps["deck"], maps["online"])
+    maps
   end
 
   defp read!(path) do
