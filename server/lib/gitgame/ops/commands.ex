@@ -196,6 +196,9 @@ defmodule GitGame.Ops.Commands do
 
   defp spend(game, player, command) do
     card = card_in_hand(game, player, command)
-    update_in(game.players[player].hand, &List.delete(&1, card))
+
+    game
+    |> update_in([Access.key!(:players), player, Access.key!(:hand)], &List.delete(&1, card))
+    |> GitGame.Game.discard(card)
   end
 end

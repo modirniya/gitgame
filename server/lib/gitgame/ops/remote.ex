@@ -181,7 +181,11 @@ defmodule GitGame.Ops.Remote do
             {overwrite(g, theirs), %{p | grudges: p.grudges + 1}, crossed ++ [theirs], dropped}
 
           strategy == :theirs and mine not in dropped ->
-            {g, %{p | local: Enum.reject(p.local, &(&1.id == mine))}, crossed, dropped ++ [mine]}
+            # a dropped commit's cards leave play
+            gone = Enum.find(p.local, &(&1.id == mine))
+
+            {GitGame.Game.discard(g, gone.cards), %{p | local: List.delete(p.local, gone)},
+             crossed, dropped ++ [mine]}
 
           true ->
             {g, p, crossed, dropped}
