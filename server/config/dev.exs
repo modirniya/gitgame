@@ -54,6 +54,12 @@ config :gitgame, GitGameWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :gitgame, dev_routes: true
 
+# Emails in development are written to the log, not sent: all of each, so a confirmation link can be followed.
+config :gitgame, GitGame.Mailer,
+  adapter: Swoosh.Adapters.Logger,
+  level: :info,
+  log_full_email: true
+
 # Sessions over plain http on localhost (Safari won't keep a Secure cookie there), and writes from the Vite dev and
 # preview servers, which proxy /api here (ADR-0005).
 config :gitgame,

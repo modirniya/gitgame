@@ -9,16 +9,25 @@ import Config
 
 # The rules the game is played by (docs/design/round-resolution.md). A release will need them copied in: see M11.
 # Days close on a clock: one Oban job per day, at its deadline (docs/design/phase-1-plan.md, M5).
-config :gitgame, Oban, repo: GitGame.Repo, queues: [days: 10, notifications: 5]
+config :gitgame, Oban,
+  repo: GitGame.Repo,
+  queues: [days: 10, notifications: 5],
+  # the daily digest (ADR-0006), at eight in the morning UTC
+  plugins: [{Oban.Plugins.Cron, crontab: [{"0 8 * * *", GitGame.Notifications.Digest}]}]
 
 # The ways a notification reaches a player (GitGame.Notifications.Channel, ADR-0006).
-config :gitgame, notification_channels: [GitGame.Notifications.PushChannel]
+config :gitgame,
+  notification_channels: [GitGame.Notifications.PushChannel, GitGame.Notifications.EmailChannel]
+
+# Swoosh only ever sends through the adapter GitGame.Mailer is configured with; it needs no HTTP client of its own,
+# and no in-memory mailbox.
+config :swoosh, api_client: false, local: false
 
 config :gitgame, rules_dir: Path.expand("../../rules", __DIR__)
 
 # Per hour: new players from one address, and games and rooms made by one player (GitGameWeb.Plugs.RateLimit). A
 # classroom behind one address makes a few dozen players; a script makes thousands.
-config :gitgame, rate_limits: %{players: 60, games: 120}
+config :gitgame, rate_limits: %{players: 60, games: 120, emails: 10}
 
 config :gitgame,
   namespace: GitGame,

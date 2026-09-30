@@ -51,7 +51,10 @@ config :gitgame, :push,
 config :gitgame, notification_channels: [GitGame.TestChannel]
 
 # every test comes from 127.0.0.1; the limit itself is tested with its own numbers
-config :gitgame, rate_limits: %{players: 1_000_000, games: 1_000_000}
+config :gitgame, rate_limits: %{players: 1_000_000, games: 1_000_000, emails: 1_000_000}
+
+# Emails in tests are kept for the test to look at (Swoosh.TestAssertions).
+config :gitgame, GitGame.Mailer, adapter: Swoosh.Adapters.Test
 
 # GitHub in the tests is a stand-in (test/support/github_stub.ex): no test ever reaches the real one.
 config :gitgame, :github,

@@ -684,3 +684,16 @@ details.more summary {
 .your-games li.due .status {
   color: var(--warn);
 }
+
+.email form {
+  margin-top: 8px;
+}
+label.check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--ink);
+}
+label.check input {
+  min-height: auto;
+}

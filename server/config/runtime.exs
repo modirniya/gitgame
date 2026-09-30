@@ -32,6 +32,19 @@ if public = System.get_env("GITGAME_VAPID_PUBLIC_KEY") do
     subject: System.get_env("GITGAME_VAPID_SUBJECT", "mailto:hello@gitgame.online")
 end
 
+# Reminders by email (ADR-0006) are on when an SMTP relay is in the environment, and off otherwise. The provider is
+# whoever runs the relay.
+if relay = System.get_env("GITGAME_SMTP_RELAY") do
+  config :gitgame, GitGame.Mailer,
+    adapter: Swoosh.Adapters.SMTP,
+    relay: relay,
+    port: String.to_integer(System.get_env("GITGAME_SMTP_PORT", "587")),
+    username: System.get_env("GITGAME_SMTP_USERNAME"),
+    password: System.get_env("GITGAME_SMTP_PASSWORD"),
+    tls: :always,
+    auth: :always
+end
+
 # Linking GitHub (ADR-0005) is on when the OAuth app's credentials are in the environment, and off otherwise:
 # anonymous play needs nothing.
 if client_id = System.get_env("GITGAME_GITHUB_CLIENT_ID") do

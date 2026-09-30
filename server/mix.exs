@@ -44,6 +44,9 @@ defmodule GitGame.MixProject do
       {:oban, "~> 2.24"},
       # the OAuth protocol for linking GitHub (ADR-0005); its requests go through GitGame.HTTP
       {:assent, "~> 0.3.1"},
+      # reminder emails (ADR-0006), over SMTP, so the provider is configuration
+      {:swoosh, "~> 1.28"},
+      {:gen_smtp, "~> 1.3"},
       {:stream_data, "~> 1.4", only: :test},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.13"},

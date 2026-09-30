@@ -66,6 +66,12 @@ export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
         body: JSON.stringify({ hotseat, bots, day_length: dayLength, ...(seed != null && { seed }) }),
       }),
 
+    /** Reminders by email (ADR-0006): `{email: {address, confirmed, digest} | null, available}`, set, removed. */
+    emailSettings: () => call(fetcher, "/email"),
+    setEmail: (address, digest) =>
+      call(fetcher, "/email", { method: "PUT", body: JSON.stringify({ address, digest }) }),
+    removeEmail: () => call(fetcher, "/email", { method: "DELETE" }).then(() => ({ email: null, available: true })),
+
     /** The key a browser subscribes to reminders with (ADR-0006), or null if this remote doesn't send them. */
     pushKey: () =>
       call(fetcher, "/push").then(
