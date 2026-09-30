@@ -49,8 +49,8 @@ The charter's exit: *a full game can be played and replayed from its log.*
 *Done when:* the property tests pass under both orders at a few thousand generated games each, and a replay of any generated game is byte-identical.
 
 ### M4 · The event log
-- [ ] Tables: `games` (seed, rules version, players, day length), `packs` (one per player per day, replaceable until the day closes), `game_events` (append-only, `seq` per game). No table holds derived state; it is folded from events, with a cache that can always be thrown away.
-- [ ] Every write carries the game version it was written against, and a stale write is rejected in Git's words (`! [rejected] ... (fetch first)`), after which the client refetches.
+- [x] Tables: `games` (seed, seats, day length, and a snapshot of the rules it was created with) and `game_events`, the append-only log of inputs (`game_created`, `pack_sent`, `day_closed`; a later pack replaces an earlier one), enforced append-only by a trigger ([ADR-0004](../adr/0004-the-event-log-stores-inputs.md)). No table holds derived state; it is folded from the log.
+- [x] Every write carries the game version it was written against, and a stale write is rejected in Git's words (`! [rejected] ... (fetch first)`), after which the client refetches. A game's version is its latest `game_created` or `day_closed`, so other players' packs never make yours stale.
 - [ ] A small JSON API: create a game, fetch a view, send or replace a pack.
 
 *Done when:* a game survives a server restart mid-day with nothing lost, and a stale pack is rejected with the fetch-first message.
