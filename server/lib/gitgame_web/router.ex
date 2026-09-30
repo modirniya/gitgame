@@ -3,12 +3,18 @@ defmodule GitGameWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug GitGameWeb.Plugs.SameOrigin
+    plug GitGameWeb.Plugs.Identity
   end
 
   scope "/api", GitGameWeb do
     pipe_through :api
 
     get "/health", HealthController, :show
+
+    post "/players", PlayerController, :create
+    get "/session", PlayerController, :show
+    delete "/session", PlayerController, :delete
 
     post "/games", GameController, :create
     get "/games/:id", GameController, :show

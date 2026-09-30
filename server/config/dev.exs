@@ -54,6 +54,12 @@ config :gitgame, GitGameWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :gitgame, dev_routes: true
 
+# Sessions over plain http on localhost (Safari won't keep a Secure cookie there), and writes from the Vite dev and
+# preview servers, which proxy /api here (ADR-0005).
+config :gitgame,
+  secure_cookies: false,
+  origins: ["http://localhost:5173", "http://localhost:4173"]
+
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"
 
