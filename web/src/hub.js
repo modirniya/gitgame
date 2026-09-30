@@ -1,6 +1,7 @@
 // I-Hub (event-screens §3): where a day's pack is written. `main` at the top, your branch and hand below, one row of
 // actions each saying why when it can't be played, and the pack as a list of commands with what each will cost. The
-// hub holds nothing: it renders a view and a draft (`{ops, selected, picking}`), and hands every change to `change`.
+// hub holds nothing: it renders a view and a draft (`{ops, selected, picking}`), and hands every change to `change`,
+// except a commit message, which is written into its op as it is typed (see `row`).
 import { el } from "./dom.js";
 import { card, commandName, commit } from "./cards.js";
 import { strip } from "./table.js";
@@ -100,10 +101,12 @@ function row(view, draft, change, r, i) {
   const remove = () => change({ ...draft, ops: draft.ops.filter((_, j) => j !== i) });
   const op = r.op;
 
+  const cmd = el("span", { class: "cmd" }, command(op, view));
+
   return el(
     "li",
     { class: `op${r.runs ? "" : " over"}${r.maybe ? " maybe" : ""}` },
-    el("span", { class: "cmd" }, command(op, view)),
+    cmd,
     el("span", { class: "cost", title: "ops this costs: now, or at most" }, range(r)),
     el("button", { class: "remove", "aria-label": `remove ${command(op, view)}`, onclick: remove }, "×"),
     op.op === "commit" &&
@@ -113,7 +116,12 @@ function row(view, draft, change, r, i) {
         placeholder: "commit message",
         maxlength: 200,
         value: op.message ?? "",
-        onchange: (e) => set({ message: e.target.value }),
+        // No re-render: one when the field lost focus replaced the send button under the very tap that took the
+        // focus away, and the pack wasn't sent.
+        oninput: (e) => {
+          op.message = e.target.value;
+          cmd.textContent = command(op, view);
+        },
       }),
     op.op === "pull" &&
       el(
