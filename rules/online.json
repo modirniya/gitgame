@@ -49,7 +49,7 @@
     "pull_when_up_to_date": 0,
     "pull_rebase": 2,
     "resolve_by_hand_extra": 1,
-    "command_card": 1,
+    "tag": 1,
     "arm_trap": 0
   },
 

@@ -31,8 +31,8 @@ The charter's exit: *a full game can be played and replayed from its log.*
 
 - [x] `GitGame.Rules` loads `rules/deck.json` and `rules/online.json` into a validated struct, failing loudly on a missing or unknown key, and exposes nothing the JSON doesn't say.
 - [x] `GitGame.Game`: the state of one game (`main`, pointers, hands, staged cards, local branches, tokens, armed traps, the deck, the day, the incident), built from `new(rules, seed, players)`.
-- [ ] One module per op family (commit ops, remote ops, command cards, traps), for the cards `rules/online.json` switches on, each a pure function of state and op → state and events, using Git's messages.
-- [ ] Scoring and the release (CI, production down, least blame), with the live score counting a face-down bug as clean.
+- [x] One module per op family (commit ops, remote ops, command cards, traps), for the cards `rules/online.json` switches on, each a pure function of state and op → state and events, using Git's messages.
+- [x] Scoring and the release (CI, production down, least blame), with the live score counting a face-down bug as clean.
 
 *Done when:* every op in round-resolution §3 has unit tests for success, each failure, and cost, including the v0.2 rules: free pull and push when there is nothing to do, a merge token only when merging unpushed commits, `--resolve` at +1, failed command cards staying in hand, the hand limit, and one reflog restoring everything.
 
