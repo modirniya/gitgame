@@ -632,3 +632,25 @@ button.link {
   border-left: 3px solid var(--warn);
   background: var(--raised);
 }
+
+/* ---------- start and rooms ---------- */
+
+.start-actions {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 8px;
+}
+details.more {
+  margin-top: 16px;
+}
+details.more summary {
+  cursor: pointer;
+  color: var(--muted);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.share code {
+  overflow-wrap: anywhere;
+  color: var(--you);
+}

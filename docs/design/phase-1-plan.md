@@ -114,7 +114,7 @@ Private rooms by link, and a game against the bot in one tap (charter priority 2
   - Tables `rooms` (a short code, its host, the day length and number of bots, and the game once started) and `room_members` (who joined, in order).
   - `POST /api/rooms` opens a room with you as its host. `GET /api/rooms/:code` shows it, `POST .../join` joins it, `PATCH` lets the host change the bots and day length, and `POST .../start` lets the host start the game: every member takes a seat under their handle, in the order they joined, then the bots.
   - A room is full at five seats, members and bots together, and is closed once started. `GET /api/rooms/:code/live` says `refetch` whenever it changes, and ends when the game starts.
-- [ ] **M9b · Rooms in the client.** The start screen's first button plays the bot now, in one tap; the second opens a room and shows its link to share. The room screen lists who is in, lets the host set bots and start, and takes everyone to the game when it starts. The hotseat form stays, under "more".
+- [x] **M9b · Rooms in the client.** The start screen's first button plays the bot now, in one tap; the second opens a room and shows its link to share. The room screen lists who is in, lets the host set bots and start, and takes everyone to the game when it starts. The hotseat form stays, under "more".
 - [ ] **M9c · Your games.** `GET /api/games` lists the games you hold a seat in, and whether your pack is in for today; the start screen lists them, those waiting on you first.
 
 *Done when:* one browser opens a room, a second opens its link and joins, the host starts, and both play the same game from their own seats, which a test does through the API; and a first visit reaches a game against the bot in one tap.

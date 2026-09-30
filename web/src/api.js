@@ -28,6 +28,16 @@ async function call(fetcher, path, init) {
   return body;
 }
 
+function watch(url, signal, Source = globalThis.EventSource) {
+  if (!Source) return () => {};
+  const source = new Source(url);
+  source.addEventListener("refetch", (e) => {
+    signal();
+    if (JSON.parse(e.data).over) source.close();
+  });
+  return () => source.close();
+}
+
 export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
   return {
     /**
@@ -69,15 +79,20 @@ export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
      * write; the stream closes itself after the release. The browser's EventSource reconnects on its own, and a
      * reconnect is just one more refetch. Returns a function that stops watching.
      */
-    live: (id, signal, Source = globalThis.EventSource) => {
-      if (!Source) return () => {};
-      const source = new Source(`/api/games/${encodeURIComponent(id)}/live`);
-      source.addEventListener("refetch", (e) => {
-        signal();
-        if (JSON.parse(e.data).over) source.close();
-      });
-      return () => source.close();
-    },
+    live: (id, signal, Source) => watch(`/api/games/${encodeURIComponent(id)}/live`, signal, Source),
+
+    /** Rooms (M9): open one, look at it, join it, set it up (host), start its game (host). Each answers with the room. */
+    openRoom: () => call(fetcher, "/rooms", { method: "POST" }),
+    fetchRoom: (code) => call(fetcher, `/rooms/${encodeURIComponent(code)}`),
+    joinRoom: (code) => call(fetcher, `/rooms/${encodeURIComponent(code)}/join`, { method: "POST" }),
+    updateRoom: (code, { bots, dayLength }) =>
+      call(fetcher, `/rooms/${encodeURIComponent(code)}`, {
+        method: "PATCH",
+        body: JSON.stringify({ bots, day_length: dayLength }),
+      }),
+    startRoom: (code) => call(fetcher, `/rooms/${encodeURIComponent(code)}/start`, { method: "POST" }),
+    /** Watch a room, as `live` watches a game; its stream closes once the game has started. */
+    liveRoom: (code, signal, Source) => watch(`/api/rooms/${encodeURIComponent(code)}/live`, signal, Source),
 
     /** Send, or replace, today's pack for `seat`. `version` is the one the pack was written against. */
     sendPack: (id, { seat, version, ops, discard = [] }) =>
