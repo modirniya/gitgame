@@ -46,5 +46,6 @@ npm run build          # the PWA in dist/
 | `src/exit.test.js`            | The Phase 1 exit as a test: a game against the bot through the client's modules, then replayed (needs `GITGAME_REMOTE`) |
 | `src/whoami.js`               | Who this device is: handle and avatar, "link GitHub", sign out, and the nudge after a finished game                     |
 | `src/room.js`                 | A room (M9): who is in, the link to share, the host's bots, day length and start                                        |
+| `src/games.js`                | Your games on the start screen, those waiting on your pack first                                                        |
 | `src/start.js`, `src/game.js` | I-Start, and a game as one player sees it                                                                               |
 | `public/sw.js`                | The service worker: the app's files offline, never the game                                                             |

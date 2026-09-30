@@ -267,6 +267,45 @@ defmodule GitGameWeb.GameControllerTest do
            end)
   end
 
+  describe "your games (M9c)" do
+    test "lists the games you hold a seat in: waiting on your pack first, finished last", %{
+      conn: conn,
+      me: me
+    } do
+      %{"id" => waiting} = create(conn, %{"hotseat" => ["raj"], "seed" => 1})
+      %{"id" => sent} = create(conn, %{"hotseat" => ["kim"], "seed" => 2})
+      %{"id" => done} = create(conn, %{"bots" => ["bot"], "seed" => 3})
+
+      for seat <- [me, "kim"] do
+        conn |> post(~p"/api/games/#{sent}/packs", %{"version" => 1, "seat" => seat, "ops" => []})
+      end
+
+      for _ <- 1..12, do: Games.close_day(done)
+
+      # someone else's game isn't yours
+      {other, _} = signed_in()
+      create(other, %{"bots" => ["bot"]})
+
+      assert %{"games" => games} = conn |> get(~p"/api/games") |> json_response(200)
+      assert Enum.map(games, & &1["id"]) == [waiting, sent, done]
+
+      assert [
+               %{"yours" => [^me, "raj"], "waiting_on_you" => [^me, "raj"], "released" => false},
+               %{"day" => 2, "waiting_on_you" => [^me, "kim"]},
+               %{
+                 "released" => true,
+                 "waiting_on_you" => [],
+                 "deadline" => nil,
+                 "scores" => %{"bot" => _}
+               }
+             ] = games
+    end
+
+    test "needs a signed-in device" do
+      assert build_conn() |> get(~p"/api/games") |> json_response(401)
+    end
+  end
+
   # You ship your biggest card every day, the way a script calling the API would.
   defp play(conn, id, day) do
     view = conn |> get(~p"/api/games/#{id}") |> json_response(200)

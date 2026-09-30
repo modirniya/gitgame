@@ -22,6 +22,7 @@ JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has
 | `GET /session` | Who this device is signed in as, and whether this server can link GitHub (`link_github`), or `401` |
 | `GET /auth/github` | A page navigation, not an API call: sends the browser to GitHub to link an account (no scopes asked), and GitHub back to `/auth/github/callback`, which signs the device in as the account's player and returns to the client |
 | `DELETE /session` | Signs this device out (`204`) |
+| `GET /games` | Signed in: your games (M9c), each with its day, your seats, `waiting_on_you` (your seats whose pack isn't in today) and scores; those waiting on you first, finished ones last |
 | `POST /games` | Signed in: `{"hotseat": [...], "bots": [...], "day_length": "live" \| "lunch" \| "correspondence", "seed": n}`. You take the first seat, under your handle, and hold the seats of the `hotseat` people at your device → the game from your seat |
 | `GET /games/:id` | The game from your seat: your own cards, branch and traps, every day log as you may see it, and `yours`, the seats you hold (`?seat=` picks one in a hotseat game). A device holding no seat gets the table's view |
 | `GET /games/:id/days/:day` | A replay: the view as it stood when `day` closed (`0`: as created), folded from the log up to there; seats as above |
