@@ -83,7 +83,29 @@ The charter's exit: *a full game can be played and replayed from its log.*
 
 Rough until Phase 1 is done; each needs its details written before it starts.
 
-- **M8 · Identity:** GitHub OAuth, with anonymous play as the fallback and a nudge to link (charter decision 15). Written fresh, without Firebase, per [ADR-0005](../adr/0005-sign-in-written-fresh.md): players and server-side sessions, with seats owned by players.
+### M8 · Identity
+
+GitHub OAuth, with anonymous play as the fallback and a nudge to link (charter decision 15), written fresh per [ADR-0005](../adr/0005-sign-in-written-fresh.md).
+
+- [x] **M8a · Players and sessions.**
+  - Tables `players` (a unique handle, and the GitHub id, login and avatar once linked) and `sessions` (the SHA-256 of a random token, its player, when it expires).
+  - `POST /api/players` makes an anonymous player with a generated handle and signs the device in. `GET /api/session` says who you are; `DELETE /api/session` signs out.
+  - The session is a `gitgame_session` cookie: `HttpOnly`, `SameSite=Lax`, and `Secure` outside development. Writes from another `Origin` are refused.
+- [ ] **M8b · Seats belong to players.**
+  - A `game_seats` table maps each seat to a player or a bot, and a game is created by a signed-in player, who takes the first seat. Hotseat games name the other people at the device, whose seats the creator also holds.
+  - The API stops trusting `?player=`. You see a game as the seat you hold, or choose among the seats you hold in a hotseat game, and packs are written only for a seat you hold.
+  - The client signs in anonymously on first open, and the exit test plays with a session.
+  - Games created before M8 have no creator to give their seats to, so they stay readable and take no more packs. Only development databases have them.
+- [ ] **M8c · Link GitHub.**
+  - `GET /api/auth/github` and its callback, through Assent's generic OAuth2 strategy: `state` and PKCE, no scopes, GitHub's token discarded.
+  - A new GitHub account attaches to the current player. A known one signs the device in as its player, and moves the anonymous player's seats over where that doesn't seat one player twice in a game.
+  - Tested against a stand-in for GitHub, never the real one.
+- [ ] **M8d · Who you are, in the client.** Your handle and avatar, "link GitHub" in the menu and as a nudge after your first finished game, and sign out.
+
+*Done when:* a new visitor starts a game against the bot without signing in. They link GitHub after it ends, open the game from a second browser signed in with the same GitHub account, and find it there. And nobody can read or write a seat that isn't theirs, which a test checks through the API.
+
+### After M8
+
 - **M9 · Rooms:** private rooms by link, invites, and quick "play the bot now" (charter priority 2: a game in five seconds).
 - **M10 · Notifications:** push, email and the daily digest; "your pack is due" is the retention loop (charter decision 16).
 - **M11 · Hosting:** an ADR choosing the host (none is chosen yet), then deploy from tags, never branches ([workflow.md](../workflow.md)).

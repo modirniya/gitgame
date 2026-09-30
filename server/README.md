@@ -14,10 +14,13 @@ mix test           # creates and migrates the test database first
 
 ## The API
 
-JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has them. Until sign-in (M8) a request names its player, which is fine for a hotseat client and nothing else.
+JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has them. A device is signed in by an `HttpOnly` session cookie ([ADR-0005](../docs/adr/0005-sign-in-written-fresh.md)); writes from another site's pages are refused. Until M8b the game endpoints still take the player's name from the request, which is fine for a hotseat client and nothing else.
 
 | | |
 |---|---|
+| `POST /players` | An anonymous player with a generated handle, and this device signed in as them (`201`); a device already signed in gets its player back (`200`) |
+| `GET /session` | Who this device is signed in as, or `401` |
+| `DELETE /session` | Signs this device out (`204`) |
 | `POST /games` | `{"seats": [...], "bots": [...], "day_length": "live" \| "lunch" \| "correspondence", "seed": n}` → the public view |
 | `GET /games/:id` | The public view; `?player=ana` adds ana's own cards, branch and traps, and shows every day log as she may see it |
 | `GET /games/:id/days/:day` | A replay: the view as it stood when `day` closed (`0`: as created), folded from the log up to there; `?player=` as above |
