@@ -876,3 +876,30 @@ label.check input {
     opacity: 0;
   }
 }
+
+/* ---------- the guided first game ---------- */
+
+.guide {
+  position: sticky;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 5;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--raised);
+  border: 1px solid var(--accent);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+}
+.guide p {
+  margin: 0 0 6px;
+}
+.guide-target {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  animation: beckon 1.4s ease-in-out infinite;
+}
+@keyframes beckon {
+  50% {
+    outline-color: transparent;
+  }
+}

@@ -13,6 +13,7 @@ import { catchup, recall, remember } from "./catchup.js";
 import { nudge } from "./whoami.js";
 import { remindButton } from "./remind.js";
 import { whatDecidedIt } from "./verdict.js";
+import { guideLayer, guideStep, highlight, isGuided, setGuided } from "./guide.js";
 
 const fresh = () => ({ ops: [], selected: [], picking: null });
 
@@ -121,6 +122,16 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
         log && transcript(log, you, { label: `day ${last.day}` }),
       ),
     );
+    guide(view);
+  }
+
+  // The guided first game (M14d): one sentence and one highlighted thing over the hub, until done or skipped.
+  function guide(view) {
+    if (!view.you || view.released || !isGuided(id)) return;
+    const step = guideStep(view, s.draft);
+    if (!step) return setGuided(id, false);
+    node.append(guideLayer(step, { done: () => (setGuided(id, false), render()) }));
+    highlight(node, step.target);
   }
 
   // O-Handoff: the pack is in; the hand leaves the screen before the device changes hands.
