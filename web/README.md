@@ -13,7 +13,7 @@ cd server && mix phx.server
 cd web && npm install && npm run dev
 ```
 
-Open http://localhost:5173. Until sign-in (M8) it is a hotseat client: the people at the device take the human seats, and the remote plays the bots.
+Open http://localhost:5173. The first time it opens, the device signs in as a new anonymous player ([ADR-0005](../docs/adr/0005-sign-in-written-fresh.md)). You take the first seat of every game you start; anyone else at the device can take one too (hotseat), and the remote plays the bots.
 
 ## Checks
 
@@ -29,7 +29,7 @@ npm run build          # the PWA in dist/
 
 | File                          | What it is                                                                                                              |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `src/main.js`, `src/route.js` | The entry and the addresses (`#/`, `#/g/<id>/<player>`, `#/r/<id>/<day>`)                                               |
+| `src/main.js`, `src/route.js` | The entry and the addresses (`#/`, `#/g/<id>[/<seat>]`, `#/r/<id>/<day>`)                                               |
 | `src/api.js`                  | The remote's JSON API; errors carry the remote's own words                                                              |
 | `src/dom.js`                  | Building DOM without innerHTML, so other players' text is only ever text                                                |
 | `src/brand.js`                | The name, defined once (`// BRAND`, [branding.md](../docs/branding.md))                                                 |

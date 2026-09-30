@@ -28,38 +28,50 @@ function write(view) {
     .map((r) => r.op);
 }
 
+// Node's fetch keeps no cookies, so this carries the session cookie from response to request as a browser would.
+function browser() {
+  let cookie = null;
+  return async (path, init = {}) => {
+    const response = await fetch(`${base}${path}`, {
+      ...init,
+      headers: { ...init.headers, ...(cookie && { cookie }) },
+    });
+    const set = response.headers.get("set-cookie");
+    if (set) cookie = set.split(";")[0];
+    return response;
+  };
+}
+
 describe.skipIf(!base)("the Phase 1 exit", () => {
-  const api = remote((path, init) => fetch(`${base}${path}`, init));
+  const api = remote(browser());
 
   it("a full game against the bot, played through the client and replayed from its log", async () => {
-    const { id } = await api.createGame({
-      seats: ["ana", "bot"],
-      bots: ["bot"],
-      dayLength: "correspondence",
-      seed: 42,
-    });
+    // a new visitor: signed in anonymously, with no form (ADR-0005)
+    const me = await api.join();
+    const { id } = await api.createGame({ bots: ["bot"], dayLength: "correspondence", seed: 42 });
 
-    let view = await api.fetchView(id, "ana");
+    let view = await api.fetchView(id);
+    expect(view.you.player).toBe(me.handle);
     for (let day = 0; !view.released && day < 20; day++) {
-      await api.sendPack(id, { player: "ana", version: view.version, ops: write(view) });
-      view = await api.fetchView(id, "ana");
+      await api.sendPack(id, { version: view.version, ops: write(view) });
+      view = await api.fetchView(id);
     }
 
     expect(view.released).toBeTruthy();
     const log = view.days.flatMap((d) => d.log);
-    expect(log.some((e) => e.type === "push_accepted" && e.player === "ana")).toBe(true);
+    expect(log.some((e) => e.type === "push_accepted" && e.player === me.handle)).toBe(true);
 
     // every event the remote sent becomes a moment, or is a boundary between them
     for (const d of view.days) {
       const events = d.log.filter((e) => !BOUNDARIES.includes(e.type));
-      expect(moments(d.log, { you: "ana" }).moments).toHaveLength(events.length);
+      expect(moments(d.log, { you: me.handle }).moments).toHaveLength(events.length);
     }
 
     // the replay: each day as the log makes it, and the last day is the game as it ended
     for (let n = 0; n <= view.days.length; n++) {
-      const then = await api.fetchDay(id, n, "ana");
+      const then = await api.fetchDay(id, n);
       expect(then.days).toEqual(view.days.slice(0, n));
     }
-    expect(await api.fetchDay(id, view.days.length, "ana")).toEqual(view);
+    expect(await api.fetchDay(id, view.days.length)).toEqual(view);
   }, 60_000);
 });

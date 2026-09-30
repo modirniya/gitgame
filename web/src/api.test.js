@@ -11,28 +11,35 @@ function fake(status, body) {
 }
 
 describe("the remote", () => {
-  it("creates a game with its seats, bots and day length", async () => {
+  it("creates a game with the others at this device, the bots and the day length", async () => {
     const { calls, api } = fake(201, { id: "g1" });
-    await api.createGame({ seats: ["ana", "bot"], bots: ["bot"], dayLength: "lunch" });
+    await api.createGame({ hotseat: ["raj"], bots: ["bot"], dayLength: "lunch" });
 
     expect(calls[0].url).toBe("/api/games");
-    expect(JSON.parse(calls[0].init.body)).toEqual({
-      seats: ["ana", "bot"],
-      bots: ["bot"],
-      day_length: "lunch",
-    });
+    expect(JSON.parse(calls[0].init.body)).toEqual({ hotseat: ["raj"], bots: ["bot"], day_length: "lunch" });
   });
 
-  it("fetches a player's view with the name escaped", async () => {
+  it("fetches the view from a seat, the name escaped, or from the device's own seat", async () => {
     const { calls, api } = fake(200, {});
     await api.fetchView("g1", "ana & raj");
-    expect(calls[0].url).toBe("/api/games/g1?player=ana%20%26%20raj");
+    await api.fetchView("g1");
+    expect(calls.map((c) => c.url)).toEqual(["/api/games/g1?seat=ana%20%26%20raj", "/api/games/g1"]);
+  });
+
+  it("knows who this device is, or that it is nobody yet, and signs it in", async () => {
+    const me = { id: "p1", handle: "quiet-otter-42", github: null };
+    expect(await fake(200, { player: me }).api.me()).toEqual(me);
+    expect(await fake(401, { error: "fatal: not signed in" }).api.me()).toBeNull();
+
+    const { calls, api } = fake(201, { player: me });
+    expect(await api.join()).toEqual(me);
+    expect(calls[0]).toMatchObject({ url: "/api/players", init: { method: "POST" } });
   });
 
   it("marks a rejected pack as stale, in the remote's own words", async () => {
     const message = " ! [rejected]        main -> main (fetch first)";
     const { api } = fake(409, { error: message });
-    const error = await api.sendPack("g1", { player: "ana", version: 2, ops: [] }).catch((e) => e);
+    const error = await api.sendPack("g1", { seat: "ana", version: 2, ops: [] }).catch((e) => e);
 
     expect(error).toBeInstanceOf(RemoteError);
     expect(error.stale).toBe(true);

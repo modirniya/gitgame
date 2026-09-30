@@ -30,23 +30,36 @@ async function call(fetcher, path, init) {
 
 export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
   return {
-    /** A new game. `bots` are seats the remote plays; the answer is the public view. */
-    createGame: ({ seats, bots = [], dayLength = "live", seed }) =>
+    /** Who this device is signed in as, or null. The session is an HttpOnly cookie the page never sees (ADR-0005). */
+    me: () =>
+      call(fetcher, "/session").then(
+        (r) => r.player,
+        (e) => {
+          if (e.status === 401) return null;
+          throw e;
+        },
+      ),
+
+    /** Sign this device in as a new anonymous player; a device already signed in gets its own player back. */
+    join: () => call(fetcher, "/players", { method: "POST" }).then((r) => r.player),
+
+    /**
+     * A new game: you take the first seat, `hotseat` names the other people at this device, and the remote plays the
+     * `bots`. The answer is the game from your seat.
+     */
+    createGame: ({ hotseat = [], bots = [], dayLength = "live", seed }) =>
       call(fetcher, "/games", {
         method: "POST",
-        body: JSON.stringify({ seats, bots, day_length: dayLength, ...(seed != null && { seed }) }),
+        body: JSON.stringify({ hotseat, bots, day_length: dayLength, ...(seed != null && { seed }) }),
       }),
 
-    /** The view as `player` sees it, or the public view if `player` is omitted. */
-    fetchView: (id, player) =>
-      call(fetcher, `/games/${encodeURIComponent(id)}${player ? `?player=${encodeURIComponent(player)}` : ""}`),
+    /** The game from a seat this device holds (`seat`, or its first), or the table's view if it holds none. */
+    fetchView: (id, seat) =>
+      call(fetcher, `/games/${encodeURIComponent(id)}${seat ? `?seat=${encodeURIComponent(seat)}` : ""}`),
 
     /** A replay: the view as it stood when `day` closed (0: as created), folded by the remote from the log. */
-    fetchDay: (id, day, player) =>
-      call(
-        fetcher,
-        `/games/${encodeURIComponent(id)}/days/${day}${player ? `?player=${encodeURIComponent(player)}` : ""}`,
-      ),
+    fetchDay: (id, day, seat) =>
+      call(fetcher, `/games/${encodeURIComponent(id)}/days/${day}${seat ? `?seat=${encodeURIComponent(seat)}` : ""}`),
 
     /**
      * Watch a game: `signal()` runs whenever the remote says to refetch, which it does on connecting and after every
@@ -63,11 +76,11 @@ export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
       return () => source.close();
     },
 
-    /** Send, or replace, today's pack. `version` is the one the pack was written against. */
-    sendPack: (id, { player, version, ops, discard = [] }) =>
+    /** Send, or replace, today's pack for `seat`. `version` is the one the pack was written against. */
+    sendPack: (id, { seat, version, ops, discard = [] }) =>
       call(fetcher, `/games/${encodeURIComponent(id)}/packs`, {
         method: "POST",
-        body: JSON.stringify({ player, version, ops, discard }),
+        body: JSON.stringify({ seat, version, ops, discard }),
       }),
   };
 }

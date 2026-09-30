@@ -91,7 +91,7 @@ GitHub OAuth, with anonymous play as the fallback and a nudge to link (charter d
   - Tables `players` (a unique handle, and the GitHub id, login and avatar once linked) and `sessions` (the SHA-256 of a random token, its player, when it expires).
   - `POST /api/players` makes an anonymous player with a generated handle and signs the device in. `GET /api/session` says who you are; `DELETE /api/session` signs out.
   - The session is a `gitgame_session` cookie: `HttpOnly`, `SameSite=Lax`, and `Secure` outside development. Writes from another `Origin` are refused.
-- [ ] **M8b · Seats belong to players.**
+- [x] **M8b · Seats belong to players.**
   - A `game_seats` table maps each seat to a player or a bot, and a game is created by a signed-in player, who takes the first seat. Hotseat games name the other people at the device, whose seats the creator also holds.
   - The API stops trusting `?player=`. You see a game as the seat you hold, or choose among the seats you hold in a hotseat game, and packs are written only for a seat you hold.
   - The client signs in anonymously on first open, and the exit test plays with a session.

@@ -2,19 +2,18 @@ import { describe, expect, it } from "vitest";
 import { seatsFrom } from "./start.js";
 
 describe("seats from the start form", () => {
-  it("seats the people first, then the bots", () => {
-    expect(seatsFrom(" ana, raj ", 1)).toEqual({
-      seats: ["ana", "raj", "bot"],
-      humans: ["ana", "raj"],
+  it("seats you first, then the others at this device, then the bots", () => {
+    expect(seatsFrom("quiet-otter-42", " raj, kim ", 1)).toEqual({
+      seats: ["quiet-otter-42", "raj", "kim", "bot"],
+      hotseat: ["raj", "kim"],
       bots: ["bot"],
     });
-    expect(seatsFrom("ana", 2).seats).toEqual(["ana", "bot-1", "bot-2"]);
+    expect(seatsFrom("me", "", 2).seats).toEqual(["me", "bot-1", "bot-2"]);
   });
 
   it("refuses a table the remote would refuse", () => {
-    expect(seatsFrom("", 2).error).toMatch(/at least one person/);
-    expect(seatsFrom("ana", 0).error).toMatch(/2 to 5/);
-    expect(seatsFrom("a,b,c,d", 2).error).toMatch(/2 to 5/);
-    expect(seatsFrom("bot", 1).error).toMatch(/its own name/);
+    expect(seatsFrom("me", "", 0).error).toMatch(/2 to 5/);
+    expect(seatsFrom("me", "a,b,c", 2).error).toMatch(/2 to 5/);
+    expect(seatsFrom("me", "me", 1).error).toMatch(/its own name/);
   });
 });

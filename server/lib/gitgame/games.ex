@@ -13,16 +13,16 @@ defmodule GitGame.Games do
   """
   import Ecto.Query
   alias GitGame.{Bot, Game, Repo, Resolver, Rules}
-  alias GitGame.Games.{CloseDay, Event, Pack, Record, Signal, View}
+  alias GitGame.Games.{CloseDay, Event, Pack, Record, Seat, Signal, View}
 
   # Seeds stay below 2^53, so they survive a round trip through JSON numbers in any client.
   @max_seed 9_007_199_254_740_991
   @stale "! [rejected]        main -> main (fetch first)"
 
   @doc """
-  A new game for `seats`, with the rules as they are now. Options: `:day_length` (default "live"), `:seed`, and
-  `:bots`, the seats a bot plays. A bot sends its pack the moment each day opens, so a game of bots alone plays itself
-  to the release as soon as it is created.
+  A new game for `seats`, with the rules as they are now. Options: `:day_length` (default "live"), `:seed`, `:bots`,
+  the seats a bot plays, and `:holders`, a map from seat to the id of the player who holds it (ADR-0005). A bot sends
+  its pack the moment each day opens, so a game of bots alone plays itself to the release as soon as it is created.
   """
   def create(seats, opts \\ []) do
     maps = Rules.read_maps!()
@@ -30,12 +30,14 @@ defmodule GitGame.Games do
     length = Keyword.get(opts, :day_length, "live")
     seed = Keyword.get_lazy(opts, :seed, fn -> :rand.uniform(@max_seed) end)
     bots = Keyword.get(opts, :bots, [])
+    holders = Keyword.get(opts, :holders, %{})
 
     with :ok <- check_new(rules, seed, seats, length),
+         :ok <- check(bots -- seats == [], "fatal: every bot must have a seat"),
          :ok <-
-           if(bots -- seats == [],
-             do: :ok,
-             else: {:error, :invalid, "fatal: every bot must have a seat"}
+           check(
+             Map.keys(holders) -- (seats -- bots) == [],
+             "fatal: only a person's seat is held"
            ) do
       Repo.transaction(fn ->
         record =
@@ -47,6 +49,9 @@ defmodule GitGame.Games do
             bots: bots
           })
 
+        for {seat, player_id} <- holders,
+            do: Repo.insert!(%Seat{game_id: record.id, seat: seat, player_id: player_id})
+
         created = Repo.insert!(%Event{game_id: record.id, seq: 1, type: "game_created", day: 0})
         schedule_close(record.id, 1, deadline(created.inserted_at, rules, length))
         send_bot_packs(record)
@@ -54,6 +59,9 @@ defmodule GitGame.Games do
       end)
     end
   end
+
+  defp check(true, _message), do: :ok
+  defp check(false, message), do: {:error, :invalid, message}
 
   defp check_new(rules, seed, seats, length) do
     Game.new(rules, seed, seats, length)
@@ -90,6 +98,30 @@ defmodule GitGame.Games do
     case Enum.find_index(events, &(&1.type == "day_closed" and &1.day == day)) do
       nil -> {:error, :not_found, "fatal: day #{day} hasn't closed"}
       i -> {:ok, Enum.take(events, i + 1)}
+    end
+  end
+
+  @doc """
+  The seats `player_id` holds in the game, in seat order: one, several in a hotseat game, or none (nil holds none).
+  `{:error, :not_found}` if there is no such game.
+  """
+  def seats_held(id, player_id) do
+    case Repo.get(Record, id) do
+      nil ->
+        {:error, :not_found}
+
+      record ->
+        held =
+          if player_id,
+            do:
+              Repo.all(
+                from s in Seat,
+                  where: s.game_id == ^id and s.player_id == ^player_id,
+                  select: s.seat
+              ),
+            else: []
+
+        {:ok, Enum.filter(record.seats, &(&1 in held))}
     end
   end
 
