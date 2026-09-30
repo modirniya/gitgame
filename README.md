@@ -14,7 +14,7 @@ The mechanics are accurate to Git. People who know Git enjoy the details; people
 
 ## Status
 
-**Phase 0, moving to Phase 1.** The rules are still a draft (v0.x). They have been tested in two throwaway prototypes and in simulation, but not yet by other people: [ADR-0002](docs/adr/0002-beta-before-human-playtest.md) moves the human playtest to a beta of the real product, with guardrails that keep rule changes cheap. Progress is tracked in [CHANGELOG.md](CHANGELOG.md).
+**Phase 1: building the engine** ([the plan](docs/design/phase-1-plan.md)). The rules are v0.2, still a draft. They have been tested in throwaway prototypes and in simulation, but not yet by other people: [ADR-0002](docs/adr/0002-beta-before-human-playtest.md) moves the human playtest to a beta of the real product. The server lives in [server/](server/README.md). Progress is tracked in [CHANGELOG.md](CHANGELOG.md).
 
 ## Read this repository
 

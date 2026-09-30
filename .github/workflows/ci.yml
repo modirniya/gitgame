@@ -1,8 +1,8 @@
 # CI: the checks a pull request must pass before review (docs/workflow.md: "CI must pass").
-# Today those are the prototypes' smoke tests. The mobile one plays 800 games against the bot through the pure
-# engine, replays each from its seed, renders every screen for every event, and walks the guided game; the packs one
-# checks the online resolver's rules and plays 480 simulated games. No dependencies to install: the prototypes are
-# plain ES modules and the tests need only node.
+# Two jobs. The prototypes' smoke tests: the mobile one plays 800 games against the bot through the pure engine,
+# replays each from its seed, renders every screen for every event, and walks the guided game; the packs one checks
+# the online resolver's rules and plays 480 simulated games. They need only node. The server job formats, compiles
+# with warnings as errors, and tests the Elixir app against a real Postgres, since every game is an event log there.
 name: ci
 
 on:
@@ -30,3 +30,41 @@ jobs:
           node-version: 24
       - run: node prototypes/mobile/smoke-test.js
       - run: node prototypes/packs/smoke-test.js
+
+  server:
+    name: server format, compile, test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: server
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      MIX_ENV: test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+    steps:
+      - uses: actions/checkout@v7
+      - uses: erlef/setup-beam@v1
+        id: beam
+        with:
+          otp-version: "29"
+          elixir-version: "1.20"
+      - uses: actions/cache@v6
+        with:
+          path: |
+            server/deps
+            server/_build
+          key: mix-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles('server/mix.lock') }}
+      - run: mix deps.get
+      - run: mix format --check-formatted
+      - run: mix compile --warnings-as-errors
+      - run: mix test

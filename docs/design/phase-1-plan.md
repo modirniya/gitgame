@@ -18,10 +18,10 @@ The plan from rules v0.2 to a beta that strangers can finish games in. The [char
 The charter's exit: *a full game can be played and replayed from its log.*
 
 ### M1 · Server skeleton
-- [ ] `server/`: a Phoenix app with no HTML, assets, mailer or dashboard: `--app gitgame --module GitGame`, per [branding.md](../branding.md). Postgres through Ecto.
-- [ ] `GitGame.Brand` is the one place the name is defined, marked `# BRAND`.
-- [ ] CI: a second job with Elixir and a Postgres service. It runs `mix format --check-formatted`, `mix compile --warnings-as-errors` and `mix test`. Branch protection gets the new check.
-- [ ] A health endpoint and one test that hits it.
+- [x] `server/`: a Phoenix app with no HTML, assets, mailer or dashboard: `--app gitgame --module GitGame`, per [branding.md](../branding.md). Postgres through Ecto.
+- [x] `GitGame.Brand` is the one place the name is defined, marked `# BRAND`.
+- [x] CI: a second job with Elixir and a Postgres service. It runs `mix format --check-formatted`, `mix compile --warnings-as-errors` and `mix test`. Branch protection gets the new check.
+- [x] A health endpoint and one test that hits it.
 
 *Done when:* CI is green on the empty app, and `mix phx.server` answers the health check locally.
 
