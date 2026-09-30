@@ -12,7 +12,7 @@ It also adapts to bigger screens. From 600 px wide (an iPad in portrait) it uses
 
 Add `?seed=123` to replay a shuffle, and `?debug` to expose the router as `window.gitgame` for driving a game from the console. The scoreboard's "playtest numbers" and `window.gitgamePlaytest()` show what `playtest.js` recorded on the device.
 
-**Test:** `node smoke-test.js`. It plays 800 games against the bot (400 competent, 400 random) plus 200 random-vs-random through the pure engine. It checks the pointer invariant after every action, replays every game from its seed, and checks event coverage. It renders every screen for every event of 300 games and walks the guided game over 500 seeds. It runs in about 20 s and exits non-zero on any failure.
+**Test:** `node smoke-test.js`. It plays 800 games against the bot (400 competent, 400 random) plus 200 random-vs-random through the pure engine. It checks the pointer invariant after every action, replays every game from its seed, and checks event coverage. It renders every screen for every event of 300 games and walks the guided game over 500 seeds. It runs in about 20 s, exits non-zero on any failure, and runs in CI on every pull request ([.github/workflows/ci.yml](../../.github/workflows/ci.yml)).
 
 ## Files
 
