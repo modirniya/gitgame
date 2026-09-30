@@ -14,7 +14,7 @@ The mechanics are accurate to Git. People who know Git enjoy the details; people
 
 ## Status
 
-**Phase 0 — playtesting the rules on paper.** There is no product code yet, on purpose: the [charter](docs/adr/0000-project-charter.md) requires the rules to prove themselves at a table before anything is built around them. Progress is tracked in [CHANGELOG.md](CHANGELOG.md).
+**Phase 0, moving to Phase 1.** The rules are still a draft (v0.x). They have been tested in two throwaway prototypes and in simulation, but not yet by other people: [ADR-0002](docs/adr/0002-beta-before-human-playtest.md) moves the human playtest to a beta of the real product, with guardrails that keep rule changes cheap. Progress is tracked in [CHANGELOG.md](CHANGELOG.md).
 
 ## Read this repository
 
