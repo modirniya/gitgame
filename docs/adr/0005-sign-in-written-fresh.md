@@ -1,6 +1,6 @@
 # ADR-0005: Sign-in written fresh: GitHub OAuth and anonymous players, no Firebase
 
-*Status: Proposed · Date: 2026-09-29*
+*Status: Accepted · Date: 2026-09-29*
 
 ## Context
 

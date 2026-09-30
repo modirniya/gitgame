@@ -83,7 +83,7 @@ The charter's exit: *a full game can be played and replayed from its log.*
 
 Rough until Phase 1 is done; each needs its details written before it starts.
 
-- **M8 · Identity:** GitHub OAuth, with anonymous play as the fallback and a nudge to link (charter decision 15). Written fresh, without Firebase, per [ADR-0005](../adr/0005-sign-in-written-fresh.md) (proposed): players and server-side sessions, with seats owned by players.
+- **M8 · Identity:** GitHub OAuth, with anonymous play as the fallback and a nudge to link (charter decision 15). Written fresh, without Firebase, per [ADR-0005](../adr/0005-sign-in-written-fresh.md): players and server-side sessions, with seats owned by players.
 - **M9 · Rooms:** private rooms by link, invites, and quick "play the bot now" (charter priority 2: a game in five seconds).
 - **M10 · Notifications:** push, email and the daily digest; "your pack is due" is the retention loop (charter decision 16).
 - **M11 · Hosting:** an ADR choosing the host (none is chosen yet), then deploy from tags, never branches ([workflow.md](../workflow.md)).
