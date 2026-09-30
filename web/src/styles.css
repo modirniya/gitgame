@@ -163,11 +163,11 @@ button.primary {
 .card.command .big {
   font-size: 0.95rem;
 }
-/* at the left, the part of a card an overlapping neighbour never covers */
+/* at the left, the part of a card an overlapping neighbour never covers; under the file name, clear of the number */
 .card .bug {
   position: absolute;
   left: 6px;
-  bottom: 6px;
+  top: 32px;
   padding: 0 4px;
   border-radius: 3px;
   background: var(--reject);
@@ -300,15 +300,6 @@ ol.seats {
   color: var(--muted);
 }
 
-/* ---------- the hand ---------- */
-
-.hand .cards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding-top: 8px;
-}
-
 @media (min-width: 600px) {
   #app {
     max-width: 640px;
@@ -382,7 +373,7 @@ ol.seats {
 }
 /* The hand, fanned (event-screens §3): each card overlaps the one before by --overlap, set by the hub so a row fits
    the screen and every card keeps at least 44 px to tap. The one under the finger, or selected, comes forward. */
-.hand {
+.hand-rows {
   padding: 14px 0 4px;
 }
 .hand-fan {
@@ -740,4 +731,148 @@ label.check input {
 .bubble .who {
   font-weight: 700;
   color: var(--other);
+}
+
+/* ---------- motion (event-screens §4: 300–600 ms; none under prefers-reduced-motion, above) ---------- */
+
+.stage {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 110px;
+  position: relative;
+}
+.moved li {
+  animation-duration: 450ms;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+  animation-delay: calc(var(--i, 0) * 120ms);
+}
+.fly-in li {
+  animation-name: fly-in;
+}
+.fly-in.late li {
+  animation-delay: calc(500ms + var(--i, 0) * 120ms);
+}
+@keyframes fly-in {
+  from {
+    transform: translate(-40px, 60px) scale(0.8);
+    opacity: 0;
+  }
+}
+.reject .bouncer {
+  animation: bounce 700ms ease-in-out both;
+}
+@keyframes bounce {
+  0% {
+    transform: translateX(60px);
+    opacity: 0;
+  }
+  40% {
+    transform: translateX(-8px);
+    opacity: 1;
+  }
+  55% {
+    transform: translateX(40px);
+  }
+  70%,
+  90% {
+    transform: translateX(34px) rotate(-3deg);
+  }
+  80%,
+  100% {
+    transform: translateX(46px) rotate(3deg);
+  }
+}
+.reject .bouncer .card {
+  border-color: var(--reject);
+}
+.pull .slider {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  animation: slide 600ms ease-in-out both;
+}
+@keyframes slide {
+  to {
+    transform: translateX(calc((var(--n) - 1) * 70px + 10px));
+  }
+}
+.clash .from-left {
+  animation: from-left 450ms ease-out both;
+}
+.clash .from-right {
+  animation: from-right 450ms ease-out both;
+}
+.clash-file {
+  color: var(--warn);
+  font-weight: 700;
+  animation: flash 900ms 350ms both;
+}
+@keyframes from-left {
+  from {
+    transform: translateX(-80px);
+  }
+  80% {
+    transform: translateX(8px);
+  }
+}
+@keyframes from-right {
+  from {
+    transform: translateX(80px);
+  }
+  80% {
+    transform: translateX(-8px);
+  }
+}
+@keyframes flash {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  25%,
+  75% {
+    opacity: 0.2;
+  }
+}
+.flip-over li {
+  animation-name: flip-over;
+  animation-duration: 550ms;
+}
+@keyframes flip-over {
+  from {
+    transform: rotateY(180deg);
+  }
+}
+.land li:last-child {
+  animation-name: land;
+}
+@keyframes land {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+}
+.force {
+  flex-direction: column;
+  align-items: flex-start;
+}
+.fall-off li {
+  animation-name: fall-off;
+  animation-duration: 600ms;
+}
+@keyframes fall-off {
+  to {
+    transform: translateY(60px) rotate(12deg);
+    opacity: 0.25;
+  }
+}
+.rise li {
+  animation-name: rise;
+}
+@keyframes rise {
+  from {
+    transform: translateY(70px);
+    opacity: 0;
+  }
 }

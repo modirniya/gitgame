@@ -4,28 +4,100 @@ import { el } from "./dom.js";
 import { card, commit } from "./cards.js";
 import { lines } from "./transcript.js";
 
+// A commit as the reader may see it: from main, from their own branch, or else face-down, as the table would show a
+// commit it can't read (another player's, gone back to their branch).
+function find(view, id, author) {
+  const own = view.you?.local.find((c) => c.id === id);
+  return (
+    view.main.find((c) => c.id === id) ??
+    (own && {
+      id,
+      author: own.author,
+      files: [...new Set(own.cards.map((k) => k.file))],
+      lines: own.cards.reduce((n, k) => n + k.lines, 0),
+      flipped: false,
+    }) ?? { id, author, files: [], lines: "?", flipped: false }
+  );
+}
+
 const commits = (view, ids) => ids.map((id) => view.main.find((c) => c.id === id)).filter(Boolean);
-const strip = (cs) =>
+
+// The motions of event-screens §4, as CSS animations keyed by `motion` (styles.css), one card after another (--i);
+// prefers-reduced-motion turns them all off.
+const strip = (cs, motion = "") =>
   cs.length > 0 &&
   el(
     "ol",
-    { class: "strip moved" },
-    cs.map((c) => el("li", {}, commit(c))),
+    { class: `strip moved ${motion}` },
+    cs.map((c, i) => el("li", { style: `--i: ${i}` }, commit(c))),
   );
 
 /** What a moment moved, drawn: the commits it put on main or flipped, the CI's flips, the incident. */
 function picture(m, view, you) {
   const e = m.events.at(-1);
   switch (m.kind) {
+    // a push: the commits fly onto the end of main
     case "pushed":
-      return strip(commits(view, e.commits));
+      return strip(commits(view, e.commits), "fly-in");
+    // a rejection: the commit flies at the tip and is knocked back
+    case "rejected": {
+      const tip = view.main.at(-1);
+      const mine = m.player === you ? view.you.local.at(-1) : null;
+      const bounced = mine
+        ? find(view, mine.id, you)
+        : { id: "?", author: m.player, files: [], lines: "?", flipped: false };
+      return el(
+        "div",
+        { class: "stage reject" },
+        el("div", { class: "tip-card" }, commit(tip, { tip: true })),
+        el("div", { class: "bouncer" }, commit(bounced)),
+      );
+    }
+    // a pull: the pointer slides along what came in
+    case "pulled": {
+      const incoming = commits(view, e.incoming ?? []);
+      return (
+        incoming.length > 0 &&
+        el(
+          "div",
+          { class: "stage pull", style: `--n: ${incoming.length}` },
+          strip(incoming),
+          el("span", { class: `chip slider${m.player === you ? " you" : ""}` }, m.player),
+        )
+      );
+    }
+    // a conflict: the two commits meet over the file they share
+    case "conflict": {
+      const c = m.events.find((x) => x.type === "conflict_detected")?.conflicts?.[0];
+      if (!c) return null;
+      return el(
+        "div",
+        { class: "stage clash" },
+        el("div", { class: "from-left" }, commit(find(view, c.mine, m.player))),
+        el("span", { class: "clash-file" }, c.files.join(" ")),
+        el("div", { class: "from-right" }, commit(find(view, c.theirs))),
+      );
+    }
+    // blame: the commit flips over
     case "blamed":
+      return strip(commits(view, [e.target]), "flip-over");
+    // a revert lands on the bug
     case "reverted":
-      return strip(commits(view, [e.target]));
-    case "reflog":
-      return strip(commits(view, e.restored));
+      return strip(commits(view, [e.target, e.revert]), "land");
+    // a force-push: what was ahead falls off main, and the pusher's commits land
     case "forced":
-      return strip(commits(view, e.pushed));
+      return el(
+        "div",
+        { class: "stage force" },
+        strip(
+          e.erased.map((id) => find(view, id)),
+          "fall-off",
+        ),
+        strip(commits(view, e.pushed), "fly-in late"),
+      );
+    // a reflog: what the force-push erased rises back onto main
+    case "reflog":
+      return strip(commits(view, e.restored), "rise");
     case "ci":
       return el(
         "ol",

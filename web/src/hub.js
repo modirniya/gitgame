@@ -88,7 +88,7 @@ function fan(cards) {
   for (let i = 0; i < cards.length; i += perRow) rows.push(cards.slice(i, i + perRow));
   return el(
     "div",
-    { class: "hand", "aria-label": "your hand" },
+    { class: "hand-rows", "aria-label": "your hand" },
     rows.map((row) => el("div", { class: "hand-fan", style: `--overlap: ${overlap}px` }, row)),
   );
 }
