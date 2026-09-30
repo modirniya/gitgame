@@ -64,3 +64,11 @@ Neither is dominant. This is the same trade-off as real Git, which is the point.
 1. Does sending last dominate? If so, batch remote ops at the deadline (hidden simultaneous) instead of processing on arrival — that's a one-line change in the resolver and a large change in feel.
 2. Is "pay for a failed push" fun or punishing? Alternative: rejected push refunds 1 op ("at least you found out").
 3. Should OOO players' packs be bot-authored rather than empty, so 2-player games survive a vacation?
+
+**Provisional answers from simulation** ([prototypes/packs](../../prototypes/packs/README.md), bots rather than people, per [ADR-0002](../adr/0002-beta-before-human-playtest.md)):
+
+1. **The opposite: sending first dominates.** Under arrival order the first sender wins 61% of two-player games, and each early sender wins 30% of four-player games (25% is even). The edge is tempo: the waiter must pull before it can push, most of all on day 1. The information from waiting is worth little, because a pull costs nothing when nothing moved, so an early pack written "pull, push" is never stale. §4's "neither is dominant" doesn't hold, and in 24h play the edge goes to whoever's day starts first. Batching at the deadline makes it even (50/50, 25/25) but doubles conflicts and merge tokens; with no merge token for a fast-forward, tokens come most of the way back. Recommendation: batch at the deadline, and let the beta test the feel.
+2. **Keep paying.** Stale pushes come from packs written at the same moment without a pull first: 3.9 a game in a live race, about 7% of ops. A free defensive `pull` before `push` removes almost all of them (0.1 a game). A refund changes nothing unless the pack lists something after the push, and with a fallback pull it made results worse. The pack editor should pre-fill `pull` before `push`.
+3. Not simulated: it is about how absence feels to the players who stay.
+
+The simulation also found five ambiguities in this doc (the cost of `--resolve`, the release size, a force-push or blame that finds nothing to act on, and whether arming a reflog takes a pack slot), listed in the prototype's README for v1.0.
