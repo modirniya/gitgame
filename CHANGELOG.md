@@ -30,5 +30,7 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - `GitGame.Ops` and the local ops (M2c): the one interface the resolver runs an op through (its cost at the moment it runs, then its effect as events, or a failure in Git's words), with `add`, `commit` and arming a trap.
 
+- The remote ops (M2d): `push` (free with nothing to push, rejected non-fast-forward from behind, Flaky CI's die on the day's first push) and `pull` / `pull --rebase` (free when up to date; conflicts settled by the declared strategy; a merge token only when unpushed commits were merged).
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.
