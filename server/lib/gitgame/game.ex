@@ -20,7 +20,9 @@ defmodule GitGame.Game do
               sins: 0,
               blame: 0,
               fixes: 0,
-              armed: []
+              armed: [],
+              empty_days: 0,
+              left: false
   end
 
   @type t :: %__MODULE__{}

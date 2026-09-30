@@ -40,5 +40,7 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - The resolver's property tests (M3b), under both resolution orders: after every day of thousands of generated games, every pointer is on `main`, every card is in exactly one place, and no pack overspends; every game releases by its final day; and replaying a game's packs from its seed reproduces it exactly. They found one bug on their first run: a force-push that erased an already-overwritten commit lost its cards.
 
+- Absence in the resolver (M3c): no pack by the time a day closes is an empty pack; two in a row and the player has left the company, sending no more packs and drawing no more cards, while their commits stay on `main` and take blame at the release.
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.

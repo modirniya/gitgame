@@ -44,6 +44,8 @@ The charter's exit: *a full game can be played and replayed from its log.*
   - replaying a game's events from its seed reproduces its state exactly;
   - both resolution orders satisfy both properties.
 
+- [x] Absence, which is pure rules and so lives in the resolver: no pack is an empty pack, and two in a row is leaving the company (no more packs or draws; commits stay and take blame).
+
 *Done when:* the property tests pass under both orders at a few thousand generated games each, and a replay of any generated game is byte-identical.
 
 ### M4 · The event log
@@ -55,7 +57,7 @@ The charter's exit: *a full game can be played and replayed from its log.*
 
 ### M5 · Days on a clock
 - [ ] Oban jobs close each day at its deadline, or as soon as every pack is in. Closing a day is idempotent, so a retried job can't resolve a day twice.
-- [ ] Absence: no pack by the deadline is an empty pack; two in a row and the player has left the company.
+- [x] Absence: done in M3, since it is pure rules; M5 only has to close days on time.
 - [ ] Day lengths 24h, 5m and 60s, with the same code and a different number.
 
 *Done when:* a scripted 60s game runs to its release unattended, with one player going absent, and the same game at 24h does too under a fake clock.
