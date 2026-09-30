@@ -4,7 +4,8 @@ defmodule GitGame.Ops do
   op by op without knowing what any op means; each family of ops lives in its own module behind this one:
 
   - `GitGame.Ops.Local`: ops on your own side of the table (`add`, `commit`, arming a trap)
-  - remote ops and command cards follow (M2d, M2e)
+  - `GitGame.Ops.Remote`: ops that meet everyone else's work on `main` (`push`, `pull`, `pull --rebase`)
+  - command cards follow (M2e)
 
   `cost/3` is asked at the moment the op runs, because some ops are free when there is nothing to do. `run/3` returns
   `{:ok, game, events}` or `{:failed, game, events}`; a failure is reported in Git's own words and, per
@@ -16,7 +17,13 @@ defmodule GitGame.Ops do
   @callback run(Game.t(), player :: String.t(), op :: map()) ::
               {:ok | :failed, Game.t(), [map()]}
 
-  @families %{add: GitGame.Ops.Local, commit: GitGame.Ops.Local, arm: GitGame.Ops.Local}
+  @families %{
+    add: GitGame.Ops.Local,
+    commit: GitGame.Ops.Local,
+    arm: GitGame.Ops.Local,
+    push: GitGame.Ops.Remote,
+    pull: GitGame.Ops.Remote
+  }
 
   def cost(game, player, %{op: op} = o) do
     case Map.fetch(@families, op) do
