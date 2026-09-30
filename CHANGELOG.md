@@ -90,5 +90,6 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.
 
 ### Fixed
+- The signed cookie that holds a GitHub link in progress (its `state` and PKCE verifier) is now `Secure` wherever there is TLS, as the session cookie already was.
 - Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.

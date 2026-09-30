@@ -1,14 +1,15 @@
 defmodule GitGameWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :gitgame
 
-  # The session will be stored in the cookie and signed,
-  # this means its contents can be read but not tampered with.
-  # Set :encryption_salt if you would also like to encrypt it.
+  # The signed session cookie holds only a GitHub link in progress: its `state` and PKCE verifier, for the minutes
+  # between leaving for GitHub and coming back (GitGameWeb.AuthController). Signed, so it can't be forged; Lax, so it
+  # comes back with GitHub's redirect; Secure wherever there is TLS, as the session cookie is (ADR-0005).
   @session_options [
     store: :cookie,
     key: "_gitgame_key",
     signing_salt: "351MWJjO",
-    same_site: "Lax"
+    same_site: "Lax",
+    secure: Application.compile_env(:gitgame, :secure_cookies, true)
   ]
 
   # socket "/live", Phoenix.LiveView.Socket,
