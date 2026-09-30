@@ -213,6 +213,30 @@ defmodule GitGame.Ops.CommandsTest do
       refute Enum.any?(game.main, &(&1[:revert_of] == bug))
     end
 
+    test "an erased commit that was already overwritten stays gone, and its cards leave play", %{
+      game: game
+    } do
+      # found by the resolver's card-conservation property: these cards used to vanish
+      [_, crossed | _] = game.main
+
+      game = %{
+        game
+        | main:
+            Enum.map(
+              game.main,
+              &if(&1.id == crossed.id,
+                do: Map.merge(&1, %{overwritten: true, flipped: true}),
+                else: &1
+              )
+            )
+      }
+
+      assert {:ok, game, _} = Ops.run(game, "raj", %{op: :force})
+
+      refute Enum.any?(game.main ++ game.players["ana"].local, &(&1.id == crossed.id))
+      assert Enum.all?(crossed.cards, &(&1 in game.discard))
+    end
+
     test "with nothing ahead of your pointer it fails, and the card stays", %{game: game} do
       game = play(game, "raj", [%{op: :pull}])
 

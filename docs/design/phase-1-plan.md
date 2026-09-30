@@ -39,7 +39,7 @@ The charter's exit: *a full game can be played and replayed from its log.*
 ### M3 · Resolver
 - [x] `GitGame.Resolver.close_day(game, packs)`: runs each pack to its budget, in the order `rules/online.json` names (`batch_at_close`, a seeded shuffle, by default; `arrival` as the alternative), and returns the new state and the ordered events: the day log.
 - [x] Day start and end (`open_day/1`): the incident, draws, the hand limit, the final day's CI. Every card that leaves play goes to a discard pile, so cards are conserved.
-- [ ] Property tests (StreamData), which the charter makes non-negotiable before Phase 2:
+- [x] Property tests (StreamData), which the charter makes non-negotiable before Phase 2:
   - any sequence of valid packs from any reachable state gives a valid state (pointers in range, cards conserved, budgets respected);
   - replaying a game's events from its seed reproduces its state exactly;
   - both resolution orders satisfy both properties.
