@@ -85,7 +85,7 @@ Rough until Phase 1 is done; each needs its details written before it starts.
 
 ## Open items
 
-- [ ] **Merging:** branch protection needs a review the maintainer can't give on their own PRs. Either the maintainer merges each PR, or authorizes merging with `--admin` once CI passes.
+- [x] **Merging:** branch protection needs a review the maintainer can't give on their own PRs. Decided 2026-09-29: PRs are squash-merged with `--admin` once CI passes, and the maintainer is told what merged.
 - [ ] **RPS and PlayLounge:** the charter lifts auth, the FCM notifier and the client skeleton from them. Where they are is needed by M8.
 - [ ] **Hosting:** chosen by ADR before M11.
 - [ ] **Playtest question 3** (bot-authored packs for absent players): the beta's to answer; M5 makes empty packs the default.
