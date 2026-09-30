@@ -136,7 +136,7 @@ Taken ahead of M10 and M11, which each need a decision first (a notification pro
 
 ### After M9
 
-- **M10 · Notifications:** push, email and the daily digest; "your pack is due" is the retention loop (charter decision 16).
+- **M10 · Notifications:** push, email and the daily digest; "your pack is due" is the retention loop (charter decision 16). How is [ADR-0006](../adr/0006-notifications-web-push-and-email.md), *proposed*: standard Web Push with VAPID and email through SMTP, written fresh, only in 24-hour games. M10's details get written once it is accepted.
 - **M11 · Hosting:** an ADR choosing the host (none is chosen yet), then deploy from tags, never branches ([workflow.md](../workflow.md)).
 - **M13 · Beta launch:** strangers finish games; the Phase 0 exit (two people ask to play again unprompted) is checked here.
 
