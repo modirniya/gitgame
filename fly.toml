@@ -1,0 +1,47 @@
+# Fly.io (ADR-0007): one machine running the root Dockerfile's image, which serves the client and the API from one
+# origin (ADR-0005), behind Fly's proxy and its TLS for gitgame.online. Deployed by .github/workflows/deploy.yml on a
+# v* tag, never a branch. The steps to set it up are in server/README.md.
+#
+# To confirm when the app is created: the app's name (it must be free on Fly) and the region nearest the first
+# players (`fly platform regions`).
+app = "gitgame"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile"
+
+# Migrations run once per deploy, in their own machine, before the new version takes traffic.
+[deploy]
+  release_command = "/app/bin/migrate"
+
+[env]
+  PHX_HOST = "gitgame.online"
+  PORT = "4000"
+  # Fly's private network, where the database is reached, is IPv6.
+  ECTO_IPV6 = "true"
+
+[http_service]
+  internal_port = 4000
+  force_https = true
+  # Never sleep: every open game holds a live stream (charter decision 9), and a game opened a week later must open at
+  # once. ADR-0007 rules out hosts that sleep idle services.
+  auto_stop_machines = "off"
+  auto_start_machines = false
+  min_machines_running = 1
+
+  # the live streams are long-lived connections: count those, not requests
+  [http_service.concurrency]
+    type = "connections"
+    soft_limit = 1500
+    hard_limit = 2000
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/api/health"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "20s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

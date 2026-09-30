@@ -153,8 +153,8 @@ Taken ahead of M10 and M11, which each need a decision first (a notification pro
 Where the beta runs, and how a version gets there: deployed from tags, never branches ([workflow.md](../workflow.md)). The host is a decision with lasting cost, so it is an ADR, and the maintainer's to accept; everything that doesn't depend on it comes first.
 
 - [x] **M11a · One image, one origin.** The server serves the built client from its own origin, which the session cookie needs ([ADR-0005](../adr/0005-sign-in-written-fresh.md)): `/` is the client's page, with a Content Security Policy, and its files sit beside it. A `Dockerfile` at the root builds the client, the release and the rules into one image that migrates its database before it serves; CI builds that image, runs it against Postgres, and plays the exit test on it.
-- [ ] **M11b · The host.** Fly.io, per [ADR-0007](../adr/0007-where-the-beta-runs.md): one machine running the image, Fly's managed Postgres, TLS for gitgame.online. The server reads the caller's address from Fly's proxy, so the rate limits count people, not the proxy. The maintainer creates the app and its database, sets the secrets, and points the domain at it.
-- [ ] **M11c · Deploy from tags.** A workflow that builds the image for a `v*` tag and deploys it to the host, migrating first; `main` never deploys by itself.
+- [ ] **M11b · The host.** Fly.io, per [ADR-0007](../adr/0007-where-the-beta-runs.md): one machine running the image, Fly's managed Postgres, TLS for gitgame.online. The server reads the caller's address from Fly's proxy, so the rate limits count people, not the proxy. The maintainer creates the app and its database, sets the secrets, and points the domain at it (`server/README.md`, "Deploying"). Ready for that: `fly.toml` (one machine that never sleeps, health checks, migrations as the release command), and the caller's address read from `fly-client-ip`.
+- [ ] **M11c · Deploy from tags.** A workflow that builds the image for a `v*` tag and deploys it to the host, migrating first; `main` never deploys by itself. Written (`.github/workflows/deploy.yml`); it runs once the repository has `FLY_API_TOKEN`, and this box is ticked by the first deploy that works.
 
 *Done when:* a tag puts a version on gitgame.online, where a stranger can play the bot in one tap.
 
@@ -165,6 +165,7 @@ Where the beta runs, and how a version gets there: deployed from tags, never bra
 ## Open items
 
 - [x] **Merging:** branch protection needs a review the maintainer can't give on their own PRs. Decided 2026-09-29: PRs are squash-merged with `--admin` once CI passes, and the maintainer is told what merged.
-- [ ] **RPS and PlayLounge:** the charter lifts the FCM notifier and the client skeleton from them. Where they are is needed by M10. Sign-in no longer comes from RPS ([ADR-0005](../adr/0005-sign-in-written-fresh.md)).
-- [ ] **Hosting:** chosen by ADR before M11.
+- [x] **RPS and PlayLounge:** no longer needed. Sign-in ([ADR-0005](../adr/0005-sign-in-written-fresh.md)) and notifications ([ADR-0006](../adr/0006-notifications-web-push-and-email.md)) were written fresh, and the client (M7) was written against the specs.
+- [x] **Hosting:** Fly.io, [ADR-0007](../adr/0007-where-the-beta-runs.md) (2026-09-30).
+- [ ] **Checks only a deployment can make:** a real push to a real browser (the embedded test browser runs no service workers), an email through the real SMTP provider, linking a real GitHub account, and the service worker's offline copy. Each is built and tested against a stand-in; each gets tried once on gitgame.online.
 - [ ] **Playtest question 3** (bot-authored packs for absent players): the beta's to answer; M5 makes empty packs the default.
