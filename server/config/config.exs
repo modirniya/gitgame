@@ -7,6 +7,9 @@
 # General application configuration
 import Config
 
+# The rules the game is played by (docs/design/round-resolution.md). A release will need them copied in: see M11.
+config :gitgame, rules_dir: Path.expand("../../rules", __DIR__)
+
 config :gitgame,
   namespace: GitGame,
   ecto_repos: [GitGame.Repo],

@@ -13,6 +13,7 @@ The game has no turn order. It has **days**, **packs**, and a **remote** that re
 - Each player sends **exactly one pack** per day, any time before the deadline, and may replace it until then.
 - The day closes at the deadline, **or early the moment every pack has arrived**. A live game therefore runs at the speed of its slowest player; a week-long game speeds up when everyone is prompt.
 - At the end of the day, anyone holding more than **10 cards** discards down to 10.
+- **The cards in play.** Online games use the part of the deck the simulations tested: `git blame`, `revert`, `push --force` and `reflog`, and the Flaky CI, Standup Ran Long, Stack Overflow Is Down and Hackathon incidents, shuffled with two quiet days. `rules/online.json` lists them. The rest of the [tabletop deck](base-rules.md) comes online one card at a time.
 - **No pack by the deadline = an empty pack ("OOO").** Two consecutive OOO days and the player has *left the company*: they send no more packs, but their commits stay on `main` and still take blame at release. History is immutable.
 
 ## 2. The Pack
