@@ -15,6 +15,7 @@ it("offers a form where the remote can email, and says what's pending once an ad
   };
   const node = emailSettings(remote);
   await settle();
+  expect(node.hidden).toBe(false);
 
   node.querySelector("#email-address").value = "ana@example.com";
   node.querySelector("#email-digest").checked = true;
@@ -25,8 +26,16 @@ it("offers a form where the remote can email, and says what's pending once an ad
   expect(node.textContent).toContain("confirm the link we sent");
 });
 
-it("shows nothing where the remote can't send email", async () => {
+it("shows nothing where the remote can't send email, not even an empty disclosure", async () => {
   const node = emailSettings({ emailSettings: async () => ({ email: null, available: false }) });
+  expect(node.hidden).toBe(true);
   await settle();
   expect(node.textContent).toBe("");
+  expect(node.hidden).toBe(true);
+});
+
+it("shows nothing when the remote can't be asked", async () => {
+  const node = emailSettings({ emailSettings: async () => Promise.reject(new Error("offline")) });
+  await settle();
+  expect(node.hidden).toBe(true);
 });

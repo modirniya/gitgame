@@ -4,7 +4,8 @@
 import { el } from "./dom.js";
 
 export function emailSettings(remote) {
-  const node = el("details", { class: "more email" });
+  // hidden until the remote says it can send: an empty <details> still shows the browser's own "Details"
+  const node = el("details", { class: "more email", hidden: true });
   let error = "";
 
   const act = (f) =>
@@ -14,6 +15,7 @@ export function emailSettings(remote) {
     });
 
   function show(state) {
+    node.hidden = !state.available;
     if (!state.available) return node.replaceChildren();
     const e = state.email;
     const body = e
@@ -55,6 +57,6 @@ export function emailSettings(remote) {
     );
   }
 
-  remote.emailSettings().then(show, () => node.replaceChildren());
+  remote.emailSettings().then(show, () => show({ available: false }));
   return node;
 }
