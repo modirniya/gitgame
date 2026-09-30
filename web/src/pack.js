@@ -188,3 +188,28 @@ export function actions(view, ops, selected = []) {
     ),
   };
 }
+
+/**
+ * What each action would do, in your situation now, as a line under its button (event-screens §3, I-Hub): the
+ * consequence of playing it, where `actions` says why it can't be.
+ */
+export function consequences(view, ops, selected = []) {
+  const { left: s } = price(view, ops);
+  const picked = s.hand.filter((c) => selected.includes(c.id) && c.kind === "commit");
+  const lines = (cards) => cards.reduce((n, c) => n + c.lines, 0);
+  const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+  return {
+    add:
+      picked.length &&
+      `stage ${plural(picked.length, "card")}, +${lines(picked)}${picked.some((c) => c.bug) ? ", a bug" : ""}`,
+    commit: s.staged.length && `one commit, +${lines(s.staged)} lines`,
+    pull: s.behind > 0 ? `${s.behind} new on main: catch up` : "at the tip: free unless main moves",
+    push: s.local.length ? `${plural(s.local.length, "commit")} to main` : "nothing to push yet",
+    blame: "flip a face-down commit: −3 to its author if a bug",
+    revert: "cancel a flipped bug: +1 to you",
+    force: `erase ${plural(s.behind, "commit")} ahead of you; a sin`,
+    arm: "free: fires when someone force-pushes",
+    tag: "ship v1.0: CI flips every commit",
+  };
+}
