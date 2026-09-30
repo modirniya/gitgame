@@ -17,6 +17,12 @@ defmodule GitGameWeb do
   those modules here.
   """
 
+  @doc """
+  The origin people reach the game at: the endpoint's own URL, unless `config :gitgame, :public_url` says otherwise (the
+  Vite dev server, in development, which proxies /api here). GitHub is sent back to it, and so is the browser.
+  """
+  def public_url, do: Application.get_env(:gitgame, :public_url) || GitGameWeb.Endpoint.url()
+
   def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
 
   def router do

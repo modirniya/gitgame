@@ -20,7 +20,8 @@ defmodule GitGame.MixProject do
   def application do
     [
       mod: {GitGame.Application, []},
-      extra_applications: [:logger, :runtime_tools, :crypto]
+      # :inets and :ssl for the requests to GitHub (GitGame.GitHub.HTTP)
+      extra_applications: [:logger, :runtime_tools, :crypto, :inets, :ssl]
     ]
   end
 
@@ -41,6 +42,8 @@ defmodule GitGame.MixProject do
     [
       {:phoenix, "~> 1.8.15"},
       {:oban, "~> 2.24"},
+      # the OAuth protocol for linking GitHub (ADR-0005); its requests go through GitGame.GitHub.HTTP
+      {:assent, "~> 0.3.1"},
       {:stream_data, "~> 1.4", only: :test},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.13"},

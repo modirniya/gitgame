@@ -64,4 +64,26 @@ defmodule GitGame.PlayersTest do
     :ok = Players.sign_out(token)
     assert Players.from_token(token) == nil
   end
+
+  describe "linking GitHub" do
+    @octo %{id: 42, login: "octo", avatar_url: "https://avatars.example/42"}
+
+    test "an account on a device already linked to another is a player of its own" do
+      {:ok, anon} = Players.create_anonymous()
+      {:ok, octo} = Players.link_github(anon, @octo)
+      {:ok, hubot} = Players.link_github(octo, %{@octo | id: 7, login: "hubot"})
+
+      assert hubot.id != octo.id
+      assert Repo.get!(Player, octo.id).github_login == "octo"
+    end
+
+    test "linking again refreshes the login and avatar, and moves no seats from a linked player" do
+      {:ok, a} = Players.create_anonymous()
+      {:ok, octo} = Players.link_github(a, @octo)
+      {:ok, again} = Players.link_github(nil, %{@octo | login: "octocat"})
+
+      assert again.id == octo.id
+      assert again.github_login == "octocat"
+    end
+  end
 end

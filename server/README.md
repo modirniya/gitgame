@@ -19,7 +19,8 @@ JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has
 | | |
 |---|---|
 | `POST /players` | An anonymous player with a generated handle, and this device signed in as them (`201`); a device already signed in gets its player back (`200`) |
-| `GET /session` | Who this device is signed in as, or `401` |
+| `GET /session` | Who this device is signed in as, and whether this server can link GitHub (`link_github`), or `401` |
+| `GET /auth/github` | A page navigation, not an API call: sends the browser to GitHub to link an account (no scopes asked), and GitHub back to `/auth/github/callback`, which signs the device in as the account's player and returns to the client |
 | `DELETE /session` | Signs this device out (`204`) |
 | `POST /games` | Signed in: `{"hotseat": [...], "bots": [...], "day_length": "live" \| "lunch" \| "correspondence", "seed": n}`. You take the first seat, under your handle, and hold the seats of the `hotseat` people at your device → the game from your seat |
 | `GET /games/:id` | The game from your seat: your own cards, branch and traps, every day log as you may see it, and `yours`, the seats you hold (`?seat=` picks one in a hotseat game). A device holding no seat gets the table's view |
@@ -27,6 +28,16 @@ JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has
 | `POST /games/:id/packs` | Signed in: `{"version", "ops", "discard"}`, and `"seat"` if you hold several, sends or replaces today's pack for a seat you hold; `409` if the day has moved on (`fetch first`) |
 | `GET /games/:id/live` | Server-Sent Events: `refetch` on connecting and whenever the log grows, nothing else; ends after the release |
 | `GET /health` | Whether the server and its database are up |
+
+## Linking GitHub
+
+Anonymous play needs nothing. To let players link GitHub, create a GitHub OAuth app whose callback URL is the address people reach the game at plus `/api/auth/github/callback` (in development, `http://localhost:5173/api/auth/github/callback`, since the Vite server proxies `/api` here), and start the server with its credentials:
+
+```bash
+GITGAME_GITHUB_CLIENT_ID=... GITGAME_GITHUB_CLIENT_SECRET=... mix phx.server
+```
+
+The tests never reach GitHub: `test/support/github_stub.ex` stands in for it.
 
 ## Before you push
 

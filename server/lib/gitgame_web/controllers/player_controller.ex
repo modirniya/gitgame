@@ -4,7 +4,7 @@ defmodule GitGameWeb.PlayerController do
   device in one request. `GET /api/session` says who this device is; `DELETE /api/session` signs it out.
   """
   use GitGameWeb, :controller
-  alias GitGame.Players
+  alias GitGame.{GitHub, Players}
   alias GitGame.Players.Player
   alias GitGameWeb.Plugs.Identity
 
@@ -12,7 +12,7 @@ defmodule GitGameWeb.PlayerController do
 
   # A device already signed in keeps its player: pressing "play" twice never makes two of you.
   def create(%{assigns: %{player: %Player{} = player}} = conn, _params),
-    do: json(conn, %{player: Player.public(player)})
+    do: json(conn, me(player))
 
   def create(conn, _params) do
     with {:ok, player} <- Players.create_anonymous() do
@@ -21,14 +21,16 @@ defmodule GitGameWeb.PlayerController do
       conn
       |> Identity.put(token, expires_at)
       |> put_status(:created)
-      |> json(%{player: Player.public(player)})
+      |> json(me(player))
     end
   end
 
-  def show(%{assigns: %{player: %Player{} = player}} = conn, _params),
-    do: json(conn, %{player: Player.public(player)})
+  def show(%{assigns: %{player: %Player{} = player}} = conn, _params), do: json(conn, me(player))
 
   def show(_conn, _params), do: {:error, :unauthorized, "fatal: not signed in"}
+
+  # whether this server can link GitHub at all, so the client offers it only where it can
+  defp me(player), do: %{player: Player.public(player), link_github: GitHub.enabled?()}
 
   def delete(conn, _params) do
     Players.sign_out(conn.assigns.session_token)

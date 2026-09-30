@@ -96,7 +96,7 @@ GitHub OAuth, with anonymous play as the fallback and a nudge to link (charter d
   - The API stops trusting `?player=`. You see a game as the seat you hold, or choose among the seats you hold in a hotseat game, and packs are written only for a seat you hold.
   - The client signs in anonymously on first open, and the exit test plays with a session.
   - Games created before M8 have no creator to give their seats to, so they stay readable and take no more packs. Only development databases have them.
-- [ ] **M8c · Link GitHub.**
+- [x] **M8c · Link GitHub.**
   - `GET /api/auth/github` and its callback, through Assent's generic OAuth2 strategy: `state` and PKCE, no scopes, GitHub's token discarded.
   - A new GitHub account attaches to the current player. A known one signs the device in as its player, and moves the anonymous player's seats over where that doesn't seat one player twice in a game.
   - Tested against a stand-in for GitHub, never the real one.
