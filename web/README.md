@@ -40,5 +40,7 @@ npm run build          # the PWA in dist/
 | `src/transcript.js`           | Moments as a terminal prints them: `ana@main $ git push` and Git's output                                        |
 | `src/pack.js`                 | The pack editor's model: ops in the remote's shapes, a pull before each push, and each op's cost now and at most |
 | `src/hub.js`                  | I-Hub: `main`, your branch and hand, the actions (greyed with the reason), and the pack as commands              |
+| `src/screens.js`              | The consequence screens: one moment at a time, what it moved, the coach line; continue or skip                   |
+| `src/catchup.js`              | What this reader hasn't seen: each closed day's big moments, then today's incident; remembered per device        |
 | `src/start.js`, `src/game.js` | I-Start, and a game as one player sees it                                                                        |
 | `public/sw.js`                | The service worker: the app's files offline, never the game                                                      |

@@ -526,3 +526,68 @@ ol.pack {
   flex-wrap: wrap;
   color: var(--muted);
 }
+
+/* ---------- moments, the handoff, the scoreboard ---------- */
+
+.moment,
+.handoff,
+.scoreboard {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  min-height: 70vh;
+}
+.moment .transcript {
+  font-size: 0.95rem;
+}
+.moment.reject .transcript {
+  box-shadow: inset 3px 0 0 var(--reject);
+}
+.moment.ok .transcript {
+  box-shadow: inset 3px 0 0 var(--ok);
+}
+.moment.warn .transcript {
+  box-shadow: inset 3px 0 0 var(--warn);
+}
+.coach {
+  margin: 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--muted);
+}
+.moment-actions {
+  display: grid;
+  gap: 8px;
+}
+.incident-card h2 {
+  font-size: 1.3rem;
+  color: var(--warn);
+}
+.incident-card .cards {
+  display: flex;
+  gap: 8px;
+}
+.handoff button {
+  width: 100%;
+}
+
+/* CI flips every commit in order, 250 ms apart (event-screens §4); reduced motion shows them flipped at once. */
+.strip.ci .flip {
+  justify-content: center;
+  align-items: center;
+  animation: flip 450ms ease-out both;
+  animation-delay: calc(var(--i) * 250ms);
+}
+.strip.ci .flip.bug {
+  color: var(--reject);
+}
+.strip.ci .flip.clean {
+  color: var(--ok);
+}
+@keyframes flip {
+  from {
+    transform: rotateY(90deg);
+  }
+  to {
+    transform: none;
+  }
+}
