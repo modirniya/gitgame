@@ -41,7 +41,7 @@ defmodule GitGame.Games do
 
   @doc """
   The game as its log makes it: `%{game: current state, version: ..., days: [%{day, log}], opened: this day's opening
-  events}`, or `{:error, :not_found}`.
+  events, sent: who has sent a pack for the open day}`, or `{:error, :not_found}`.
   """
   def load(id) do
     case Repo.get(Record, id) do
@@ -173,6 +173,8 @@ defmodule GitGame.Games do
             last_seq: seq
         }
     end)
-    |> Map.drop([:pending])
+    |> then(fn acc ->
+      acc |> Map.put(:sent, acc.pending |> Map.keys() |> Enum.sort()) |> Map.delete(:pending)
+    end)
   end
 end

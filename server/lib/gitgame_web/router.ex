@@ -9,5 +9,9 @@ defmodule GitGameWeb.Router do
     pipe_through :api
 
     get "/health", HealthController, :show
+
+    post "/games", GameController, :create
+    get "/games/:id", GameController, :show
+    post "/games/:id/packs", GameController, :send_pack
   end
 end
