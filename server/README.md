@@ -26,6 +26,12 @@ JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has
 | `GET /games/:id` | The game from your seat: your own cards, branch and traps, every day log as you may see it, and `yours`, the seats you hold (`?seat=` picks one in a hotseat game). A device holding no seat gets the table's view |
 | `GET /games/:id/days/:day` | A replay: the view as it stood when `day` closed (`0`: as created), folded from the log up to there; seats as above |
 | `POST /games/:id/packs` | Signed in: `{"version", "ops", "discard"}`, and `"seat"` if you hold several, sends or replaces today's pack for a seat you hold; `409` if the day has moved on (`fetch first`) |
+| `POST /rooms` | Signed in: opens a room (M9) with you as its host and first member → the room: its `code`, host, members, bots, day length |
+| `GET /rooms/:code` | The room, and whether you're in it (`you.member`) or host it (`you.host`); `game_id` once its game has started |
+| `POST /rooms/:code/join` | Signed in: joins the room; `409` once it is full (five seats, members and bots) or started |
+| `PATCH /rooms/:code` | The host: `{"bots", "day_length"}` |
+| `POST /rooms/:code/start` | The host: starts the game, members' seats in the order they joined, then the bots → the room with its `game_id` |
+| `GET /rooms/:code/live` | Server-Sent Events: `refetch` on connecting and whenever the room changes; ends when its game starts |
 | `GET /games/:id/live` | Server-Sent Events: `refetch` on connecting and whenever the log grows, nothing else; ends after the release |
 | `GET /health` | Whether the server and its database are up |
 

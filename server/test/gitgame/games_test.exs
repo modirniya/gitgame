@@ -168,7 +168,7 @@ defmodule GitGame.GamesTest do
   describe "the refetch signal (charter decision 9)" do
     test "every write tells whoever is watching to fetch again, and only once it has committed" do
       {:ok, %{id: id}} = new_game()
-      :ok = GitGame.Games.Signal.subscribe(id)
+      :ok = GitGame.Signal.subscribe({:game, id})
 
       {:ok, _} = Games.send_pack(id, "ana", 1, %{"ops" => []})
       assert_received {:refetch, %{over: false}}
@@ -183,7 +183,7 @@ defmodule GitGame.GamesTest do
     test "a refused write, or a day asked to close twice, changes nothing and says nothing" do
       {:ok, %{id: id}} = new_game()
       {:ok, _} = Games.close_day(id, 1)
-      :ok = GitGame.Games.Signal.subscribe(id)
+      :ok = GitGame.Signal.subscribe({:game, id})
 
       {:error, :stale, _} = Games.send_pack(id, "ana", 1, %{"ops" => []})
       {:ok, %{already_closed: true}} = Games.close_day(id, 1)
@@ -192,7 +192,7 @@ defmodule GitGame.GamesTest do
 
     test "the release is the last signal, and says so" do
       {:ok, %{id: id}} = new_game()
-      :ok = GitGame.Games.Signal.subscribe(id)
+      :ok = GitGame.Signal.subscribe({:game, id})
       for _ <- 1..12, do: {:ok, _} = Games.close_day(id)
 
       assert_received {:refetch, %{over: true}}

@@ -13,7 +13,8 @@ defmodule GitGame.Games do
   """
   import Ecto.Query
   alias GitGame.{Bot, Game, Repo, Resolver, Rules}
-  alias GitGame.Games.{CloseDay, Event, Pack, Record, Seat, Signal, View}
+  alias GitGame.Signal
+  alias GitGame.Games.{CloseDay, Event, Pack, Record, Seat, View}
 
   # Seeds stay below 2^53, so they survive a round trip through JSON numbers in any client.
   @max_seed 9_007_199_254_740_991
@@ -236,7 +237,7 @@ defmodule GitGame.Games do
     |> case do
       {:ok, result} ->
         # after the commit, never inside it: a reader told to refetch must find the write already there
-        unless result[:already_closed], do: Signal.broadcast(id, result[:over] == true)
+        unless result[:already_closed], do: Signal.broadcast({:game, id}, result[:over] == true)
         {:ok, result}
 
       {:error, {reason, message}} ->
