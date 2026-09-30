@@ -106,9 +106,21 @@ GitHub OAuth, with anonymous play as the fallback and a nudge to link (charter d
 
 *Met in tests 2026-09-30,* against a stand-in for GitHub: the exit test starts as a new visitor with no form; `AuthControllerTest` links a first device, then signs a second in as the same player and finds its game there; `GameControllerTest` checks that no one reads or writes a seat that isn't theirs. The same trip against real GitHub waits for an OAuth app's credentials (`server/README.md`).
 
-### After M8
+### M9 · Rooms
 
-- **M9 · Rooms:** private rooms by link, invites, and quick "play the bot now" (charter priority 2: a game in five seconds).
+Private rooms by link, and a game against the bot in one tap (charter priority 2: a game in five seconds). A room is where a game is gathered before it starts: a game's seats are fixed when it is created, since the log names them (ADR-0004), so people join the room, not the game.
+
+- [x] **M9a · Rooms on the server.**
+  - Tables `rooms` (a short code, its host, the day length and number of bots, and the game once started) and `room_members` (who joined, in order).
+  - `POST /api/rooms` opens a room with you as its host. `GET /api/rooms/:code` shows it, `POST .../join` joins it, `PATCH` lets the host change the bots and day length, and `POST .../start` lets the host start the game: every member takes a seat under their handle, in the order they joined, then the bots.
+  - A room is full at five seats, members and bots together, and is closed once started. `GET /api/rooms/:code/live` says `refetch` whenever it changes, and ends when the game starts.
+- [ ] **M9b · Rooms in the client.** The start screen's first button plays the bot now, in one tap; the second opens a room and shows its link to share. The room screen lists who is in, lets the host set bots and start, and takes everyone to the game when it starts. The hotseat form stays, under "more".
+- [ ] **M9c · Your games.** `GET /api/games` lists the games you hold a seat in, and whether your pack is in for today; the start screen lists them, those waiting on you first.
+
+*Done when:* one browser opens a room, a second opens its link and joins, the host starts, and both play the same game from their own seats, which a test does through the API; and a first visit reaches a game against the bot in one tap.
+
+### After M9
+
 - **M10 · Notifications:** push, email and the daily digest; "your pack is due" is the retention loop (charter decision 16).
 - **M11 · Hosting:** an ADR choosing the host (none is chosen yet), then deploy from tags, never branches ([workflow.md](../workflow.md)).
 - **M12 · Beta telemetry:** what ADR-0002 promises the beta records: how rejections, conflicts and absences go, completed games, and players who come back unprompted. Nothing keeps score across games before rules v1.0.

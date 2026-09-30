@@ -20,6 +20,12 @@ defmodule GitGameWeb.Router do
     get "/games/:id", GameController, :show
     get "/games/:id/days/:day", GameController, :day
     post "/games/:id/packs", GameController, :send_pack
+
+    post "/rooms", RoomController, :create
+    get "/rooms/:code", RoomController, :show
+    patch "/rooms/:code", RoomController, :update
+    post "/rooms/:code/join", RoomController, :join
+    post "/rooms/:code/start", RoomController, :start
   end
 
   # Linking GitHub: browser navigations, not JSON calls, and the flow's state lives in the signed session cookie.
@@ -38,5 +44,6 @@ defmodule GitGameWeb.Router do
   # Server-Sent Events: the browser asks for text/event-stream, which the JSON pipeline would refuse.
   scope "/api", GitGameWeb do
     get "/games/:id/live", LiveController, :show
+    get "/rooms/:code/live", LiveController, :room
   end
 end
