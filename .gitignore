@@ -37,3 +37,11 @@ Thumbs.db
 bugreport-*.zip
 *.hprof
 coverage/
+
+# --- The client built into the server's static files (the Dockerfile does this; never committed) ---
+server/priv/static/assets/
+server/priv/static/index.html
+server/priv/static/icon.svg
+server/priv/static/manifest.webmanifest
+server/priv/static/sw.js
+server/priv/rules/

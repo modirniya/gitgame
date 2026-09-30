@@ -42,6 +42,11 @@ defmodule GitGameWeb.Router do
     get "/github/callback", AuthController, :callback
   end
 
+  # The client's page, from the same origin as everything under /api (ADR-0005).
+  scope "/", GitGameWeb do
+    get "/", ClientController, :index
+  end
+
   # Server-Sent Events: the browser asks for text/event-stream, which the JSON pipeline would refuse.
   scope "/api", GitGameWeb do
     get "/games/:id/live", LiveController, :show

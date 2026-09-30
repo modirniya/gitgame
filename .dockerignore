@@ -1,0 +1,12 @@
+# Only what the image builds from: web/, server/, rules/. Everything else stays out, and so do build outputs.
+*
+!web/
+!server/
+!rules/
+**/node_modules
+**/dist
+server/_build
+server/deps
+server/priv/static/assets
+server/priv/static/index.html
+server/priv/rules

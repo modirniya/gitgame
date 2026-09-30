@@ -1,0 +1,5 @@
+#!/bin/sh
+# Starts the release with its web server on.
+set -eu
+cd -P -- "$(dirname -- "$0")"
+PHX_SERVER=true exec ./gitgame start

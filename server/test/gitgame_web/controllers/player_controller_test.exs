@@ -50,10 +50,23 @@ defmodule GitGameWeb.PlayerControllerTest do
              |> post(~p"/api/players")
              |> json_response(403)
 
+    # the page's own origin: the host the request went to, on whatever port or scheme the proxy speaks
+    for origin <- [
+          "http://www.example.com",
+          "https://www.example.com",
+          "http://www.example.com:4100"
+        ] do
+      assert conn
+             |> put_req_header("origin", origin)
+             |> post(~p"/api/players")
+             |> json_response(201)
+    end
+
+    # a look-alike host is another site
     assert conn
-           |> put_req_header("origin", GitGameWeb.Endpoint.url())
+           |> put_req_header("origin", "https://www.example.com.evil.example")
            |> post(~p"/api/players")
-           |> json_response(201)
+           |> json_response(403)
 
     assert build_conn() |> post(~p"/api/players") |> json_response(201)
 
