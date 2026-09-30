@@ -4,6 +4,10 @@ defmodule GitGame.Resolver do
   Pure: a game and the day's packs in, the next game and the day log out. No clock, no database, no randomness
   except the game's seed, so a game replays exactly from its seed and its packs.
 
+  Absence is a rule, not an error (charter decision 6): no pack by the time the day closes is an empty pack, and after
+  `left_the_company_after_consecutive_empty_days` of them in a row the player has left the company. They send no more
+  packs and draw no more cards, but their commits stay on `main` and still take blame at the release.
+
   In the order `rules/online.json` names. `batch_at_close` (ADR-0003) resolves whole packs in an order shuffled from
   the seed and the day, whatever order they arrived in; `arrival` resolves them in the order given.
 
@@ -20,7 +24,7 @@ defmodule GitGame.Resolver do
     game = %{game | day: day, incident: incident, rolled: false}
 
     {game, drew} =
-      Enum.reduce(game.seats, {game, []}, fn id, {g, drew} ->
+      Enum.reduce(present(game), {game, []}, fn id, {g, drew} ->
         {cards, pile} = Enum.split(g.draw_pile, g.rules.draw)
 
         g =
@@ -39,11 +43,18 @@ defmodule GitGame.Resolver do
   map `%{ops: [...], discard: [card ids]}` that also declares which cards to give up to the hand limit.
   """
   def close_day(%Game{released: nil} = game, packs) do
-    arrived = for {id, _} <- packs, id in game.seats, uniq: true, do: id
-    packs = Map.new(packs, fn {id, pack} -> {id, normalize(pack)} end)
+    # someone who has left the company sends nothing more: anything that arrives from them is ignored
+    arrived = for {id, _} <- packs, id in present(game), uniq: true, do: id
+
+    packs =
+      packs
+      |> Enum.filter(fn {id, _} -> id in arrived end)
+      |> Map.new(fn {id, pack} -> {id, normalize(pack)} end)
+
+    {game, absences} = absence(game, arrived)
 
     {game, log} =
-      Enum.reduce(order(game, arrived), {game, []}, fn id, {g, log} ->
+      Enum.reduce(order(game, arrived), {game, absences}, fn id, {g, log} ->
         if g.released,
           do: {g, log},
           else: run_pack(g, id, Map.get(packs, id, %{ops: [], discard: []}), log)
@@ -61,6 +72,33 @@ defmodule GitGame.Resolver do
       else: open_day(game) |> then(fn {g, opened} -> {g, log ++ opened} end)
   end
 
+  defp present(game), do: Enum.reject(game.seats, &game.players[&1].left)
+
+  # A pack that arrived resets a player's run of empty days; no pack extends it, and a long enough run is leaving.
+  defp absence(game, arrived) do
+    Enum.reduce(present(game), {game, []}, fn id, {g, log} ->
+      p = g.players[id]
+      run = p.empty_days + 1
+
+      cond do
+        id in arrived ->
+          {Game.put_player(g, id, %{p | empty_days: 0}), log}
+
+        run >= g.rules.left_after_empty_days ->
+          left = [
+            %{type: :empty_pack, player: id, in_a_row: run},
+            %{type: :left_the_company, player: id}
+          ]
+
+          {Game.put_player(g, id, %{p | empty_days: run, left: true}), log ++ left}
+
+        true ->
+          {Game.put_player(g, id, %{p | empty_days: run}),
+           log ++ [%{type: :empty_pack, player: id, in_a_row: run}]}
+      end
+    end)
+  end
+
   defp normalize(ops) when is_list(ops), do: %{ops: ops, discard: []}
 
   defp normalize(%{} = pack),
@@ -70,10 +108,13 @@ defmodule GitGame.Resolver do
   defp order(game, arrived) do
     case game.rules.resolution_order do
       :batch_at_close ->
-        game.seats |> Seeded.shuffle(Seeded.stream(game.seed, {:order, game.day})) |> elem(0)
+        game
+        |> present()
+        |> Seeded.shuffle(Seeded.stream(game.seed, {:order, game.day}))
+        |> elem(0)
 
       :arrival ->
-        arrived ++ (game.seats -- arrived)
+        arrived ++ (present(game) -- arrived)
     end
   end
 

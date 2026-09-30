@@ -204,4 +204,50 @@ defmodule GitGame.ResolverTest do
     assert Enum.count(log, &(&1.type == :pack_opened)) == 1
     assert tagger in ["ana", "raj"]
   end
+
+  describe "absence (charter decision 6: a rule, not an error)" do
+    test "no pack is an empty pack; one that arrives resets the run", %{rules: rules} do
+      game = day_one(rules, %{"ana" => [], "raj" => []})
+      {game, log} = Resolver.close_day(game, [{"ana", []}])
+
+      assert [%{type: :empty_pack, player: "raj", in_a_row: 1}] =
+               Enum.filter(log, &(&1.type == :empty_pack))
+
+      {game, _} = Resolver.close_day(game, [{"ana", []}, {"raj", []}])
+      assert game.players["raj"].empty_days == 0
+    end
+
+    test "two empty days in a row and the player has left the company", %{rules: rules} do
+      game = day_one(rules, %{"ana" => [], "raj" => []})
+      {game, _} = Resolver.close_day(game, [{"ana", []}])
+      {game, log} = Resolver.close_day(game, [{"ana", []}])
+
+      assert Enum.any?(log, &(&1 == %{type: :left_the_company, player: "raj"}))
+      assert game.players["raj"].left
+    end
+
+    test "someone who left sends no more packs and draws no more cards; their commits stay on main",
+         %{rules: rules} do
+      game = day_one(rules, %{"ana" => [], "raj" => [card("r1", "auth.js", 8, true)]})
+
+      {game, _} =
+        Resolver.close_day(game, [
+          {"raj", [%{op: :add, cards: ["r1"]}, %{op: :commit}, %{op: :push}]}
+        ])
+
+      {game, _} = Resolver.close_day(game, [{"ana", []}])
+      {game, _} = Resolver.close_day(game, [{"ana", []}])
+      assert game.players["raj"].left
+      hand = game.players["raj"].hand
+
+      {game, log} = Resolver.close_day(game, [{"ana", []}, {"raj", [%{op: :pull}]}])
+      refute Enum.any?(log, &(&1[:player] == "raj"))
+      assert game.players["raj"].hand == hand
+      assert Enum.any?(game.main, &(&1.author == "raj"))
+
+      # and at the release their bug is still theirs
+      {released, _} = GitGame.Release.ci(game, nil)
+      assert released.players["raj"].blame == 1
+    end
+  end
 end
