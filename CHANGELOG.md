@@ -44,5 +44,7 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - The event log (M4a), ADR-0004: a game is a row (seed, seats, day length, a snapshot of its rules) and an append-only log of what players did (`game_created`, `pack_sent`, `day_closed`), enforced by a database trigger; its state and day logs are folded from the log through the pure resolver. `GitGame.Games` creates games, takes packs (a pack for a version that has moved on is rejected, `! [rejected] (fetch first)`), and closes each day once. `GitGame.Games.Pack` admits only the online game's ops, in their exact shapes.
 
+- The games API (M4b): `POST /api/games`, `GET /api/games/:id` and `POST /api/games/:id/packs`. A game's public view shows what everyone at the table may see: `main` as announced (a face-down commit never says whether it is a bug), pointers, tokens, card counts, the live score, the incident, and who has sent today's pack. A stale pack is `409` with Git's `(fetch first)`.
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.
