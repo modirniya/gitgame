@@ -27,13 +27,16 @@ npm run build          # the PWA in dist/
 
 ## Where things are
 
-| File                          | What it is                                                               |
-| ----------------------------- | ------------------------------------------------------------------------ |
-| `src/main.js`, `src/route.js` | The entry and the addresses (`#/`, `#/g/<id>/<player>`)                  |
-| `src/api.js`                  | The remote's JSON API; errors carry the remote's own words               |
-| `src/dom.js`                  | Building DOM without innerHTML, so other players' text is only ever text |
-| `src/brand.js`                | The name, defined once (`// BRAND`, [branding.md](../docs/branding.md))  |
-| `src/cards.js`                | Cards as the printed deck draws them, colored from `rules/deck.json`     |
-| `src/table.js`                | The Table: `main`, pointers, every seat's public state                   |
-| `src/start.js`, `src/game.js` | I-Start, and a game as one player sees it                                |
-| `public/sw.js`                | The service worker: the app's files offline, never the game              |
+| File                          | What it is                                                                                     |
+| ----------------------------- | ---------------------------------------------------------------------------------------------- |
+| `src/main.js`, `src/route.js` | The entry and the addresses (`#/`, `#/g/<id>/<player>`)                                        |
+| `src/api.js`                  | The remote's JSON API; errors carry the remote's own words                                     |
+| `src/dom.js`                  | Building DOM without innerHTML, so other players' text is only ever text                       |
+| `src/brand.js`                | The name, defined once (`// BRAND`, [branding.md](../docs/branding.md))                        |
+| `src/cards.js`                | Cards as the printed deck draws them, colored from `rules/deck.json`                           |
+| `src/table.js`                | The Table: `main`, pointers, every seat's public state                                         |
+| `src/moments.js`              | The event-to-screen mapper: a day log becomes moments, one per op, and says which get a screen |
+| `src/copy.js`                 | Every coach line, keyed by moment: the one file a translation replaces (event-screens §6)      |
+| `src/transcript.js`           | Moments as a terminal prints them: `ana@main $ git push` and Git's output                      |
+| `src/start.js`, `src/game.js` | I-Start, and a game as one player sees it                                                      |
+| `public/sw.js`                | The service worker: the app's files offline, never the game                                    |
