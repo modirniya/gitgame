@@ -4,7 +4,7 @@
 
 **Question:** in the online model ([round-resolution.md](../../docs/design/round-resolution.md)), does sending your pack last dominate (playtest question 1), and is paying for a rejected push punishing (question 2)? [ADR-0002](../../docs/adr/0002-beta-before-human-playtest.md) asks for a simulation of each open rules question before Phase 1 code depends on it; this is the one for questions 1 and 2.
 
-**Run:** `node sim.js` prints the tables below (about 3.5 minutes; 4,000 games per condition), and `node sim.js --detail` prints the day-by-day and batching diagnostics (about 40 seconds; 2,000 games per row). **Test:** `node smoke-test.js` checks the resolver's rules and plays 480 games across every variant (under a second).
+**Run:** `node sim.js` prints the tables below (about 3.5 minutes; 4,000 games per condition). `node sim.js --detail` prints the day-by-day and batching diagnostics (about 40 seconds; 2,000 games per row), and `node sim.js --v02` the check of the rules v0.2 decisions (about 2 minutes). **Test:** `node smoke-test.js` checks the resolver's rules and plays 480 games across every variant (under a second).
 
 ## Method
 
@@ -117,6 +117,29 @@ Under arrival order the player who sends first wins 61% of two-player games; wit
 ### The fast-forward finding holds here too
 
 No merge token for a fast-forward pull cuts tokens from 5.5 to 3.7 per two-player live game, with no change to who wins or how long games run.
+
+### Rules v0.2 check (`node sim.js --v02`)
+
+The maintainer took the recommendations above: batch at the deadline, no merge token for a fast-forward pull, and, from the `prototypes/mobile` findings, 5 force-push cards and 4 reflogs (up from 3 and 3) and a hand limit of 10. This run checks each change on top of the last. Players send at random times, 4,000 games per row, and the seats are not rotated, so "seat spread" (best seat minus worst) includes about ±2% of noise.
+
+| rules | players | force-pushes / game | reflogs fired / game | games with a force-push | merge tokens / game | conflicts / game | hand at the end | days | seat spread |
+|---|---|---|---|---|---|---|---|---|---|
+| v0.1 (arrival order, today) | 2 | 0.304 | 0.133 | 23.9% | 2.7 | 1.15 | 14.3 | 9.9 | 0.7% |
+| v0.1 batched | 2 | 0.024 | 0.012 | 2.1% | 5.5 | 2.58 | 12.7 | 10.0 | 2.1% |
+| + no merge token for a fast-forward | 2 | 0.025 | 0.013 | 2.2% | 3.7 | 2.59 | 12.5 | 9.9 | 2.4% |
+| + 5 force-push / 4 reflog cards | 2 | 0.039 | 0.023 | 3.5% | 3.7 | 2.62 | 12.5 | 9.9 | 4.0% |
+| v0.2 (all of it, + hand limit 10) | 2 | 0.039 | 0.023 | 3.5% | 3.7 | 2.62 | 9.9 | 9.9 | 4.0% |
+| v0.1 (arrival order, today) | 4 | 2.039 | 1.488 | 89.3% | 6.6 | 4.72 | 9.8 | 10.5 | 2.5% |
+| v0.1 batched | 4 | 1.095 | 0.930 | 62.3% | 15.3 | 10.05 | 6.8 | 11.1 | 4.3% |
+| + no merge token for a fast-forward | 4 | 1.132 | 0.981 | 63.6% | 9.1 | 9.95 | 7.0 | 10.8 | 3.8% |
+| + 5 force-push / 4 reflog cards | 4 | 1.817 | 1.540 | 74.1% | 9.2 | 10.03 | 7.3 | 10.9 | 5.8% |
+| v0.2 (all of it, + hand limit 10) | 4 | 1.817 | 1.540 | 74.1% | 9.2 | 10.04 | 6.4 | 10.9 | 5.7% |
+
+v0.2, 2 players, one writer force-pushes over a single commit: 0.53 force-pushes a game, in 41.3% of games; that writer wins 51.5% ±1.5.
+
+- Batching alone makes force-push rare with two players (24% → 2% of games), and the extra cards only bring it to 3.5%. The cause is the writer, not the rules: it force-pushes only when two or more commits are ahead of it, and when everyone writes against the start of the day, you are rarely two behind. A writer willing to force-push over a single big commit does it in 41% of games and wins 51.5%, so it is a legitimate choice, not a mistake. The production bot should play that way.
+- No merge token for a fast-forward pull cuts tokens by a third (5.5 → 3.7 with two players, 15.3 → 9.1 with four).
+- The hand limit brings the end-of-game hand from about 12.5 to 9.9 cards with two players, and changes nothing else measured.
 
 ### Spec gaps found while writing the resolver
 

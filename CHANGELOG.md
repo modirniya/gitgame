@@ -21,3 +21,6 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 - ADR-0002: the human playtest moves to a beta of the real product; the rules stay draft (v0.x) until people have played it.
 - `prototypes/packs`: a simulation of the online day/pack model that answers playtest questions 1 and 2 provisionally. Sending first, not last, dominates under arrival order (61:39); batching at the deadline is fair but doubles conflicts. Paying for a rejected push stays. Answers are recorded in `round-resolution.md` §7.
 - `docs/design/phase-1-plan.md`: the build plan for Phase 1 (server skeleton, rules, resolver, event log, days, views and bots, hotseat web client) and the beta, with a "done when" for each milestone.
+
+### Changed
+- Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.

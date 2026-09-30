@@ -5,7 +5,7 @@
 // between your fetch and your pack — the question is whether that insurance makes sending early safe.
 import { behindBy, conflictsFor, commitsOnMain, hasCmd, lines, hasBug, isLiveBug, opsFor, scores, RELEASE_AT } from './remote.js';
 
-export function writePack(s, id, { defensive = true, fallback = false } = {}) {
+export function writePack(s, id, { defensive = true, fallback = false, forceAt = 2 } = {}) {
   const p = s.players[id], others = s.ids.filter(x => x !== id), sc = scores(s);
   const behind = behindBy(s, id), cmds = s.incident !== 'sodown';
   let budget = opsFor(s); const ops = [];
@@ -30,9 +30,10 @@ export function writePack(s, id, { defensive = true, fallback = false } = {}) {
     add({ op: 'tag' }, 1);
     return ops;
   }
-  // 2. Force-push when the commits ahead of you are big and someone else's; a reflog may bring them back.
+  // 2. Force-push when the commits ahead of you (at least `forceAt` of them) are big and someone else's; a reflog
+  //    may bring them back. The mobile bot waited for 2; under batching you are rarely 2 behind, so it never fired.
   const ahead = s.main.slice(p.ptr);
-  if (cmds && willPush && behind >= 2 && hasCmd(p, 'push --force') && ahead.some(c => c.author !== id && !c.revertOf && lines(c) >= 4)) add({ op: 'force' }, 1);
+  if (cmds && willPush && behind >= forceAt && hasCmd(p, 'push --force') && ahead.some(c => c.author !== id && !c.revertOf && lines(c) >= 4)) add({ op: 'force' }, 1);
   // 3. Ship what is ready: pull if behind (or, defensively, always: it is free when nothing moved), then push.
   else if (willPush) { if (behind || defensive) { const x = pull(); add(x.o, x.cost); } push(); }
   else if (behind && budget >= 3) { const x = pull(); add(x.o, x.cost); }

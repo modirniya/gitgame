@@ -1,7 +1,7 @@
 // Runs the pack model thousands of times to answer the charter's playtest questions 1 and 2 with numbers:
 // does sending your pack last dominate, and is paying for a rejected push punishing? `node sim.js` prints the
 // tables in README.md; `node sim.js --detail` the diagnostics behind its findings (who pushes on which day, batching
-// with and without the fast-forward rule); `node sim.js --quick` runs a few games of each experiment as a smoke test.
+// with and without the fast-forward rule); `node sim.js --v02` the rules v0.2 comparison; `node sim.js --quick` runs a few games of each experiment as a smoke test.
 //
 // The timing model: each day every player has a send time in [0, 1] (the deadline is 1) and fetches the remote
 // `compose` earlier, then writes the whole pack against what they saw. Packs resolve in send order, so anything that
@@ -23,7 +23,7 @@ const TIMING = {
   race: s => ({ fetch: 0, send: 0.1 + random(s) * 0.3 }),
 };
 
-export function play({ seed, timings, compose = 0.02, mode = 'arrival', rules = {}, defensive = true, fallback = false }) {
+export function play({ seed, timings, compose = 0.02, mode = 'arrival', rules = {}, defensive = true, fallback = false, forceAt = 2 }) {
   const s = createGame({ seed, players: timings.length, rules });
   const stats = { landed: 0, rejected: 0, stale: 0, lostOps: 0, conflicts: 0, forces: 0, reflogs: 0, emptyPacks: 0, packs: 0, sendRank: Object.fromEntries(s.ids.map(id => [id, 0])) };
   while (!s.over) {
@@ -36,7 +36,7 @@ export function play({ seed, timings, compose = 0.02, mode = 'arrival', rules = 
     const steps = plan.flatMap(x => [{ t: x.fetch, kind: 'fetch', x }, { t: x.send, kind: 'send', x }]).sort((a, b) => a.t - b.t || (a.kind === 'fetch' ? -1 : 1));
     for (const st of steps) {
       if (s.over) break;
-      if (st.kind === 'fetch') st.x.pack = writePack(structuredClone(s), st.x.id, { defensive, fallback });
+      if (st.kind === 'fetch') st.x.pack = writePack(structuredClone(s), st.x.id, { defensive, fallback, forceAt: typeof forceAt === 'object' ? forceAt[st.x.id] ?? 2 : forceAt });
       else {
         const e = receive(s, st.x.id, st.x.pack);
         stats.packs++;
@@ -98,8 +98,37 @@ function detail() {
   }
 }
 
+// Rules v0.1 against the v0.2 decisions (batch at the deadline, no merge token for a fast-forward, 5 force-push cards
+// and 4 reflogs, a hand limit of 10), one change at a time and together. 4,000 games per row.
+function v02() {
+  const N = 4000, hand = r => r.s.ids.reduce((a, id) => a + r.s.players[id].hand.length, 0) / r.s.ids.length;
+  const V02 = { freeFastForward: true, forceCards: 5, reflogCards: 4, handLimit: 10 };
+  console.log('| rules | players | force-pushes / game | reflogs fired / game | games with a force-push | merge tokens / game | conflicts / game | hand at the end | days | seat spread |\n|---|---|---|---|---|---|---|---|---|---|');
+  for (const n of [2, 4]) for (const [label, mode, rules] of [
+    ['v0.1 (arrival order, today)', 'arrival', {}], ['v0.1 batched', 'batch', {}], ['+ no merge token for a fast-forward', 'batch', { freeFastForward: true }],
+    ['+ 5 force-push / 4 reflog cards', 'batch', { freeFastForward: true, forceCards: 5, reflogCards: 4 }], ['v0.2 (all of it, + hand limit 10)', 'batch', V02],
+  ]) {
+    let forces = 0, reflogs = 0, withForce = 0, merge = 0, conflicts = 0, handEnd = 0, days = 0; const wins = Array(n).fill(0);
+    for (let g = 0; g < N; g++) {
+      const r = play({ seed: 1 + g, timings: Array(n).fill('random'), mode, rules });
+      forces += r.stats.forces; reflogs += r.stats.reflogs; withForce += r.stats.forces > 0; conflicts += r.stats.conflicts; days += r.days; handEnd += hand(r);
+      r.s.ids.forEach((id, i) => { merge += r.s.players[id].merge; if (r.win.includes(id)) wins[i] += 1 / r.win.length; });
+    }
+    const spread = (Math.max(...wins) - Math.min(...wins)) / N;
+    console.log(`| ${label} | ${n} | ${(forces / N).toFixed(3)} | ${(reflogs / N).toFixed(3)} | ${pct(withForce / N)} | ${(merge / N).toFixed(1)} | ${(conflicts / N).toFixed(2)} | ${(handEnd / N).toFixed(1)} | ${(days / N).toFixed(1)} | ${pct(spread)} |`);
+  }
+  // Is force-pushing over a single commit good play, or just more drama? One writer of each, seats alternating.
+  let f1 = 0, games = 0, agg = 0;
+  for (let g = 0; g < N; g++) {
+    const bold = g % 2 ? 'p1' : 'p0', r = play({ seed: 1 + g, timings: ['random', 'random'], mode: 'batch', rules: V02, forceAt: { [bold]: 1 } });
+    f1 += r.stats.forces; games += r.stats.forces > 0; if (r.win.includes(bold)) agg += 1 / r.win.length;
+  }
+  console.log(`\nv0.2, 2 players, one writer force-pushes over a single commit: ${(f1 / N).toFixed(2)} force-pushes a game, in ${pct(games / N)} of games; that writer wins ${pct(agg / N)} ${ci(agg, N)}.`);
+}
+
 function main() {
   if (process.argv.includes('--detail')) return detail();
+  if (process.argv.includes('--v02')) return v02();
   const quick = process.argv.includes('--quick'), N = quick ? 40 : 4000;
   const row = (label, r, a, b) => `| ${label} | ${a}: ${share(r, a)} | ${b}: ${share(r, b)} | ${r.per('stale').toFixed(2)} | ${r.per('lostOps').toFixed(2)} | ${r.per('landed').toFixed(2)} | ${r.per('days').toFixed(1)} | ${(r.per('merge')).toFixed(1)} |`;
   const head = (a, b) => `| condition | ${a} strategy wins | ${b} strategy wins | non-fast-forward rejections / game | ops lost to rejections | pushes landed / game | days | merge tokens / game |\n|---|---|---|---|---|---|---|---|`;

@@ -1,0 +1,55 @@
+{
+  "version": "0.2",
+  "notes": [
+    "The online rules as data: days, packs and resolution. docs/design/round-resolution.md explains them; this file is what the server reads, so a rules change needs no code change (charter: rules are data; ADR-0002 guardrail).",
+    "Cards, incidents, scoring tokens and the release size are shared with the tabletop game and live in deck.json."
+  ],
+
+  "day": {
+    "lengths": { "correspondence": "24h", "lunch": "5m", "live": "60s" },
+    "final_day": { "correspondence": 7, "lunch": 12, "live": 12 },
+    "draw": 2,
+    "ops_budget": 3,
+    "hand_limit": 10,
+    "closes_early_when_all_packs_are_in": true
+  },
+
+  "pack": {
+    "max_ops": 4,
+    "replaceable_until_the_day_closes": true,
+    "failed_op_costs_its_ops": true,
+    "failed_command_card_stays_in_hand": true
+  },
+
+  "resolution": {
+    "order": "batch_at_close",
+    "order_options": {
+      "batch_at_close": "All of the day's packs resolve together when the day closes, one whole pack at a time, in a random order drawn from the game's seed (ADR-0003).",
+      "arrival": "Each pack resolves the moment it arrives (charter decision 11, superseded; kept for the beta to compare)."
+    },
+    "default_conflict_strategy": "theirs"
+  },
+
+  "op_costs": {
+    "add": 1,
+    "commit": 1,
+    "push": 1,
+    "push_with_nothing_to_push": 0,
+    "pull": 1,
+    "pull_when_up_to_date": 0,
+    "pull_rebase": 2,
+    "resolve_by_hand_extra": 1,
+    "command_card": 1,
+    "arm_trap": 0
+  },
+
+  "merge_token": {
+    "on_plain_pull": "only_when_merging_unpushed_commits",
+    "on_rebase": false
+  },
+
+  "absence": {
+    "empty_pack_when_nothing_arrives": true,
+    "left_the_company_after_consecutive_empty_days": 2
+  }
+}
