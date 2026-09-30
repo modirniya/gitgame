@@ -1,8 +1,8 @@
 # Event screens: the game as a sequence of moments
 
-*Status: Draft · Last verified: 2026-09-29*
+*Status: Draft · Last verified: 2026-09-30*
 
-A phone shows one thing at a time. That fits this game better than a table view does: a game is a sequence of **events**, and each event is either a **question** to the player (an input screen) or a **consequence** to show them (an output screen). This document is the specification of those events and screens. The mobile prototype in [`prototypes/mobile/`](../../prototypes/README.md) implements it; the production client will be a rewrite that implements it again, properly. The spec is what carries over. The prototype does not (see [ADR-0001](../adr/0001-prototypes-are-disposable.md)).
+A phone shows one thing at a time. That fits this game better than a table view does: a game is a sequence of **events**, and each event is either a **question** to the player (an input screen) or a **consequence** to show them (an output screen). This document is the specification of those events and screens. The mobile prototype in [`prototypes/mobile/`](../../prototypes/README.md) implemented it first; the production client in [`web/`](../../web/README.md) implements it again for the online game, and §9 records where it differs. The spec is what carries over. The prototype does not (see [ADR-0001](../adr/0001-prototypes-are-disposable.md)).
 
 ## 1. Principles
 
@@ -115,3 +115,16 @@ The mobile prototype ([findings](../../prototypes/mobile/README.md#findings)) an
 3. **Do people open the Table sheet, and when?** *Provisionally: rarely.* The hub's strip already shows `main` in full; the sheet's only unique content is tokens and the bot's counts (the incident is now on the hub too). If opens stay rare, move tokens onto the hub and drop the sheet. *Measure:* Table opens per game, and the screen each was opened from.
 
 The prototype also raised a broader answer to the question behind all three: **one event per screen is clearer for the moments (rejection, conflict, blame, force-push, reflog, CI) and too slow for the routine.** A game is about 105 screens, 36 of them round ceremony and about 40 routine ops. The next version of this spec should give each event its own screen the first time it happens in a game, and after that let routine events animate in the hub with a one-line receipt.
+
+## 9. In the online client
+
+The production client ([`web/`](../../web/README.md), M7) plays the online game, days and packs, not the prototype's alternating turns. The spec carries over with these differences, each following from that or from §8's findings.
+
+- **The events are the remote's day log** (`server/lib/gitgame/games/projection.ex`), not the prototype's engine events. The mapper (`web/src/moments.js`) turns a day log, as the remote sends it to one reader, into **moments**: one per op, written as a terminal would show it (`ana@main $ git pull -X theirs`, then Git's output), with the coach line from `web/src/copy.js`.
+- **§8's finding is the rule.** Rejections, conflicts, blame, reverts, force-pushes, reflogs, the tag, CI and leaving the company always get a screen. A push and a pull get one the first time each happens in a game. Everything else is a line in the day's transcript.
+- **No bot turn, no O-BotTurn.** Everyone's pack resolves at once when the day closes ([ADR-0003](../adr/0003-batch-packs-at-the-deadline.md)), so opening a game shows what happened since you last looked: each closed day's screens, then today's incident with your draws (`web/src/catchup.js`). A minute away and a week away are the same thing.
+- **I-Hub writes a pack, not a turn.** Ops are listed as commands with what each will cost now and at most, since another pack may land first. A pull is written before each push by default, and a conflict is flagged before sending. Undo is removing an op from the pack before it is sent; a sent pack can be replaced until the day closes.
+- **I-Pull and I-Conflict are not screens.** A strategy is declared on the pull (`--rebase`, `-X ours|theirs|resolve`), because nobody can be asked in the middle of the night (charter decision 3).
+- **The Table** is a sheet on phones and a panel beside the hub on wide screens, as §4 says, with the last day's log as a transcript.
+- **Replays** (`#/r/<id>`) show any game day by day, each day the view the remote folds from the log.
+
