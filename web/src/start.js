@@ -6,6 +6,7 @@ import { name } from "./brand.js";
 import { whoami } from "./whoami.js";
 import { gamesList } from "./games.js";
 import { emailSettings } from "./email.js";
+import { setGuided } from "./guide.js";
 
 const LENGTHS = [
   ["live", "live · 60s days"],
@@ -46,8 +47,14 @@ export function startScreen({ remote, go, me, failure = null, notice = "", signO
   const button = el("button", { class: "primary", type: "submit", disabled: !me }, "git init");
 
   // Five-minute days: a first game against the bot shouldn't mark someone absent for reading the screens slowly.
+  // A player's first game is guided (M14d): nothing else they've played to learn from yet.
   const quick = () =>
-    busy(() => remote.createGame({ bots: ["bot"], dayLength: "lunch" }).then((view) => go(`/g/${view.id}`)));
+    busy(async () => {
+      const first = (await remote.listGames().catch(() => [null])).length === 0;
+      const view = await remote.createGame({ bots: ["bot"], dayLength: "lunch" });
+      if (first) setGuided(view.id, true);
+      go(`/g/${view.id}`);
+    });
   const invite = () => busy(() => remote.openRoom().then((room) => go(`/room/${room.code}`)));
 
   async function busy(f) {

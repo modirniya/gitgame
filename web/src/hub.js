@@ -153,6 +153,7 @@ export function hub({ view, draft, change, send, sending = false, error = "" }) 
       "button",
       {
         class: "action",
+        "data-guide": key,
         disabled: !!can[key],
         title: can[key] ?? "",
         onclick: () => (op ? put(op()) : change({ ...draft, picking: key })),
@@ -232,7 +233,7 @@ export function hub({ view, draft, change, send, sending = false, error = "" }) 
     el("p", { class: "error", role: "alert" }, error),
     el(
       "button",
-      { class: "primary send", disabled: sending, onclick: send },
+      { class: "primary send", "data-guide": "send", disabled: sending, onclick: send },
       sending ? "sending…" : sent ? "replace today's pack" : "send pack",
     ),
   );

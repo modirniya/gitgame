@@ -165,7 +165,7 @@ The maintainer, playing the beta, found it poorer than the mobile prototype. The
 - [x] **M14a · Colors, the hub, the scoreboard.** Player colors outside the deck's file colors (the prototype's finding 5); the hand fanned, in one row or two, every card keeping a finger's width; each action saying what it would do in your situation, not only why it can't; the scoreboard's "what decided it".
 - [x] **M14b · The bot's reasoning.** The bot writes a public "why" for each op it plays, from what anyone at the table could see, and the day's screens show it beside the bot's commands.
 - [x] **M14c · Animations.** The motions of event-screens §4 on the moment screens: a push flying onto `main`, a rejection bouncing back, a pull sliding the pointer, a force-push dropping commits and a reflog raising them; none under `prefers-reduced-motion`.
-- [ ] **M14d · The guided first game.** A first game against the bot that highlights one thing and says one sentence at each step, through a whole day: build a commit, push (and the pull written for you), send, and see what the day did.
+- [x] **M14d · The guided first game.** A first game against the bot that highlights one thing and says one sentence at each step, through a whole day: build a commit, push (and the pull written for you), send, and see what the day did.
 
 ### After M9
 
