@@ -1,6 +1,6 @@
 # ADR-0007: Where the beta runs
 
-*Status: Accepted · Date: 2026-09-30*
+*Status: Accepted; its choice of managed Postgres superseded by [ADR-0008](0008-the-beta-shares-a-postgres.md) · Date: 2026-09-30*
 
 ## Context
 

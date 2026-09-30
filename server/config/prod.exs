@@ -7,7 +7,8 @@ config :gitgame, GitGameWeb.Endpoint,
   force_ssl: [
     rewrite_on: [:x_forwarded_proto],
     exclude: [
-      # paths: ["/health"],
+      # the host's health check calls the machine over plain HTTP from inside its network (fly.toml)
+      paths: ["/api/health"],
       hosts: ["localhost", "127.0.0.1"]
     ]
   ]

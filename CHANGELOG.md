@@ -94,6 +94,8 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - Ready for Fly.io (M11b/c, ADR-0007): `fly.toml` runs one machine that never sleeps (every open game holds a live stream), with health checks and migrations before each deploy, and a workflow deploys a `v*` tag, never a branch. Behind Fly's proxy the server reads the caller's address from `fly-client-ip`, so the rate limits count people. Deploying needs the maintainer's Fly account; the steps are in `server/README.md`.
 
+- ADR-0008: the beta's database is its own database, with its own non-superuser, on an existing Postgres (`rps-db`) rather than Fly's managed Postgres, for cost; the app is `gitgame-online`, in `lax`, served at gitgame-online.fly.dev until gitgame.online's DNS points at it.
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.
 
