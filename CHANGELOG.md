@@ -24,5 +24,7 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - `server/`: the Phoenix API app (M1): Postgres through Ecto, `GitGame.Brand` as the one definition of the name, and `GET /api/health`, which also checks the database. CI gains a server job (format, compile with warnings as errors, test against Postgres 17).
 
+- `GitGame.Rules` (M2a): the server reads and validates `rules/deck.json` and `rules/online.json`, failing loudly on any missing, unknown or mistyped key. `deck.json` gains stable card ids, machine-readable incident effects and a `scoring` section; `online.json` gains the cards switched on for online play (the tested core, plus two quiet days).
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.

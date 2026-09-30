@@ -5,6 +5,16 @@
     "Cards, incidents, scoring tokens and the release size are shared with the tabletop game and live in deck.json."
   ],
 
+  "cards": {
+    "note": "Which of deck.json's cards are in play online. Only what the simulations exercised is on (the maintainer's call, 2026-09-29); the rest stay in the tabletop deck and come online one small change at a time, once their online rules are precise.",
+    "commands": ["blame", "revert", "force", "reflog"],
+    "incidents": ["flaky_ci", "standup", "sodown", "hackathon"],
+    "quiet_days": [
+      { "id": "quiet_tuesday", "name": "Quiet Tuesday", "text": "Nothing special. Get some work done." },
+      { "id": "coffee_machine_fixed", "name": "Coffee Machine Fixed", "text": "Nothing special. Morale is high." }
+    ]
+  },
+
   "day": {
     "lengths": { "correspondence": "24h", "lunch": "5m", "live": "60s" },
     "final_day": { "correspondence": 7, "lunch": 12, "live": 12 },

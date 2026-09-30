@@ -25,37 +25,45 @@
   },
 
   "command_cards": [
-    { "name": "git blame", "count": 5, "cost": 1,
+    { "id": "blame", "name": "git blame", "count": 5, "cost": 1,
       "text": "Flip one commit on main. If it holds a bug, its author takes -3 blame now. The commit stays face-up." },
-    { "name": "git bisect", "count": 2, "cost": 1,
+    { "id": "bisect", "name": "git bisect", "count": 2, "cost": 1,
       "text": "Point at a range of main. If any bug is in it, its owner must say which half it is in. Halve until found, then flip it: -3 to its author." },
-    { "name": "cherry-pick", "count": 3, "cost": 1,
+    { "id": "cherry_pick", "name": "cherry-pick", "count": 3, "cost": 1,
       "text": "Copy one commit from main onto your local branch (use a spare card as the copy). The original author stays the author, including for blame." },
-    { "name": "push --force", "count": 5, "cost": 1,
+    { "id": "force", "name": "push --force", "count": 5, "cost": 1,
       "text": "Overwrite main with your local branch. Every commit after your pointer is erased and goes back to its owner's local branch. Take a Sin token." },
-    { "name": "reflog", "count": 4, "cost": 0,
+    { "id": "reflog", "name": "reflog", "count": 4, "cost": 0,
       "text": "Play at any time, even on someone else's turn, right after a push --force: the erased commits come back on top of main. Free to play." },
-    { "name": "revert", "count": 4, "cost": 1,
+    { "id": "revert", "name": "revert", "count": 4, "cost": 1,
       "text": "Choose a face-up bug on main. Put this card on top of it as a revert: it no longer counts as a bug at release. +1 for you." },
-    { "name": "stash", "count": 2, "cost": 1,
+    { "id": "stash", "name": "stash", "count": 2, "cost": 1,
       "text": "Set up to 3 cards from your hand aside, face down. They are safe from any discard effect. Take them back for free on a later turn." },
-    { "name": "commit --amend", "count": 2, "cost": 1,
+    { "id": "amend", "name": "commit --amend", "count": 2, "cost": 1,
       "text": "Swap one card in your last unpushed commit with a card from your hand. On a commit that is already on main: +1 Sin." },
-    { "name": "rebase -i", "count": 3, "cost": 1,
+    { "id": "rebase_i", "name": "rebase -i", "count": 3, "cost": 1,
       "text": "Squash two or more of your unpushed commits into one. +2 lines for clean history. A bug found inside a squashed commit costs -5 instead of -3." },
-    { "name": "checkout <sha>", "count": 3, "cost": 1,
+    { "id": "checkout", "name": "checkout <sha>", "count": 3, "cost": 1,
       "text": "Target a player. They are in Detached HEAD: their next commit is discarded unless they first spend 1 op on git switch -c." }
   ],
 
   "incidents": [
-    { "name": "Friday Deploy",           "text": "Everyone must push this round. Anyone who doesn't loses 1 op next round." },
-    { "name": "left-pad Unpublished",    "text": "Every Dockerfile commit on main becomes a bug. Flip them face-up now." },
-    { "name": "Merge Freeze",            "text": "Nobody can push this round." },
-    { "name": "Flaky CI",                "text": "The next push this round rolls a die. On 1 or 2 it is rejected; the op is spent." },
-    { "name": "Standup Ran Long",        "text": "Everyone has 2 ops this round instead of 3." },
-    { "name": "Stack Overflow Is Down",  "text": "No command cards this round." },
-    { "name": "Hackathon",               "text": "Everyone has 4 ops this round." },
-    { "name": "Security Audit",          "text": "Going around the table, each player flips one commit on main that is not their own. Blame applies." }
+    { "id": "friday_deploy", "name": "Friday Deploy",           "text": "Everyone must push this round. Anyone who doesn't loses 1 op next round.",
+      "effect": { "kind": "must_push", "ops_lost_next_day": 1 } },
+    { "id": "left_pad", "name": "left-pad Unpublished",    "text": "Every Dockerfile commit on main becomes a bug. Flip them face-up now.",
+      "effect": { "kind": "file_becomes_bug", "file": "Dockerfile" } },
+    { "id": "merge_freeze", "name": "Merge Freeze",            "text": "Nobody can push this round.",
+      "effect": { "kind": "no_push" } },
+    { "id": "flaky_ci", "name": "Flaky CI",                "text": "The next push this round rolls a die. On 1 or 2 it is rejected; the op is spent.",
+      "effect": { "kind": "flaky_first_push", "die": 6, "rejected_at_or_below": 2 } },
+    { "id": "standup", "name": "Standup Ran Long",        "text": "Everyone has 2 ops this round instead of 3.",
+      "effect": { "kind": "ops", "ops": 2 } },
+    { "id": "sodown", "name": "Stack Overflow Is Down",  "text": "No command cards this round.",
+      "effect": { "kind": "no_commands" } },
+    { "id": "hackathon", "name": "Hackathon",               "text": "Everyone has 4 ops this round.",
+      "effect": { "kind": "ops", "ops": 4 } },
+    { "id": "security_audit", "name": "Security Audit",          "text": "Going around the table, each player flips one commit on main that is not their own. Blame applies.",
+      "effect": { "kind": "each_flips_one_not_their_own" } }
   ],
 
   "tickets": {
@@ -84,6 +92,15 @@
     "hand_limit": 10,
     "release_at_commits": { "2": 10, "3": 12, "4": 15, "5": 15 },
     "production_down_at_bugs": 4
+  },
+
+  "scoring": {
+    "note": "Points at release. Lines of clean commits on main count for their author; everything below is added per token or event.",
+    "bug_blamed": -3,
+    "merge_token": -1,
+    "grudge_token": -1,
+    "sin_token": -1,
+    "revert_played": 1
   },
 
   "tokens": {
