@@ -16,6 +16,8 @@ export function card(c, { size = "hand", selected = false, onclick } = {}) {
   const props = {
     class: `card ${size}${selected ? " selected" : ""}`,
     "data-id": c.id,
+    // the face is drawn for the eye; a screen reader gets it in words
+    "aria-label": c.kind === "command" ? commandName(c.command) : `${c.file} +${c.lines}${c.bug ? ", bug" : ""}`,
     "aria-pressed": onclick ? String(selected) : null,
     onclick,
   };
@@ -62,6 +64,7 @@ export function commit(c, { tip = false, onclick, pickable = false } = {}) {
       style: `--band: ${fileColor(c.files?.[0])}`,
       "data-id": c.id,
       title: c.message,
+      "aria-label": `${c.id} by ${c.author}: ${(c.files ?? []).join(" ")} +${c.lines}, ${state[0] === "down" ? "face-down" : state[0]}`,
       onclick,
     },
     el("span", { class: "band" }),

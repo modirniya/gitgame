@@ -58,6 +58,8 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - The day log as a terminal (M7c): the client maps every event the remote sends to a moment, one per op (`ana@main $ git pull -X theirs`, then `CONFLICT (content): …`), each with a coach line in the second person. Rejections, conflicts, blame, force-pushes, reflogs, the tag and CI always get a screen of their own; a push and a pull only the first time each happens in a game, as the mobile prototype found; the rest are lines in the transcript. The game screen shows the last day's log.
 
+- Writing a pack in the browser (M7d): the hub shows `main`, your branch (unpushed commits face-up to you) and your hand, and one row of actions, each greyed out with the reason when it can't be played. The pack is a list of commands (`git pull --rebase -X ours`), with a pull written before each push by default and each op's cost as the remote will charge it: now, and at most if someone else pushes first. A conflict is flagged before you send. The Table is a sheet on phones and a panel on wide screens. The view now carries the pack's op limit and the default conflict strategy.
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.
 

@@ -71,7 +71,7 @@ The charter's exit: *a full game can be played and replayed from its log.*
 
 ### M7 · Hotseat web client
 - [ ] `web/`: Vite and a PWA, no framework unless an ADR adds one. The terminal-style UI the charter asks for, on the screen spec in [event-screens.md](event-screens.md): the event-to-screen mapper, the hub, and the Table as a sheet on phones and a panel on wide screens.
-- [ ] A pack editor that writes `pull` before `push` by default and shows each op's cost as the remote will charge it.
+- [x] A pack editor that writes `pull` before `push` by default and shows each op's cost as the remote will charge it: now, and at most if another pack lands first (ADR-0003's random order).
 - [ ] The live view through a push channel that only signals "refetch" (charter decision 9).
 - [ ] A replay view: any finished game, day by day, from its log.
 
