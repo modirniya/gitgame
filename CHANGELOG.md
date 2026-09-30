@@ -34,5 +34,7 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - The command cards (M2e): `git blame` (a live bug counts against its author), `git revert` (from the tip, +1) and `git push --force` (a sin; an armed `reflog` restores all of its owner's erased commits on top; an erased revert revives its bug). Under Stack Overflow Is Down every command fails, is paid for, and keeps its card.
 
+- The release (M2f): `git tag v1.0` once `main` is the release size; CI flips every commit and counts each unblamed live bug once; production down at four bugs, when the least blame wins; scores broken down by `rules/deck.json`'s scoring, with a face-down bug counting as clean while the game runs. `online.json` gains the cost of `tag` and drops an unused `command_card` cost.
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.

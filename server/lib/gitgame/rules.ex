@@ -42,7 +42,7 @@ defmodule GitGame.Rules do
   ]
   defstruct @enforce_keys
 
-  @op_costs ~w(add commit push push_with_nothing_to_push pull pull_when_up_to_date pull_rebase resolve_by_hand_extra command_card arm_trap)a
+  @op_costs ~w(add commit push push_with_nothing_to_push pull pull_when_up_to_date pull_rebase resolve_by_hand_extra tag arm_trap)a
   @effects %{
     "ops" => {:ops, [ops: :int]},
     "flaky_first_push" => {:flaky_first_push, [die: :int, rejected_at_or_below: :int]},
