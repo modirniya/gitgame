@@ -9,6 +9,7 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ### Fixed
 - Typing a commit message and then tapping "send pack" didn't send the pack: leaving the field redrew the hub under the tap. The message is now kept as it is typed.
+- The guided first game, on a first day with only 2 ops (Standup Ran Long), had you push after add and commit had spent them, then send a pack whose push didn't run. It now stops at the commit and says it waits for another day.
 
 ## [0.1.0] - 2026-09-30
 
