@@ -9,8 +9,11 @@
   --line: #2c3038;
   --ink: #e6e3dc;
   --muted: #8a8f99;
-  --you: #3ec1b3;
-  --other: #a88bfa;
+  /* Buttons, links and the prompt. The cards' file colors (rules/deck.json) are teal, violet, coral, blue and amber,
+     so the players' own colors sit outside that family: an api.py card must never read as the other player's. */
+  --accent: #3ec1b3;
+  --you: #ff6ac1;
+  --other: #9aa3b5;
   --ok: #5ec27a;
   --reject: #f0605d;
   --warn: #e9a83b;
@@ -33,6 +36,8 @@
     --ok: #2f8f4e;
     --reject: #c8322f;
     --warn: #a86a00;
+    --you: #c4267f;
+    --other: #6b7385;
     color-scheme: light;
   }
 }
@@ -67,11 +72,11 @@ h1 {
 }
 h1::before {
   content: "$ ";
-  color: var(--you);
+  color: var(--accent);
 }
 
 a {
-  color: var(--you);
+  color: var(--accent);
 }
 .muted,
 .lede {
@@ -112,13 +117,13 @@ button:disabled {
   cursor: default;
 }
 button.primary {
-  background: var(--you);
-  border-color: var(--you);
+  background: var(--accent);
+  border-color: var(--accent);
   color: var(--ground);
   font-weight: 700;
 }
 :focus-visible {
-  outline: 2px solid var(--you);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -158,9 +163,10 @@ button.primary {
 .card.command .big {
   font-size: 0.95rem;
 }
+/* at the left, the part of a card an overlapping neighbour never covers */
 .card .bug {
   position: absolute;
-  right: 6px;
+  left: 6px;
   bottom: 6px;
   padding: 0 4px;
   border-radius: 3px;
@@ -170,9 +176,8 @@ button.primary {
   font-weight: 700;
 }
 .card.selected {
-  border-color: var(--you);
-  box-shadow: 0 0 0 2px var(--you);
-  transform: translateY(-8px);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
 }
 
 .card.strip {
@@ -375,11 +380,29 @@ ol.seats {
 .card.used {
   opacity: 0.3;
 }
-.hub .cards {
+/* The hand, fanned (event-screens §3): each card overlaps the one before by --overlap, set by the hub so a row fits
+   the screen and every card keeps at least 44 px to tap. The one under the finger, or selected, comes forward. */
+.hand {
+  padding: 14px 0 4px;
+}
+.hand-fan {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 10px 0 4px;
+  padding-bottom: 6px;
+}
+.hand-fan .card + .card {
+  margin-left: calc(-1 * var(--overlap, 0px));
+}
+.hand-fan .card {
+  box-shadow: -2px 0 6px rgb(0 0 0 / 0.25);
+  transition: transform 120ms ease-out;
+}
+.hand-fan .card:hover,
+.hand-fan .card:focus-visible,
+.hand-fan .card.selected {
+  z-index: 1;
+}
+.hand-fan .card.selected {
+  transform: translateY(-12px);
 }
 
 .actions {
@@ -419,7 +442,7 @@ ol.pack {
 }
 .pack .cmd::before {
   content: "$ ";
-  color: var(--you);
+  color: var(--accent);
 }
 .pack .cost {
   padding: 0 6px;
@@ -624,7 +647,7 @@ button.link {
   padding: 0;
   border: none;
   background: none;
-  color: var(--you);
+  color: var(--accent);
   text-decoration: underline;
 }
 .nudge {
@@ -652,7 +675,7 @@ details.more summary {
 }
 .share code {
   overflow-wrap: anywhere;
-  color: var(--you);
+  color: var(--accent);
 }
 
 /* ---------- your games ---------- */
@@ -696,4 +719,11 @@ label.check {
 }
 label.check input {
   min-height: auto;
+}
+.action .will {
+  font-size: 0.65rem;
+  color: var(--accent);
+}
+.verdict {
+  font-weight: 700;
 }

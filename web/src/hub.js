@@ -4,7 +4,7 @@
 import { el } from "./dom.js";
 import { card, commandName, commit } from "./cards.js";
 import { strip } from "./table.js";
-import { actions, add, price } from "./pack.js";
+import { actions, add, consequences, price } from "./pack.js";
 
 /** An op as the command a terminal would show. */
 export function command(op, view) {
@@ -66,6 +66,33 @@ function branch(view) {
   );
 }
 
+// A hand card is 96 px wide; a fanned one shows at least this much of itself, a finger's width.
+const CARD = 96;
+const TAP = 44;
+
+/**
+ * How the hand fans on a screen `width` wide: the cards in each row, and how much each overlaps the one before. One
+ * row if every card keeps TAP pixels to tap, otherwise two.
+ */
+export function fanLayout(n, width) {
+  const step = (count) => (count > 1 ? Math.min(CARD + 8, (width - CARD) / (count - 1)) : CARD + 8);
+  const rows = n > 1 && step(n) < TAP ? 2 : 1;
+  const perRow = Math.ceil(n / rows);
+  return { rows, perRow, overlap: Math.max(0, CARD - Math.floor(step(perRow))) };
+}
+
+function fan(cards) {
+  const width = Math.min(globalThis.innerWidth || 640, 640) - 32;
+  const { perRow, overlap } = fanLayout(cards.length, width);
+  const rows = [];
+  for (let i = 0; i < cards.length; i += perRow) rows.push(cards.slice(i, i + perRow));
+  return el(
+    "div",
+    { class: "hand", "aria-label": "your hand" },
+    rows.map((row) => el("div", { class: "hand-fan", style: `--overlap: ${overlap}px` }, row)),
+  );
+}
+
 const range = (r) => (r.cost === r.most ? `${r.cost}` : `${r.cost}–${r.most}`);
 
 function row(view, draft, change, r, i) {
@@ -117,6 +144,7 @@ function row(view, draft, change, r, i) {
 export function hub({ view, draft, change, send, sending = false, error = "" }) {
   const priced = price(view, draft.ops);
   const can = actions(view, draft.ops, draft.selected);
+  const will = consequences(view, draft.ops, draft.selected);
   const put = (op) => change({ ...draft, ops: add(view, draft.ops, op), selected: [], picking: null });
   const sent = view.sent_today.includes(view.you.player);
 
@@ -130,7 +158,8 @@ export function hub({ view, draft, change, send, sending = false, error = "" }) 
         onclick: () => (op ? put(op()) : change({ ...draft, picking: key })),
       },
       label,
-      can[key] && el("span", { class: "why" }, can[key]),
+      // what it would do, in your situation; or, when it can't be played, why not
+      can[key] ? el("span", { class: "why" }, can[key]) : will[key] && el("span", { class: "will" }, will[key]),
     );
 
   const inHand = new Set(priced.left.hand.map((c) => c.id));
@@ -170,9 +199,7 @@ export function hub({ view, draft, change, send, sending = false, error = "" }) 
         el("button", { onclick: () => change({ ...draft, picking: null }) }, "cancel"),
       ),
     branch(view),
-    el(
-      "div",
-      { class: "cards", "aria-label": "your hand" },
+    fan(
       view.you.hand.map((c) =>
         inHand.has(c.id)
           ? card(c, {

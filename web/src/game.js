@@ -12,6 +12,7 @@ import { momentScreen } from "./screens.js";
 import { catchup, recall, remember } from "./catchup.js";
 import { nudge } from "./whoami.js";
 import { remindButton } from "./remind.js";
+import { whatDecidedIt } from "./verdict.js";
 
 const fresh = () => ({ ops: [], selected: [], picking: null });
 
@@ -177,6 +178,7 @@ function scoreboard(view, me) {
       { class: view.released.production_down ? "error" : "muted" },
       view.released.production_down ? "Production is down." : `${view.released.bugs} bugs reached production.`,
     ),
+    el("p", { class: "verdict" }, whatDecidedIt(view.scores)),
     el(
       "ol",
       { class: "seats" },

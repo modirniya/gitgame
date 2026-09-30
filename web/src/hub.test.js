@@ -64,3 +64,15 @@ describe("the hub", () => {
     expect(render(v).node.querySelector(".send").textContent).toBe("replace today's pack");
   });
 });
+
+import { fanLayout } from "./hub.js";
+
+it("fans the hand in one row while every card keeps a finger's width, and in two rows past that", () => {
+  // a phone's 343 px: six cards fit in one row, seven need two
+  expect(fanLayout(6, 343)).toEqual({ rows: 1, perRow: 6, overlap: 47 });
+  expect(fanLayout(7, 343)).toEqual({ rows: 2, perRow: 4, overlap: 14 });
+  expect(fanLayout(10, 343)).toMatchObject({ rows: 2, perRow: 5 });
+  expect(fanLayout(10, 343).overlap).toBeLessThanOrEqual(96 - 44);
+  // few cards on a wide screen don't overlap at all
+  expect(fanLayout(3, 608).overlap).toBe(0);
+});
