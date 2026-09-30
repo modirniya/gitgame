@@ -31,6 +31,10 @@ describe("the remote", () => {
     expect(await fake(200, me).api.me()).toEqual(me);
     expect(await fake(401, { error: "fatal: not signed in" }).api.me()).toBeNull();
 
+    const from = fake(200, me);
+    await from.api.me("notification");
+    expect(from.calls[0].url).toBe("/api/session?via=notification");
+
     const { calls, api } = fake(201, me);
     expect(await api.join()).toEqual(me);
     await api.signOut();

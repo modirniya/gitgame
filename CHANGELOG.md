@@ -86,6 +86,8 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - One image, one origin (M11a): the server serves the built client at `/`, with a Content Security Policy, from the same origin as the API. A root `Dockerfile` builds the client, the release and the rules into one image that migrates its database before serving, and CI builds that image, runs it against Postgres and plays a game on it. Where it runs is still to be decided.
 
+- Reminders (M10a): in games with 24-hour days, when a day opens (and again with a quarter of it left) whoever's pack isn't in gets "your pack is due", and when a game is released everyone in it hears so; at most once per game a day on each channel, however many jobs run. The channels themselves, Web Push and email, come next (ADR-0006). A link from a notification tells the beta's report where the visit came from.
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.
 

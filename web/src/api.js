@@ -44,8 +44,8 @@ export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
      * Who this device is signed in as, `{player, link_github}`, or null. The session is an HttpOnly cookie the page never
      * sees (ADR-0005); `link_github` says whether this remote can link a GitHub account.
      */
-    me: () =>
-      call(fetcher, "/session").catch((e) => {
+    me: (via) =>
+      call(fetcher, via ? `/session?via=${encodeURIComponent(via)}` : "/session").catch((e) => {
         if (e.status === 401) return null;
         throw e;
       }),

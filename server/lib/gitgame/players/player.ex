@@ -5,6 +5,8 @@ defmodule GitGame.Players.Player do
   """
   use Ecto.Schema
 
+  @type t :: %__MODULE__{}
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @timestamps_opts [type: :utc_datetime_usec]
   schema "players" do
