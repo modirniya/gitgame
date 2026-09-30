@@ -8,13 +8,15 @@
 
 An asynchronous multiplayer card game whose rules *are* Git.
 
-Players race to ship commits to a shared `main`: commit, push, pull, rebase, resolve conflicts, bluff bugs past `git blame`, and survive `push --force`. There are no turns — there are **days**, **packs**, and a **remote** that receives packs in the order they arrive. A day can be 24 hours or 60 seconds, so a week-long correspondence game and a live lunch game are the same game.
+Players race to ship commits to a shared `main`: commit, push, pull, rebase, resolve conflicts, bluff bugs past `git blame`, and survive `push --force`. There are no turns — there are **days**, **packs**, and a **remote** that resolves each day's packs together when the day closes. A day can be 24 hours or 60 seconds, so a week-long correspondence game and a live lunch game are the same game.
 
 The mechanics are accurate to Git. People who know Git enjoy the details; people who don't learn it without meaning to.
 
 ## Status
 
-**Phase 1: building the engine** ([the plan](docs/design/phase-1-plan.md)). The rules are v0.2, still a draft. They have been tested in throwaway prototypes and in simulation, but not yet by other people: [ADR-0002](docs/adr/0002-beta-before-human-playtest.md) moves the human playtest to a beta of the real product. The server lives in [server/](server/README.md). Progress is tracked in [CHANGELOG.md](CHANGELOG.md).
+**Phase 2: the beta** ([the plan](docs/design/phase-1-plan.md)). Phase 1 is done: a full game against the bot is played in the browser and replayed from its log, and CI proves it on every change. Since then: anonymous sign-in with GitHub linking, rooms by link, your games, and what the beta records. Next are notifications and hosting, each waiting on an ADR. The rules are v0.2, still a draft: [ADR-0002](docs/adr/0002-beta-before-human-playtest.md) makes the beta the human playtest.
+
+To play it on your machine: the server in [server/](server/README.md), the client in [web/](web/README.md). Progress is tracked in [CHANGELOG.md](CHANGELOG.md).
 
 ## Read this repository
 
