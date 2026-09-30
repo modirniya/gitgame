@@ -17,6 +17,7 @@ Every document in `docs/` starts with a status line like the one above. The stat
 | [design/base-rules.md](design/base-rules.md) | The tabletop game: cards, ops, commands, incidents, the release. The online rules derive from it. |
 | [design/round-resolution.md](design/round-resolution.md) | Days, packs, and the remote: how the online game resolves without turns. |
 | [design/event-screens.md](design/event-screens.md) | The game as events and screens: the spec a phone client is built from. |
+| [design/phase-1-plan.md](design/phase-1-plan.md) | The build plan from rules v0.2 to the beta: milestones, what each must show before it counts as done, and open items. |
 | [../rules/deck.json](../rules/deck.json) · [../tabletop/](../tabletop/README.md) | The physical deck as data, and the print-and-play built from it. |
 | [../prototypes/](../prototypes/README.md) | Throwaway experiments and what they found. |
 

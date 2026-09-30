@@ -20,3 +20,4 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 - CI: a GitHub Actions workflow runs the mobile prototype's smoke test on every pull request and on pushes to `main`.
 - ADR-0002: the human playtest moves to a beta of the real product; the rules stay draft (v0.x) until people have played it.
 - `prototypes/packs`: a simulation of the online day/pack model that answers playtest questions 1 and 2 provisionally. Sending first, not last, dominates under arrival order (61:39); batching at the deadline is fair but doubles conflicts. Paying for a rejected push stays. Answers are recorded in `round-resolution.md` §7.
+- `docs/design/phase-1-plan.md`: the build plan for Phase 1 (server skeleton, rules, resolver, event log, days, views and bots, hotseat web client) and the beta, with a "done when" for each milestone.
