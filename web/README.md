@@ -29,7 +29,7 @@ npm run build          # the PWA in dist/
 
 | File                          | What it is                                                                                                              |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `src/main.js`, `src/route.js` | The entry and the addresses (`#/`, `#/g/<id>[/<seat>]`, `#/r/<id>/<day>`)                                               |
+| `src/main.js`, `src/route.js` | The entry and the addresses (`#/`, `#/g/<id>[/<seat>]`, `#/room/<code>`, `#/r/<id>/<day>`)                              |
 | `src/api.js`                  | The remote's JSON API; errors carry the remote's own words                                                              |
 | `src/dom.js`                  | Building DOM without innerHTML, so other players' text is only ever text                                                |
 | `src/brand.js`                | The name, defined once (`// BRAND`, [branding.md](../docs/branding.md))                                                 |
@@ -45,5 +45,6 @@ npm run build          # the PWA in dist/
 | `src/replay.js`               | A replay: any game day by day, each day the view the remote folds from the log to that day's close                      |
 | `src/exit.test.js`            | The Phase 1 exit as a test: a game against the bot through the client's modules, then replayed (needs `GITGAME_REMOTE`) |
 | `src/whoami.js`               | Who this device is: handle and avatar, "link GitHub", sign out, and the nudge after a finished game                     |
+| `src/room.js`                 | A room (M9): who is in, the link to share, the host's bots, day length and start                                        |
 | `src/start.js`, `src/game.js` | I-Start, and a game as one player sees it                                                                               |
 | `public/sw.js`                | The service worker: the app's files offline, never the game                                                             |

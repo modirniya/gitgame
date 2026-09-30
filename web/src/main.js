@@ -5,6 +5,7 @@ import { remote as makeRemote } from "./api.js";
 import { startScreen } from "./start.js";
 import { gameScreen } from "./game.js";
 import { replayScreen } from "./replay.js";
+import { roomScreen } from "./room.js";
 import { route } from "./route.js";
 
 const root = document.getElementById("app");
@@ -42,11 +43,13 @@ function render() {
   leave = () => {};
   const where = route(location.hash);
 
-  if (where.screen === "game" || where.screen === "replay") {
+  if (where.screen !== "start") {
     const screen =
       where.screen === "game"
         ? gameScreen({ remote, go, id: where.id, seat: where.seat, me })
-        : replayScreen({ remote, go, id: where.id, day: where.day });
+        : where.screen === "room"
+          ? roomScreen({ remote, go, code: where.code })
+          : replayScreen({ remote, go, id: where.id, day: where.day });
     leave = screen.leave;
     mount(root, screen.node);
   } else {

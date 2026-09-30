@@ -76,6 +76,8 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - Rooms by link, on the server (M9a): `POST /api/rooms` opens a room with an eight-character code to share; others join by it, the host sets the bots and day length and starts the game, and every member takes a seat under their handle in the order they joined, then the bots. Five seats at most; closed once started. `GET /api/rooms/:code/live` says `refetch` whenever the room changes.
 
+- Rooms in the client (M9b): the start screen's first button plays the bot now, in one tap; the second opens a room and shows its link to share. Whoever opens the link can join; the host sets the bots and day length and starts, and the room's stream takes everyone to the game. Setting up a hotseat game by hand moved under "more".
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.
 

@@ -1,6 +1,6 @@
-// I-Start (event-screens §3): a new game in a few seconds (charter priority 2). You take the first seat, as the
-// player this device is signed in as (ADR-0005); anyone else at the device can take a seat too (hotseat), and the
-// remote plays the bots.
+// I-Start (event-screens §3): a new game in a few seconds (charter priority 2). One tap plays the bot; another opens a
+// room to invite someone (M9). Under "more", a game set up by hand: you take the first seat, as the player this device
+// is signed in as (ADR-0005), anyone else at the device can take a seat too (hotseat), and the remote plays the bots.
 import { el } from "./dom.js";
 import { name } from "./brand.js";
 import { whoami } from "./whoami.js";
@@ -41,6 +41,25 @@ export function startScreen({ remote, go, me, failure = null, notice = "", signO
   const error = el("p", { class: "error", role: "alert" }, failure?.message ?? notice);
   const button = el("button", { class: "primary", type: "submit", disabled: !me }, "git init");
 
+  // Five-minute days: a first game against the bot shouldn't mark someone absent for reading the screens slowly.
+  const quick = () =>
+    busy(() => remote.createGame({ bots: ["bot"], dayLength: "lunch" }).then((view) => go(`/g/${view.id}`)));
+  const invite = () => busy(() => remote.openRoom().then((room) => go(`/room/${room.code}`)));
+
+  async function busy(f) {
+    error.textContent = "";
+    for (const b of [play, room, button]) b.disabled = true;
+    try {
+      await f();
+    } catch (e) {
+      error.textContent = e.message;
+      for (const b of [play, room, button]) b.disabled = !me;
+    }
+  }
+
+  const play = el("button", { class: "primary", disabled: !me, onclick: quick }, "play the bot now");
+  const room = el("button", { disabled: !me, onclick: invite }, "invite someone");
+
   async function submit(event) {
     event.preventDefault();
     const answer = seatsFrom(me.player.handle, others.value, Number(bots.value));
@@ -63,7 +82,13 @@ export function startScreen({ remote, go, me, failure = null, notice = "", signO
     me && whoami(me, { signOut }),
     el("h1", {}, name),
     el("p", { class: "lede" }, "A card game about Git. Ship commits to main; survive push --force."),
-    el(
+    el("div", { class: "start-actions" }, play, room),
+    error,
+    el("details", { class: "more" }, el("summary", {}, "more: set up a game by hand"), form()),
+  );
+
+  function form() {
+    return el(
       "form",
       { onsubmit: submit },
       el("label", { for: "bots" }, "bots"),
@@ -72,8 +97,7 @@ export function startScreen({ remote, go, me, failure = null, notice = "", signO
       others,
       el("label", { for: "length" }, "day length"),
       length,
-      error,
       button,
-    ),
-  );
+    );
+  }
 }
