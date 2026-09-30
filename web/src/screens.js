@@ -85,7 +85,7 @@ export function momentScreen(m, { view, you, step, next, skip }) {
       el(
         "button",
         { class: "primary", onclick: next, autofocus: true },
-        step.at === step.of ? "write your pack" : "continue",
+        step.at < step.of ? "continue" : view.released ? "the scores" : "write your pack",
       ),
       step.at < step.of && el("button", { onclick: skip }, "skip to your pack"),
     ),

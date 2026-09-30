@@ -8,8 +8,8 @@ const yours = {
     m.output.includes("(merge token taken)")
       ? "You merged into your unpushed work, so you took a merge token. A --rebase costs 2 ops and takes none."
       : "Your pointer is at the tip. A push now would be accepted, unless someone pushes first.",
-  conflict: () =>
-    "Someone's commit touched a file yours did. The strategy you declared settled it, since there's no one to ask in the middle of the night.",
+  conflict: (m) =>
+    `Someone's commit touched a file yours did, and ${m.command.match(/-X \w+/)[0]} settled it: there's no one to ask in the middle of the night. Declare -X on the pull to choose.`,
   rejected: (m) =>
     m.output[0].startsWith("CI failed")
       ? "Flaky CI rejected your push; the op is spent. Tomorrow's first push rolls again only if the incident repeats."

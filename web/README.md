@@ -27,20 +27,22 @@ npm run build          # the PWA in dist/
 
 ## Where things are
 
-| File                          | What it is                                                                                                       |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `src/main.js`, `src/route.js` | The entry and the addresses (`#/`, `#/g/<id>/<player>`)                                                          |
-| `src/api.js`                  | The remote's JSON API; errors carry the remote's own words                                                       |
-| `src/dom.js`                  | Building DOM without innerHTML, so other players' text is only ever text                                         |
-| `src/brand.js`                | The name, defined once (`// BRAND`, [branding.md](../docs/branding.md))                                          |
-| `src/cards.js`                | Cards as the printed deck draws them, colored from `rules/deck.json`                                             |
-| `src/table.js`                | The Table: `main`, pointers, every seat's public state                                                           |
-| `src/moments.js`              | The event-to-screen mapper: a day log becomes moments, one per op, and says which get a screen                   |
-| `src/copy.js`                 | Every coach line, keyed by moment: the one file a translation replaces (event-screens §6)                        |
-| `src/transcript.js`           | Moments as a terminal prints them: `ana@main $ git push` and Git's output                                        |
-| `src/pack.js`                 | The pack editor's model: ops in the remote's shapes, a pull before each push, and each op's cost now and at most |
-| `src/hub.js`                  | I-Hub: `main`, your branch and hand, the actions (greyed with the reason), and the pack as commands              |
-| `src/screens.js`              | The consequence screens: one moment at a time, what it moved, the coach line; continue or skip                   |
-| `src/catchup.js`              | What this reader hasn't seen: each closed day's big moments, then today's incident; remembered per device        |
-| `src/start.js`, `src/game.js` | I-Start, and a game as one player sees it                                                                        |
-| `public/sw.js`                | The service worker: the app's files offline, never the game                                                      |
+| File                          | What it is                                                                                                              |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `src/main.js`, `src/route.js` | The entry and the addresses (`#/`, `#/g/<id>/<player>`, `#/r/<id>/<day>`)                                               |
+| `src/api.js`                  | The remote's JSON API; errors carry the remote's own words                                                              |
+| `src/dom.js`                  | Building DOM without innerHTML, so other players' text is only ever text                                                |
+| `src/brand.js`                | The name, defined once (`// BRAND`, [branding.md](../docs/branding.md))                                                 |
+| `src/cards.js`                | Cards as the printed deck draws them, colored from `rules/deck.json`                                                    |
+| `src/table.js`                | The Table: `main`, pointers, every seat's public state                                                                  |
+| `src/moments.js`              | The event-to-screen mapper: a day log becomes moments, one per op, and says which get a screen                          |
+| `src/copy.js`                 | Every coach line, keyed by moment: the one file a translation replaces (event-screens §6)                               |
+| `src/transcript.js`           | Moments as a terminal prints them: `ana@main $ git push` and Git's output                                               |
+| `src/pack.js`                 | The pack editor's model: ops in the remote's shapes, a pull before each push, and each op's cost now and at most        |
+| `src/hub.js`                  | I-Hub: `main`, your branch and hand, the actions (greyed with the reason), and the pack as commands                     |
+| `src/screens.js`              | The consequence screens: one moment at a time, what it moved, the coach line; continue or skip                          |
+| `src/catchup.js`              | What this reader hasn't seen: each closed day's big moments, then today's incident; remembered per device               |
+| `src/replay.js`               | A replay: any game day by day, each day the view the remote folds from the log to that day's close                      |
+| `src/exit.test.js`            | The Phase 1 exit as a test: a game against the bot through the client's modules, then replayed (needs `GITGAME_REMOTE`) |
+| `src/start.js`, `src/game.js` | I-Start, and a game as one player sees it                                                                               |
+| `public/sw.js`                | The service worker: the app's files offline, never the game                                                             |

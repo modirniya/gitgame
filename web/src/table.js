@@ -58,7 +58,8 @@ function seat(view, id) {
     el("span", { class: "who" }, id),
     el("span", { class: "score" }, s.total),
     el("span", { class: "facts" }, p.left ? "left the company" : facts.join(" · ")),
-    !view.released && !p.left && el("span", { class: "sent" }, sent ? "pack sent" : "writing…"),
+    // only a day still open has packs in or out; a replay's days, and a finished game, have none
+    view.deadline && !p.left && el("span", { class: "sent" }, sent ? "pack sent" : "writing…"),
   );
 }
 

@@ -116,7 +116,14 @@ export function gameScreen({ remote, go, id, player }) {
   // Enter continues or sends, Escape backs out of whatever is open (event-screens §4), unless a field has the keyboard.
   function key(e) {
     if (!s.view || e.target.closest?.("input, select, textarea")) return;
-    if (s.queue.length || s.handoff) return;
+    if (s.handoff) return;
+    // on a moment's screen: Enter continues, Escape skips to the hub, as its buttons do
+    if (s.queue.length && s.at < s.queue.length) {
+      if (e.key === "Escape") caughtUp();
+      if (e.key === "Enter" && !e.target.closest?.("button"))
+        s.at + 1 < s.queue.length ? set({ at: s.at + 1 }) : caughtUp();
+      return;
+    }
     if (e.key === "Escape") set({ draft: { ...s.draft, picking: null }, tableOpen: false });
     // a focused button answers Enter itself
     if (e.key === "Enter" && !e.target.closest?.("button") && !s.view.released && !s.sending) send();
@@ -171,6 +178,12 @@ function scoreboard(view) {
         ),
       ),
     ),
-    el("p", {}, el("a", { href: "#/" }, "new game")),
+    el(
+      "p",
+      {},
+      el("a", { href: `#/r/${view.id}` }, "replay this game, day by day"),
+      " · ",
+      el("a", { href: "#/" }, "new game"),
+    ),
   );
 }
