@@ -53,7 +53,7 @@ defmodule GitGame.GitHub do
       user_url: "/user",
       redirect_uri: redirect_uri,
       code_verifier: true,
-      http_adapter: Keyword.get(github, :http_adapter, GitGame.GitHub.HTTP)
+      http_adapter: Keyword.get(github, :http_adapter, GitGame.HTTP)
     ]
   end
 end

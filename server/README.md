@@ -33,6 +33,9 @@ JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has
 | `PATCH /rooms/:code` | The host: `{"bots", "day_length"}` |
 | `POST /rooms/:code/start` | The host: starts the game, members' seats in the order they joined, then the bots → the room with its `game_id` |
 | `GET /rooms/:code/live` | Server-Sent Events: `refetch` on connecting and whenever the room changes; ends when its game starts |
+| `GET /push` | The VAPID public key a browser subscribes to reminders with (ADR-0006), or `404` if push is off |
+| `POST /push/subscriptions` | Signed in: keeps a browser's push subscription (`{"endpoint", "keys"}`); only browsers' own push services are accepted |
+| `DELETE /push/subscriptions` | Signed in: forgets it (`{"endpoint"}`) |
 | `GET /games/:id/live` | Server-Sent Events: `refetch` on connecting and whenever the log grows, nothing else; ends after the release |
 | `GET /health` | Whether the server and its database are up |
 
@@ -66,6 +69,7 @@ The root `Dockerfile` builds the whole game into one image: the web client, the 
 | `PHX_HOST` | the host people reach the game at, e.g. `gitgame.online` |
 | `PORT` | where it listens (default 4000) |
 | `GITGAME_GITHUB_CLIENT_ID`, `GITGAME_GITHUB_CLIENT_SECRET` | optional: linking GitHub |
+| `GITGAME_VAPID_PUBLIC_KEY`, `GITGAME_VAPID_PRIVATE_KEY`, `GITGAME_VAPID_SUBJECT` | optional: reminders by Web Push; `mix gitgame.vapid_keys` makes a pair, and changing it later unsubscribes every browser |
 
 Behind a proxy, the proxy must terminate TLS and pass on `x-forwarded-proto`. Without Docker, the same release is `MIX_ENV=prod mix release`, once `web/dist/` has been copied into `priv/static/` and `rules/` into `priv/rules/` (see the `Dockerfile`), then `bin/migrate` and `bin/server`. Where it runs is M11's decision; CI builds the image and plays a game against it on every pull request.
 

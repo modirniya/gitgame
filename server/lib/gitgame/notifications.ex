@@ -19,6 +19,9 @@ defmodule GitGame.Notifications do
   # the shortest day a reminder is worth sending in
   @worth 86_400
 
+  @doc "Whether days `seconds` long are worth a reminder."
+  def worth?(seconds), do: seconds >= @worth
+
   @doc "A day has opened, closing at `deadline` after `seconds`: schedules its reminders, if the day is long enough."
   def day_opened(game_id, day, deadline, seconds) when seconds >= @worth do
     Oban.insert!(Remind.new(%{game_id: game_id, day: day, kind: "pack_due"}))

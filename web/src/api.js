@@ -66,6 +66,20 @@ export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
         body: JSON.stringify({ hotseat, bots, day_length: dayLength, ...(seed != null && { seed }) }),
       }),
 
+    /** The key a browser subscribes to reminders with (ADR-0006), or null if this remote doesn't send them. */
+    pushKey: () =>
+      call(fetcher, "/push").then(
+        (r) => r.public_key,
+        (e) => {
+          if (e.status === 404) return null;
+          throw e;
+        },
+      ),
+
+    /** Hand a browser's push subscription to the remote. */
+    subscribePush: (subscription) =>
+      call(fetcher, "/push/subscriptions", { method: "POST", body: JSON.stringify(subscription) }),
+
     /** Your games (M9c): every game this device's player holds a seat in, those waiting on their pack first. */
     listGames: () => call(fetcher, "/games").then((r) => r.games),
 
