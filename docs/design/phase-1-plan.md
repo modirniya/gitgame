@@ -73,9 +73,11 @@ The charter's exit: *a full game can be played and replayed from its log.*
 - [x] `web/`: Vite and a PWA, no framework unless an ADR adds one. The terminal-style UI the charter asks for, on the screen spec in [event-screens.md](event-screens.md): the event-to-screen mapper, the hub, and the Table as a sheet on phones and a panel on wide screens.
 - [x] A pack editor that writes `pull` before `push` by default and shows each op's cost as the remote will charge it: now, and at most if another pack lands first (ADR-0003's random order).
 - [x] The live view through a push channel that only signals "refetch" (charter decision 9): Server-Sent Events, since a browser's `EventSource` reconnects by itself and a reconnect is one more refetch.
-- [ ] A replay view: any finished game, day by day, from its log.
+- [x] A replay view: any finished game, day by day, from its log (`#/r/<id>`, each day folded by the remote from the log up to its close).
 
 *Done when (Phase 1 exit):* a full game against the bot is played in the browser, and replayed from its log.
+
+*Met 2026-09-29.* CI's exit job plays a whole game against the bot through the client's own modules on a real server, then replays it day by day and checks each day against the game as it ended. By hand: a seven-day correspondence game against the bot, played in the browser at the mobile preset (ana 36, bot 28, no bugs reached production), then replayed.
 
 ## Phase 2: the beta
 

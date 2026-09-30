@@ -62,6 +62,8 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - Playing in the browser as the day happens (M7e): opening a game shows what happened since you last looked, one screen per big moment and then today's incident with your draws, whether that was a minute or a week ago. The client watches the game's `refetch` stream and fetches again when it says so. Hotseat: after your pack is sent, the device is passed to the next person who owes one, with your hand off the screen. A finished game ends on CI and the scoreboard.
 
+- Replays, and the Phase 1 exit (M7f): any game can be replayed day by day (`#/r/<id>`), each day the view the remote folds from the log up to that day's close, with that day's log as a terminal. CI's new exit job starts a real server and plays a whole game against the bot through the client's own modules, then replays it and checks every day against the game as it ended.
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.
 

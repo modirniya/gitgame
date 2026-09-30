@@ -41,6 +41,13 @@ export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
     fetchView: (id, player) =>
       call(fetcher, `/games/${encodeURIComponent(id)}${player ? `?player=${encodeURIComponent(player)}` : ""}`),
 
+    /** A replay: the view as it stood when `day` closed (0: as created), folded by the remote from the log. */
+    fetchDay: (id, day, player) =>
+      call(
+        fetcher,
+        `/games/${encodeURIComponent(id)}/days/${day}${player ? `?player=${encodeURIComponent(player)}` : ""}`,
+      ),
+
     /**
      * Watch a game: `signal()` runs whenever the remote says to refetch, which it does on connecting and after every
      * write; the stream closes itself after the release. The browser's EventSource reconnects on its own, and a

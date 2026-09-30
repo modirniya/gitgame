@@ -32,4 +32,9 @@ describe("the table", () => {
     expect(seats[1]).toContain("3 blame");
     expect(seats[1]).toContain("pack sent");
   });
+
+  it("shows whose pack is in only on a day still open, not in a replay or a finished game", () => {
+    const past = table(view({ deadline: null }));
+    expect(past.textContent).not.toMatch(/writing…|pack sent/);
+  });
 });

@@ -95,7 +95,12 @@ function row(view, draft, change, r, i) {
         el(
           "label",
           {},
-          el("input", { type: "checkbox", checked: !!op.rebase, onchange: (e) => set({ rebase: e.target.checked }) }),
+          el("input", {
+            type: "checkbox",
+            "aria-label": "--rebase",
+            checked: !!op.rebase,
+            onchange: (e) => set({ rebase: e.target.checked }),
+          }),
           " --rebase",
         ),
         el(

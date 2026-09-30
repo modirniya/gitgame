@@ -87,6 +87,9 @@ describe("the day log as moments", () => {
     expect(ms[3].coach).toMatch(/^Your commit is on main/);
     expect(ms[6].coach).toMatch(/^bot hit a conflict/);
 
+    // the reader's own conflict names the strategy that settled it, declared or the default
+    expect(moments(day, { you: "bot" }).moments[6].coach).toMatch(/and -X theirs settled it/);
+
     const asBot = moments(day, { you: "bot" }).moments;
     expect(asBot.find((m) => m.kind === "pushed").coach).toMatch(/^ana pushed, so the tip moved/);
   });
