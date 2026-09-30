@@ -14,6 +14,10 @@
   --ok: #5ec27a;
   --reject: #f0605d;
   --warn: #e9a83b;
+  /* the transcript is a terminal: dark in either theme */
+  --term: #0d0f12;
+  --term-ink: #d8d5ce;
+  --term-muted: #7d828c;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
   color-scheme: dark;
 }
@@ -310,4 +314,41 @@ ol.seats {
     transition: none !important;
     animation: none !important;
   }
+}
+
+/* ---------- the transcript ---------- */
+
+.transcript {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--term);
+  color: var(--term-ink);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+.transcript .lines {
+  margin-bottom: 6px;
+}
+.transcript .who {
+  color: var(--other);
+}
+.transcript .mine .who {
+  color: var(--you);
+}
+.transcript .out {
+  white-space: pre;
+}
+.transcript .note {
+  color: var(--term-muted);
+}
+.transcript .ok .out {
+  color: var(--ok);
+}
+.transcript .reject .out {
+  color: var(--reject);
+}
+.transcript .warn .out {
+  color: var(--warn);
 }
