@@ -82,6 +82,8 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - Beta telemetry (M12): the server marks what a game's log can't hold, a player's visit (once a day, with where it came from once notifications exist) and a replay opened, and `mix gitgame.beta_report` prints what ADR-0002 promises the beta records: games started, released and finished by people, when packs were sent against how their pushes went, failed pushes and what the player did next, absences and who left, replays, and players who came back or played again. People's seats only; nothing is shown to players.
 
+- Rate limits (M12c): new players per address, and games and rooms per player, are capped per hour, answered with `429` and `retry-after`, so a script can't mint players or games without end (ADR-0005).
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.
 

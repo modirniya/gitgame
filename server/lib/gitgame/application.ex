@@ -13,6 +13,8 @@ defmodule GitGame.Application do
       {Oban, Application.fetch_env!(:gitgame, Oban)},
       {DNSCluster, query: Application.get_env(:gitgame, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: GitGame.PubSub},
+      # the counters behind GitGameWeb.Plugs.RateLimit
+      GitGameWeb.Plugs.RateLimit.Table,
       # Start a worker by calling: GitGame.Worker.start_link(arg)
       # {GitGame.Worker, arg},
       # Start to serve requests, typically the last entry

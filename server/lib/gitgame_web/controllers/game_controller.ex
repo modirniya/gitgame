@@ -15,6 +15,7 @@ defmodule GitGameWeb.GameController do
   action_fallback GitGameWeb.FallbackController
 
   plug :signed_in when action in [:index, :create, :send_pack]
+  plug GitGameWeb.Plugs.RateLimit, [bucket: :games, by: :player] when action == :create
 
   # Your games (M9c): the ones waiting on your pack first.
   def index(conn, _params), do: json(conn, %{games: Games.list_for(conn.assigns.player.id)})

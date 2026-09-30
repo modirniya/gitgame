@@ -14,7 +14,7 @@ mix test           # creates and migrates the test database first
 
 ## The API
 
-JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has them. A device is signed in by an `HttpOnly` session cookie ([ADR-0005](../docs/adr/0005-sign-in-written-fresh.md)); writes from another site's pages are refused. You see and write a game only as a seat you hold; anyone else gets the table's view.
+JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has them. Making players (per address) and games and rooms (per player) is capped per hour (`config :gitgame, :rate_limits`); past the cap, `429` with `retry-after`. A device is signed in by an `HttpOnly` session cookie ([ADR-0005](../docs/adr/0005-sign-in-written-fresh.md)); writes from another site's pages are refused. You see and write a game only as a seat you hold; anyone else gets the table's view.
 
 | | |
 |---|---|

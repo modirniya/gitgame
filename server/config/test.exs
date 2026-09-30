@@ -35,6 +35,9 @@ config :phoenix,
 # Jobs run only when a test drains the queue: the tests are the clock.
 config :gitgame, Oban, testing: :manual
 
+# every test comes from 127.0.0.1; the limit itself is tested with its own numbers
+config :gitgame, rate_limits: %{players: 1_000_000, games: 1_000_000}
+
 # GitHub in the tests is a stand-in (test/support/github_stub.ex): no test ever reaches the real one.
 config :gitgame, :github,
   client_id: "test-client",
