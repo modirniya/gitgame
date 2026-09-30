@@ -7,6 +7,7 @@ Throwaway software that exists to answer a question. **Nothing in this directory
 | Prototype | Question it answers | Status |
 |---|---|---|
 | [play-vs-bot/](play-vs-bot/) | Can one person understand the game by playing it against a bot, with a guide and hints? | Done. Single-file desktop page with a real resolver, a scripted bot, a guided first game, hints, undo and a live score. `node smoke-test.js` auto-plays 800 games. |
+| [packs/](packs/) | In the online model, does sending your pack last dominate, and is paying for a rejected push punishing? (Playtest questions 1 and 2, by simulation, per ADR-0002.) | Done. Sending *first* dominates (61:39) under arrival order; batching at the deadline makes it fair but doubles conflicts. Keep paying for rejected pushes; a free pull before push removes nearly all of them. `node sim.js`. |
 | [mobile/](mobile/) | Does one-event-per-screen on a phone make the game clearer and more fun than the table view? | Built; awaiting a human playtest. Every screen of [the spec](../docs/design/event-screens.md) against the bot, with animations, the guided game and a playtest recorder. Provisional answer: clearer for the moments, too slow for the routine (about 105 screens a game). Findings, including three rule findings, in its README. |
 
 ## Rules for this directory
