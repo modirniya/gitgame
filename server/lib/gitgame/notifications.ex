@@ -46,8 +46,14 @@ defmodule GitGame.Notifications do
   def released(_game_id, _day, _seconds), do: :ok
 
   @doc false
-  # What the job does: works out who to tell, from the game as its log makes it now.
-  def send_now(game_id, day, kind) do
+  # What the job does: works out who to tell, from the game as its log makes it now. `channels` defaults to the
+  # configured ones; a test names its own.
+  def send_now(
+        game_id,
+        day,
+        kind,
+        channels \\ Application.get_env(:gitgame, :notification_channels, [])
+      ) do
     with {:ok, state} <- Games.load(game_id) do
       game = state.game
 
@@ -72,7 +78,7 @@ defmodule GitGame.Notifications do
         end
 
       for player <- Enum.uniq_by(recipients, & &1.id),
-          do: notify(player, message(kind, game_id, day, game))
+          do: notify(player, message(kind, game_id, day, game), channels)
 
       :ok
     else
@@ -102,9 +108,8 @@ defmodule GitGame.Notifications do
     }
   end
 
-  defp notify(player, message) do
-    for channel <- Application.get_env(:gitgame, :notification_channels, []),
-        channel.reaches?(player) do
+  defp notify(player, message, channels) do
+    for channel <- channels, channel.reaches?(player) do
       sent = %Sent{
         player_id: player.id,
         game_id: message.game_id,

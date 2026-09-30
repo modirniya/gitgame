@@ -22,6 +22,10 @@ defmodule GitGameWeb.Router do
     get "/games/:id/days/:day", GameController, :day
     post "/games/:id/packs", GameController, :send_pack
 
+    get "/email", EmailController, :show
+    put "/email", EmailController, :update
+    delete "/email", EmailController, :delete
+
     get "/push", PushController, :key
     post "/push/subscriptions", PushController, :subscribe
     delete "/push/subscriptions", PushController, :unsubscribe
@@ -44,6 +48,13 @@ defmodule GitGameWeb.Router do
 
     get "/github", AuthController, :github
     get "/github/callback", AuthController, :callback
+  end
+
+  # The links in emails: page navigations from a mail client, and its one-click unsubscribe POST (RFC 8058).
+  scope "/api/email", GitGameWeb do
+    get "/confirm", EmailController, :confirm
+    get "/unsubscribe", EmailController, :unsubscribe
+    post "/unsubscribe", EmailController, :unsubscribe
   end
 
   # The client's page, from the same origin as everything under /api (ADR-0005).

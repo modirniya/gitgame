@@ -33,6 +33,8 @@ JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has
 | `PATCH /rooms/:code` | The host: `{"bots", "day_length"}` |
 | `POST /rooms/:code/start` | The host: starts the game, members' seats in the order they joined, then the bots → the room with its `game_id` |
 | `GET /rooms/:code/live` | Server-Sent Events: `refetch` on connecting and whenever the room changes; ends when its game starts |
+| `GET /email`, `PUT /email`, `DELETE /email` | Signed in: the address given for reminders (`{"address", "digest"}`), set (a confirmation link is emailed; capped per hour), or removed |
+| `GET /email/confirm`, `GET` or `POST /email/unsubscribe` | The links in emails: page navigations that come back to the client (`?email=confirmed`), and a mail client's one-click unsubscribe (RFC 8058) |
 | `GET /push` | The VAPID public key a browser subscribes to reminders with (ADR-0006), or `404` if push is off |
 | `POST /push/subscriptions` | Signed in: keeps a browser's push subscription (`{"endpoint", "keys"}`); only browsers' own push services are accepted |
 | `DELETE /push/subscriptions` | Signed in: forgets it (`{"endpoint"}`) |
@@ -69,6 +71,7 @@ The root `Dockerfile` builds the whole game into one image: the web client, the 
 | `PHX_HOST` | the host people reach the game at, e.g. `gitgame.online` |
 | `PORT` | where it listens (default 4000) |
 | `GITGAME_GITHUB_CLIENT_ID`, `GITGAME_GITHUB_CLIENT_SECRET` | optional: linking GitHub |
+| `GITGAME_SMTP_RELAY`, `GITGAME_SMTP_PORT`, `GITGAME_SMTP_USERNAME`, `GITGAME_SMTP_PASSWORD` | optional: reminders by email and the daily digest, through any SMTP provider (TLS always); in development emails are written to the log |
 | `GITGAME_VAPID_PUBLIC_KEY`, `GITGAME_VAPID_PRIVATE_KEY`, `GITGAME_VAPID_SUBJECT` | optional: reminders by Web Push; `mix gitgame.vapid_keys` makes a pair, and changing it later unsubscribes every browser |
 
 Behind a proxy, the proxy must terminate TLS and pass on `x-forwarded-proto`. Without Docker, the same release is `MIX_ENV=prod mix release`, once `web/dist/` has been copied into `priv/static/` and `rules/` into `priv/rules/` (see the `Dockerfile`), then `bin/migrate` and `bin/server`. Where it runs is M11's decision; CI builds the image and plays a game against it on every pull request.

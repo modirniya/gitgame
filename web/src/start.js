@@ -5,6 +5,7 @@ import { el } from "./dom.js";
 import { name } from "./brand.js";
 import { whoami } from "./whoami.js";
 import { gamesList } from "./games.js";
+import { emailSettings } from "./email.js";
 
 const LENGTHS = [
   ["live", "live · 60s days"],
@@ -39,7 +40,9 @@ export function startScreen({ remote, go, me, failure = null, notice = "", signO
     { id: "length" },
     LENGTHS.map(([v, label]) => el("option", { value: v }, label)),
   );
-  const error = el("p", { class: "error", role: "alert" }, failure?.message ?? notice);
+  // a notice written as a terminal comment ("# ...") is news, not a failure
+  const note = !failure && notice.startsWith("#");
+  const error = el("p", { class: note ? "muted" : "error", role: "alert" }, failure?.message ?? notice);
   const button = el("button", { class: "primary", type: "submit", disabled: !me }, "git init");
 
   // Five-minute days: a first game against the bot shouldn't mark someone absent for reading the screens slowly.
@@ -94,6 +97,7 @@ export function startScreen({ remote, go, me, failure = null, notice = "", signO
     el("div", { class: "start-actions" }, play, room),
     error,
     yours,
+    me && emailSettings(remote),
     el("details", { class: "more" }, el("summary", {}, "more: set up a game by hand"), form()),
   );
 

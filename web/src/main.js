@@ -27,7 +27,14 @@ const signedIn = remote
 
 // Back from GitHub without a link (refused, or the trip broke): say so once. Either way, what the address said is
 // taken out of it, so a reload doesn't count or say it again.
-let notice = params.get("github") === "failed" ? "GitHub wasn't linked: the trip there and back didn't finish." : "";
+const NOTICES = {
+  "github=failed": "GitHub wasn't linked: the trip there and back didn't finish.",
+  "email=confirmed": "# your address is confirmed: reminders will come by email",
+  "email=unsubscribed": "# no more reminders by email",
+  "email=failed": "That link has expired or was already used. Set your address again for a new one.",
+};
+const key = ["github", "email"].map((k) => `${k}=${params.get(k)}`).find((k) => NOTICES[k]);
+let notice = key ? NOTICES[key] : "";
 if (notice || via) history.replaceState(null, "", location.pathname + location.hash);
 
 async function signOut() {
