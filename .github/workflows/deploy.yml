@@ -35,9 +35,8 @@ jobs:
             exit 1
           fi
           flyctl deploy --remote-only
-      # the Fly address, which answers whatever the domain's DNS says
       - name: The version is up
         run: |
-          for i in $(seq 1 30); do curl -sf https://gitgame-online.fly.dev/api/health && exit 0; sleep 10; done
-          echo "::error::gitgame-online.fly.dev/api/health didn't answer after the deploy"
+          for i in $(seq 1 30); do curl -sf https://gitgame.online/api/health && exit 0; sleep 10; done
+          echo "::error::gitgame.online/api/health didn't answer after the deploy"
           exit 1

@@ -2,7 +2,8 @@
 # origin (ADR-0005), behind Fly's proxy and its TLS for gitgame.online. Deployed by .github/workflows/deploy.yml on a
 # v* tag, never a branch. The steps to set it up are in server/README.md.
 #
-# The app is gitgame-online ("gitgame" was taken on Fly), in Los Angeles, beside the Postgres it shares (ADR-0008).
+# The app is gitgame-online ("gitgame" was taken on Fly), in Los Angeles, beside the Postgres it shares (ADR-0008),
+# served at gitgame.online (its certificate: `fly certs show gitgame.online`).
 app = "gitgame-online"
 primary_region = "lax"
 
@@ -14,8 +15,7 @@ primary_region = "lax"
   release_command = "/app/bin/migrate"
 
 [env]
-  # the Fly address until gitgame.online's DNS points here (`fly certs add gitgame.online`, then this line)
-  PHX_HOST = "gitgame-online.fly.dev"
+  PHX_HOST = "gitgame.online"
   PORT = "4000"
   # Fly's private network, where the database is reached (rps-db.flycast), is IPv6.
   ECTO_IPV6 = "true"
