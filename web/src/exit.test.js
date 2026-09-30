@@ -47,7 +47,7 @@ describe.skipIf(!base)("the Phase 1 exit", () => {
 
   it("a full game against the bot, played through the client and replayed from its log", async () => {
     // a new visitor: signed in anonymously, with no form (ADR-0005)
-    const me = await api.join();
+    const { player: me } = await api.join();
     const { id } = await api.createGame({ bots: ["bot"], dayLength: "correspondence", seed: 42 });
 
     let view = await api.fetchView(id);

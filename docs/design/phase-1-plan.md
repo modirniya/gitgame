@@ -100,9 +100,11 @@ GitHub OAuth, with anonymous play as the fallback and a nudge to link (charter d
   - `GET /api/auth/github` and its callback, through Assent's generic OAuth2 strategy: `state` and PKCE, no scopes, GitHub's token discarded.
   - A new GitHub account attaches to the current player. A known one signs the device in as its player, and moves the anonymous player's seats over where that doesn't seat one player twice in a game.
   - Tested against a stand-in for GitHub, never the real one.
-- [ ] **M8d · Who you are, in the client.** Your handle and avatar, "link GitHub" in the menu and as a nudge after your first finished game, and sign out.
+- [x] **M8d · Who you are, in the client.** Your handle and avatar, "link GitHub" in the menu and as a nudge after your first finished game, and sign out.
 
 *Done when:* a new visitor starts a game against the bot without signing in. They link GitHub after it ends, open the game from a second browser signed in with the same GitHub account, and find it there. And nobody can read or write a seat that isn't theirs, which a test checks through the API.
+
+*Met in tests 2026-09-30,* against a stand-in for GitHub: the exit test starts as a new visitor with no form; `AuthControllerTest` links a first device, then signs a second in as the same player and finds its game there; `GameControllerTest` checks that no one reads or writes a seat that isn't theirs. The same trip against real GitHub waits for an OAuth app's credentials (`server/README.md`).
 
 ### After M8
 

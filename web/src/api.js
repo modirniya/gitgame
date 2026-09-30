@@ -30,18 +30,21 @@ async function call(fetcher, path, init) {
 
 export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
   return {
-    /** Who this device is signed in as, or null. The session is an HttpOnly cookie the page never sees (ADR-0005). */
+    /**
+     * Who this device is signed in as, `{player, link_github}`, or null. The session is an HttpOnly cookie the page never
+     * sees (ADR-0005); `link_github` says whether this remote can link a GitHub account.
+     */
     me: () =>
-      call(fetcher, "/session").then(
-        (r) => r.player,
-        (e) => {
-          if (e.status === 401) return null;
-          throw e;
-        },
-      ),
+      call(fetcher, "/session").catch((e) => {
+        if (e.status === 401) return null;
+        throw e;
+      }),
 
     /** Sign this device in as a new anonymous player; a device already signed in gets its own player back. */
-    join: () => call(fetcher, "/players", { method: "POST" }).then((r) => r.player),
+    join: () => call(fetcher, "/players", { method: "POST" }),
+
+    /** Sign this device out. */
+    signOut: () => call(fetcher, "/session", { method: "DELETE" }),
 
     /**
      * A new game: you take the first seat, `hotseat` names the other people at this device, and the remote plays the

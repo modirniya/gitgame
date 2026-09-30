@@ -3,6 +3,7 @@
 // remote plays the bots.
 import { el } from "./dom.js";
 import { name } from "./brand.js";
+import { whoami } from "./whoami.js";
 
 const LENGTHS = [
   ["live", "live · 60s days"],
@@ -24,8 +25,8 @@ export function seatsFrom(you, others, bots) {
   return { seats, hotseat, bots: robots };
 }
 
-export function startScreen({ remote, go, me }) {
-  const who = el("p", { class: "muted" }, "$ whoami");
+/** `me` is this device's `{player, link_github}`, or null with `failure` when the remote couldn't be reached. */
+export function startScreen({ remote, go, me, failure = null, notice = "", signOut }) {
   const others = el("input", { id: "others", value: "", autocomplete: "off", spellcheck: "false" });
   const bots = el(
     "select",
@@ -37,22 +38,12 @@ export function startScreen({ remote, go, me }) {
     { id: "length" },
     LENGTHS.map(([v, label]) => el("option", { value: v }, label)),
   );
-  const error = el("p", { class: "error", role: "alert" });
-  const button = el("button", { class: "primary", type: "submit", disabled: true }, "git init");
-  let player = null;
-
-  me.then(
-    (p) => {
-      player = p;
-      who.textContent = `you are ${p.handle}`;
-      button.disabled = false;
-    },
-    (e) => (error.textContent = e.message),
-  );
+  const error = el("p", { class: "error", role: "alert" }, failure?.message ?? notice);
+  const button = el("button", { class: "primary", type: "submit", disabled: !me }, "git init");
 
   async function submit(event) {
     event.preventDefault();
-    const answer = seatsFrom(player.handle, others.value, Number(bots.value));
+    const answer = seatsFrom(me.player.handle, others.value, Number(bots.value));
     if (answer.error) return (error.textContent = answer.error);
 
     button.disabled = true;
@@ -69,9 +60,9 @@ export function startScreen({ remote, go, me }) {
   return el(
     "section",
     { class: "screen start" },
+    me && whoami(me, { signOut }),
     el("h1", {}, name),
     el("p", { class: "lede" }, "A card game about Git. Ship commits to main; survive push --force."),
-    who,
     el(
       "form",
       { onsubmit: submit },
