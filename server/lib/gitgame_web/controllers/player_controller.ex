@@ -4,18 +4,23 @@ defmodule GitGameWeb.PlayerController do
   device in one request. `GET /api/session` says who this device is; `DELETE /api/session` signs it out.
   """
   use GitGameWeb, :controller
-  alias GitGame.{GitHub, Players}
+  alias GitGame.{Beta, GitHub, Players}
   alias GitGame.Players.Player
   alias GitGameWeb.Plugs.Identity
 
   action_fallback GitGameWeb.FallbackController
 
-  # A device already signed in keeps its player: pressing "play" twice never makes two of you.
-  def create(%{assigns: %{player: %Player{} = player}} = conn, _params),
-    do: json(conn, me(player))
+  # A device asking who it is has just opened the game, and the beta counts that as a visit (M12); `via` says what
+  # brought it back, once notifications exist. A device already signed in keeps its player: pressing "play" twice
+  # never makes two of you.
+  def create(%{assigns: %{player: %Player{} = player}} = conn, params) do
+    Beta.visit(player, params["via"])
+    json(conn, me(player))
+  end
 
-  def create(conn, _params) do
+  def create(conn, params) do
     with {:ok, player} <- Players.create_anonymous() do
+      Beta.visit(player, params["via"])
       {token, expires_at} = Players.sign_in(player)
 
       conn
@@ -25,7 +30,10 @@ defmodule GitGameWeb.PlayerController do
     end
   end
 
-  def show(%{assigns: %{player: %Player{} = player}} = conn, _params), do: json(conn, me(player))
+  def show(%{assigns: %{player: %Player{} = player}} = conn, params) do
+    Beta.visit(player, params["via"])
+    json(conn, me(player))
+  end
 
   def show(_conn, _params), do: {:error, :unauthorized, "fatal: not signed in"}
 

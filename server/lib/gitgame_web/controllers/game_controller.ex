@@ -9,7 +9,7 @@ defmodule GitGameWeb.GameController do
   sees: the public view.
   """
   use GitGameWeb, :controller
-  alias GitGame.Games
+  alias GitGame.{Beta, Games}
   alias GitGame.Games.View
 
   action_fallback GitGameWeb.FallbackController
@@ -50,8 +50,10 @@ defmodule GitGameWeb.GameController do
   def day(conn, %{"id" => id, "day" => day} = params) do
     with {:ok, id} <- uuid(id),
          {:ok, day} <- day_number(day),
-         {:ok, state} <- Games.load(id, through_day: day),
-         do: view(conn, state, id, seat(params))
+         {:ok, state} <- Games.load(id, through_day: day) do
+      Beta.replay(conn.assigns.player, id)
+      view(conn, state, id, seat(params))
+    end
   end
 
   def send_pack(conn, %{"id" => id, "version" => version} = params) when is_integer(version) do
