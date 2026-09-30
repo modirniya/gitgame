@@ -169,9 +169,34 @@ The maintainer, playing the beta, found it poorer than the mobile prototype. The
 - [x] **M14c · Animations.** The motions of event-screens §4 on the moment screens: a push flying onto `main`, a rejection bouncing back, a pull sliding the pointer, a force-push dropping commits and a reflog raising them; none under `prefers-reduced-motion`.
 - [x] **M14d · The guided first game.** A first game against the bot that highlights one thing and says one sentence at each step, through a whole day: build a commit, push (and the pull written for you), send, and see what the day did.
 
-### After M9
+### M13 · Beta launch
 
-- **M13 · Beta launch:** strangers finish games; the Phase 0 exit (two people ask to play again unprompted) is checked here.
+Strangers play the beta, and it answers what the playtest would have ([ADR-0002](../adr/0002-beta-before-human-playtest.md)). The milestone is read through M12's report: every number below is one `mix gitgame.beta_report` prints. What is the maintainer's to decide is marked **open**. M13a needs no decision; the rest wait on the ones they name.
+
+- [ ] **M13a · The report reads production, and only the beta.**
+  - The release has no Mix, so the report gets a command of its own in the image. It prints what `mix gitgame.beta_report` prints, read where the data is (`fly ssh console -a gitgame-online -C /app/bin/beta_report`).
+  - It counts from a date (`--since`), so games played while the beta was built and tested don't count as strangers'. Those include the maintainer's own and the ones sessions played to check the deployment.
+  - **Open:** the launch date to count from, and whether the team's own games after it are left out too, and how.
+- [ ] **M13b · Ready for strangers.** Done once, before anyone is invited:
+  - **The optional features.** Each one launched is tried once on the deployment (`server/README.md`, "Turning on the optional features"), which closes the open item "Checks only a deployment can make". **Open:** which of GitHub sign-in, email and push are on at launch. Anonymous play needs none of them.
+  - **A restore.** `rps-db`'s snapshot is restored once into a scratch app, so a restore has been done before one is needed ([ADR-0008](../adr/0008-the-beta-shares-a-postgres.md)). The maintainer's to do: it creates an app.
+  - **Feedback.** Somewhere for players to say what broke or what they think, linked from the start screen. **Open:** where (GitHub issues, an address, a form).
+  - **Capacity.** One `shared-cpu-1x` machine with 512 MB, with live streams capped at 2,000 connections (`fly.toml`). New players are capped at 60 an hour from one address (`config :gitgame, :rate_limits`), which an office or a conference behind one address could reach. **Open:** whether that is enough for the invitations below; more costs money.
+- [ ] **M13c · Invite.** **Open:**
+  - who, how many and when, in waves or at once;
+  - whether the charter's launch (Hacker News, r/git, a badge for READMEs) is part of this milestone or waits for a first, smaller wave's numbers;
+  - whether the badge, which doesn't exist yet, is wanted now.
+- [ ] **M13d · Read it.** Every week while the beta runs, the report's output is recorded, dated, in [round-resolution.md](round-resolution.md) §7, beside the simulations' provisional answers to the playtest questions:
+  1. **When packs are sent** against how their pushes went: whether batching at the deadline ([ADR-0003](../adr/0003-batch-packs-at-the-deadline.md)) stays, or arrival order (one setting) is tried.
+  2. **What people do after a failed push:** whether paying for a rejected push stays.
+  3. **Absences and who left the company:** whether an absent player's pack is written by a bot instead of left empty.
+
+  **Open:** how many finished games are enough to decide each. Each decision is a rules change, and gets an ADR where it changes a locked line.
+
+*Done when:* the report, run on production over the beta (M13a), shows two things.
+
+- **The charter's Phase 2 exit.** Strangers have completed games, and at least half of the games people started reached a release with someone still in the company ("finished by people", the charter's "≥ 50% of started games reach a release"), over at least *N* started games. **Open:** *N*.
+- **The Phase 0 exit, which ADR-0002 moves to the beta.** At least two people ask to play again, unprompted. The report's nearest numbers are the players who came back on another day with no notification, and those who started a game after finishing one. **Open:** whether those count as asking, or only people who say so. The other half of that exit, the rules reaching v1.0, follows from M13d's decisions.
 
 ## Open items
 
