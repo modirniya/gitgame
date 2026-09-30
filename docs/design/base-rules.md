@@ -1,12 +1,12 @@
 # Base rules: the tabletop game
 
-*Status: Draft · Last verified: 2026-09-29*
+*Status: Draft · Last verified: 2026-09-29 · Rules v0.2*
 
 This is the game as designed for a table: 2–5 players, about 45 minutes, everyone works on the same repo, and only one player's name ends up on the release. The online game derives from it — [round-resolution.md](round-resolution.md) replaces turns with days and packs and pre-declares every choice that would need a live answer. Where the two disagree, the online doc wins for the online game, and this doc wins for the box.
 
 ## Components
 
-The exact deck lives in [`rules/deck.json`](../../rules/deck.json); the printable version is built from it into [`tabletop/print-and-play.pdf`](../../tabletop/print-and-play.pdf). In summary: 60 commit cards (5 files × 12 sizes, 12 of them bugs), 30 command cards, 8 incidents, 6 secret tickets, 4 optional roles, one initial-commit card, and merge / grudge / sin tokens.
+The exact deck lives in [`rules/deck.json`](../../rules/deck.json); the printable version is built from it into [`tabletop/print-and-play.pdf`](../../tabletop/print-and-play.pdf). In summary: 60 commit cards (5 files × 12 sizes, 12 of them bugs), 33 command cards, 8 incidents, 6 secret tickets, 4 optional roles, one initial-commit card, and merge / grudge / sin tokens.
 
 **Setup:** the initial commit starts `main`; every pointer starts on it. Commit and command cards are shuffled into one draw deck; each player gets 5 cards and one face-down secret ticket. The release comes at 10 commits with 2 players, 12 with 3, 15 with 4 or 5.
 
@@ -45,9 +45,11 @@ Draw 2 cards at the start of your turn ("new tickets came in"), then spend 3 ops
 | `git add` | 1 | Move any number of cards from hand to staging, face down |
 | `git commit` | 1 | All staged cards become **one commit** on your local branch |
 | `git push` | 1 | Move your commits to remote `main`. **Rejected** if your pointer isn't at the tip |
-| `git pull` | 1 | Catch up to the tip and take a merge token (messy history, −1 at the end) |
+| `git pull` | 1 | Catch up to the tip. If you had unpushed commits, take a merge token (messy history, −1 at the end). With nothing of yours to merge it is a fast-forward in Git: no merge commit, no token |
 | `git pull --rebase` | 2 | Catch up with clean history, no penalty |
 | Play a command | 1 | See below |
+
+**Hand limit:** at the end of your turn, if you hold more than 10 cards, discard down to 10.
 
 **The commit-size gamble:** big commits score more lines at once, but if one bug is inside, `git blame` penalises the whole commit. Small atomic commits are safer but cost more ops. Real engineering advice becomes a game decision.
 

@@ -1,6 +1,6 @@
 # ADR-0000: Project charter
 
-*Status: Accepted; §5 Phase 0 amended by [ADR-0002](0002-beta-before-human-playtest.md) · Date: 2026-09-29 · NeuEra LLC*
+*Status: Accepted; §5 Phase 0 amended by [ADR-0002](0002-beta-before-human-playtest.md); decision 11 superseded by [ADR-0003](0003-batch-packs-at-the-deadline.md) · Date: 2026-09-29 · NeuEra LLC*
 
 This document is the single point of reference for what Git Game is, what we have decided, what we deliberately walked away from, and in what order we will build it. Changes to anything under "Locked" require a new ADR that supersedes the relevant line.
 

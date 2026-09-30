@@ -41,7 +41,8 @@ function buildDeck(s) {
       d.push({ id: 'k' + n++, file, lines: ln, bug });
     }
   }
-  for (const [cmd, count] of [['git blame', 5], ['revert', 4], ['push --force', 3], ['reflog', 3]]) for (let i = 0; i < count; i++) d.push({ id: 'k' + n++, cmd });
+  const r = s.rules;
+  for (const [cmd, count] of [['git blame', 5], ['revert', 4], ['push --force', r.forceCards ?? 3], ['reflog', r.reflogCards ?? 3]]) for (let i = 0; i < count; i++) d.push({ id: 'k' + n++, cmd });
   for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(rand(s) * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
   return d;
 }
@@ -62,7 +63,14 @@ export function startDay(s) {
   s.incident = INCIDENTS[Math.floor(rand(s) * INCIDENTS.length)];
   for (const id of s.ids) { draw(s, id); draw(s, id); }
 }
-export function endDay(s) { if (!s.over && s.day >= DAYS) release(s, null); }
+export function endDay(s) {
+  // rules v0.2: discard down to the hand limit at the end of the day, lowest-value commit cards first
+  if (s.rules.handLimit) for (const id of s.ids) {
+    const p = s.players[id], value = c => c.cmd ? 100 : c.bug ? c.lines - 50 : c.lines;
+    p.hand.sort((a, z) => value(z) - value(a)); p.hand.length = Math.min(p.hand.length, s.rules.handLimit);
+  }
+  if (!s.over && s.day >= DAYS) release(s, null);
+}
 
 // ---------- one op at processing time: { cost, run } where run() returns the outcome ----------
 const take = (p, n) => p.hand.splice(p.hand.findIndex(c => c.cmd === n), 1)[0];

@@ -231,12 +231,13 @@ def reference_page(c):
         f"1. Draw {s['draw_per_turn']} cards (new tickets came in).",
         f"2. Spend {s['ops_per_turn']} ops, in any order.",
         "3. Say a real commit message out loud when you commit. \"fix\", \"wip\" or \"asdf\" draws a bug.",
+        f"4. Holding more than {s['hand_limit']} cards? Discard down to {s['hand_limit']}.",
     ])
     y1 = section(left, y1, "Ops", [
         "git add (1) — move any number of hand cards to your staging area, face down.",
         "git commit (1) — all staged cards become ONE commit on your local branch.",
         "git push (1) — move your local commits onto the end of main. Rejected if your pointer is not at the tip. The op is still spent.",
-        "git pull (1) — move your pointer to the tip. Take a merge token (-1 at release).",
+        "git pull (1) — move your pointer to the tip. If you had unpushed commits, take a merge token (-1 at release); with none it is a fast-forward: no token.",
         "git pull --rebase (2) — same, no merge token.",
         "play a command card (its printed cost).",
     ])

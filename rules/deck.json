@@ -1,6 +1,6 @@
 {
   "brand": { "name": "Git Game", "marker": "BRAND", "note": "Working name; see docs/branding.md before changing." },
-  "version": "0.1",
+  "version": "0.2",
   "notes": [
     "Source of truth for the tabletop deck. docs/design/base-rules.md describes the rules; this file describes the physical cards.",
     "tabletop/build.py turns this file into the print-and-play PDF. Change this file, rebuild, commit both.",
@@ -31,9 +31,9 @@
       "text": "Point at a range of main. If any bug is in it, its owner must say which half it is in. Halve until found, then flip it: -3 to its author." },
     { "name": "cherry-pick", "count": 3, "cost": 1,
       "text": "Copy one commit from main onto your local branch (use a spare card as the copy). The original author stays the author, including for blame." },
-    { "name": "push --force", "count": 3, "cost": 1,
+    { "name": "push --force", "count": 5, "cost": 1,
       "text": "Overwrite main with your local branch. Every commit after your pointer is erased and goes back to its owner's local branch. Take a Sin token." },
-    { "name": "reflog", "count": 3, "cost": 0,
+    { "name": "reflog", "count": 4, "cost": 0,
       "text": "Play at any time, even on someone else's turn, right after a push --force: the erased commits come back on top of main. Free to play." },
     { "name": "revert", "count": 4, "cost": 1,
       "text": "Choose a face-up bug on main. Put this card on top of it as a revert: it no longer counts as a bug at release. +1 for you." },
@@ -81,6 +81,7 @@
     "starting_hand": 5,
     "draw_per_turn": 2,
     "ops_per_turn": 3,
+    "hand_limit": 10,
     "release_at_commits": { "2": 10, "3": 12, "4": 15, "5": 15 },
     "production_down_at_bugs": 4
   },
