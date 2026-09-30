@@ -68,6 +68,8 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - Players and sessions (M8a): `POST /api/players` makes an anonymous player with a generated handle (`quiet-otter-42`) and signs the device in, with no form and no account. A session is a random token in an `HttpOnly`, `SameSite=Lax` cookie, stored only as its hash, extended while in use and revocable (`DELETE /api/session`). Writes from another site's pages are refused.
 
+- Seats belong to players (M8b): a game is started by a signed-in player, who takes the first seat under their handle and holds the seats of anyone else at their device (hotseat). The API shows a game only from a seat you hold, and takes packs only for one; everyone else gets the table's view, and `?player=` is gone. The client signs a new device in anonymously on first open, with no form.
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.
 

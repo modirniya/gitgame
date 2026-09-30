@@ -1,5 +1,6 @@
-// I-Start (event-screens §3): a new game in a few seconds (charter priority 2). Hotseat until sign-in exists (M8):
-// the people at this device take the human seats and pass it between them; the remote plays the bots.
+// I-Start (event-screens §3): a new game in a few seconds (charter priority 2). You take the first seat, as the
+// player this device is signed in as (ADR-0005); anyone else at the device can take a seat too (hotseat), and the
+// remote plays the bots.
 import { el } from "./dom.js";
 import { name } from "./brand.js";
 
@@ -9,23 +10,23 @@ const LENGTHS = [
   ["correspondence", "correspondence · 24h days"],
 ];
 
-/** The seats a form's answers make: people first, in the order typed, then `bots` bots. */
-export function seatsFrom(people, bots) {
-  const humans = people
+/** The seats a form's answers make: you, then the others at this device in the order typed, then `bots` bots. */
+export function seatsFrom(you, others, bots) {
+  const hotseat = others
     .split(",")
     .map((p) => p.trim())
     .filter(Boolean);
   const robots = Array.from({ length: bots }, (_, i) => (bots === 1 ? "bot" : `bot-${i + 1}`));
-  const seats = [...humans, ...robots];
+  const seats = [you, ...hotseat, ...robots];
 
-  if (humans.length === 0) return { error: "fatal: a game needs at least one person" };
   if (seats.length < 2 || seats.length > 5) return { error: "fatal: a game has 2 to 5 seats" };
   if (new Set(seats).size !== seats.length) return { error: "fatal: every seat needs its own name" };
-  return { seats, humans, bots: robots };
+  return { seats, hotseat, bots: robots };
 }
 
-export function startScreen({ remote, go }) {
-  const people = el("input", { id: "people", value: "you", autocomplete: "off", spellcheck: "false" });
+export function startScreen({ remote, go, me }) {
+  const who = el("p", { class: "muted" }, "$ whoami");
+  const others = el("input", { id: "others", value: "", autocomplete: "off", spellcheck: "false" });
   const bots = el(
     "select",
     { id: "bots" },
@@ -37,22 +38,28 @@ export function startScreen({ remote, go }) {
     LENGTHS.map(([v, label]) => el("option", { value: v }, label)),
   );
   const error = el("p", { class: "error", role: "alert" });
-  const button = el("button", { class: "primary", type: "submit" }, "git init");
+  const button = el("button", { class: "primary", type: "submit", disabled: true }, "git init");
+  let player = null;
+
+  me.then(
+    (p) => {
+      player = p;
+      who.textContent = `you are ${p.handle}`;
+      button.disabled = false;
+    },
+    (e) => (error.textContent = e.message),
+  );
 
   async function submit(event) {
     event.preventDefault();
-    const answer = seatsFrom(people.value, Number(bots.value));
+    const answer = seatsFrom(player.handle, others.value, Number(bots.value));
     if (answer.error) return (error.textContent = answer.error);
 
     button.disabled = true;
     error.textContent = "";
     try {
-      const view = await remote.createGame({
-        seats: answer.seats,
-        bots: answer.bots,
-        dayLength: length.value,
-      });
-      go(`/g/${view.id}/${encodeURIComponent(answer.humans[0])}`);
+      const view = await remote.createGame({ hotseat: answer.hotseat, bots: answer.bots, dayLength: length.value });
+      go(`/g/${view.id}`);
     } catch (e) {
       error.textContent = e.message;
       button.disabled = false;
@@ -64,13 +71,14 @@ export function startScreen({ remote, go }) {
     { class: "screen start" },
     el("h1", {}, name),
     el("p", { class: "lede" }, "A card game about Git. Ship commits to main; survive push --force."),
+    who,
     el(
       "form",
       { onsubmit: submit },
-      el("label", { for: "people" }, "people at this device, comma-separated"),
-      people,
       el("label", { for: "bots" }, "bots"),
       bots,
+      el("label", { for: "others" }, "others at this device (hotseat), comma-separated"),
+      others,
       el("label", { for: "length" }, "day length"),
       length,
       error,

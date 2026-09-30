@@ -28,6 +28,7 @@ export function view(over = {}) {
       commands: { blame: 1, force: 1, reflog: 0, revert: 1 },
     },
     bots: ["bot"],
+    yours: ["ana"],
     deadline: "2026-09-29T20:00:00Z",
     incident: { id: "flaky_ci", name: "Flaky CI", text: "The next push rolls a die." },
     released: null,

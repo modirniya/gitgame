@@ -33,6 +33,23 @@ defmodule GitGame.GamesTest do
     assert Repo.get!(Record, id).rules == Rules.read_maps!()
   end
 
+  test "a bot sits in a seat of its own, and only a person's seat is held by a player" do
+    {:ok, player} = GitGame.Players.create_anonymous()
+
+    assert {:error, :invalid, "fatal: every bot must have a seat"} =
+             Games.create(["ana", "raj"], bots: ["hal"])
+
+    assert {:error, :invalid, "fatal: only a person's seat is held"} =
+             Games.create(["ana", "bot"], bots: ["bot"], holders: %{"bot" => player.id})
+
+    {:ok, %{id: id}} =
+      Games.create(["ana", "raj", "bot"], bots: ["bot"], holders: %{"raj" => player.id})
+
+    assert Games.seats_held(id, player.id) == {:ok, ["raj"]}
+    assert Games.seats_held(id, nil) == {:ok, []}
+    assert Games.seats_held(Ecto.UUID.generate(), player.id) == {:error, :not_found}
+  end
+
   test "a game that can't exist isn't created" do
     assert {:error, :invalid, "a game needs 2 to 5 different players" <> _} =
              Games.create(["ana"])

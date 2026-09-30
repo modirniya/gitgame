@@ -13,14 +13,15 @@ import { catchup, recall, remember } from "./catchup.js";
 
 const fresh = () => ({ ops: [], selected: [], picking: null });
 
-// Hotseat (until sign-in, M8): the people at this device who still owe today's pack.
+// Hotseat: the other seats this device holds (ADR-0005) whose people still owe today's pack.
 const waiting = (view) =>
-  view.seats.filter(
-    (id) =>
-      id !== view.you.player && !view.bots.includes(id) && !view.players[id].left && !view.sent_today.includes(id),
+  (view.yours ?? []).filter(
+    (seat) => seat !== view.you.player && !view.players[seat].left && !view.sent_today.includes(seat),
   );
 
-export function gameScreen({ remote, go, id, player }) {
+// `seat` is the one the address names, in a hotseat game; otherwise the remote shows this device's only seat, or the
+// table's view if it holds none.
+export function gameScreen({ remote, go, id, seat }) {
   const node = el("section", { class: "screen game" });
   let alive = true;
   let s = { view: null, draft: fresh(), sending: false, error: "", tableOpen: false, queue: [], at: 0, handoff: null };
@@ -33,9 +34,10 @@ export function gameScreen({ remote, go, id, player }) {
 
   async function fetchView(error = "") {
     try {
-      const view = await remote.fetchView(id, player);
+      const view = await remote.fetchView(id, seat);
       const moved = !s.view || view.version !== s.view.version;
-      const next = catchup(view, recall(id, player));
+      // the table's view has no one to catch up: it shows what happened, not what you missed
+      const next = view.you ? catchup(view, recall(id, view.you.player)) : { queue: [], memory: null };
       pending = next.memory;
       set({ view, error, draft: moved ? fresh() : s.draft, queue: next.queue, at: Math.min(s.at, next.queue.length) });
     } catch (e) {
@@ -46,14 +48,14 @@ export function gameScreen({ remote, go, id, player }) {
 
   // Done with the moments: remember how far this reader has read, and go to the hub.
   function caughtUp() {
-    remember(id, player, pending);
+    if (pending) remember(id, s.view.you.player, pending);
     set({ queue: [], at: 0 });
   }
 
   async function send() {
     set({ sending: true, error: "" });
     try {
-      await remote.sendPack(id, { player, version: s.view.version, ops: s.draft.ops });
+      await remote.sendPack(id, { seat: s.view.you.player, version: s.view.version, ops: s.draft.ops });
       const version = s.view.version;
       await fetchView();
       set({ sending: false, handoff: s.view.version === version ? (waiting(s.view)[0] ?? null) : null });
@@ -69,19 +71,23 @@ export function gameScreen({ remote, go, id, player }) {
     if (s.queue.length && s.at < s.queue.length) {
       const next = () => (s.at + 1 < s.queue.length ? set({ at: s.at + 1 }) : caughtUp());
       const step = { at: s.at + 1, of: s.queue.length };
-      return mount(node, momentScreen(s.queue[s.at], { view: s.view, you: player, step, next, skip: caughtUp }));
+      const you = s.view.you.player;
+      return mount(node, momentScreen(s.queue[s.at], { view: s.view, you, step, next, skip: caughtUp }));
     }
     if (s.handoff) return mount(node, handoff(s.handoff));
 
     const view = s.view;
+    const you = view.you?.player ?? null;
     const last = view.days.at(-1);
-    const log = last && moments(last.log, { you: player }).moments;
+    const log = last && moments(last.log, { you }).moments;
 
     mount(
       node,
       view.released
         ? scoreboard(view)
-        : hub({ view, draft: s.draft, change: (draft) => set({ draft }), send, sending: s.sending, error: s.error }),
+        : you
+          ? hub({ view, draft: s.draft, change: (draft) => set({ draft }), send, sending: s.sending, error: s.error })
+          : el("p", { class: "muted" }, "# you hold no seat in this game: this is what the table sees"),
       el(
         "button",
         {
@@ -96,7 +102,7 @@ export function gameScreen({ remote, go, id, player }) {
         { class: `table-panel${s.tableOpen ? " open" : ""}` },
         table(view),
         log && el("h2", {}, `$ git log  # day ${last.day}`),
-        log && transcript(log, player, { label: `day ${last.day}` }),
+        log && transcript(log, you, { label: `day ${last.day}` }),
       ),
     );
   }
@@ -109,7 +115,7 @@ export function gameScreen({ remote, go, id, player }) {
       el("h1", {}, "pack sent"),
       el("p", {}, `Pass the device to ${next}. Your hand is hidden until you come back to it.`),
       el("button", { class: "primary", onclick: () => go(`/g/${id}/${encodeURIComponent(next)}`) }, `I'm ${next}`),
-      el("button", { onclick: () => set({ handoff: null }) }, `back to ${player}'s pack`),
+      el("button", { onclick: () => set({ handoff: null }) }, `back to ${s.view.you.player}'s pack`),
     );
   }
 
@@ -126,7 +132,7 @@ export function gameScreen({ remote, go, id, player }) {
     }
     if (e.key === "Escape") set({ draft: { ...s.draft, picking: null }, tableOpen: false });
     // a focused button answers Enter itself
-    if (e.key === "Enter" && !e.target.closest?.("button") && !s.view.released && !s.sending) send();
+    if (e.key === "Enter" && !e.target.closest?.("button") && s.view.you && !s.view.released && !s.sending) send();
   }
 
   function fail(e) {
