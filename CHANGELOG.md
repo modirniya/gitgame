@@ -7,6 +7,10 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-30
+
+Fixes found playing the live site as a newcomer would.
+
 ### Fixed
 - "Remind me when my pack is due" showed only while today's pack was in, so it never appeared when yours was the last pack in (in every 24-hour game against the bot): the day closed on your send. It now shows once you've sent a pack in the game, as ADR-0006 says.
 - Typing a commit message and then tapping "send pack" didn't send the pack: leaving the field redrew the hub under the tap. The message is now kept as it is typed.
@@ -118,5 +122,6 @@ The first version on the hosted service: the beta ADR-0002 makes the playtest, l
 - Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.
 
-[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/modirniya/gitgame/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/modirniya/gitgame/releases/tag/v0.1.0
