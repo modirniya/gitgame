@@ -44,5 +44,6 @@ npm run build          # the PWA in dist/
 | `src/catchup.js`              | What this reader hasn't seen: each closed day's big moments, then today's incident; remembered per device               |
 | `src/replay.js`               | A replay: any game day by day, each day the view the remote folds from the log to that day's close                      |
 | `src/exit.test.js`            | The Phase 1 exit as a test: a game against the bot through the client's modules, then replayed (needs `GITGAME_REMOTE`) |
+| `src/whoami.js`               | Who this device is: handle and avatar, "link GitHub", sign out, and the nudge after a finished game                     |
 | `src/start.js`, `src/game.js` | I-Start, and a game as one player sees it                                                                               |
 | `public/sw.js`                | The service worker: the app's files offline, never the game                                                             |

@@ -10,6 +10,7 @@ import { moments } from "./moments.js";
 import { transcript } from "./transcript.js";
 import { momentScreen } from "./screens.js";
 import { catchup, recall, remember } from "./catchup.js";
+import { nudge } from "./whoami.js";
 
 const fresh = () => ({ ops: [], selected: [], picking: null });
 
@@ -21,7 +22,7 @@ const waiting = (view) =>
 
 // `seat` is the one the address names, in a hotseat game; otherwise the remote shows this device's only seat, or the
 // table's view if it holds none.
-export function gameScreen({ remote, go, id, seat }) {
+export function gameScreen({ remote, go, id, seat, me = null }) {
   const node = el("section", { class: "screen game" });
   let alive = true;
   let s = { view: null, draft: fresh(), sending: false, error: "", tableOpen: false, queue: [], at: 0, handoff: null };
@@ -84,7 +85,7 @@ export function gameScreen({ remote, go, id, seat }) {
     mount(
       node,
       view.released
-        ? scoreboard(view)
+        ? scoreboard(view, me)
         : you
           ? hub({ view, draft: s.draft, change: (draft) => set({ draft }), send, sending: s.sending, error: s.error })
           : el("p", { class: "muted" }, "# you hold no seat in this game: this is what the table sees"),
@@ -155,7 +156,7 @@ export function gameScreen({ remote, go, id, seat }) {
 }
 
 // O-Scoreboard: the totals, and the points each was made of (rules/deck.json scoring).
-function scoreboard(view) {
+function scoreboard(view, me) {
   const rows = [...view.seats].sort((a, b) => view.scores[b].total - view.scores[a].total);
   const parts = (s) =>
     ["lines", "fixes", "blame", "sins", "grudges", "merge"]
@@ -184,6 +185,7 @@ function scoreboard(view) {
         ),
       ),
     ),
+    me && nudge(me),
     el(
       "p",
       {},

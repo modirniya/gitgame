@@ -26,14 +26,18 @@ describe("the remote", () => {
     expect(calls.map((c) => c.url)).toEqual(["/api/games/g1?seat=ana%20%26%20raj", "/api/games/g1"]);
   });
 
-  it("knows who this device is, or that it is nobody yet, and signs it in", async () => {
-    const me = { id: "p1", handle: "quiet-otter-42", github: null };
-    expect(await fake(200, { player: me }).api.me()).toEqual(me);
+  it("knows who this device is, or that it is nobody yet, signs it in, and out", async () => {
+    const me = { player: { id: "p1", handle: "quiet-otter-42", github: null }, link_github: false };
+    expect(await fake(200, me).api.me()).toEqual(me);
     expect(await fake(401, { error: "fatal: not signed in" }).api.me()).toBeNull();
 
-    const { calls, api } = fake(201, { player: me });
+    const { calls, api } = fake(201, me);
     expect(await api.join()).toEqual(me);
-    expect(calls[0]).toMatchObject({ url: "/api/players", init: { method: "POST" } });
+    await api.signOut();
+    expect(calls.map((c) => [c.url, c.init.method])).toEqual([
+      ["/api/players", "POST"],
+      ["/api/session", "DELETE"],
+    ]);
   });
 
   it("marks a rejected pack as stale, in the remote's own words", async () => {

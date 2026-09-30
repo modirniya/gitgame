@@ -602,3 +602,33 @@ ol.pack {
   margin-bottom: 12px;
   text-align: center;
 }
+
+/* ---------- who you are ---------- */
+
+.whoami {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+}
+.whoami .handle {
+  font-weight: 700;
+}
+.avatar {
+  border-radius: 50%;
+}
+button.link {
+  min-height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--you);
+  text-decoration: underline;
+}
+.nudge {
+  padding: 10px 12px;
+  border-left: 3px solid var(--warn);
+  background: var(--raised);
+}

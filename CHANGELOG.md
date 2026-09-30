@@ -72,6 +72,8 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - Linking GitHub (M8c): `GET /api/auth/github` runs GitHub's web flow with `state` and PKCE, asking for no scopes; GitHub's token is used once to read the public profile and dropped. A new account is linked to the device's anonymous player, games and all; the same account on another device signs it in as the same player and brings over that device's anonymous seats. Off unless `GITGAME_GITHUB_CLIENT_ID` and `GITGAME_GITHUB_CLIENT_SECRET` are set.
 
+- Who you are, in the client (M8d): the start screen shows your handle, and once GitHub is linked, your login and avatar and a way to sign out. An anonymous player gets "link GitHub" instead, and a nudge on the scoreboard after a game: their games live in this browser alone. A GitHub trip that didn't finish says so once.
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.
 
