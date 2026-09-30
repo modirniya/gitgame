@@ -91,6 +91,10 @@ if config_env() == :prod do
 
   config :gitgame, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
+  # On Fly.io (ADR-0007), its proxy says who asked in `fly-client-ip`, a header only it sets; anywhere else, no header
+  # is trusted for that.
+  if System.get_env("FLY_APP_NAME"), do: config(:gitgame, :client_ip_header, "fly-client-ip")
+
   config :gitgame, GitGameWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
     http: [

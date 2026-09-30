@@ -1,0 +1,42 @@
+# Deploys the hosted service (ADR-0007) from a version tag, never a branch (docs/workflow.md: releases). The image is
+# the root Dockerfile, which CI has already built and played a game against on the tagged commit's pull request; Fly
+# builds it again from the tag and runs bin/migrate before switching (fly.toml).
+#
+# Needs the repository secret FLY_API_TOKEN: a deploy token for the app (`fly tokens create deploy`).
+name: deploy
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+# one deploy at a time, and never one cancelled half way
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy to Fly.io
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+      - uses: superfly/flyctl-actions/setup-flyctl@1.6
+      - name: Deploy the tagged version
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          if [ -z "$FLY_API_TOKEN" ]; then
+            echo "::error::FLY_API_TOKEN isn't set: see server/README.md, 'Deploying'"
+            exit 1
+          fi
+          flyctl deploy --remote-only
+      - name: The version is up
+        run: |
+          for i in $(seq 1 30); do curl -sf https://gitgame.online/api/health && exit 0; sleep 10; done
+          echo "::error::gitgame.online/api/health didn't answer after the deploy"
+          exit 1

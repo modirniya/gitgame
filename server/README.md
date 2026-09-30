@@ -76,6 +76,24 @@ The root `Dockerfile` builds the whole game into one image: the web client, the 
 
 Behind a proxy, the proxy must terminate TLS and pass on `x-forwarded-proto`. Without Docker, the same release is `MIX_ENV=prod mix release`, once `web/dist/` has been copied into `priv/static/` and `rules/` into `priv/rules/` (see the `Dockerfile`), then `bin/migrate` and `bin/server`. Where it runs is M11's decision; CI builds the image and plays a game against it on every pull request.
 
+## Deploying (Fly.io)
+
+The beta runs on Fly.io ([ADR-0007](../docs/adr/0007-where-the-beta-runs.md)), configured by the root `fly.toml` and deployed by `.github/workflows/deploy.yml` when a `v*` tag is pushed ([workflow.md](../docs/workflow.md), releases). Setting it up once needs the maintainer's Fly account:
+
+1. **The app.** `fly apps create gitgame` (or another free name, then change `app` in `fly.toml`). Check `primary_region` in `fly.toml` is near the first players (`fly platform regions`).
+2. **The database.** Create a Fly Managed Postgres cluster and attach it to the app, which sets `DATABASE_URL` as a secret. The commands are in Fly's own documentation, since its Postgres CLI changes; confirm the backup terms while there (ADR-0007).
+3. **The secrets.** In the same `fly secrets set` call:
+   - `SECRET_KEY_BASE=$(mix phx.gen.secret)`;
+   - the VAPID pair from `mix gitgame.vapid_keys`, with `GITGAME_VAPID_SUBJECT=mailto:` and a real address;
+   - `GITGAME_SMTP_*` from the email provider;
+   - `GITGAME_GITHUB_CLIENT_ID` and `GITGAME_GITHUB_CLIENT_SECRET` from a GitHub OAuth app whose callback is `https://gitgame.online/api/auth/github/callback`.
+   Each is optional except the first two; without one, that feature is off.
+4. **The domain.** `fly certs add gitgame.online`, and the DNS records it asks for.
+5. **Deploys.** `fly tokens create deploy`, stored in the repository as the secret `FLY_API_TOKEN` (`gh secret set FLY_API_TOKEN`).
+6. **A release.** Follow [workflow.md](../docs/workflow.md): move *Unreleased* in the changelog under a version, commit `chore(release): vX.Y.Z`, then tag and push the tag. The workflow deploys it, migrations run first, and it checks `https://gitgame.online/api/health`.
+
+Behind Fly's proxy the server reads who asked from `fly-client-ip`, so the rate limits count people, not the proxy.
+
 ## Before you push
 
 CI runs exactly these, and fails on any of them:

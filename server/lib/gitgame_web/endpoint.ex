@@ -36,6 +36,7 @@ defmodule GitGameWeb.Endpoint do
   end
 
   plug Plug.RequestId
+  plug GitGameWeb.Plugs.ClientIP
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
   plug Plug.Parsers,
