@@ -34,4 +34,5 @@ Copy [template.md](template.md).
 | [0004](0004-the-event-log-stores-inputs.md) | The event log stores what players did, not what the rules made of it | Accepted |
 | [0005](0005-sign-in-written-fresh.md) | Sign-in written fresh: GitHub OAuth and anonymous players, no Firebase | Accepted |
 | [0006](0006-notifications-web-push-and-email.md) | Notifications through standard Web Push and email, written fresh | Accepted |
-| [0007](0007-where-the-beta-runs.md) | Where the beta runs | Accepted |
+| [0007](0007-where-the-beta-runs.md) | Where the beta runs | Accepted; its managed Postgres superseded by 0008 |
+| [0008](0008-the-beta-shares-a-postgres.md) | The beta's database lives on an existing Postgres, for now | Accepted |
