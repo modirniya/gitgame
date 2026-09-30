@@ -25,15 +25,26 @@ defmodule GitGame.Game do
 
   @type t :: %__MODULE__{}
 
-  @enforce_keys [:rules, :seed, :seats, :players, :main, :draw_pile, :next_commit]
-  defstruct @enforce_keys ++ [day: 0, incident: nil, rolled: false, released: nil]
+  @enforce_keys [
+    :rules,
+    :seed,
+    :seats,
+    :players,
+    :main,
+    :draw_pile,
+    :next_commit,
+    :length,
+    :final_day
+  ]
+  defstruct @enforce_keys ++ [discard: [], day: 0, incident: nil, rolled: false, released: nil]
 
   @doc """
-  A new game for `player_ids`, in seat order: the draw pile is the online deck (every commit card, and each command
+  A new game for `player_ids`, in seat order, played in days of `length` (a name from `rules/online.json`'s
+  `day.lengths`, `"live"` unless given), which also sets the final day: the draw pile is the online deck (every commit card, and each command
   card switched on in `rules/online.json`, as many times as the deck prints it), shuffled by the seed; everyone is
   dealt the starting hand, one card at a time around the table; `main` holds only the initial commit.
   """
-  def new(%Rules{} = rules, seed, player_ids) when is_integer(seed) do
+  def new(%Rules{} = rules, seed, player_ids, length \\ "live") when is_integer(seed) do
     {fewest, most} = rules.release_at |> Map.keys() |> Enum.min_max()
 
     unless length(player_ids) in fewest..most and player_ids == Enum.uniq(player_ids),
@@ -42,6 +53,9 @@ defmodule GitGame.Game do
           ArgumentError,
           "a game needs #{fewest} to #{most} different players, got #{inspect(player_ids)}"
         )
+
+    unless Map.has_key?(rules.final_day, length),
+      do: raise(ArgumentError, "no day length #{inspect(length)} in the rules")
 
     {pile, _} = rules |> online_deck() |> Seeded.shuffle(Seeded.stream(seed, :deck))
     {hands, pile} = deal(pile, player_ids, rules.starting_hand)
@@ -53,7 +67,9 @@ defmodule GitGame.Game do
       players: Map.new(player_ids, &{&1, %Player{hand: Map.fetch!(hands, &1)}}),
       main: [%{id: Seeded.sha(seed, 0), author: nil, cards: [], initial: true, flipped: true}],
       draw_pile: pile,
-      next_commit: 1
+      next_commit: 1,
+      length: length,
+      final_day: rules.final_day[length]
     }
   end
 
@@ -83,6 +99,10 @@ defmodule GitGame.Game do
   @doc "The game with one player's side of the table replaced."
   def put_player(%__MODULE__{} = game, id, %Player{} = p),
     do: %{game | players: Map.put(game.players, id, p)}
+
+  @doc "Cards leaving play for good: spent commands, armed traps, dropped commits, the hand limit."
+  def discard(%__MODULE__{} = game, cards),
+    do: %{game | discard: game.discard ++ List.wrap(cards)}
 
   @doc "How many commits on `main` the player hasn't pulled."
   def behind_by(%__MODULE__{main: main, players: players}, id),

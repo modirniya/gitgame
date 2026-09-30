@@ -34,11 +34,11 @@ The charter's exit: *a full game can be played and replayed from its log.*
 - [x] One module per op family (commit ops, remote ops, command cards, traps), for the cards `rules/online.json` switches on, each a pure function of state and op → state and events, using Git's messages.
 - [x] Scoring and the release (CI, production down, least blame), with the live score counting a face-down bug as clean.
 
-*Done when:* every op in round-resolution §3 has unit tests for success, each failure, and cost, including the v0.2 rules: free pull and push when there is nothing to do, a merge token only when merging unpushed commits, `--resolve` at +1, failed command cards staying in hand, the hand limit, and one reflog restoring everything.
+*Done when:* every op in round-resolution §3 has unit tests for success, each failure, and cost, including the v0.2 rules: free pull and push when there is nothing to do, a merge token only when merging unpushed commits, `--resolve` at +1, failed command cards staying in hand, and one reflog restoring everything. (The hand limit happens at the end of a day, so it is in M3.)
 
 ### M3 · Resolver
-- [ ] `GitGame.Resolver.resolve_day(state, packs, seed)`: runs each pack to its budget, in the order `rules/online.json` names (`batch_at_close`, a seeded shuffle, by default; `arrival` as the alternative), and returns the new state and the ordered events: the day log.
-- [ ] Day start and end: the incident, draws, the hand limit, the final day's CI.
+- [x] `GitGame.Resolver.close_day(game, packs)`: runs each pack to its budget, in the order `rules/online.json` names (`batch_at_close`, a seeded shuffle, by default; `arrival` as the alternative), and returns the new state and the ordered events: the day log.
+- [x] Day start and end (`open_day/1`): the incident, draws, the hand limit, the final day's CI. Every card that leaves play goes to a discard pile, so cards are conserved.
 - [ ] Property tests (StreamData), which the charter makes non-negotiable before Phase 2:
   - any sequence of valid packs from any reachable state gives a valid state (pointers in range, cards conserved, budgets respected);
   - replaying a game's events from its seed reproduces its state exactly;

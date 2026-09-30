@@ -64,8 +64,11 @@ defmodule GitGame.Ops.Local do
         failed(game, player, :arm, "error: no #{trap} card in hand")
 
       true ->
+        # the card is on the table face-down from now on: out of the hand, never back in it
         p = %{p | hand: List.delete(p.hand, card), armed: p.armed ++ [trap]}
-        {:ok, put_player(game, player, p), [%{type: :armed, player: player, trap: trap}]}
+
+        {:ok, game |> put_player(player, p) |> Game.discard(card),
+         [%{type: :armed, player: player, trap: trap}]}
     end
   end
 

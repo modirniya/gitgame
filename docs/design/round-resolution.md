@@ -12,7 +12,7 @@ The game has no turn order. It has **days**, **packs**, and a **remote** that re
 - At day start: flip one **Incident** (public), every player **draws 2** cards and receives a budget of **3 ops**. Ops don't carry over — use them or lose them.
 - Each player sends **exactly one pack** per day, any time before the deadline, and may replace it until then.
 - The day closes at the deadline, **or early the moment every pack has arrived**. A live game therefore runs at the speed of its slowest player; a week-long game speeds up when everyone is prompt.
-- At the end of the day, anyone holding more than **10 cards** discards down to 10.
+- At the end of the day, anyone holding more than **10 cards** discards down to 10. Nobody is there to choose, so a pack may declare which cards to give up. Whatever it doesn't cover goes by a fixed, public rule: the smallest commit cards first, bugs before clean ones, command cards last.
 - **The cards in play.** Online games use the part of the deck the simulations tested: `git blame`, `revert`, `push --force` and `reflog`, and the Flaky CI, Standup Ran Long, Stack Overflow Is Down and Hackathon incidents, shuffled with two quiet days. `rules/online.json` lists them. The rest of the [tabletop deck](base-rules.md) comes online one card at a time.
 - **No pack by the deadline = an empty pack ("OOO").** Two consecutive OOO days and the player has *left the company*: they send no more packs, but their commits stay on `main` and still take blame at release. History is immutable.
 
@@ -20,7 +20,7 @@ The game has no turn order. It has **days**, **packs**, and a **remote** that re
 
 A pack is an **ordered list of ops** written against the remote as it stood when the day opened.
 
-- List up to **4 ops**; the remote executes them in order until the **3-op budget** is spent. Ops that turn out free (see §3) don't consume budget, which is why a 4th op can exist. An op that no longer fits the remaining budget is not run.
+- List up to **4 ops**; the remote executes them in order until the **3-op budget** is spent. Ops that turn out free (see §3) don't consume budget, which is why a 4th op can exist. An op that no longer fits the remaining budget is not run, and the pack stops there.
 - **Local ops** never interact with other players: `add`, `commit`, `commit --amend` (unpushed), `rebase -i`, and **arming a trap** (`reflog`, `stash`), which is played face-down. Arming is free but takes one of the 4 slots.
 - **Remote ops** are resolved against the remote at resolution time: `push`, `pull`, `pull --rebase`, `push --force`, `cherry-pick`, `blame`, `bisect`, `revert`, `tag`.
 - An op that is invalid at resolution time **fails, and its cost is still paid.** The failure is reported in Git's own words. A command card whose op fails (a `blame` on a commit someone flipped earlier in the day, a `push --force` with nothing ahead of your pointer) stays in your hand.
@@ -73,5 +73,6 @@ Because the day's packs resolve together, everyone writes blind to today's moves
 
 ## History
 
+- v0.2 (2026-09-29): which cards the hand limit takes when a pack doesn't say; a pack stops at the first op that doesn't fit. Settled while writing the server's resolver.
 - v0.2 (2026-09-29): packs resolve together at the deadline (ADR-0003); no merge token for a fast-forward pull; hand limit of 10; `--resolve` costs +1; failed command cards stay in hand; arming takes a pack slot; release size by player count. Evidence: [prototypes/packs](../../prototypes/packs/README.md).
 - v0.1: arrival-order resolution, pending the Phase 0 playtest.
