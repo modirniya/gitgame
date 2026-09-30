@@ -18,3 +18,4 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 - ADR-0001: prototypes are disposable, specs carry over. `docs/design/event-screens.md` specifies the one-event-per-screen mobile flow; `prototypes/mobile/PLAN.md` is the build plan for it.
 - `prototypes/mobile`: the one-event-per-screen phone prototype against the bot, with a pure event-emitting engine, every screen in the spec, animations, the guided first game, a playtest recorder and a smoke test. Its findings answer the spec's open questions provisionally and propose three rule changes: no merge token for a fast-forward pull, a hand limit, and making force-push reachable in a two-player game.
 - CI: a GitHub Actions workflow runs the mobile prototype's smoke test on every pull request and on pushes to `main`.
+- ADR-0002: the human playtest moves to a beta of the real product; the rules stay draft (v0.x) until people have played it.
