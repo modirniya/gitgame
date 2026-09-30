@@ -23,6 +23,8 @@ defmodule GitGameWeb.GameControllerTest do
              game["players"]["ana"]
 
     assert %{"id" => _, "name" => _} = game["incident"]
+    assert %{"day_length" => "live", "deadline" => deadline} = game
+    assert {:ok, _, 0} = DateTime.from_iso8601(deadline)
   end
 
   test "POST /api/games refuses a game that can't exist", %{conn: conn} do

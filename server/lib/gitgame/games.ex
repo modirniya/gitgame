@@ -4,13 +4,16 @@ defmodule GitGame.Games do
   through the pure resolver (ADR-0004). No state is stored and no process holds a game (charter decisions 8 and 9):
   a request a second or a week after the last one does the same thing, which is read the log and fold it.
 
+  Days run on a clock (M5): each day's deadline is when it opened plus the day length in the game's rules, and a job
+  closes it then (`GitGame.Games.CloseDay`), or sooner, the moment every player still in the game has sent a pack.
+
   Every write locks the game's row for its transaction, so two writes to one game never interleave, and carries the
   game version it was written against: once a day has closed, a pack written before it is rejected, as Git rejects a
   push to a remote that has moved on.
   """
   import Ecto.Query
   alias GitGame.{Game, Repo, Resolver, Rules}
-  alias GitGame.Games.{Event, Pack, Record}
+  alias GitGame.Games.{CloseDay, Event, Pack, Record}
 
   # Seeds stay below 2^53, so they survive a round trip through JSON numbers in any client.
   @max_seed 9_007_199_254_740_991
@@ -26,7 +29,8 @@ defmodule GitGame.Games do
     with :ok <- check_new(rules, seed, seats, length) do
       Repo.transaction(fn ->
         record = Repo.insert!(%Record{seed: seed, seats: seats, day_length: length, rules: maps})
-        Repo.insert!(%Event{game_id: record.id, seq: 1, type: "game_created", day: 0})
+        created = Repo.insert!(%Event{game_id: record.id, seq: 1, type: "game_created", day: 0})
+        schedule_close(record.id, 1, deadline(created.inserted_at, rules, length))
         %{id: record.id, version: 1}
       end)
     end
@@ -69,15 +73,14 @@ defmodule GitGame.Games do
     case Pack.decode(json, state.game.rules.pack_max_ops) do
       {:ok, _} ->
         stored = %{"ops" => json["ops"], "discard" => Map.get(json, "discard", [])}
+        attrs = %{type: "pack_sent", day: state.game.day, player: player, payload: stored}
+        seq = append(record, state, attrs)
+        state = %{state | sent: Enum.uniq([player | state.sent]), last_seq: seq}
 
-        append(record, state, %{
-          type: "pack_sent",
-          day: state.game.day,
-          player: player,
-          payload: stored
-        })
-
-        {:ok, %{version: state.version}}
+        # The day closes early the moment every player still in the game has sent a pack (round-resolution §1).
+        if state.game.rules.closes_early and everyone_sent?(state),
+          do: close_open_day(record, state),
+          else: {:ok, %{version: state.version, closed: false}}
 
       {:error, message} ->
         {:error, :invalid, message}
@@ -107,8 +110,23 @@ defmodule GitGame.Games do
     seq =
       append(record, state, %{type: "day_closed", day: state.game.day, player: nil, payload: %{}})
 
-    {:ok, %{day: state.game.day, version: seq, already_closed: false}}
+    after_close = fold(record, events(record.id))
+
+    # The next day's deadline is scheduled in the transaction that opens the day, unless the game just ended.
+    unless after_close.game.released,
+      do: schedule_close(record.id, after_close.game.day, after_close.deadline)
+
+    {:ok, %{day: state.game.day, version: seq, already_closed: false, closed: true}}
   end
+
+  defp everyone_sent?(state),
+    do: Enum.all?(state.game.seats, &(state.game.players[&1].left or &1 in state.sent))
+
+  defp deadline(opened_at, rules, length),
+    do: DateTime.add(opened_at, rules.day_seconds[length], :second)
+
+  defp schedule_close(id, day, at),
+    do: Oban.insert!(CloseDay.new(%{game_id: id, day: day}, scheduled_at: at))
 
   # ---------- the log ----------
 
@@ -144,17 +162,25 @@ defmodule GitGame.Games do
     {game, opened} =
       rules |> Game.new(record.seed, record.seats, record.day_length) |> Resolver.open_day()
 
-    start = %{game: game, version: 1, days: [], opened: opened, pending: %{}, last_seq: 0}
+    start = %{
+      game: game,
+      version: 1,
+      days: [],
+      opened: opened,
+      pending: %{},
+      last_seq: 0,
+      opened_at: nil
+    }
 
     Enum.reduce(events, start, fn
-      %Event{type: "game_created", seq: seq}, acc ->
-        %{acc | version: seq, last_seq: seq}
+      %Event{type: "game_created", seq: seq, inserted_at: at}, acc ->
+        %{acc | version: seq, last_seq: seq, opened_at: at}
 
       %Event{type: "pack_sent", seq: seq, player: player, payload: payload}, acc ->
         {:ok, pack} = Pack.decode(payload, acc.game.rules.pack_max_ops)
         %{acc | pending: Map.put(acc.pending, player, {seq, pack}), last_seq: seq}
 
-      %Event{type: "day_closed", seq: seq, day: day}, acc ->
+      %Event{type: "day_closed", seq: seq, day: day, inserted_at: at}, acc ->
         packs =
           acc.pending
           |> Enum.sort_by(fn {_, {s, _}} -> s end)
@@ -170,11 +196,15 @@ defmodule GitGame.Games do
             opened: opened,
             pending: %{},
             version: seq,
-            last_seq: seq
+            last_seq: seq,
+            opened_at: at
         }
     end)
     |> then(fn acc ->
-      acc |> Map.put(:sent, acc.pending |> Map.keys() |> Enum.sort()) |> Map.delete(:pending)
+      acc
+      |> Map.put(:sent, acc.pending |> Map.keys() |> Enum.sort())
+      |> Map.put(:deadline, deadline(acc.opened_at, rules, record.day_length))
+      |> Map.delete(:pending)
     end)
   end
 end
