@@ -1,6 +1,6 @@
 # Mobile prototype: plan
 
-*Status: Draft · Last verified: 2026-09-29 · To be executed by the next session*
+*Status: Done · Last verified: 2026-09-29 · Executed step by step; the findings are in [README.md](README.md)*
 
 Build the one-event-per-screen version of the game for a phone, against the bot, per the spec in [docs/design/event-screens.md](../../docs/design/event-screens.md). This is a prototype: it answers "is this clearer and more fun on a phone?", it is not the product, and the production client will be a rewrite of the same spec. Spend effort on the **screens, animations and copy** — those are what we are testing — and keep the code plain enough that a reader sees the rules in it.
 

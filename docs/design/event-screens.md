@@ -16,7 +16,7 @@ A phone shows one thing at a time. That fits this game better than a table view 
 
 ## 2. The event model
 
-The engine is pure: `apply(state, action) → { state, events[] }`. The UI never reads state to decide what to show; it consumes the **events** and maps each to a screen. Input screens produce **actions**. This is the same shape as the online game's day log ([round-resolution.md](round-resolution.md)): there, packs are the actions and the remote's log is the events. A production client is an event-to-screen mapper for that log.
+The engine is pure: `apply(state, action) → { state, events[] }`. The UI never reads state to decide what to show; it consumes the **events** and maps each to a screen. Events are written **per viewer**: another player's hand, staged cards and hidden bugs appear only as counts, and a bot's public reasoning carries only public facts. Input screens produce **actions**. This is the same shape as the online game's day log ([round-resolution.md](round-resolution.md)): there, packs are the actions and the remote's log is the events. A production client is an event-to-screen mapper for that log.
 
 | Event | Payload | Screen |
 |---|---|---|
@@ -24,20 +24,21 @@ The engine is pure: `apply(state, action) → { state, events[] }`. The UI never
 | `TurnStarted` | player, ops, drawn cards, behindBy | O-YourTurn (you) · O-BotTurn (bot) |
 | `Staged` | cards | O-Staged (brief) |
 | `Committed` | commit, lines, hasBug (own only) | O-Committed |
-| `PushAccepted` | commits, mainSize | O-Pushed |
-| `PushRejected` | reason: `non-fast-forward` \| `flaky` \| `freeze`, behindBy | O-Rejected |
-| `Pulled` | rebase, mergeTokens, incoming | O-Pulled |
-| `ConflictDetected` | mine, theirs, files, affordableStrategies | I-Conflict |
-| `ConflictResolved` | strategy, consequences | O-Resolved |
+| `PushAccepted` | commits, from (old tip), mainSize, roll (if a die was rolled) | O-Pushed |
+| `PushRejected` | reason: `non-fast-forward` \| `flaky` \| `freeze`, behindBy, roll | O-Rejected |
+| `Pulled` | rebase, mergeTokens, incoming, from, to, hadLocal (merge or fast-forward) | O-Pulled |
+| `ConflictDetected` | conflicts [{ mine, theirs, files }], rebase, affordable strategies | I-Conflict |
+| `ConflictResolved` | strategy, crossedOut, discarded, grudges, extraOp | O-Resolved |
 | `Blamed` | target, wasBug, author, penalty | O-Blamed |
 | `Reverted` | target, fixer | O-Reverted |
-| `Forced` | erased, sin | O-Forced |
+| `Forced` | erased, pushed, returned (to their owners' branches), revived (reverts undone), sin, oldTip, newTip | O-Forced |
 | `ReflogFired` | victim, restored | O-Reflog |
 | `Tagged` | by | O-CI (starts the CI sequence) |
 | `TurnEnded` | player, summary, scoreDelta | O-TurnSummary |
 | `BotActed` | op, reasoning, resulting events | O-BotStep (one per op) |
 | `YouAreBehind` | behindBy | O-Behind (interstitial after the bot's first push of its turn) |
-| `CIRan` | flips (ordered), bugs, productionDown | O-CI (animated), then O-Scoreboard |
+| `CIRan` | by (who tagged; none at the deadline), flips (ordered), bugs, productionDown | O-CI (animated), then O-Scoreboard |
+| `Undone` | — | none: the hub re-renders with a one-line note |
 
 Actions (from input screens): `stage(cards)`, `commit(message)`, `push()`, `pull({rebase})`, `resolve(strategy)`, `blame(target)`, `revert(target)`, `force()`, `tag()`, `endTurn()`, `undo()`.
 
@@ -86,6 +87,7 @@ Not separate screens: a **guide layer** on the frame. It highlights the one elem
 ## 4. Visual language
 
 - **Baseline viewport** 390 × 844 (iPhone 14/15 class), portrait only. Works to 360 wide. Safe-area insets respected. Touch targets ≥ 44 pt. No horizontal page scroll; only the `main` strip scrolls sideways, with snap.
+- **Bigger screens** keep the event screen phone-shaped, because one question or one consequence at a time is the point. From 600 px wide the column widens, cards grow, and the hub's four ops sit in one row. From about 1000 × 560 the Table stops being a sheet and becomes a panel beside the screen, with `main` laid out in full (wrapping, not scrolling) and a log of what has happened. Enter answers with the primary button; Escape cancels, closes the sheet or skips the bot.
 - **Cards** are the printed cards ([`rules/deck.json`](../../rules/deck.json)): a colored band per file, Courier-style file name, big `+N`, a red BUG tag on the face. Hand cards 96 × 134; strip cards 64 × 90; face-down back is a neutral hatch. The same component at every size.
 - **`main`** is a horizontal strip: initial commit at the left, tip at the right with a `tip` marker, each slot labelled with file + lines + author (the announced log), pointer chips beneath. The strip auto-scrolls to the tip on change.
 - **Player colors**: you teal, bot violet (from the deck's file palette family). Semantic: reject red, ok green, warn amber. Light theme on a warm neutral ground; dark theme with the same tokens.
@@ -106,6 +108,10 @@ In: everything in §3 for a 2-player game against the bot, the guide, hints, und
 
 ## 8. Open questions for the playtest
 
-1. Is one-screen-per-op too slow on the bot's turn? (Measure how often people press "skip bot".)
-2. Does the interstitial **O-Behind** land the lesson, or does it become noise after game two?
-3. Do people open the Table sheet, and when? If never, the hub's strip is enough and the sheet goes.
+The mobile prototype ([findings](../../prototypes/mobile/README.md#findings)) answers these provisionally, from simulated games and the builder's play; no other player has used it yet. `playtest.js` in the prototype records the numbers that settle each one.
+
+1. **Is one-screen-per-op too slow on the bot's turn?** *Provisionally: not in time, yes in content.* The bot averages 2.5 ops a turn, about 4 s at 1.2 s per step, with no taps. But 45% of its steps are "staged a card" or "committed", which can't show anything because the cards are hidden. Fold stage and commit into one step and keep one screen per remote op (pull, push, blame, force, tag). *Measure:* skip-bot presses, and how each bot step was left.
+2. **Does the interstitial O-Behind land the lesson, or does it become noise after game two?** *Provisionally: it lands in the guided game (99.2% of guided seeds reach the pull lesson) and is redundant after that.* It appears 4.4 times a game, and O-YourTurn states the same fact two screens later. Keep it in the guided game and the first ordinary game, then let O-YourTurn carry it. *Measure:* O-Behind reading time by game number.
+3. **Do people open the Table sheet, and when?** *Provisionally: rarely.* The hub's strip already shows `main` in full; the sheet's only unique content is tokens and the bot's counts (the incident is now on the hub too). If opens stay rare, move tokens onto the hub and drop the sheet. *Measure:* Table opens per game, and the screen each was opened from.
+
+The prototype also raised a broader answer to the question behind all three: **one event per screen is clearer for the moments (rejection, conflict, blame, force-push, reflog, CI) and too slow for the routine.** A game is about 105 screens, 36 of them round ceremony and about 40 routine ops. The next version of this spec should give each event its own screen the first time it happens in a game, and after that let routine events animate in the hub with a one-line receipt.

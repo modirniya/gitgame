@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#EEE9DF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#15191D" media="(prefers-color-scheme: dark)">
+  <title>Git Game · mobile prototype</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- The frame: a status bar, the Table panel (wide screens only), the screen the router renders into, and the Table sheet. -->
+  <div id="app">
+    <header id="status" class="status" hidden></header>
+    <aside id="table-pane" class="table-pane" aria-label="the table"></aside>
+    <main id="screen"></main>
+  </div>
+  <div id="sheet" class="sheet" hidden></div>
+  <script type="module">
+    import { start, api } from './router.js';
+    import { install as guide } from './guide.js';
+    import { install as playtest } from './playtest.js';
+    guide(api); playtest(api);
+    start(document.getElementById('screen'));
+    // ?debug exposes the router to the console, for driving a game to a given screen when checking a screen by hand
+    if (new URLSearchParams(location.search).has('debug')) window.gitgame = api;
+  </script>
+</body>
+</html>
