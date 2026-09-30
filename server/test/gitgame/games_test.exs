@@ -126,4 +126,59 @@ defmodule GitGame.GamesTest do
     assert {:error, :over, _} = Games.send_pack(id, "ana", version, %{"ops" => []})
     assert {:error, :over, _} = Games.close_day(id)
   end
+
+  describe "replay (M7)" do
+    test "a day's replay is the game as that day closed, and shows nothing that came after" do
+      {:ok, %{id: id}} = new_game()
+      {:ok, _} = Games.close_day(id, 1)
+      {:ok, %{version: v}} = Games.load(id)
+      {:ok, _} = Games.send_pack(id, "ana", v, %{"ops" => []})
+
+      assert {:ok, %{game: %Game{day: 1}, days: [], sent: [], deadline: nil}} =
+               Games.load(id, through_day: 0)
+
+      assert {:ok, %{game: %Game{day: 2}, days: [%{day: 1}], sent: [], deadline: nil} = day1} =
+               Games.load(id, through_day: 1)
+
+      # today ana's day-2 pack is in; the replay of day 1 doesn't know that yet
+      assert {:ok, %{sent: ["ana"], version: ^v} = now} = Games.load(id)
+      assert day1.game == now.game
+
+      assert {:error, :not_found, "fatal: day 2 hasn't closed"} = Games.load(id, through_day: 2)
+    end
+  end
+
+  describe "the refetch signal (charter decision 9)" do
+    test "every write tells whoever is watching to fetch again, and only once it has committed" do
+      {:ok, %{id: id}} = new_game()
+      :ok = GitGame.Games.Signal.subscribe(id)
+
+      {:ok, _} = Games.send_pack(id, "ana", 1, %{"ops" => []})
+      assert_received {:refetch, %{over: false}}
+      assert {:ok, %{sent: ["ana"]}} = Games.load(id)
+
+      # raj's pack closes the day: still one write, one signal
+      {:ok, %{closed: true}} = Games.send_pack(id, "raj", 1, %{"ops" => []})
+      assert_received {:refetch, %{over: false}}
+      refute_received {:refetch, _}
+    end
+
+    test "a refused write, or a day asked to close twice, changes nothing and says nothing" do
+      {:ok, %{id: id}} = new_game()
+      {:ok, _} = Games.close_day(id, 1)
+      :ok = GitGame.Games.Signal.subscribe(id)
+
+      {:error, :stale, _} = Games.send_pack(id, "ana", 1, %{"ops" => []})
+      {:ok, %{already_closed: true}} = Games.close_day(id, 1)
+      refute_received {:refetch, _}
+    end
+
+    test "the release is the last signal, and says so" do
+      {:ok, %{id: id}} = new_game()
+      :ok = GitGame.Games.Signal.subscribe(id)
+      for _ <- 1..12, do: {:ok, _} = Games.close_day(id)
+
+      assert_received {:refetch, %{over: true}}
+    end
+  end
 end

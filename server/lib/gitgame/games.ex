@@ -13,7 +13,7 @@ defmodule GitGame.Games do
   """
   import Ecto.Query
   alias GitGame.{Bot, Game, Repo, Resolver, Rules}
-  alias GitGame.Games.{CloseDay, Event, Pack, Record, View}
+  alias GitGame.Games.{CloseDay, Event, Pack, Record, Signal, View}
 
   # Seeds stay below 2^53, so they survive a round trip through JSON numbers in any client.
   @max_seed 9_007_199_254_740_991
@@ -64,12 +64,32 @@ defmodule GitGame.Games do
 
   @doc """
   The game as its log makes it: `%{game: current state, version: ..., days: [%{day, log}], opened: this day's opening
-  events, sent: who has sent a pack for the open day}`, or `{:error, :not_found}`.
+  events, sent: who has sent a pack for the open day, bots: the seats bots play}`, or `{:error, :not_found}`.
+
+  With `through_day: n`, the game as it stood when day `n` closed (day 0: as created), folded from the log up to that
+  point and no further, so a replay shows nothing that happened later: not even which packs were in for the next day.
   """
-  def load(id) do
-    case Repo.get(Record, id) do
+  def load(id, opts \\ []) do
+    with %Record{} = record <- Repo.get(Record, id),
+         {:ok, events} <- through(events(id), opts[:through_day]) do
+      state = fold(record, events)
+      # a day in a replay is long over: it has no deadline
+      {:ok, if(opts[:through_day], do: %{state | deadline: nil}, else: state)}
+    else
       nil -> {:error, :not_found}
-      record -> {:ok, fold(record, events(id))}
+      {:error, _, _} = error -> error
+    end
+  end
+
+  defp through(events, nil), do: {:ok, events}
+
+  # the log starts with game_created
+  defp through(events, 0), do: {:ok, Enum.take(events, 1)}
+
+  defp through(events, day) do
+    case Enum.find_index(events, &(&1.type == "day_closed" and &1.day == day)) do
+      nil -> {:error, :not_found, "fatal: day #{day} hasn't closed"}
+      i -> {:ok, Enum.take(events, i + 1)}
     end
   end
 
@@ -137,7 +157,14 @@ defmodule GitGame.Games do
       send_bot_packs(record)
     end
 
-    {:ok, %{day: state.game.day, version: seq, already_closed: false, closed: true}}
+    {:ok,
+     %{
+       day: state.game.day,
+       version: seq,
+       already_closed: false,
+       closed: true,
+       over: after_close.game.released != nil
+     }}
   end
 
   # Each bot still in the game writes its pack from its own view, exactly what a person in its seat would see, and
@@ -175,8 +202,13 @@ defmodule GitGame.Games do
       end
     end)
     |> case do
-      {:ok, result} -> {:ok, result}
-      {:error, {reason, message}} -> {:error, reason, message}
+      {:ok, result} ->
+        # after the commit, never inside it: a reader told to refetch must find the write already there
+        unless result[:already_closed], do: Signal.broadcast(id, result[:over] == true)
+        {:ok, result}
+
+      {:error, {reason, message}} ->
+        {:error, reason, message}
     end
   end
 
@@ -239,6 +271,7 @@ defmodule GitGame.Games do
       acc
       |> Map.put(:sent, acc.pending |> Map.keys() |> Enum.sort())
       |> Map.put(:deadline, deadline(acc.opened_at, rules, record.day_length))
+      |> Map.put(:bots, record.bots)
       |> Map.delete(:pending)
     end)
   end

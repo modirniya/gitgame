@@ -54,5 +54,7 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - The web client's first screens (M7a): `web/` is Vite and a PWA with no framework. Start a game against bots from a phone or a laptop and see the table (`main` with every pointer, each seat's score, counts and tokens) and your hand. `npm run dev` proxies `/api` to the server. CI formats, tests and builds it.
 
+- Live refetch and replay on the server (M7b). `GET /api/games/:id/live` is a Server-Sent Events stream that says only `refetch`, whenever the game's log grows and after the write has committed, and ends at the release (charter decision 9). `GET /api/games/:id/days/:day` replays the game as it stood when that day closed, folded from the log up to there. The view now says which seats are bots and what each op and command costs under the game's own rules.
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.

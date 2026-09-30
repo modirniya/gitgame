@@ -54,7 +54,8 @@ defmodule GitGameWeb.GameControllerTest do
 
     view = conn |> get(~p"/api/games/#{id}") |> json_response(200)
     assert view["sent_today"] == ["ana"]
-    refute inspect(view) =~ "pull"
+    # the cost table names every op; nothing else may
+    refute inspect(Map.delete(view, "costs")) =~ "pull"
   end
 
   test "a pack written before the day closed is 409, in Git's words; the client refetches", %{
@@ -112,6 +113,70 @@ defmodule GitGameWeb.GameControllerTest do
              Enum.find(ana["today"], &(&1["type"] == "drew" and &1["player"] == "raj"))
 
     assert %{"error" => _} = conn |> get(~p"/api/games/#{id}?player=kim") |> json_response(403)
+  end
+
+  test "the view says who the bots are and what each op costs under this game's rules", %{
+    conn: conn
+  } do
+    game = create(conn, %{"seats" => ["ana", "bot"], "bots" => ["bot"], "seed" => 42})
+
+    assert game["bots"] == ["bot"]
+
+    assert %{"ops" => %{"pull" => 1, "pull_rebase" => 2, "pull_when_up_to_date" => 0}} =
+             game["costs"]
+
+    assert game["costs"]["commands"] == %{
+             "blame" => 1,
+             "force" => 1,
+             "reflog" => 0,
+             "revert" => 1
+           }
+  end
+
+  describe "replay (M7)" do
+    setup %{conn: conn} do
+      %{"id" => id} =
+        game = create(conn, %{"seats" => ["hal", "eve"], "bots" => ["hal", "eve"], "seed" => 7})
+
+      %{id: id, game: game}
+    end
+
+    test "GET /days/:day is the game as that day closed; the last day is the game as it ended", %{
+      conn: conn,
+      id: id,
+      game: game
+    } do
+      start = conn |> get(~p"/api/games/#{id}/days/0") |> json_response(200)
+      assert %{"day" => 1, "days" => [], "released" => nil, "deadline" => nil} = start
+      assert [%{"initial" => true}] = start["main"]
+
+      for n <- 1..length(game["days"]) do
+        view = conn |> get(~p"/api/games/#{id}/days/#{n}") |> json_response(200)
+        assert length(view["days"]) == n
+        assert view["days"] == Enum.take(game["days"], n)
+      end
+
+      last = conn |> get(~p"/api/games/#{id}/days/#{length(game["days"])}") |> json_response(200)
+      assert last == game
+    end
+
+    test "a replay can be read as one player, with their cards as they were", %{
+      conn: conn,
+      id: id
+    } do
+      view = conn |> get(~p"/api/games/#{id}/days/1?player=hal") |> json_response(200)
+      assert %{"you" => %{"player" => "hal", "hand" => [_ | _]}} = view
+
+      assert conn |> get(~p"/api/games/#{id}/days/1?player=kim") |> json_response(403)
+    end
+
+    test "a day that hasn't closed, or isn't a day, is 404", %{conn: conn, id: id} do
+      assert %{"error" => "fatal: day 99 hasn't closed"} =
+               conn |> get(~p"/api/games/#{id}/days/99") |> json_response(404)
+
+      assert conn |> get(~p"/api/games/#{id}/days/-1") |> json_response(404)
+      assert conn |> get(~p"/api/games/#{id}/days/one") |> json_response(404)
+    end
   end
 
   describe "bots (charter decision 12)" do

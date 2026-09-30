@@ -22,11 +22,18 @@ defmodule GitGame.Games.View do
       commands_allowed: not match?(%{effect: %{kind: :no_commands}}, game.incident),
       release_at: game.rules.release_at[length(game.seats)],
       hand_limit: game.rules.hand_limit,
+      # what each op costs under this game's rules, for a client to show before the pack is sent; some are free when
+      # there is nothing to do, which only the remote can know when the pack runs
+      costs: %{
+        ops: game.rules.op_costs,
+        commands: Map.new(game.rules.commands, fn {id, c} -> {id, c.cost} end)
+      },
       # when the open day closes if not every pack is in first; nil once the game is over
       deadline: if(game.released, do: nil, else: state[:deadline]),
       incident: game.incident && Map.take(game.incident, [:id, :name, :text]),
       released: game.released,
       seats: game.seats,
+      bots: Map.get(state, :bots, []),
       sent_today: sent,
       main: Enum.map(game.main, &commit/1),
       players: Map.new(game.seats, &{&1, player(game, &1)}),
