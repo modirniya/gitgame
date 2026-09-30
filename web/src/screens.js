@@ -76,8 +76,10 @@ export function momentScreen(m, { view, you, step, next, skip }) {
       `${step.at} of ${step.of}`,
       m.pack && ` · ${m.player === you ? "your" : `${m.player}'s`} pack`,
     ),
-    title ? el("h1", {}, title) : el("div", { class: "transcript" }, lines(m, you)),
+    title ? el("h1", {}, title) : el("div", { class: "transcript" }, lines(m, you, { why: false })),
     picture(m, view, you),
+    // the bot thinking out loud (event-screens §5), above what it means for you
+    m.why && el("p", { class: "bubble" }, el("span", { class: "who" }, m.player), " ", m.why),
     m.coach && el("p", { class: "coach" }, m.coach),
     el(
       "div",

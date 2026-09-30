@@ -16,12 +16,24 @@ defmodule GitGame.Games.Pack do
     with {:ok, ops} <- list(json, "ops"),
          :ok <- at_most(ops, max_ops),
          {:ok, discard} <- strings(json, "discard", []),
-         {:ok, ops} <- all(ops, &op/1) do
+         {:ok, ops} <- all(ops, &op_with_why/1) do
       {:ok, %{ops: ops, discard: discard}}
     end
   end
 
   def decode(_, _), do: {:error, "a pack is an object with an \"ops\" list"}
+
+  # Any op may say why it is played, in words everyone at the table reads (a bot's reasoning, M14b), so it can't be
+  # longer than a line.
+  defp op_with_why(o) do
+    with {:ok, op} <- op(o) do
+      case Map.get(o, "why") do
+        nil -> {:ok, op}
+        why when is_binary(why) and byte_size(why) <= 160 -> {:ok, Map.put(op, :why, why)}
+        _ -> {:error, "an op's \"why\" is a line of at most 160 bytes"}
+      end
+    end
+  end
 
   defp at_most(ops, max) when length(ops) <= max, do: :ok
   defp at_most(ops, max), do: {:error, "a pack lists at most #{max} ops, not #{length(ops)}"}

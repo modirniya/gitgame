@@ -72,12 +72,21 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
     }
   }
 
+  // A bot's routine step moves on by itself after a moment (event-screens §5: 1.2 s); a tap moves on sooner.
+  let auto = null;
+
   function render() {
+    clearTimeout(auto);
     if (s.queue.length && s.at < s.queue.length) {
       const next = () => (s.at + 1 < s.queue.length ? set({ at: s.at + 1 }) : caughtUp());
       const step = { at: s.at + 1, of: s.queue.length };
       const you = s.view.you.player;
-      return mount(node, momentScreen(s.queue[s.at], { view: s.view, you, step, next, skip: caughtUp }));
+      const m = s.queue[s.at];
+      if (m.bot) {
+        const at = s.at;
+        auto = setTimeout(() => alive && s.at === at && next(), 1200);
+      }
+      return mount(node, momentScreen(m, { view: s.view, you, step, next, skip: caughtUp }));
     }
     if (s.handoff) return mount(node, handoff(s.handoff));
 
@@ -155,6 +164,7 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
     node,
     leave: () => {
       alive = false;
+      clearTimeout(auto);
       stop();
       document.removeEventListener("keydown", key);
     },

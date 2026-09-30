@@ -33,6 +33,17 @@ defmodule GitGame.Games.PackTest do
         do: assert({:ok, %{ops: [^expected]}} = Pack.decode(%{"ops" => [op]}, 4))
   end
 
+  test "an op may say why it is played, in one line (M14b)" do
+    assert {:ok, %{ops: [%{op: :push, why: "it ships what it has committed"}]}} =
+             Pack.decode(
+               %{"ops" => [%{"op" => "push", "why" => "it ships what it has committed"}]},
+               4
+             )
+
+    assert {:error, "an op's \"why\" is a line of at most 160 bytes"} =
+             Pack.decode(%{"ops" => [%{"op" => "push", "why" => String.duplicate("x", 161)}]}, 4)
+  end
+
   test "refuses what isn't a pack, without making atoms from what it was sent" do
     assert {:error, "a pack is an object with an \"ops\" list"} = Pack.decode(%{}, 4)
     assert {:error, "a pack is an object with an \"ops\" list"} = Pack.decode("push", 4)

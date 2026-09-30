@@ -27,7 +27,7 @@ const FIRST_TIME = new Set(["pushed", "pulled"]);
  * `log` is a day's events as `you` may see them. `seen` is the kinds this reader has already had a screen for in this
  * game; the moments that give a kind its first screen add it to the returned `seen`.
  */
-export function moments(log, { you, seen = new Set() } = {}) {
+export function moments(log, { you, seen = new Set(), bots = [] } = {}) {
   seen = new Set(seen);
   const out = [];
   let pack = null;
@@ -54,8 +54,16 @@ export function moments(log, { you, seen = new Set() } = {}) {
 
     m.pack = pack;
     m.coach = coach(m, you);
+    // a bot says why it played each op (M14b), in words anyone at the table may read
+    m.why = m.events.findLast((x) => x.why)?.why ?? null;
     m.screen = ALWAYS.has(m.kind) || (FIRST_TIME.has(m.kind) && !seen.has(m.kind));
     if (m.screen) seen.add(m.kind);
+    // The bot is a character (event-screens §5): each of its ops is a step on screen, with its reasoning, except
+    // staging, which folds into the commit it makes (the prototype's finding: "it staged a card" shows nothing).
+    if (bots.includes(m.player) && m.kind !== "staged" && m.kind !== "armed") {
+      m.screen = true;
+      m.bot = !ALWAYS.has(m.kind);
+    }
     out.push(m);
   }
 

@@ -14,7 +14,14 @@ describe("catching up", () => {
   });
 
   it("after a week away: every day's big moments in order, then today", () => {
-    const v = view({ you: { ...view().you, player: "ana" }, days: game.days.slice(0, 5), day: 6, today: [opened] });
+    // the first-time rule is for people's ops: here nobody is a bot
+    const v = view({
+      you: { ...view().you, player: "ana" },
+      bots: [],
+      days: game.days.slice(0, 5),
+      day: 6,
+      today: [opened],
+    });
     const { queue, memory } = catchup(v, { logs: 0, opened: 1, seen: [] });
 
     expect(queue.at(-1).kind).toBe("incident");
@@ -27,7 +34,7 @@ describe("catching up", () => {
   });
 
   it("a push seen on an earlier day gets no second screen", () => {
-    const v = view({ days: game.days.slice(0, 5), day: 6, today: [opened] });
+    const v = view({ bots: [], days: game.days.slice(0, 5), day: 6, today: [opened] });
     const first = catchup(v, { logs: 0, opened: 6, seen: ["pushed", "pulled"] });
     expect(first.queue.map((m) => m.kind)).not.toContain("pushed");
   });

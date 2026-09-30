@@ -29,8 +29,8 @@ defmodule GitGame.Games.Projection do
     e |> Map.delete(key) |> Map.put(:count, length(Map.fetch!(e, key)))
   end
 
-  def event(%{type: :committed, player: p, commit: c}, _viewer),
-    do: %{type: :committed, player: p, commit: c.id}
+  def event(%{type: :committed, player: p, commit: c} = e, _viewer),
+    do: e |> Map.take([:why]) |> Map.merge(%{type: :committed, player: p, commit: c.id})
 
   def event(%{type: :op_failed, op: op} = e, _viewer) when op in @local_ops,
     do: Map.delete(e, :message)

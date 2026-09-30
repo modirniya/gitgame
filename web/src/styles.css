@@ -727,3 +727,17 @@ label.check input {
 .verdict {
   font-weight: 700;
 }
+
+/* the bot thinking out loud (event-screens §5) */
+.bubble {
+  position: relative;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--raised);
+  border: 1px solid var(--line);
+}
+.bubble .who {
+  font-weight: 700;
+  color: var(--other);
+}
