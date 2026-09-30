@@ -121,6 +121,8 @@ defmodule GitGameWeb.GameControllerTest do
     game = create(conn, %{"seats" => ["ana", "bot"], "bots" => ["bot"], "seed" => 42})
 
     assert game["bots"] == ["bot"]
+    assert game["max_ops"] == 4
+    assert game["default_strategy"] == "theirs"
 
     assert %{"ops" => %{"pull" => 1, "pull_rebase" => 2, "pull_when_up_to_date" => 0}} =
              game["costs"]

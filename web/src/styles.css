@@ -18,6 +18,7 @@
   --term: #0d0f12;
   --term-ink: #d8d5ce;
   --term-muted: #7d828c;
+  --term-field: #1a1d22;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
   color-scheme: dark;
 }
@@ -351,4 +352,177 @@ ol.seats {
 }
 .transcript .warn .out {
   color: var(--warn);
+}
+
+/* ---------- the hub ---------- */
+
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.status .incident {
+  color: var(--warn);
+}
+.status .budget {
+  color: var(--ink);
+}
+.picking {
+  color: var(--warn);
+}
+.card.used {
+  opacity: 0.3;
+}
+.hub .cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 0 4px;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+  margin: 12px 0;
+}
+.action {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6px 8px;
+  line-height: 1.2;
+  font-size: 0.85rem;
+}
+.action .why {
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+
+ol.pack {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--term);
+  color: var(--term-ink);
+  font-size: 0.85rem;
+}
+.pack .op {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 2px 8px;
+  padding: 4px 0;
+}
+.pack .cmd::before {
+  content: "$ ";
+  color: var(--you);
+}
+.pack .cost {
+  padding: 0 6px;
+  border-radius: 3px;
+  background: var(--line);
+  color: var(--term-ink);
+}
+.pack .remove {
+  min-height: 32px;
+  min-width: 32px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--term-muted);
+}
+.pack .note,
+.pack .flags,
+.pack .message {
+  grid-column: 1 / -1;
+}
+.pack .note {
+  font-size: 0.75rem;
+  color: var(--term-muted);
+}
+.pack .over .cmd,
+.pack .over .note {
+  color: var(--reject);
+  text-decoration: line-through;
+}
+.pack .maybe .note {
+  color: var(--warn);
+}
+.pack .message,
+.pack select {
+  min-height: 36px;
+  background: var(--term-field);
+  color: var(--term-ink);
+}
+.pack .flags {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.pack .flags label {
+  margin: 0;
+  color: var(--term-ink);
+}
+.pack .flags input {
+  min-height: auto;
+}
+.pack .empty {
+  color: var(--term-muted);
+}
+.send {
+  width: 100%;
+}
+
+/* The Table: a sheet on phones, opened from its button; a panel beside the hub on wide screens (event-screens §4). */
+.table-toggle {
+  width: 100%;
+  margin: 12px 0;
+}
+.table-panel {
+  display: none;
+}
+.table-panel.open {
+  display: block;
+}
+
+@media (min-width: 1000px) {
+  #app:has(.game) {
+    max-width: 1180px;
+  }
+  .game {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+  .table-toggle {
+    display: none;
+  }
+  .table-panel {
+    display: block;
+    position: sticky;
+    top: 16px;
+  }
+  .table-panel ol.strip {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+}
+
+.branch h2 {
+  color: var(--you);
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+.branch .staged {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  color: var(--muted);
 }
