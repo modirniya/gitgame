@@ -112,6 +112,9 @@ defmodule GitGame.Ops.Commands do
     old_tip = List.last(game.main).id
     {kept, erased} = Enum.split(game.main, at)
     main = kept ++ p.local
+
+    # what the force-push itself made the tip, before any reflog puts the erased commits back on top
+    new_tip = List.last(main).id
     players = Map.new(game.players, fn {id, q} -> {id, %{q | pointer: min(q.pointer, at)}} end)
     game = %{game | main: main, players: players}
 
@@ -145,7 +148,7 @@ defmodule GitGame.Ops.Commands do
       pushed: Enum.map(p.local, & &1.id),
       returned: returned,
       revived: revived,
-      message: " + #{old_tip}...#{List.last(game.main).id} main -> main (forced update)"
+      message: " + #{old_tip}...#{new_tip} main -> main (forced update)"
     }
 
     fired =

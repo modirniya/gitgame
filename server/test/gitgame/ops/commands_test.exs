@@ -170,6 +170,7 @@ defmodule GitGame.Ops.CommandsTest do
              } = forced
 
       assert pushed == raj_commit.id
+      assert forced.message == " + #{List.last(erased)}...#{pushed} main -> main (forced update)"
       assert Enum.map(game.main, & &1.id) |> tl() == [raj_commit.id]
       assert Enum.map(game.players["ana"].local, & &1.id) == erased
       assert game.players["raj"].sins == 1
@@ -183,9 +184,15 @@ defmodule GitGame.Ops.CommandsTest do
     } do
       game = play(game, "ana", [%{op: :arm, trap: "reflog"}])
 
+      [raj_commit] = game.players["raj"].local
+
       assert {:ok, game,
-              [%{returned: []}, %{type: :reflog_fired, player: "ana", restored: ^erased}]} =
+              [%{returned: []} = forced, %{type: :reflog_fired, player: "ana", restored: ^erased}]} =
                Ops.run(game, "raj", %{op: :force})
+
+      # the forced-update line is what the force-push did; the reflog that answers it is its own event
+      assert forced.message ==
+               " + #{List.last(erased)}...#{raj_commit.id} main -> main (forced update)"
 
       assert game.main |> Enum.map(& &1.id) |> Enum.take(-2) == erased
       assert game.players["ana"].local == []
