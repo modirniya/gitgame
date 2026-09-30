@@ -10,6 +10,18 @@ export function keyBytes(base64url) {
   return Uint8Array.from(raw, (c) => c.charCodeAt(0));
 }
 
+/**
+ * Whether to offer "remind me" (ADR-0006): in a game whose days are long enough to be reminded of, once this reader
+ * has sent a pack in it. Today's or an earlier day's: the last pack in closes the day, so against the bot the next day
+ * has opened by the time the view comes back, with today's pack not in. An absent day's empty pack wasn't sent.
+ */
+export function offerReminders(view) {
+  const you = view.you?.player;
+  if (!you || !view.reminders || view.released) return false;
+  const sent = (e) => e.type === "pack_opened" && e.player === you && e.ops > 0;
+  return view.sent_today.includes(you) || view.days.some((d) => d.log.some(sent));
+}
+
 const supported = () =>
   typeof navigator !== "undefined" &&
   "serviceWorker" in navigator &&
