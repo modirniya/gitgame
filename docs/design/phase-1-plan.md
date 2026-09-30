@@ -121,11 +121,23 @@ Private rooms by link, and a game against the bot in one tap (charter priority 2
 
 *Met 2026-09-30.* `RoomControllerTest` plays a room from open to a closed day with two devices. By hand: a room opened in the browser, a second device joined by its code, and the host's screen showed them at once; the host started and both held their own seats; and "play the bot now" went from the start screen to a game in one tap.
 
+### M12 · Beta telemetry
+
+What [ADR-0002](../adr/0002-beta-before-human-playtest.md) promises the beta records, "without the player doing anything": when each pack was sent against how it went (playtest question 1), failed pushes and what followed them (question 2), absences (question 3), and completed games and replays (the exit). Most of it is already in every game's log (ADR-0004), so M12 adds only what the log can't know, and a report that reads both. Nothing keeps score across games before rules v1.0, and nothing here is shown to players.
+
+Taken ahead of M10 and M11, which each need a decision first (a notification provider, a host); M12 needs none.
+
+- [x] **M12a · Marks.** A `beta_marks` table for what the log can't know: a player's visit (at most one a day, with where it came from once notifications exist, so "came back unprompted" can be told apart), and a replay opened. Recorded by the server as it answers; nothing is sent from the client for it.
+- [x] **M12b · The report.** `mix gitgame.beta_report` prints, from the logs and the marks: games started and finished (the charter's "≥ 50% of started games reach a release"), how late in the day packs were sent against how they went, failed pushes and the next op of whoever failed, absences and who left, replays per finished game, and players who came back on another day or started another game after finishing one, unprompted.
+
+*Done when:* the report runs on a database of generated games and its numbers match what a test computed from the same games.
+
+*Met 2026-09-30* by `GitGame.Beta.ReportTest`. It found one thing worth reporting apart: a game whose people have all left plays itself to its release with the bots, so the report counts games *finished by people* (someone still in the company) separately from games that reached a release, and the charter's share is of the first.
+
 ### After M9
 
 - **M10 · Notifications:** push, email and the daily digest; "your pack is due" is the retention loop (charter decision 16).
 - **M11 · Hosting:** an ADR choosing the host (none is chosen yet), then deploy from tags, never branches ([workflow.md](../workflow.md)).
-- **M12 · Beta telemetry:** what ADR-0002 promises the beta records: how rejections, conflicts and absences go, completed games, and players who come back unprompted. Nothing keeps score across games before rules v1.0.
 - **M13 · Beta launch:** strangers finish games; the Phase 0 exit (two people ask to play again unprompted) is checked here.
 
 ## Open items

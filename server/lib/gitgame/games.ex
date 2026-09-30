@@ -103,6 +103,15 @@ defmodule GitGame.Games do
   end
 
   @doc """
+  A game's record, its raw log (each event with when it was written), and what the log folds to: what the beta report
+  (M12) reads, since it needs when packs were sent as well as how they went.
+  """
+  def history(%Record{} = record) do
+    events = events(record.id)
+    %{record: record, events: events, state: fold(record, events)}
+  end
+
+  @doc """
   The seats `player_id` holds in the game, in seat order: one, several in a hotseat game, or none (nil holds none).
   `{:error, :not_found}` if there is no such game.
   """

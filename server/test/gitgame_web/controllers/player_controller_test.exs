@@ -63,4 +63,12 @@ defmodule GitGameWeb.PlayerControllerTest do
            |> get(~p"/api/health")
            |> json_response(200)
   end
+
+  test "opening the game marks a visit for the beta (M12), once a day", %{conn: conn} do
+    conn = post(conn, ~p"/api/players")
+    conn |> get(~p"/api/session") |> json_response(200)
+    conn |> get(~p"/api/session?via=notification") |> json_response(200)
+
+    assert [%{kind: "visit", via: nil}] = GitGame.Repo.all(GitGame.Beta.Mark)
+  end
 end
