@@ -136,19 +136,28 @@ Taken ahead of M10 and M11, which each need a decision first (a notification pro
 
 *Met 2026-09-30* by `GitGame.Beta.ReportTest`. It found one thing worth reporting apart: a game whose people have all left plays itself to its release with the bots, so the report counts games *finished by people* (someone still in the company) separately from games that reached a release, and the charter's share is of the first.
 
+### M10 · Notifications
+
+"Your pack is due" is the retention loop (charter decision 16), sent as [ADR-0006](../adr/0006-notifications-web-push-and-email.md) decides: standard Web Push and email, written fresh, only in games with 24-hour days, at most once per game a day on each channel.
+
+- [ ] **M10a · Reminders.** A `notifications` table records what was sent to whom, for which game and day, on which channel; its unique index is what keeps "at most once". When a 24-hour day opens, and again when a quarter of it is left, an Oban job finds the people whose pack isn't in and hands each a reminder for every channel they have. When a game is released, everyone in it gets "v1.0 has shipped". A link from a notification says where it came from (`?via=`), and the beta counts that visit apart (M12).
+- [ ] **M10b · Web Push.** VAPID keys from the environment; `push_subscriptions` stored when the service worker subscribes; a payloadless push, signed with the VAPID key, to each subscription, which is dropped when its push service says it is gone. The service worker, woken, fetches your games and shows the one waiting; tapping it opens the game. The client asks for permission only after a pack has been sent in a 24-hour game, from a "remind me" button.
+- [ ] **M10c · Email.** An address given for reminders, confirmed by a link before anything is sent, with a one-click unsubscribe in every email; sent over SMTP through Swoosh (the provider is configuration). The daily digest is one email a day listing the games waiting on you, for players who choose it instead.
+
+*Done when:* in tests, a 24-hour game's day opening sends one push to a stored subscription (a stand-in push service) and one email to a confirmed address (Swoosh's test adapter) for a player whose pack isn't in, none to one whose pack is, and none twice; and opening the game from it marks a visit that came from a notification.
+
 ### M11 · Hosting
 
 Where the beta runs, and how a version gets there: deployed from tags, never branches ([workflow.md](../workflow.md)). The host is a decision with lasting cost, so it is an ADR, and the maintainer's to accept; everything that doesn't depend on it comes first.
 
 - [x] **M11a · One image, one origin.** The server serves the built client from its own origin, which the session cookie needs ([ADR-0005](../adr/0005-sign-in-written-fresh.md)): `/` is the client's page, with a Content Security Policy, and its files sit beside it. A `Dockerfile` at the root builds the client, the release and the rules into one image that migrates its database before it serves; CI builds that image, runs it against Postgres, and plays the exit test on it.
-- [ ] **M11b · The host.** An ADR choosing where the image runs, with a managed Postgres, TLS for gitgame.online, and a proxy that passes on who asked (the rate limits count by address). Needs the maintainer: the choice, and the accounts.
+- [ ] **M11b · The host.** Fly.io, per [ADR-0007](../adr/0007-where-the-beta-runs.md): one machine running the image, Fly's managed Postgres, TLS for gitgame.online. The server reads the caller's address from Fly's proxy, so the rate limits count people, not the proxy. The maintainer creates the app and its database, sets the secrets, and points the domain at it.
 - [ ] **M11c · Deploy from tags.** A workflow that builds the image for a `v*` tag and deploys it to the host, migrating first; `main` never deploys by itself.
 
 *Done when:* a tag puts a version on gitgame.online, where a stranger can play the bot in one tap.
 
 ### After M9
 
-- **M10 · Notifications:** push, email and the daily digest; "your pack is due" is the retention loop (charter decision 16).
 - **M13 · Beta launch:** strangers finish games; the Phase 0 exit (two people ask to play again unprompted) is checked here.
 
 ## Open items
