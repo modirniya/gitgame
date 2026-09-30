@@ -7,6 +7,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Fixed
+- Typing a commit message and then tapping "send pack" didn't send the pack: leaving the field redrew the hub under the tap. The message is now kept as it is typed.
+
 ## [0.1.0] - 2026-09-30
 
 The first version on the hosted service: the beta ADR-0002 makes the playtest, live at https://gitgame.online.

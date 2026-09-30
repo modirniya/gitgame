@@ -59,6 +59,19 @@ describe("the hub", () => {
     expect(node.querySelector(".branch").textContent).not.toMatch(/0$/);
   });
 
+  it("takes a commit message as it is typed, with no re-render to swallow the tap on send", () => {
+    const draft = { ops: [{ op: "commit", message: "" }], selected: [], picking: null };
+    const { node, changes } = render(view(), draft);
+    const input = node.querySelector(".pack .message");
+    input.value = "fix: the login";
+    input.dispatchEvent(new Event("input"));
+    input.dispatchEvent(new Event("change"));
+
+    expect(changes).toEqual([]);
+    expect(draft.ops[0].message).toBe("fix: the login");
+    expect(node.querySelector(".pack .cmd").textContent).toBe('git commit -m "fix: the login"');
+  });
+
   it("offers to replace a pack already sent today", () => {
     const v = view({ sent_today: ["ana", "bot"] });
     expect(render(v).node.querySelector(".send").textContent).toBe("replace today's pack");
