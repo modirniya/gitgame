@@ -56,9 +56,9 @@ The charter's exit: *a full game can be played and replayed from its log.*
 *Done when:* a game survives a server restart mid-day with nothing lost, and a stale pack is rejected with the fetch-first message.
 
 ### M5 · Days on a clock
-- [ ] Oban jobs close each day at its deadline, or as soon as every pack is in. Closing a day is idempotent, so a retried job can't resolve a day twice.
+- [x] Oban jobs close each day at its deadline, or as soon as every pack is in. Closing a day is idempotent, so a retried job can't resolve a day twice. Each day's job is enqueued in the same transaction that opens the day.
 - [x] Absence: done in M3, since it is pure rules; M5 only has to close days on time.
-- [ ] Day lengths 24h, 5m and 60s, with the same code and a different number.
+- [x] Day lengths 24h, 5m and 60s, with the same code and a different number (from `rules/online.json`).
 
 *Done when:* a scripted 60s game runs to its release unattended, with one player going absent, and the same game at 24h does too under a fake clock.
 

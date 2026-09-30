@@ -46,9 +46,9 @@ defmodule GitGame.GamesTest do
     ana = ship(game, "ana")
     raj = ship(game, "raj")
 
-    {:ok, _} = Games.send_pack(id, "ana", 1, ana)
-    {:ok, _} = Games.send_pack(id, "raj", 1, raj)
-    {:ok, %{day: 1, version: version}} = Games.close_day(id)
+    {:ok, %{closed: false}} = Games.send_pack(id, "ana", 1, ana)
+    # the last pack in closes the day at once (round-resolution §1)
+    {:ok, %{day: 1, closed: true, version: version}} = Games.send_pack(id, "raj", 1, raj)
 
     # nothing is kept in memory: loading reads the log and folds it again, as after a restart
     {:ok, loaded} = Games.load(id)
@@ -75,9 +75,8 @@ defmodule GitGame.GamesTest do
     {:ok, %{id: id}} = new_game()
     {:ok, %{game: game}} = Games.load(id)
     {:ok, _} = Games.send_pack(id, "ana", 1, %{"ops" => [%{"op" => "commit"}]})
-    {:ok, _} = Games.send_pack(id, "raj", 1, %{"ops" => []})
-    {:ok, _} = Games.send_pack(id, "ana", 1, ship(game, "ana"))
-    {:ok, _} = Games.close_day(id)
+    {:ok, %{closed: false}} = Games.send_pack(id, "ana", 1, ship(game, "ana"))
+    {:ok, %{closed: true}} = Games.send_pack(id, "raj", 1, %{"ops" => []})
 
     {:ok, %{days: [%{log: log}]}} = Games.load(id)
     assert Enum.any?(log, &(&1.type == :push_accepted and &1.player == "ana"))

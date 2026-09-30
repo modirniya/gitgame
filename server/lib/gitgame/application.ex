@@ -10,6 +10,7 @@ defmodule GitGame.Application do
     children = [
       GitGameWeb.Telemetry,
       GitGame.Repo,
+      {Oban, Application.fetch_env!(:gitgame, Oban)},
       {DNSCluster, query: Application.get_env(:gitgame, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: GitGame.PubSub},
       # Start a worker by calling: GitGame.Worker.start_link(arg)

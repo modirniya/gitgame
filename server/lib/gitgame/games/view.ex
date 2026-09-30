@@ -7,12 +7,15 @@ defmodule GitGame.Games.View do
   """
   alias GitGame.{Game, Release}
 
-  def public(%{game: %Game{} = game, version: version, sent: sent}, id) do
+  def public(%{game: %Game{} = game, version: version, sent: sent} = state, id) do
     %{
       id: id,
       version: version,
       day: game.day,
       final_day: game.final_day,
+      day_length: game.length,
+      # when the open day closes if not every pack is in first; nil once the game is over
+      deadline: if(game.released, do: nil, else: state[:deadline]),
       incident: game.incident && Map.take(game.incident, [:id, :name, :text]),
       released: game.released,
       seats: game.seats,
