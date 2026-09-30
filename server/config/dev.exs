@@ -58,7 +58,10 @@ config :gitgame, dev_routes: true
 # preview servers, which proxy /api here (ADR-0005).
 config :gitgame,
   secure_cookies: false,
-  origins: ["http://localhost:5173", "http://localhost:4173"]
+  origins: ["http://localhost:5173", "http://localhost:4173"],
+  # people reach the game at the Vite dev server, which proxies /api here; a development GitHub OAuth app's callback
+  # URL is http://localhost:5173/api/auth/github/callback
+  public_url: "http://localhost:5173"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"

@@ -22,6 +22,19 @@ defmodule GitGameWeb.Router do
     post "/games/:id/packs", GameController, :send_pack
   end
 
+  # Linking GitHub: browser navigations, not JSON calls, and the flow's state lives in the signed session cookie.
+  pipeline :auth do
+    plug :fetch_session
+    plug GitGameWeb.Plugs.Identity
+  end
+
+  scope "/api/auth", GitGameWeb do
+    pipe_through :auth
+
+    get "/github", AuthController, :github
+    get "/github/callback", AuthController, :callback
+  end
+
   # Server-Sent Events: the browser asks for text/event-stream, which the JSON pipeline would refuse.
   scope "/api", GitGameWeb do
     get "/games/:id/live", LiveController, :show

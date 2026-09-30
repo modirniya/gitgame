@@ -1,7 +1,8 @@
 defmodule GitGame.Players do
   @moduledoc """
   Players and their sessions (ADR-0005). Everyone starts anonymous, with a generated handle and a session, in one
-  request, so nothing stands between a new visitor and a game (charter priority 2). Linking GitHub comes later (M8c).
+  request, so nothing stands between a new visitor and a game (charter priority 2). Linking a GitHub account is what
+  lets them come back from another device.
 
   A session token is 32 random bytes, given to the device once and stored here only as its SHA-256. It lasts a year
   for an anonymous player, whose account is lost with the cookie, and 60 days once linked; either way it is extended
@@ -10,6 +11,7 @@ defmodule GitGame.Players do
   import Ecto.Query
   alias GitGame.Repo
   alias GitGame.Players.{Player, Session}
+  alias GitGame.Games.Seat
 
   @anonymous_days 365
   @linked_days 60
@@ -34,6 +36,50 @@ defmodule GitGame.Players do
 
   defp handle,
     do: "#{Enum.random(@adjectives)}-#{Enum.random(@animals)}-#{Enum.random(10..99)}"
+
+  @doc """
+  The player a GitHub account signs in, given the one this device is signed in as now (or nil):
+
+  - an account we haven't seen is linked to this device's anonymous player, whose games stay theirs;
+  - an account we have seen (the same person on another device) signs the device in as its own player, and takes
+    over the anonymous player's seats, except in a game where it already holds one;
+  - an account we haven't seen, on a device already linked to another, is a new player of its own.
+
+  The profile's login and avatar are refreshed each time. `{:ok, player}`.
+  """
+  def link_github(current, %{id: github_id, login: login, avatar_url: avatar}) do
+    profile = %{github_login: login, avatar_url: avatar}
+
+    Repo.transaction(fn ->
+      player =
+        case {Repo.get_by(Player, github_id: github_id), current} do
+          {nil, %Player{github_id: nil}} ->
+            current
+
+          {nil, _} ->
+            {:ok, fresh} = create_anonymous()
+            fresh
+
+          {known, %Player{github_id: nil, id: id}} when id != known.id ->
+            take_seats(known, current)
+            known
+
+          {known, _} ->
+            known
+        end
+
+      player |> Ecto.Changeset.change(Map.put(profile, :github_id, github_id)) |> Repo.update!()
+    end)
+  end
+
+  defp take_seats(to, from) do
+    taken = from s in Seat, where: s.player_id == ^to.id, select: s.game_id
+
+    Repo.update_all(
+      from(s in Seat, where: s.player_id == ^from.id and s.game_id not in subquery(taken)),
+      set: [player_id: to.id]
+    )
+  end
 
   @doc "Signs a device in as `player`: returns the token for its cookie, and when it expires."
   def sign_in(%Player{} = player) do

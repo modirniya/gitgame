@@ -23,6 +23,14 @@ end
 config :gitgame, GitGameWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
+# Linking GitHub (ADR-0005) is on when the OAuth app's credentials are in the environment, and off otherwise:
+# anonymous play needs nothing.
+if client_id = System.get_env("GITGAME_GITHUB_CLIENT_ID") do
+  config :gitgame, :github,
+    client_id: client_id,
+    client_secret: System.fetch_env!("GITGAME_GITHUB_CLIENT_SECRET")
+end
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
