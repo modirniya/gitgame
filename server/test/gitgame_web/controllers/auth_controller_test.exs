@@ -31,6 +31,12 @@ defmodule GitGameWeb.AuthControllerTest do
     assert query["code_challenge_method"] == "S256"
     assert query["redirect_uri"] == GitGameWeb.public_url() <> "/api/auth/github/callback"
     refute Map.has_key?(query, "scope")
+
+    # the flow's state waits in a signed cookie that is Secure wherever the session cookie is
+    %{secure: secure, same_site: "Lax"} =
+      conn |> get(~p"/api/auth/github") |> Map.fetch!(:resp_cookies) |> Map.fetch!("_gitgame_key")
+
+    assert secure == Application.get_env(:gitgame, :secure_cookies, true)
   end
 
   test "a GitHub account we haven't seen is linked to this device's player, games and all" do
