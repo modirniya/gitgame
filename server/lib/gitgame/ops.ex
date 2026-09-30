@@ -5,7 +5,7 @@ defmodule GitGame.Ops do
 
   - `GitGame.Ops.Local`: ops on your own side of the table (`add`, `commit`, arming a trap)
   - `GitGame.Ops.Remote`: ops that meet everyone else's work on `main` (`push`, `pull`, `pull --rebase`)
-  - command cards follow (M2e)
+  - `GitGame.Ops.Commands`: the command cards (`blame`, `revert`, `push --force`, and the `reflog` it can trigger)
 
   `cost/3` is asked at the moment the op runs, because some ops are free when there is nothing to do. `run/3` returns
   `{:ok, game, events}` or `{:failed, game, events}`; a failure is reported in Git's own words and, per
@@ -22,7 +22,10 @@ defmodule GitGame.Ops do
     commit: GitGame.Ops.Local,
     arm: GitGame.Ops.Local,
     push: GitGame.Ops.Remote,
-    pull: GitGame.Ops.Remote
+    pull: GitGame.Ops.Remote,
+    blame: GitGame.Ops.Commands,
+    revert: GitGame.Ops.Commands,
+    force: GitGame.Ops.Commands
   }
 
   def cost(game, player, %{op: op} = o) do
