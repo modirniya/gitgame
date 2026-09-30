@@ -130,6 +130,8 @@ Taken ahead of M10 and M11, which each need a decision first (a notification pro
 - [x] **M12a · Marks.** A `beta_marks` table for what the log can't know: a player's visit (at most one a day, with where it came from once notifications exist, so "came back unprompted" can be told apart), and a replay opened. Recorded by the server as it answers; nothing is sent from the client for it.
 - [x] **M12b · The report.** `mix gitgame.beta_report` prints, from the logs and the marks: games started and finished (the charter's "≥ 50% of started games reach a release"), how late in the day packs were sent against how they went, failed pushes and the next op of whoever failed, absences and who left, replays per finished game, and players who came back on another day or started another game after finishing one, unprompted.
 
+- [x] **M12c · Rate limits.** The abuse control [ADR-0005](../adr/0005-sign-in-written-fresh.md) asks for before strangers arrive: new players per address, and games and rooms per player, each capped per hour (`config :gitgame, :rate_limits`), answered with `429` and `retry-after`. Behind a proxy, M11 must pass on who asked.
+
 *Done when:* the report runs on a database of generated games and its numbers match what a test computed from the same games.
 
 *Met 2026-09-30* by `GitGame.Beta.ReportTest`. It found one thing worth reporting apart: a game whose people have all left plays itself to its release with the bots, so the report counts games *finished by people* (someone still in the company) separately from games that reached a release, and the charter's share is of the first.

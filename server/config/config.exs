@@ -13,6 +13,10 @@ config :gitgame, Oban, repo: GitGame.Repo, queues: [days: 10]
 
 config :gitgame, rules_dir: Path.expand("../../rules", __DIR__)
 
+# Per hour: new players from one address, and games and rooms made by one player (GitGameWeb.Plugs.RateLimit). A
+# classroom behind one address makes a few dozen players; a script makes thousands.
+config :gitgame, rate_limits: %{players: 60, games: 120}
+
 config :gitgame,
   namespace: GitGame,
   ecto_repos: [GitGame.Repo],

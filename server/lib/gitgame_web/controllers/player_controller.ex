@@ -10,6 +10,8 @@ defmodule GitGameWeb.PlayerController do
 
   action_fallback GitGameWeb.FallbackController
 
+  plug GitGameWeb.Plugs.RateLimit, [bucket: :players, by: :ip] when action == :create
+
   # A device asking who it is has just opened the game, and the beta counts that as a visit (M12); `via` says what
   # brought it back, once notifications exist. A device already signed in keeps its player: pressing "play" twice
   # never makes two of you.

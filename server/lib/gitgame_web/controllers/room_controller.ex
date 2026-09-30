@@ -9,6 +9,8 @@ defmodule GitGameWeb.RoomController do
   action_fallback GitGameWeb.FallbackController
 
   plug :signed_in when action in [:create, :join, :update, :start]
+  # rooms and games share a count: either is a thing one player makes
+  plug GitGameWeb.Plugs.RateLimit, [bucket: :games, by: :player] when action == :create
 
   def create(conn, _params) do
     with {:ok, room} <- Rooms.open(conn.assigns.player),
