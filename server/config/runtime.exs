@@ -32,6 +32,10 @@ if client_id = System.get_env("GITGAME_GITHUB_CLIENT_ID") do
 end
 
 if config_env() == :prod do
+  # a release carries the rules it was built with, in its priv (the Dockerfile copies rules/ there)
+  config :gitgame,
+    rules_dir: System.get_env("GITGAME_RULES_DIR") || Application.app_dir(:gitgame, "priv/rules")
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """

@@ -84,8 +84,11 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 - Rate limits (M12c): new players per address, and games and rooms per player, are capped per hour, answered with `429` and `retry-after`, so a script can't mint players or games without end (ADR-0005).
 
+- One image, one origin (M11a): the server serves the built client at `/`, with a Content Security Policy, from the same origin as the API. A root `Dockerfile` builds the client, the release and the rules into one image that migrates its database before serving, and CI builds that image, runs it against Postgres and plays a game on it. Where it runs is still to be decided.
+
 ### Changed
 - Rules v0.2. ADR-0003: a day's packs resolve together at the deadline, in a seeded random order, instead of on arrival. A plain pull takes a merge token only when it merges unpushed commits. Hand limit of 10. The deck has 5 `push --force` and 4 `reflog` cards (was 3 and 3), 33 command cards in all. The online rules are data in `rules/online.json`; `round-resolution.md` is spec v0.2 with its five ambiguities settled; the print-and-play PDF is rebuilt.
 
 ### Fixed
+- Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.

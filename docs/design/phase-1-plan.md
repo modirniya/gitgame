@@ -136,10 +136,19 @@ Taken ahead of M10 and M11, which each need a decision first (a notification pro
 
 *Met 2026-09-30* by `GitGame.Beta.ReportTest`. It found one thing worth reporting apart: a game whose people have all left plays itself to its release with the bots, so the report counts games *finished by people* (someone still in the company) separately from games that reached a release, and the charter's share is of the first.
 
+### M11 · Hosting
+
+Where the beta runs, and how a version gets there: deployed from tags, never branches ([workflow.md](../workflow.md)). The host is a decision with lasting cost, so it is an ADR, and the maintainer's to accept; everything that doesn't depend on it comes first.
+
+- [x] **M11a · One image, one origin.** The server serves the built client from its own origin, which the session cookie needs ([ADR-0005](../adr/0005-sign-in-written-fresh.md)): `/` is the client's page, with a Content Security Policy, and its files sit beside it. A `Dockerfile` at the root builds the client, the release and the rules into one image that migrates its database before it serves; CI builds that image, runs it against Postgres, and plays the exit test on it.
+- [ ] **M11b · The host.** An ADR choosing where the image runs, with a managed Postgres, TLS for gitgame.online, and a proxy that passes on who asked (the rate limits count by address). Needs the maintainer: the choice, and the accounts.
+- [ ] **M11c · Deploy from tags.** A workflow that builds the image for a `v*` tag and deploys it to the host, migrating first; `main` never deploys by itself.
+
+*Done when:* a tag puts a version on gitgame.online, where a stranger can play the bot in one tap.
+
 ### After M9
 
 - **M10 · Notifications:** push, email and the daily digest; "your pack is due" is the retention loop (charter decision 16).
-- **M11 · Hosting:** an ADR choosing the host (none is chosen yet), then deploy from tags, never branches ([workflow.md](../workflow.md)).
 - **M13 · Beta launch:** strangers finish games; the Phase 0 exit (two people ask to play again unprompted) is checked here.
 
 ## Open items

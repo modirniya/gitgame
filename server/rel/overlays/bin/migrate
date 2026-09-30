@@ -1,0 +1,5 @@
+#!/bin/sh
+# Migrates the database the release points at (DATABASE_URL). Run before starting a new version.
+set -eu
+cd -P -- "$(dirname -- "$0")"
+exec ./gitgame eval GitGame.Deploy.migrate

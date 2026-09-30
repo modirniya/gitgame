@@ -55,6 +55,20 @@ mix gitgame.beta_report          # readable
 mix gitgame.beta_report --json   # for a script
 ```
 
+## Production
+
+The root `Dockerfile` builds the whole game into one image: the web client, the server's release, and the rules. It serves the client from the same origin as `/api`, which the session cookie needs, and migrates its database before it starts. It needs:
+
+| | |
+|---|---|
+| `DATABASE_URL` | `ecto://user:password@host/database` |
+| `SECRET_KEY_BASE` | signs cookies: `mix phx.gen.secret` |
+| `PHX_HOST` | the host people reach the game at, e.g. `gitgame.online` |
+| `PORT` | where it listens (default 4000) |
+| `GITGAME_GITHUB_CLIENT_ID`, `GITGAME_GITHUB_CLIENT_SECRET` | optional: linking GitHub |
+
+Behind a proxy, the proxy must terminate TLS and pass on `x-forwarded-proto`. Without Docker, the same release is `MIX_ENV=prod mix release`, once `web/dist/` has been copied into `priv/static/` and `rules/` into `priv/rules/` (see the `Dockerfile`), then `bin/migrate` and `bin/server`. Where it runs is M11's decision; CI builds the image and plays a game against it on every pull request.
+
 ## Before you push
 
 CI runs exactly these, and fails on any of them:
