@@ -132,3 +132,16 @@ it("opens a day with the incident, your draws, today's ops, and where you stand"
   // ana is one behind in the fixture
   expect(node.querySelector(".then").textContent).toMatch(/^You are 1 behind: a push would be rejected/);
 });
+
+it("CI turns the real commits on main, and leads to the scores", () => {
+  const flips = [
+    { commit: "53d8cce", author: "ana", bug: false, blamed_now: false },
+    { commit: "15efd4d", author: "bot", bug: true, blamed_now: true },
+  ];
+  const node = screen([{ type: "ci_ran", by: "bot", day: 11, bugs: 1, production_down: false, flips }], "ana", {
+    released: { day: 11, bugs: 1, production_down: false },
+  });
+  expect([...node.querySelectorAll(".ci-grid .card")].map((c) => c.dataset.id)).toEqual(["53d8cce", "15efd4d"]);
+  expect(node.querySelector(".stamp").textContent).toBe("1 bug reached production");
+  expect(node.querySelector(".actions .primary").textContent).toBe("the scores");
+});

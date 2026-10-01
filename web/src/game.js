@@ -13,9 +13,8 @@ import { moments } from "./moments.js";
 import { transcript } from "./transcript.js";
 import { momentScreen } from "./screens.js";
 import { catchup, recall, remember } from "./catchup.js";
-import { nudge } from "./whoami.js";
 import { offerReminders, remindButton } from "./remind.js";
-import { whatDecidedIt } from "./verdict.js";
+import { scoreboard } from "./release.js";
 import { feedbackBox } from "./feedback.js";
 import { guideLayer, guideStep, highlight, isGuided, setGuided } from "./guide.js";
 
@@ -259,50 +258,4 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
       document.removeEventListener("keydown", key);
     },
   };
-}
-
-// O-Scoreboard: the totals, and the points each was made of (rules/deck.json scoring).
-function scoreboard(view, me, feedback) {
-  const rows = [...view.seats].sort((a, b) => view.scores[b].total - view.scores[a].total);
-  const parts = (s) =>
-    ["lines", "fixes", "blame", "sins", "grudges", "merge"]
-      .filter((k) => s[k])
-      .map((k) => `${k} ${s[k] > 0 ? "+" : ""}${s[k]}`);
-
-  return el(
-    "section",
-    { class: "view scoreboard" },
-    el(
-      "div",
-      { class: "body" },
-      el("h1", {}, "v1.0 shipped"),
-      el(
-        "p",
-        { class: view.released.production_down ? "error" : "muted" },
-        view.released.production_down ? "Production is down." : `${view.released.bugs} bugs reached production.`,
-      ),
-      el("p", { class: "verdict" }, whatDecidedIt(view.scores)),
-      el(
-        "ol",
-        { class: "seats" },
-        rows.map((id) =>
-          el(
-            "li",
-            { class: `seat${id === view.you?.player ? " you" : ""}` },
-            el("span", { class: "who" }, id),
-            el("span", { class: "score" }, view.scores[id].total),
-            el("span", { class: "facts" }, parts(view.scores[id]).join(" · ")),
-          ),
-        ),
-      ),
-      feedback,
-      me && nudge(me),
-    ),
-    el(
-      "div",
-      { class: "actions" },
-      el("a", { class: "button", href: `#/r/${view.id}` }, "replay it"),
-      el("a", { class: "button primary", href: "#/" }, "new game"),
-    ),
-  );
 }
