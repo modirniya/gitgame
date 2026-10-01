@@ -7,6 +7,8 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-09-30
+
 ### Added
 - A feedback box at the end of every game (M13b): the scoreboard takes a note of up to 1000 characters for the maintainer, one per player and game, which they can change later. Only someone who held a seat can leave one, and only once the game is over; nobody else sees it. The beta report counts the notes, and `--feedback` prints them.
 
@@ -144,7 +146,8 @@ The first version on the hosted service: the beta ADR-0002 makes the playtest, l
 - Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.
 
-[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/modirniya/gitgame/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/modirniya/gitgame/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/modirniya/gitgame/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/modirniya/gitgame/compare/v0.1.0...v0.1.1
