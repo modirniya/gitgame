@@ -15,8 +15,9 @@ defmodule GitGame.Bot do
 
   Each op carries a `why` (M14b), which everyone at the table reads beside the bot's command, so a why says only what
   anyone could see: the ops themselves, `main`, whether the bot was behind. Never its hand, and never whether its own
-  face-down commit is a bug.
+  face-down commit is a bug. The sentences are in `GitGame.Bot.Why`, in the bot's voice or, for a hint, in yours.
   """
+  alias GitGame.Bot.Why
 
   @messages %{
     "auth.js" => [
@@ -46,12 +47,16 @@ defmodule GitGame.Bot do
     ]
   }
 
-  @doc "The day's pack for the player whose view this is, as JSON: `%{\"ops\" => [...], \"discard\" => []}`."
-  def write_pack(view) do
+  @doc """
+  The day's pack for the player whose view this is, as JSON: `%{"ops" => [...], "discard" => []}`. `voice: :you`
+  words its whys for the person in that seat, for a hint (M15k); the ops are the same.
+  """
+  def write_pack(view, opts \\ []) do
     me = view.you.player
 
     s = %{
       view: view,
+      voice: Keyword.get(opts, :voice, :it),
       me: me,
       you: view.you,
       pub: view.players[me],
@@ -83,10 +88,7 @@ defmodule GitGame.Bot do
       s = if s.you.local != [], do: s |> pull() |> push(), else: s
 
       s
-      |> add(
-        %{"op" => "tag", "why" => "main is the size of a release, and it isn't behind on points"},
-        1
-      )
+      |> add(%{"op" => "tag", "why" => why(s, :release)}, 1)
       |> Map.put(:done, true)
     else
       s
@@ -105,13 +107,7 @@ defmodule GitGame.Bot do
          Enum.any?(ahead, &(&1.lines >= 4)),
        do:
          s
-         |> add(
-           %{
-             "op" => "force",
-             "why" => "someone else's big commit is ahead of it: it overwrites main"
-           },
-           1
-         )
+         |> add(%{"op" => "force", "why" => why(s, :force)}, 1)
          |> Map.merge(%{pushing: true, forced: true}),
        else: s
   end
@@ -122,7 +118,7 @@ defmodule GitGame.Bot do
   defp ship(s) do
     cond do
       s.you.local != [] -> s |> pull() |> push()
-      s.pub.behind > 0 and s.left >= 3 -> pull(s, "main has moved: it catches up")
+      s.pub.behind > 0 and s.left >= 3 -> pull(s, :catch_up)
       true -> s
     end
   end
@@ -139,16 +135,7 @@ defmodule GitGame.Bot do
       |> Enum.max_by(& &1.lines, fn -> nil end)
 
     if (commands?(s, "blame") and target) && target.lines >= 5,
-      do:
-        add(
-          s,
-          %{
-            "op" => "blame",
-            "target" => target.id,
-            "why" => "it blames the biggest face-down commit on main"
-          },
-          1
-        ),
+      do: add(s, %{"op" => "blame", "target" => target.id, "why" => why(s, :blame)}, 1),
       else: s
   end
 
@@ -165,16 +152,7 @@ defmodule GitGame.Bot do
     at_tip = s.pub.behind == 0 or s.pulled
 
     if (commands?(s, "revert") and own) && at_tip,
-      do:
-        add(
-          s,
-          %{
-            "op" => "revert",
-            "target" => own.id,
-            "why" => "its own bug is face-up on main: it reverts it"
-          },
-          1
-        ),
+      do: add(s, %{"op" => "revert", "target" => own.id, "why" => why(s, :revert)}, 1),
       else: s
   end
 
@@ -201,7 +179,7 @@ defmodule GitGame.Bot do
         pick != [] ->
           s
           |> add(
-            %{"op" => "add", "cards" => Enum.map(pick, & &1.id), "why" => "it builds a commit"},
+            %{"op" => "add", "cards" => Enum.map(pick, & &1.id), "why" => why(s, :add)},
             1
           )
           |> commit(pick)
@@ -216,7 +194,7 @@ defmodule GitGame.Bot do
 
   defp arm(s) do
     if "reflog" not in s.you.armed and Enum.any?(s.you.hand, &(&1[:command] == "reflog")),
-      do: add(s, %{"op" => "arm", "trap" => "reflog", "why" => "a trap, face-down"}, 0),
+      do: add(s, %{"op" => "arm", "trap" => "reflog", "why" => why(s, :arm)}, 0),
       else: s
   end
 
@@ -231,12 +209,7 @@ defmodule GitGame.Bot do
   defp commit(s, cards) do
     before = length(s.ops)
 
-    s =
-      add(
-        s,
-        %{"op" => "commit", "message" => message(cards), "why" => "it commits what it staged"},
-        1
-      )
+    s = add(s, %{"op" => "commit", "message" => message(cards), "why" => why(s, :commit)}, 1)
 
     if length(s.ops) > before, do: Map.put(s, :committed, true), else: s
   end
@@ -244,29 +217,23 @@ defmodule GitGame.Bot do
   defp push(s),
     do:
       s
-      |> add(%{"op" => "push", "why" => "it ships what it has committed"}, 1)
+      |> add(%{"op" => "push", "why" => why(s, :push)}, 1)
       |> Map.put(:pushing, true)
 
   # A pull costs nothing if nothing moved; if the bot is behind it pays for a plain pull, or a rebase when it already
   # holds a merge token and can afford one, and it declares a strategy for any conflict it can see coming.
-  defp pull(s, why \\ nil)
-  defp pull(%{pulled: true} = s, _why), do: s
+  defp pull(s, reason \\ nil)
+  defp pull(%{pulled: true} = s, _reason), do: s
 
-  defp pull(s, why) do
+  defp pull(s, reason) do
     behind = s.pub.behind
     rebase = behind > 0 and s.pub.tokens.merge >= 1 and s.left >= 3
     {strategy, extra} = strategy(s)
     cost = if behind > 0, do: if(rebase, do: 2, else: 1) + extra, else: 0
-
-    why =
-      why ||
-        if(behind > 0,
-          do: "main has moved: it pulls before it pushes",
-          else: "it pulls first, in case someone pushes before it"
-        )
+    reason = reason || if(behind > 0, do: :pull_behind, else: :pull)
 
     op =
-      %{"op" => "pull", "rebase" => rebase, "why" => why}
+      %{"op" => "pull", "rebase" => rebase, "why" => why(s, reason)}
       |> then(&if(strategy, do: Map.put(&1, "strategy", strategy), else: &1))
 
     before = length(s.ops)
@@ -304,6 +271,8 @@ defmodule GitGame.Bot do
   # main as the rest of the pack finds it: a force-push earlier in the pack erases everything past the bot's pointer
   defp main(%{forced: true} = s), do: Enum.take(s.view.main, s.pub.pointer)
   defp main(s), do: s.view.main
+
+  defp why(s, key), do: Why.say(key, s.voice)
 
   defp commands?(s, card),
     do: s.view.commands_allowed and Enum.any?(s.you.hand, &(&1[:command] == card))
