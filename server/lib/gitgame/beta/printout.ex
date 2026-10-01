@@ -5,23 +5,30 @@ defmodule GitGame.Beta.Printout do
   there is no Mix (M13a):
 
       --json               the numbers as JSON
-      --since 2026-10-05   only games started on or after that day, and the visits and replays marked since
+      --since 2026-10-05   only games started on or after that day, and the visits, replays and notes since
+      --feedback           the notes people left at the end of their games, too, oldest first
   """
   alias GitGame.Beta.Report
+  alias GitGame.Feedback
 
   @doc "The report for `args`, as the text to print. Raises `ArgumentError` on an unknown option or a bad date."
   def run(args) do
-    {opts, rest, invalid} = OptionParser.parse(args, strict: [json: :boolean, since: :string])
+    {opts, rest, invalid} =
+      OptionParser.parse(args, strict: [json: :boolean, since: :string, feedback: :boolean])
 
     if rest != [] or invalid != [],
-      do: raise(ArgumentError, "usage: beta_report [--json] [--since YYYY-MM-DD]")
+      do: raise(ArgumentError, "usage: beta_report [--json] [--since YYYY-MM-DD] [--feedback]")
 
     since = opts[:since] && Date.from_iso8601!(opts[:since])
     report = Report.build(since: since)
+    notes = if opts[:feedback], do: Feedback.list(since)
 
-    if opts[:json],
-      do: JSON.encode!(Map.put(report, :since, since)),
-      else: format(report, since)
+    cond do
+      opts[:json] && notes -> JSON.encode!(Map.merge(report, %{since: since, notes: notes}))
+      opts[:json] -> JSON.encode!(Map.put(report, :since, since))
+      notes -> format(report, since) <> notes(notes)
+      true -> format(report, since)
+    end
   end
 
   @doc "The report as a person reads it."
@@ -48,7 +55,19 @@ defmodule GitGame.Beta.Printout do
     ## the exit
     replays         #{r.replays.opened} opened by #{r.replays.players} players; #{r.replays.finished_games_replayed} finished games replayed
     came back       #{r.returning.came_back_another_day} on another day unprompted; #{r.returning.played_again_after_finishing} started a game after finishing one
+
+    ## feedback
+    #{r.feedback.notes} notes from #{r.feedback.players} players
     """
+  end
+
+  # each note under who left it, on which game and when, indented so a note's own lines can't pass for a heading
+  defp notes(notes) do
+    for n <- notes, into: "\n## the notes\n" do
+      at = Calendar.strftime(n.at, "%Y-%m-%d %H:%M")
+      body = n.body |> String.split("\n") |> Enum.map_join("\n", &("    " <> &1))
+      "\n#{at}  #{n.handle}  game #{String.slice(n.game_id, 0, 8)}\n#{body}\n"
+    end
   end
 
   defp row(k, c),

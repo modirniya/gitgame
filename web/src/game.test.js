@@ -26,3 +26,17 @@ it("warns before sending a pack that leaves ops unspent, and sends it on the sec
   expect(sendPack).toHaveBeenCalledOnce();
   screen.leave();
 });
+
+it("ends a game on the scoreboard, with a box for a note to the maintainer", async () => {
+  const over = view({ released: { day: 12, bugs: 0, production_down: false } });
+  const remote = {
+    fetchView: async () => over,
+    live: () => () => {},
+    feedback: async () => ({ body: null, max: 1000 }),
+  };
+  const screen = gameScreen({ remote, go: () => {}, id: "g1" });
+  await settle();
+  expect(screen.node.querySelector(".scoreboard h1").textContent).toBe("v1.0 shipped");
+  expect(screen.node.querySelector(".scoreboard form.feedback textarea")).not.toBeNull();
+  screen.leave();
+});

@@ -10,7 +10,8 @@ defmodule GitGame.Beta.Report do
     push went through;
   - **failed pushes** (question 2): what the player who failed did next;
   - **absences** (question 3): packs that never came, and who left the company;
-  - **replays**, and **returning** players: back on another day unprompted, or starting a game after finishing one.
+  - **replays**, and **returning** players: back on another day unprompted, or starting a game after finishing one;
+  - **feedback:** how many notes people left at the end of their games (M13b).
 
   `since:` a date counts only the games started on or after it, and the visits and replays marked on or after it, so the
   games played while the beta was built and tested don't count as strangers' (M13a).
@@ -35,7 +36,8 @@ defmodule GitGame.Beta.Report do
       failed_pushes: failed(histories, people),
       absences: absences(histories, people),
       replays: replays(histories, since),
-      returning: returning(held, histories, since)
+      returning: returning(held, histories, since),
+      feedback: feedback(since)
     }
   end
 
@@ -231,6 +233,12 @@ defmodule GitGame.Beta.Report do
       |> Enum.filter(&(&1.type == "day_closed"))
       |> List.last()
       |> Map.fetch!(:inserted_at)
+
+  # what people said at the end of their games (M13b); `--feedback` prints the notes themselves
+  defp feedback(since) do
+    notes = GitGame.Feedback.list(since)
+    %{notes: length(notes), players: notes |> Enum.map(& &1.handle) |> Enum.uniq() |> length()}
+  end
 
   defp share(_, 0), do: nil
   defp share(n, of), do: Float.round(n / of, 3)

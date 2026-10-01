@@ -180,7 +180,7 @@ Strangers play the beta, and it answers what the playtest would have ([ADR-0002]
 - [ ] **M13b · Ready for strangers.** Done once, before anyone is invited:
   - **The optional features.** Each one launched is tried once on the deployment (`server/README.md`, "Turning on the optional features"), which closes the open item "Checks only a deployment can make". **Open:** which of GitHub sign-in, email and push are on at launch. Anonymous play needs none of them.
   - **A restore.** `rps-db`'s snapshot is restored once into a scratch app, so a restore has been done before one is needed ([ADR-0008](../adr/0008-the-beta-shares-a-postgres.md)). The maintainer's to do: it creates an app.
-  - **Feedback.** Somewhere for players to say what broke or what they think, linked from the start screen. **Open:** where (GitHub issues, an address, a form).
+  - **Feedback.** Somewhere for players to say what broke or what they think. *Decided 2026-09-30:* a box on every game's scoreboard, up to 1000 characters, one note per player and game that they can rewrite; read with `bin/beta_report --feedback`. Built.
   - **Capacity.** One `shared-cpu-1x` machine with 512 MB, with live streams capped at 2,000 connections (`fly.toml`). New players are capped at 60 an hour from one address (`config :gitgame, :rate_limits`), which an office or a conference behind one address could reach. **Open:** whether that is enough for the invitations below; more costs money.
 - [ ] **M13c · Invite.** **Open:**
   - who, how many and when, in waves or at once;

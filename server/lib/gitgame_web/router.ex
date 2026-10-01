@@ -21,6 +21,8 @@ defmodule GitGameWeb.Router do
     get "/games/:id", GameController, :show
     get "/games/:id/days/:day", GameController, :day
     post "/games/:id/packs", GameController, :send_pack
+    get "/games/:id/feedback", FeedbackController, :show
+    put "/games/:id/feedback", FeedbackController, :update
 
     get "/email", EmailController, :show
     put "/email", EmailController, :update

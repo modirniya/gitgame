@@ -3,6 +3,7 @@ defmodule GitGame.Beta.ReportTest do
   use GitGame.DataCase, async: true
   alias GitGame.{Beta, Games, Players}
   alias GitGame.Beta.{Mark, Printout, Report}
+  alias GitGame.Feedback.Note
   alias GitGame.Games.Record
 
   defp game(player, seed) do
@@ -90,7 +91,7 @@ defmodule GitGame.Beta.ReportTest do
     assert r.returning == %{came_back_another_day: 1, played_again_after_finishing: 1}
   end
 
-  test "since a date, only the games started on or after it, and the visits and replays marked since, count" do
+  test "since a date, only the games started on or after it, and the visits, replays and notes since, count" do
     {:ok, ana} = Players.create_anonymous()
 
     # a game played out while the beta was being built, then one started on launch day
@@ -101,7 +102,7 @@ defmodule GitGame.Beta.ReportTest do
       set: [inserted_at: ~U[2026-09-01 12:00:00.000000Z]]
     )
 
-    _launched = game(ana, 2)
+    launched = game(ana, 2)
 
     for {kind, day} <- [
           {"visit", ~D[2026-09-01]},
@@ -110,15 +111,38 @@ defmodule GitGame.Beta.ReportTest do
         ],
         do: Repo.insert!(%Mark{kind: kind, player_id: ana.id, day: day, game_id: built})
 
+    Repo.insert!(%Note{
+      player_id: ana.id,
+      game_id: built,
+      body: "too many conflicts",
+      inserted_at: ~U[2026-09-02 09:00:00.000000Z]
+    })
+
+    Repo.insert!(%Note{player_id: ana.id, game_id: launched, body: "fun"})
+
     all = Report.build()
     assert all.games.started == 2 and all.games.finished == 1
     assert all.replays.opened == 1
     assert all.returning == %{came_back_another_day: 1, played_again_after_finishing: 1}
+    assert all.feedback == %{notes: 2, players: 1}
 
     since = Report.build(since: Date.utc_today())
     assert since.games == %{started: 1, finished: 0, finished_by_people: 0, share: 0.0}
     assert since.replays.opened == 0
     assert since.returning == %{came_back_another_day: 0, played_again_after_finishing: 0}
+    assert since.feedback == %{notes: 1, players: 1}
+
+    # --feedback prints the notes themselves, each under who left it, indented
+    text = Printout.run(["--feedback", "--since", Date.to_iso8601(Date.utc_today())])
+    assert text =~ "1 notes from 1 players"
+
+    assert text =~
+             ~r/## the notes\n\n\S+ \S+  #{ana.handle}  game #{String.slice(launched, 0, 8)}\n    fun\n/
+
+    refute text =~ "too many conflicts"
+
+    json = JSON.decode!(Printout.run(["--json", "--feedback"]))
+    assert Enum.map(json["notes"], & &1["body"]) == ["too many conflicts", "fun"]
   end
 
   test "the printout is the report as text, or as JSON with --json, from --since a date" do
