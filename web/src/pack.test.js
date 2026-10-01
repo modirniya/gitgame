@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { actions, add, price } from "./pack.js";
+import { actions, add, price, unspent } from "./pack.js";
 import { view } from "./view.fixture.js";
 
 // In the fixture ana is 1 behind: bot's 15efd4d (README.md) is on main past her pointer.
@@ -104,5 +104,26 @@ describe("what the hub offers", () => {
   it("offers nothing more once the pack is full", () => {
     const full = [{ op: "pull" }, { op: "pull" }, { op: "pull" }, { op: "pull" }];
     expect(actions(view(), full).pull).toBe("a pack is at most 4 ops");
+  });
+});
+
+describe("ops left unspent", () => {
+  const atTip = (over = {}) => {
+    const v = view(over);
+    return { ...v, players: { ...v.players, ana: { ...v.players.ana, behind: 0 } } };
+  };
+
+  it("says how many ops are left and what would spend them", () => {
+    // ana is 1 behind, holds two commit cards and a push --force
+    expect(unspent(view(), [])).toEqual({ left: 3, moves: ["add", "pull", "force"] });
+    const committed = unspent(atTip(), [{ op: "add", cards: ["k1"] }, { op: "commit" }]);
+    expect(committed.left).toBe(1);
+    expect(committed.moves).toContain("push");
+  });
+
+  it("says nothing when the pack spends the day, is full, or nothing left would do anything", () => {
+    expect(unspent(view(), [{ op: "pull" }, { op: "add", cards: ["k1"] }, { op: "commit" }])).toBeNull();
+    expect(unspent(view({ budget: 4 }), [{ op: "pull" }, { op: "pull" }, { op: "pull" }, { op: "pull" }])).toBeNull();
+    expect(unspent(atTip({ you: { ...view().you, hand: [] } }), [])).toBeNull();
   });
 });

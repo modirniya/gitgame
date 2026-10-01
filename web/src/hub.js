@@ -5,7 +5,7 @@
 import { el } from "./dom.js";
 import { card, commandName, commit } from "./cards.js";
 import { strip } from "./table.js";
-import { actions, add, consequences, price } from "./pack.js";
+import { actions, add, consequences, price, unspent } from "./pack.js";
 
 /** An op as the command a terminal would show. */
 export function command(op, view) {
@@ -149,14 +149,29 @@ function row(view, draft, change, r, i) {
   );
 }
 
-export function hub({ view, draft, change, send, sending = false, error = "" }) {
+// the action buttons' names, which the warning about unspent ops repeats
+const LABELS = {
+  add: "add",
+  commit: "commit",
+  pull: "pull",
+  push: "push",
+  blame: "blame",
+  revert: "revert",
+  force: "push --force",
+  arm: "arm reflog",
+  tag: "tag v1.0",
+};
+
+/** `warned`: the send button was tapped with ops left unspent, so the hub says what could still be done. */
+export function hub({ view, draft, change, send, sending = false, error = "", warned = false }) {
   const priced = price(view, draft.ops);
+  const unused = warned && unspent(view, draft.ops);
   const can = actions(view, draft.ops, draft.selected);
   const will = consequences(view, draft.ops, draft.selected);
   const put = (op) => change({ ...draft, ops: add(view, draft.ops, op), selected: [], picking: null });
   const sent = view.sent_today.includes(view.you.player);
 
-  const action = (key, label, op) =>
+  const action = (key, op) =>
     el(
       "button",
       {
@@ -166,7 +181,7 @@ export function hub({ view, draft, change, send, sending = false, error = "" }) 
         title: can[key] ?? "",
         onclick: () => (op ? put(op()) : change({ ...draft, picking: key })),
       },
-      label,
+      LABELS[key],
       // what it would do, in your situation; or, when it can't be played, why not
       can[key] ? el("span", { class: "why" }, can[key]) : will[key] && el("span", { class: "will" }, will[key]),
     );
@@ -221,15 +236,15 @@ export function hub({ view, draft, change, send, sending = false, error = "" }) 
     el(
       "div",
       { class: "actions" },
-      action("add", "add", () => ({ op: "add", cards: draft.selected.filter((id) => inHand.has(id)) })),
-      action("commit", "commit", () => ({ op: "commit", message: "" })),
-      action("pull", "pull", () => ({ op: "pull" })),
-      action("push", "push", () => ({ op: "push" })),
-      action("blame", "blame"),
-      action("revert", "revert"),
-      action("force", "push --force", () => ({ op: "force" })),
-      action("arm", "arm reflog", () => ({ op: "arm", trap: "reflog" })),
-      action("tag", "tag v1.0", () => ({ op: "tag" })),
+      action("add", () => ({ op: "add", cards: draft.selected.filter((id) => inHand.has(id)) })),
+      action("commit", () => ({ op: "commit", message: "" })),
+      action("pull", () => ({ op: "pull" })),
+      action("push", () => ({ op: "push" })),
+      action("blame"),
+      action("revert"),
+      action("force", () => ({ op: "force" })),
+      action("arm", () => ({ op: "arm", trap: "reflog" })),
+      action("tag", () => ({ op: "tag" })),
     ),
     el(
       "ol",
@@ -238,11 +253,17 @@ export function hub({ view, draft, change, send, sending = false, error = "" }) 
         ? priced.rows.map((r, i) => row(view, draft, change, r, i))
         : el("li", { class: "empty" }, "# an empty pack: nothing happens, and two in a row leaves the company"),
     ),
+    unused &&
+      el(
+        "p",
+        { class: "unspent", role: "alert" },
+        `# ${unused.left} of today's ${view.budget} ops unspent: you could still ${unused.moves.map((k) => LABELS[k]).join(", ")}`,
+      ),
     el("p", { class: "error", role: "alert" }, error),
     el(
       "button",
       { class: "primary send", "data-guide": "send", disabled: sending, onclick: send },
-      sending ? "sending…" : sent ? "replace today's pack" : "send pack",
+      sending ? "sending…" : unused ? "send anyway" : sent ? "replace today's pack" : "send pack",
     ),
   );
 }
