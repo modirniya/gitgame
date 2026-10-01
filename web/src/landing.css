@@ -29,26 +29,6 @@
   gap: 16px;
 }
 
-/* a link that leads somewhere as a button would: the game's button, for an <a> */
-a.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 0 16px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--raised);
-  color: var(--ink);
-  text-decoration: none;
-}
-a.button.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--ground);
-  font-weight: 700;
-}
-
 .landing section {
   padding: 40px 0 8px;
 }

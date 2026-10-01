@@ -117,7 +117,8 @@ function moment(events, you) {
       const conflict = events.find((x) => x.type === "conflict_detected");
       const resolved = events.find((x) => x.type === "conflict_resolved");
       const flag = [e.rebase && "--rebase", resolved && gitFlag(resolved.strategy, e.rebase)].filter(Boolean).join(" ");
-      const output = [...(conflict ? conflict.message.split("\n") : []), ...e.message.split("\n")];
+      // a rebase settled by -X prints nothing at the clash itself, as in Git
+      const output = [conflict?.message, e.message].flatMap((x) => x?.split("\n") ?? []).filter(Boolean);
       const notes = [
         ...(resolved ? resolution(resolved, who === you) : []),
         ...(e.merge_token ? ["a merge token: -1 at the release"] : []),

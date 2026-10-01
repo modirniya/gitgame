@@ -1,0 +1,181 @@
+/* The frame (event-screens §3, §4): on a phone the game fills the screen, a status bar on top, then one screen whose
+   body scrolls while its answer stays at the thumb. From 1000 × 560 the Table is a panel on the left and the screen
+   keeps its phone shape on the right, as in the prototype. */
+
+#app:has(> .game) {
+  max-width: 520px;
+  padding: 0;
+}
+.game {
+  height: 100dvh;
+  display: grid;
+  /* a column that never grows to fit what it holds: a long score in the status bar must not widen the page, or a
+     phone zooms out to show it */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+
+.frame {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 2px 8px 2px 16px;
+  border-bottom: 1px solid var(--line);
+  font: 500 12px var(--mono);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.frame b {
+  color: var(--ink);
+}
+.frame .score {
+  margin-left: auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.frame .score b {
+  color: var(--other);
+}
+.frame .score b.you {
+  color: var(--you);
+}
+.table-button {
+  flex: none;
+  min-height: 44px;
+  min-width: 52px;
+  padding: 0 10px;
+  font: 600 12px var(--mono);
+  border-radius: 10px;
+}
+.pips {
+  display: inline-flex;
+  gap: 3px;
+  color: var(--you);
+}
+.pips i {
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+.pips i.on {
+  background: currentColor;
+}
+.bigpips .pips {
+  gap: 8px;
+}
+.bigpips .pips i {
+  width: 16px;
+  height: 16px;
+  border-width: 2.5px;
+}
+
+.view {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.view > .body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.view > .actions {
+  display: flex;
+  gap: 10px;
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--ground);
+}
+.view > .actions > * {
+  flex: 1;
+}
+.view > .actions.stack {
+  flex-direction: column;
+}
+.view h1:not(.cmd)::before {
+  content: none;
+}
+
+/* The Table: a sheet over the screen on a phone, opened from the frame. */
+.table-panel {
+  display: none;
+}
+.table-panel.open {
+  display: block;
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 20;
+  max-width: 520px;
+  max-height: 88dvh;
+  margin: 0 auto;
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  border-radius: 18px 18px 0 0;
+  background: var(--ground);
+  box-shadow: 0 -8px 32px rgb(0 0 0 / 0.45);
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.sheet-head h2 {
+  margin: 0;
+}
+.sheet-head .close {
+  min-height: 44px;
+  padding: 0 14px;
+}
+
+@media (min-width: 1000px) and (min-height: 560px) {
+  #app:has(> .game) {
+    max-width: 1480px;
+  }
+  .game {
+    grid-template-columns: minmax(0, 1fr) clamp(460px, 38vw, 560px);
+    grid-template-areas: "frame frame" "table view";
+  }
+  .game > .frame {
+    grid-area: frame;
+  }
+  .game > .view {
+    grid-area: view;
+    border-left: 1px solid var(--line);
+  }
+  .game > .table-panel {
+    grid-area: table;
+    display: block;
+    position: static;
+    max-height: none;
+    padding: 20px 28px 28px;
+    overflow-y: auto;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .table-button,
+  .sheet-head .close {
+    display: none;
+  }
+  .table-panel ol.strip {
+    flex-wrap: wrap;
+    overflow: visible;
+    row-gap: 12px;
+  }
+  /* main is beside the screen for the whole game, so the hub draws it only to pick a commit from */
+  .game .hub:not(.picking) .strip-wrap,
+  .game .hub .incident-note {
+    display: none;
+  }
+}
