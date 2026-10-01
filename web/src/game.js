@@ -8,6 +8,7 @@ import { table } from "./table.js";
 import { frame } from "./frame.js";
 import { hub } from "./hub.js";
 import { price, unspent } from "./pack.js";
+import { play, snapshot } from "./motion.js";
 import { moments } from "./moments.js";
 import { transcript } from "./transcript.js";
 import { momentScreen } from "./screens.js";
@@ -110,7 +111,16 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
     const tableOpen = s.tableOpen;
     const onTable = () => set({ tableOpen: !tableOpen });
 
+    // the hub drawn again after an op: keep the pack where it was scrolled to, and play what moved (M15e)
+    const was = node.querySelector(".view.hub");
+    const before = was && snapshot(was);
+    const scrolled = was?.querySelector(".body").scrollTop ?? 0;
     mount(node, frame(view, { left, tableOpen, onTable }), screenFor(view, you), tablePanel(view, you, onTable));
+    const now = node.querySelector(".view.hub");
+    if (was && now) {
+      now.querySelector(".body").scrollTop = scrolled;
+      play(now, before);
+    }
     if (writing) guide(view);
   }
 

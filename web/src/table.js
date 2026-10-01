@@ -21,10 +21,13 @@ export function label(c, view) {
  * `main` as a strip, initial commit at the left and the tip at the right, marked; each slot labelled with what was
  * announced, and each seat's pointer as a chip under the commit it's at. Only the strip scrolls sideways, and it opens
  * scrolled to the tip. `ghosts` are commits your pack pushes, drawn waiting past the tip: where they land if they do.
+ * `pointers` overrides where a seat's chip is drawn.
  */
-export function strip(view, { onpick, pickable = () => false, ghosts = [] } = {}) {
+export function strip(view, { onpick, pickable = () => false, ghosts = [], pointers = {} } = {}) {
   const tip = view.main.length - 1;
-  const at = (i) => view.seats.filter((id) => view.players[id].pointer === i + 1 && !view.players[id].left);
+  // `pointers` moves a seat's chip to where something else leaves it (the hub: where your pack's pull takes you)
+  const pointer = (id) => pointers[id] ?? view.players[id].pointer;
+  const at = (i) => view.seats.filter((id) => pointer(id) === i + 1 && !view.players[id].left);
 
   const list = el(
     "ol",
@@ -45,8 +48,8 @@ export function strip(view, { onpick, pickable = () => false, ghosts = [] } = {}
           { class: "pointers" },
           at(i).map((id) =>
             id === view.you?.player
-              ? el("span", { class: "chip you", title: id }, "you")
-              : el("span", { class: "chip", title: id }, id),
+              ? el("span", { class: "chip you", title: id, "data-seat": id }, "you")
+              : el("span", { class: "chip", title: id, "data-seat": id }, id),
           ),
         ),
       ),
