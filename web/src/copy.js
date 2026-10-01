@@ -68,6 +68,17 @@ const table = {
         : "Every commit is clean. Ship it.",
 };
 
+// The online game's incidents in a day's words: the deck's own texts (rules/deck.json) speak of the tabletop's rounds.
+const INCIDENTS = {
+  flaky_ci: "The day's first push rolls a die: on 1 or 2 it is rejected, and the op is spent.",
+  standup: "Everyone has 2 ops today instead of 3.",
+  sodown: "No command cards today.",
+  hackathon: "Everyone has 4 ops today.",
+};
+
+/** What incident `i` (from the view) does, as the online game plays it. */
+export const incidentText = (i) => INCIDENTS[i.id] ?? i.text;
+
 /** The day's opener, under the incident and what you drew: where you stand, and what that means for your pack. */
 export const OPENER = {
   drew: (n) => `You drew ${n === 2 ? "two cards" : n === 1 ? "a card" : `${n} cards`}.`,

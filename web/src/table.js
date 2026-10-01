@@ -3,6 +3,7 @@
 // screen on wide ones (§4); the same element either way, and the CSS decides.
 import { el } from "./dom.js";
 import { commit } from "./cards.js";
+import { incidentText } from "./copy.js";
 
 /** The announced log under a commit on `main`: who pushed it, and its files and lines, colored by whose it is. */
 export function label(c, view) {
@@ -19,9 +20,9 @@ export function label(c, view) {
 /**
  * `main` as a strip, initial commit at the left and the tip at the right, marked; each slot labelled with what was
  * announced, and each seat's pointer as a chip under the commit it's at. Only the strip scrolls sideways, and it opens
- * scrolled to the tip.
+ * scrolled to the tip. `ghosts` are commits your pack pushes, drawn waiting past the tip: where they land if they do.
  */
-export function strip(view, { onpick, pickable = () => false } = {}) {
+export function strip(view, { onpick, pickable = () => false, ghosts = [] } = {}) {
   const tip = view.main.length - 1;
   const at = (i) => view.seats.filter((id) => view.players[id].pointer === i + 1 && !view.players[id].left);
 
@@ -48,6 +49,15 @@ export function strip(view, { onpick, pickable = () => false } = {}) {
               : el("span", { class: "chip", title: id }, id),
           ),
         ),
+      ),
+    ),
+    ghosts.map((c, i) =>
+      el(
+        "li",
+        { class: "slot ghost" },
+        el("span", { class: "tipmark" }, i === 0 ? "your push" : ""),
+        commit(c, { faceUp: true }),
+        label(c, view),
       ),
     ),
   );
@@ -117,7 +127,7 @@ export function table(view) {
         el("span", { class: "k" }, "incident"),
         " ",
         el("b", {}, view.incident.name),
-        ` — ${view.incident.text}`,
+        ` — ${incidentText(view.incident)}`,
       ),
     el(
       "ol",

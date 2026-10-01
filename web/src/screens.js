@@ -3,7 +3,7 @@
 import { el } from "./dom.js";
 import { card, commit } from "./cards.js";
 import { pips } from "./frame.js";
-import { OPENER } from "./copy.js";
+import { incidentText, OPENER } from "./copy.js";
 
 // A commit as the reader may see it: from main, from their own branch, or else face-down, as the table would show a
 // commit it can't read (another player's, gone back to their branch).
@@ -125,7 +125,7 @@ function picture(m, view, you) {
           { class: "incident-card deal" },
           el("span", { class: "band" }, "incident"),
           el("h2", {}, view.incident?.name ?? `day ${m.day}`),
-          el("p", {}, view.incident?.text ?? ""),
+          el("p", {}, view.incident ? incidentText(view.incident) : ""),
         ),
         drew?.cards &&
           el(

@@ -68,8 +68,8 @@ ol.strip > li {
 }
 .pointers {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 2px;
   min-height: 18px;
   max-width: 100%;
