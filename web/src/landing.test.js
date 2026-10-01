@@ -29,6 +29,10 @@ it("the landing page has what search engines and link previews read", () => {
   expect(page.match(/<h1[ >]/g)).toHaveLength(1);
   expect(page).toContain('href="/play"');
 
+  // the game's page stays out of search results, so searches land here
+  const game = readFileSync(new URL("../play/index.html", import.meta.url), "utf8");
+  expect(game).toContain('<meta name="robots" content="noindex" />');
+
   const data = JSON.parse(page.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
   expect(data).toMatchObject({ "@type": "VideoGame", name, url: `https://${domain}/` });
 });

@@ -34,7 +34,8 @@ const brand = {
   },
   generateBundle() {
     this.emitFile({ type: "asset", fileName: "manifest.webmanifest", source: manifest() });
-    // search engines index the landing page; the game is one page of hash addresses, and /api is no page at all
+    // Search engines index the landing page only: the game is a page with no words until it runs (play/index.html says
+    // noindex, and robots.txt must let it be fetched to be read), and /api is no page at all.
     this.emitFile({
       type: "asset",
       fileName: "robots.txt",
@@ -43,7 +44,7 @@ const brand = {
     this.emitFile({
       type: "asset",
       fileName: "sitemap.xml",
-      source: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://${domain}/</loc></url>\n  <url><loc>https://${domain}/play</loc></url>\n</urlset>\n`,
+      source: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://${domain}/</loc></url>\n</urlset>\n`,
     });
   },
 };

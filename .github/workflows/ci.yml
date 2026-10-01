@@ -181,6 +181,8 @@ jobs:
           curl -sf localhost:4000/ | grep -q 'property="og:image"'
           curl -sf -o /dev/null localhost:4000/og.png
           curl -sf localhost:4000/sitemap.xml | grep -q "<loc>"
+          test -z "$(curl -sf localhost:4000/sitemap.xml | grep /play)"
+          curl -sf localhost:4000/play | grep -q 'name="robots" content="noindex"'
           curl -sf localhost:4000/robots.txt | grep -q "Sitemap:"
           test "$(curl -s -o /dev/null -w '%{redirect_url}' 'localhost:4000/?via=notification')" = "http://localhost:4000/play?via=notification"
           curl -sf localhost:4000/manifest.webmanifest > /dev/null
