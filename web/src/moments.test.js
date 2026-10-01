@@ -61,7 +61,7 @@ describe("the day log as moments", () => {
   });
 
   it("shows another player's cards only as counts", () => {
-    expect(ms[4]).toMatchObject({ command: "git add", output: ["(2 cards, face-down)"] });
+    expect(ms[4]).toMatchObject({ command: "git add", output: [], notes: ["2 cards, face-down"] });
     expect(ms[5]).toMatchObject({ command: "git commit", output: ["[main 2887386]"] });
   });
 

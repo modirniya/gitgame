@@ -38,7 +38,7 @@
   }
 }
 
-.stamp {
+.moment.ci .stamp {
   margin: 4px 0 0;
   padding: 4px 12px;
   border: 2px solid currentColor;
@@ -49,10 +49,10 @@
   animation: stamp 380ms var(--ease) both;
   animation-delay: calc(var(--n) * 250ms + 300ms);
 }
-.stamp.ok {
+.moment.ci .stamp.ok {
   color: var(--ok);
 }
-.stamp.bad {
+.moment.ci .stamp.bad {
   color: var(--reject);
 }
 @keyframes stamp {
