@@ -1,43 +1,78 @@
-/* The terminal (charter decision 14) on the screen spec's visual language (event-screens §4): monospace, a dark
-   ground by default and a warm light one on request, the deck's file colors on the cards, phone-shaped from 360 px
-   and wider from 600 px. Semantic colors only ever mean one thing: red a rejection or a bug, green accepted, amber a
-   warning. */
+/* The game's look (event-screens §4), the mobile prototype's visual language on the online client: prose in a
+   sans-serif and everything Git says in monospace (charter decision 14's terminal is where Git speaks), cards as the
+   printed deck draws them, a dark ground by default and a warm light one on request. Phone-shaped from 360 px, wider
+   from 600 px. Semantic colors only ever mean one thing: red a rejection or a bug, green accepted, amber a warning. */
+@import "./cards.css";
+@import "./table.css";
 
 :root {
-  --ground: #14161a;
-  --raised: #1d2026;
-  --line: #2c3038;
-  --ink: #e6e3dc;
-  --muted: #8a8f99;
+  --ground: #14181c;
+  --ground-2: #1c2227;
+  --paper: #252c33;
+  --raised: var(--paper);
+  --ink: #e7ecef;
+  --muted: #a0adb7;
+  --faint: #5e6b75;
+  --line: #343e47;
   /* Buttons, links and the prompt. The cards' file colors (rules/deck.json) are teal, violet, coral, blue and amber,
      so the players' own colors sit outside that family: an api.py card must never read as the other player's. */
   --accent: #3ec1b3;
   --you: #ff6ac1;
+  --you-soft: #3a1d31;
   --other: #9aa3b5;
-  --ok: #5ec27a;
-  --reject: #f0605d;
-  --warn: #e9a83b;
+  --other-soft: #262d38;
+  --ok: #52c98f;
+  --ok-soft: #16301f;
+  --reject: #ff6f5b;
+  --reject-soft: #3b1f1a;
+  --warn: #eaaa42;
+  --warn-soft: #34290f;
+  --cmd: #3c4955;
+  /* the hatch on the back of a face-down commit */
+  --back-1: #4a5661;
+  --back-2: #404c56;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.5);
   /* the transcript is a terminal: dark in either theme */
   --term: #0d0f12;
   --term-ink: #d8d5ce;
   --term-muted: #7d828c;
   --term-field: #1a1d22;
-  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* a card's width at each size; the hand's is the one the fan counts with (hub.js) */
+  --card-xl: 132px;
+  --card-lg: 96px;
+  --card-md: 64px;
+  --card-sm: 44px;
+  --r: 14px;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   color-scheme: dark;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
-    --ground: #f4f1ea;
-    --raised: #fffdf8;
-    --line: #ddd7cb;
-    --ink: #22201c;
-    --muted: #6f6a60;
-    --ok: #2f8f4e;
-    --reject: #c8322f;
-    --warn: #a86a00;
+    --ground: #eee9df;
+    --ground-2: #e4ddd0;
+    --paper: #ffffff;
+    --ink: #1b2228;
+    --muted: #5b6975;
+    --faint: #a7b1ba;
+    --line: #d3cbbd;
+    --accent: #1d8c80;
     --you: #c4267f;
+    --you-soft: #f8dcec;
     --other: #6b7385;
+    --other-soft: #e3e6ee;
+    --ok: #23865a;
+    --ok-soft: #dcf1e5;
+    --reject: #cf3d29;
+    --reject-soft: #fbe2dd;
+    --warn: #a86f0c;
+    --warn-soft: #faedd2;
+    --cmd: #2f3a44;
+    --back-1: #6b7a86;
+    --back-2: #5c6b77;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.14), 0 2px 8px rgb(0 0 0 / 0.06);
     color-scheme: light;
   }
 }
@@ -50,10 +85,11 @@ body {
   margin: 0;
   background: var(--ground);
   color: var(--ink);
-  font: 15px/1.45 var(--mono);
+  font: 16px/1.45 var(--sans);
   /* `--force` must read as two hyphens, as it does in a real terminal */
   font-variant-ligatures: none;
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #app {
@@ -64,15 +100,20 @@ body {
 
 h1,
 h2 {
-  font-size: 1rem;
+  font: 700 1rem/1.25 var(--mono);
   margin: 0 0 8px;
+  overflow-wrap: anywhere;
 }
 h1 {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
 }
 h1::before {
   content: "$ ";
   color: var(--accent);
+}
+code {
+  font-family: var(--mono);
+  font-size: 0.9em;
 }
 
 a {
@@ -100,21 +141,28 @@ label {
 }
 input,
 select,
-textarea,
-button {
+textarea {
   font: inherit;
   color: inherit;
   min-height: 44px;
-  border-radius: 6px;
+  border-radius: 10px;
   border: 1px solid var(--line);
-  background: var(--raised);
+  background: var(--paper);
   padding: 0 12px;
 }
 button {
+  min-height: 48px;
+  padding: 10px 16px;
+  font: 600 1rem/1.2 var(--sans);
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
   cursor: pointer;
+  touch-action: manipulation;
 }
 button:disabled {
-  opacity: 0.45;
+  opacity: 0.42;
   cursor: default;
 }
 button.primary {
@@ -124,181 +172,16 @@ button.primary {
   font-weight: 700;
 }
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
-
-/* ---------- cards ---------- */
-
-.card {
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex: none;
-  width: 96px;
-  height: 134px;
-  padding: 14px 8px 8px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: var(--raised);
-  color: var(--ink);
-  text-align: left;
-  overflow: hidden;
-}
-.card .band {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 8px;
-  background: var(--band, var(--muted));
-}
-.card .file {
-  font-size: 0.75rem;
-  color: var(--muted);
-  overflow-wrap: anywhere;
-}
-.card .big {
-  font-size: 1.7rem;
-  font-weight: 700;
-}
-.card.command .big {
-  font-size: 0.95rem;
-}
-/* at the left, the part of a card an overlapping neighbour never covers; under the file name, clear of the number */
-.card .bug {
-  position: absolute;
-  left: 6px;
-  top: 32px;
-  padding: 0 4px;
-  border-radius: 3px;
-  background: var(--reject);
-  color: var(--ground);
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-.card.selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent);
-}
-
-.card.strip {
-  width: 64px;
-  height: 90px;
-  padding: 10px 5px 5px;
-}
-.card.strip .big {
-  font-size: 1.1rem;
-}
-.card.strip .file,
-.card.strip .author {
-  font-size: 0.6rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.card.down {
-  background: repeating-linear-gradient(135deg, var(--raised) 0 6px, var(--line) 6px 7px);
-}
-.card.bug {
-  border-color: var(--reject);
-}
-.card.overwritten .big,
-.card.reverted .big {
-  text-decoration: line-through;
-  color: var(--muted);
-}
-.card.tip {
-  border-color: var(--ink);
-}
-.card.pickable {
-  border-color: var(--warn);
-  box-shadow: 0 0 0 2px var(--warn);
-}
-.card.initial {
-  justify-content: center;
-  align-items: center;
-  color: var(--muted);
-}
-
-/* ---------- the table ---------- */
-
-.table header {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
-.table .incident {
-  color: var(--warn);
-}
-
-ol.strip {
-  display: flex;
-  gap: 6px;
-  margin: 0 0 12px;
-  padding: 8px 0 4px;
-  list-style: none;
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-}
-ol.strip li {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  scroll-snap-align: end;
-}
-.pointers {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-height: 1.2em;
-}
-.chip {
-  font-size: 0.65rem;
-  padding: 0 4px;
-  border-radius: 3px;
-  background: var(--other);
-  color: var(--ground);
-}
-.chip.you {
-  background: var(--you);
-}
-
-ol.seats {
-  display: grid;
-  gap: 6px;
-  margin: 0 0 16px;
-  padding: 0;
-  list-style: none;
-}
-.seat {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0 8px;
-  padding: 8px 10px;
-  border-left: 3px solid var(--other);
-  background: var(--raised);
-  border-radius: 4px;
-}
-.seat.you {
-  border-left-color: var(--you);
-}
-.seat.left {
-  opacity: 0.55;
-}
-.seat .who {
-  font-weight: 700;
-}
-.seat .score {
-  font-weight: 700;
-  text-align: right;
-}
-.seat .facts,
-.seat .sent {
-  font-size: 0.8rem;
-  color: var(--muted);
+@media (hover: hover) {
+  button:hover:not([disabled]):not(.card) {
+    border-color: var(--muted);
+  }
+  button.primary:hover:not([disabled]) {
+    filter: brightness(1.1);
+  }
 }
 
 @media (min-width: 600px) {
@@ -317,6 +200,7 @@ ol.seats {
 /* ---------- the transcript ---------- */
 
 .transcript {
+  font-family: var(--mono);
   margin: 0 0 16px;
   padding: 10px 12px;
   border-radius: 6px;
@@ -361,6 +245,7 @@ ol.seats {
   flex-wrap: wrap;
   gap: 4px 14px;
   color: var(--muted);
+  font: 500 0.8rem var(--mono);
   margin-bottom: 8px;
 }
 .status .incident {
@@ -371,9 +256,6 @@ ol.seats {
 }
 .picking {
   color: var(--warn);
-}
-.card.used {
-  opacity: 0.3;
 }
 /* The hand, fanned (event-screens §3): each card overlaps the one before by --overlap, set by the hub so a row fits
    the screen and every card keeps at least 44 px to tap. The one under the finger, or selected, comes forward. */
@@ -407,6 +289,7 @@ ol.seats {
   margin: 12px 0;
 }
 .action {
+  font-family: var(--mono);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -420,6 +303,7 @@ ol.seats {
 }
 
 ol.pack {
+  font-family: var(--mono);
   list-style: none;
   margin: 0 0 8px;
   padding: 10px 12px;
@@ -465,6 +349,7 @@ ol.pack {
   gap: 6px;
 }
 .pack .suggestion {
+  font-family: var(--mono);
   min-height: 32px;
   padding: 0 8px;
   font-size: 0.75rem;
@@ -583,6 +468,9 @@ ol.pack {
 }
 .moment.warn .transcript {
   box-shadow: inset 3px 0 0 var(--warn);
+}
+.progress {
+  font: 500 0.8rem var(--mono);
 }
 .coach {
   margin: 0;

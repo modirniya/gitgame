@@ -17,8 +17,8 @@
         overflow: hidden;
       }
       body {
-        background: #14161a;
-        color: #e6e3dc;
+        background: #14181c;
+        color: #e7ecef;
         font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
         font-variant-ligatures: none;
         padding: 64px 72px;
@@ -58,54 +58,72 @@
         color: #9aa3b5;
       }
       .ok {
-        color: #5ec27a;
+        color: #52c98f;
       }
       .no {
-        color: #f0605d;
+        color: #ff6f5b;
       }
       .cards {
         align-self: end;
         display: flex;
         gap: 14px;
       }
+      /* the game's card (web/src/cards.css) at 124 px wide */
       .card {
         position: relative;
-        width: 118px;
-        height: 166px;
-        border-radius: 10px;
-        border: 1px solid #2c3038;
-        background: #1d2026;
-        padding: 22px 10px 10px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
+        width: 124px;
+        height: 174px;
+        border-radius: 11px;
+        border: 1px solid #343e47;
+        background: #252c33;
+        display: grid;
+        grid-template-rows: 25px 1fr;
         overflow: hidden;
+        text-align: center;
       }
-      .card::before {
-        content: "";
-        position: absolute;
-        inset: 0 0 auto;
-        height: 10px;
+      .band {
         background: var(--band);
+        color: #fff;
+        font:
+          700 11px/25px system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        text-align: left;
+        padding: 0 12px;
+      }
+      .face {
+        display: grid;
+        align-content: center;
+        gap: 6px;
       }
       .file {
-        font-size: 17px;
-        color: #8a8f99;
+        font-size: 16px;
+        font-weight: 600;
       }
       .big {
-        font-size: 40px;
-        font-weight: 700;
+        font:
+          700 42px/1 system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
       }
       .bug {
         position: absolute;
-        left: 8px;
-        top: 50px;
-        padding: 0 6px;
-        border-radius: 4px;
-        background: #f0605d;
-        color: #14161a;
-        font-size: 15px;
-        font-weight: 700;
+        left: 6px;
+        top: 32px;
+        padding: 0 7px;
+        border-radius: 6px;
+        background: #ff6f5b;
+        color: #fff;
+        font:
+          800 12px/22px system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        letter-spacing: 0.06em;
       }
       .domain {
         grid-column: 1 / -1;
@@ -119,14 +137,24 @@
   <body>
     <h1><span>$</span> Git Game</h1>
     <p class="lede">a multiplayer card game whose rules are Git</p>
-    <div class="term"><span class="who">ana@main</span> $ git push
-<span class="ok">   3f2c1d9..8e1da02  main -&gt; main</span>
-<span class="bot">bot@main</span> $ git push
-<span class="no"> ! [rejected]        main -&gt; main (non-fast-forward)</span></div>
+    <div class="term">
+      <span class="who">ana@main</span> $ git push
+      <span class="ok"> 3f2c1d9..8e1da02 main -&gt; main</span>
+      <span class="bot">bot@main</span> $ git push
+      <span class="no"> ! [rejected] main -&gt; main (non-fast-forward)</span>
+    </div>
     <div class="cards">
-      <div class="card" style="--band: #3ec1b3"><span class="file">auth.js</span><span class="big">+5</span></div>
+      <div class="card" style="--band: #3ec1b3">
+        <span class="band">commit</span
+        ><span class="face"
+          ><span class="file">auth.js</span><span class="big">+5</span></span
+        >
+      </div>
       <div class="card" style="--band: #a88bfa">
-        <span class="file">api.py</span><span class="bug">BUG</span><span class="big">+6</span>
+        <span class="band">commit</span
+        ><span class="face"
+          ><span class="file">api.py</span><span class="big">+6</span></span
+        ><span class="bug">BUG</span>
       </div>
     </div>
     <p class="domain">gitgame.online · play free in your browser</p>

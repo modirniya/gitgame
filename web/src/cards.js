@@ -1,6 +1,7 @@
-// Cards as the printed deck draws them (event-screens §4): a colored band per file, the file name, a big +N, a red BUG
-// tag on the face. Colors and command names come from rules/deck.json, the same data the tabletop PDF is built from;
-// anything that changes play (costs, budgets) comes from the remote's view instead, since a game keeps its own rules.
+// Cards as the printed deck draws them (event-screens §4): a colored band with what kind of card it is, the file in
+// monospace, a big +N, and a red BUG tag at the top left, the one corner an overlapping hand never covers. One
+// component at every size (`size`: sm, md, lg, xl). Colors and command names come from rules/deck.json, the same data
+// the tabletop PDF is built from; anything that changes play (costs, budgets) comes from the remote's view instead.
 import deck from "../../rules/deck.json";
 import { el } from "./dom.js";
 
@@ -9,12 +10,14 @@ const commands = Object.fromEntries(deck.command_cards.map((c) => [c.id, c]));
 
 export const commandName = (id) => commands[id]?.name ?? id;
 export const commandText = (id) => commands[id]?.text ?? "";
-export const fileColor = (file) => colors[file] ?? "var(--muted)";
+export const fileColor = (file) => colors[file] ?? "var(--faint)";
 
-/** A card in a hand: a commit card (file, lines, bug) or a command card. */
-export function card(c, { size = "hand", selected = false, onclick } = {}) {
+/** A card in a hand: a commit card (file, lines, bug) or a command card. `used`: already spent by the pack. */
+export function card(c, { size = "lg", selected = false, used = false, onclick } = {}) {
   const props = {
-    class: `card ${size}${selected ? " selected" : ""}`,
+    class: ["card", size, c.kind === "command" && "command", selected && "selected", used && "used"]
+      .filter(Boolean)
+      .join(" "),
     "data-id": c.id,
     // the face is drawn for the eye; a screen reader gets it in words
     "aria-label": c.kind === "command" ? commandName(c.command) : `${c.file} +${c.lines}${c.bug ? ", bug" : ""}`,
@@ -26,51 +29,74 @@ export function card(c, { size = "hand", selected = false, onclick } = {}) {
   if (c.kind === "command")
     return el(
       tag,
-      { ...props, class: `${props.class} command`, title: commandText(c.command) },
-      el("span", { class: "band" }),
-      el("span", { class: "file" }, "command"),
-      el("span", { class: "big" }, commandName(c.command)),
+      { ...props, title: commandText(c.command) },
+      el("span", { class: "band" }, "command"),
+      el("span", { class: "face" }, el("span", { class: "name" }, commandName(c.command))),
     );
 
   return el(
     tag,
     { ...props, style: `--band: ${fileColor(c.file)}` },
-    el("span", { class: "band" }),
-    el("span", { class: "file" }, c.file),
-    el("span", { class: "big" }, `+${c.lines}`),
+    el("span", { class: "band" }, "commit"),
+    el("span", { class: "face" }, el("span", { class: "file" }, c.file), el("span", { class: "big" }, `+${c.lines}`)),
     c.bug && el("span", { class: "bug" }, "BUG"),
   );
 }
 
-/** A commit on `main` as the table sees it: face-down until flipped, with what was announced when it was pushed. */
-export function commit(c, { tip = false, onclick, pickable = false } = {}) {
-  if (c.initial) return el("div", { class: "card strip initial" }, el("span", { class: "big" }, "init"));
+/**
+ * A commit as the table sees it: face-down (a hatch with its hash) until flipped, or `faceUp` for your own unpushed
+ * commits. It has both sides, so a flip can turn it in place: the face shows only what was announced when it was
+ * pushed (files and lines) plus, once flipped, whether it is a bug.
+ */
+export function commit(c, { size = "md", tip = false, onclick, pickable = false, faceUp = false } = {}) {
+  if (c.initial)
+    return el(
+      "div",
+      { class: `card ${size} initial`, "aria-label": "the initial commit" },
+      el("span", { class: "band" }, "main"),
+      el("span", { class: "face" }, el("span", { class: "file" }, "initial commit")),
+    );
 
-  // a bug stops counting once it is reverted, or crossed out by someone's `-X ours` (round-resolution §3)
+  // a bug stops counting once it is reverted, or crossed out by someone's keep-mine (round-resolution §3)
+  const up = c.flipped || faceUp;
   const live = c.bug && !c.reverted && !c.overwritten;
   const state = [
-    c.flipped ? (live ? "bug" : "clean") : "down",
+    up ? (live ? "bug" : "clean") : "down",
+    up && "up",
     c.reverted && "reverted",
     c.overwritten && "overwritten",
     c.revert_of && "revert",
     tip && "tip",
     pickable && "pickable",
   ].filter(Boolean);
+  const files = c.files ?? [];
 
   return el(
     onclick ? "button" : "div",
     {
-      class: `card strip ${state.join(" ")}`,
-      style: `--band: ${fileColor(c.files?.[0])}`,
+      class: `card ${size} commit ${state.join(" ")}`,
+      style: `--band: ${c.revert_of ? "var(--ok)" : fileColor(files[0])}`,
       "data-id": c.id,
       title: c.message,
-      "aria-label": `${c.id} by ${c.author}: ${(c.files ?? []).join(" ")} +${c.lines}, ${state[0] === "down" ? "face-down" : state[0]}`,
+      "aria-label": `${c.id} by ${c.author}: ${files.join(" ")} +${c.lines}, ${up ? state[0] : "face-down"}`,
       onclick,
     },
-    el("span", { class: "band" }),
-    el("span", { class: "file" }, c.revert_of ? "revert" : (c.files ?? []).join(" ")),
-    el("span", { class: "big" }, c.revert_of ? "↺" : `+${c.lines}`),
-    el("span", { class: "author" }, c.author),
-    c.flipped && live && el("span", { class: "bug" }, "BUG"),
+    el(
+      "span",
+      { class: "flipper" },
+      el("span", { class: "side back" }, el("span", { class: "sha" }, c.id)),
+      el(
+        "span",
+        { class: "side front" },
+        el("span", { class: "band" }, c.revert_of ? "revert" : "commit"),
+        el(
+          "span",
+          { class: "face" },
+          el("span", { class: "file" }, c.revert_of ?? files.join(" ")),
+          el("span", { class: "big" }, c.revert_of ? "↺" : `+${c.lines}`),
+        ),
+        up && live && el("span", { class: "bug" }, "BUG"),
+      ),
+    ),
   );
 }

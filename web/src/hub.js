@@ -58,14 +58,14 @@ function branch(view) {
       el(
         "ol",
         { class: "strip" },
-        local.map((c) => el("li", {}, commit(own(c)))),
+        local.map((c) => el("li", {}, commit(own(c), { faceUp: true }))),
       ),
     staged.length > 0 &&
       el(
         "div",
         { class: "cards staged" },
         el("span", {}, "staged"),
-        staged.map((c) => card(c)),
+        staged.map((c) => card(c, { size: "sm" })),
       ),
   );
 }
@@ -252,7 +252,7 @@ export function hub({ view, draft, change, send, sending = false, error = "", wa
               selected: draft.selected.includes(c.id),
               onclick: c.kind === "commit" ? () => toggle(c.id) : null,
             })
-          : card(c, { size: "hand used" }),
+          : card(c, { used: true }),
       ),
     ),
     el(
