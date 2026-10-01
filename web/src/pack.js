@@ -194,6 +194,22 @@ export function actions(view, ops, selected = []) {
 }
 
 /**
+ * What today's budget still allows once `ops` have run: the ops left, and the actions that would spend them. Null when
+ * the pack spends the day, is full, or nothing left would do anything. A pack that leaves ops unspent, even an empty
+ * one, is still the player's to send; the hub only says so first.
+ */
+export function unspent(view, ops) {
+  const { spent, full, left: s } = price(view, ops);
+  if (full || spent >= view.budget) return null;
+  const cards = s.hand.filter((c) => c.kind === "commit").map((c) => c.id);
+  const can = actions(view, ops, cards);
+  // a pull at the tip and a push of nothing change nothing, and arming a trap spends no ops
+  const idle = { pull: s.behind === 0, push: s.local.length === 0, arm: true };
+  const moves = Object.keys(can).filter((k) => !can[k] && !idle[k]);
+  return moves.length ? { left: view.budget - spent, moves } : null;
+}
+
+/**
  * What each action would do, in your situation now, as a line under its button (event-screens §3, I-Hub): the
  * consequence of playing it, where `actions` says why it can't be.
  */

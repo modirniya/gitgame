@@ -491,6 +491,9 @@ ol.pack {
 .send {
   width: 100%;
 }
+.unspent {
+  color: var(--warn);
+}
 
 /* The Table: a sheet on phones, opened from its button; a panel beside the hub on wide screens (event-screens §4). */
 .table-toggle {

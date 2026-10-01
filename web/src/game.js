@@ -6,6 +6,7 @@
 import { el, mount } from "./dom.js";
 import { table } from "./table.js";
 import { hub } from "./hub.js";
+import { unspent } from "./pack.js";
 import { moments } from "./moments.js";
 import { transcript } from "./transcript.js";
 import { momentScreen } from "./screens.js";
@@ -28,7 +29,17 @@ const waiting = (view) =>
 export function gameScreen({ remote, go, id, seat, me = null }) {
   const node = el("section", { class: "screen game" });
   let alive = true;
-  let s = { view: null, draft: fresh(), sending: false, error: "", tableOpen: false, queue: [], at: 0, handoff: null };
+  let s = {
+    view: null,
+    draft: fresh(),
+    sending: false,
+    error: "",
+    warned: false,
+    tableOpen: false,
+    queue: [],
+    at: 0,
+    handoff: null,
+  };
   let pending = null;
   // made once, so re-rendering doesn't ask the browser again
   let remind = null;
@@ -45,7 +56,14 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
       // the table's view has no one to catch up: it shows what happened, not what you missed
       const next = view.you ? catchup(view, recall(id, view.you.player)) : { queue: [], memory: null };
       pending = next.memory;
-      set({ view, error, draft: moved ? fresh() : s.draft, queue: next.queue, at: Math.min(s.at, next.queue.length) });
+      set({
+        view,
+        error,
+        draft: moved ? fresh() : s.draft,
+        warned: moved ? false : s.warned,
+        queue: next.queue,
+        at: Math.min(s.at, next.queue.length),
+      });
     } catch (e) {
       if (!s.view) return fail(e);
       set({ error: e.message });
@@ -59,7 +77,9 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
   }
 
   async function send() {
-    set({ sending: true, error: "" });
+    // A pack that leaves ops unspent goes on the second tap: the first has the hub say what could still be done.
+    if (!s.warned && unspent(s.view, s.draft.ops)) return set({ warned: true });
+    set({ sending: true, error: "", warned: false });
     try {
       await remote.sendPack(id, { seat: s.view.you.player, version: s.view.version, ops: s.draft.ops });
       const version = s.view.version;
@@ -101,7 +121,15 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
       view.released
         ? scoreboard(view, me)
         : you
-          ? hub({ view, draft: s.draft, change: (draft) => set({ draft }), send, sending: s.sending, error: s.error })
+          ? hub({
+              view,
+              draft: s.draft,
+              change: (draft) => set({ draft, warned: false }),
+              send,
+              sending: s.sending,
+              error: s.error,
+              warned: s.warned,
+            })
           : el("p", { class: "muted" }, "# you hold no seat in this game: this is what the table sees"),
       offerReminders(view) && (remind ??= remindButton(remote)),
       el(

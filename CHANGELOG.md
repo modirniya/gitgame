@@ -7,6 +7,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Changed
+- Sending a pack that leaves some of the day's ops unspent now asks first: the hub says how many are left and what could still spend them ("# 2 of today's 3 ops unspent: you could still add, push"), and "send anyway" sends it. An empty pack can still be sent.
+
 ### Fixed
 - "main has 1 commits": the tag's reason and its error now say "1 commit".
 
