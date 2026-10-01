@@ -1,43 +1,79 @@
 // The Table (event-screens §3): the shared view, what everyone at the table may see. `main` in full with its tip and
-// every pointer, each player's tokens and counts, the incident and the clock. A sheet on phones, a panel beside the
+// every pointer, the incident, and each player's counts and tokens. A sheet on phones, a panel beside the
 // screen on wide ones (§4); the same element either way, and the CSS decides.
 import { el } from "./dom.js";
 import { commit } from "./cards.js";
 
-/** `main` as a strip, initial commit at the left, the tip at the right, each seat's pointer under the commit it's at. */
+/** The announced log under a commit on `main`: who pushed it, and its files and lines, colored by whose it is. */
+export function label(c, view) {
+  if (c.initial) return el("span", { class: "who" });
+  const mine = c.author === view.you?.player;
+  return el(
+    "span",
+    { class: "who" },
+    mine ? el("span", { class: "author you" }, "you") : el("span", { class: "author" }, c.author),
+    ` ${c.revert_of ? `revert ${c.revert_of}` : `${(c.files ?? []).join(" ")} +${c.lines}`}`,
+  );
+}
+
+/**
+ * `main` as a strip, initial commit at the left and the tip at the right, marked; each slot labelled with what was
+ * announced, and each seat's pointer as a chip under the commit it's at. Only the strip scrolls sideways, and it opens
+ * scrolled to the tip.
+ */
 export function strip(view, { onpick, pickable = () => false } = {}) {
   const tip = view.main.length - 1;
   const at = (i) => view.seats.filter((id) => view.players[id].pointer === i + 1 && !view.players[id].left);
 
-  return el(
+  const list = el(
     "ol",
     { class: "strip", "aria-label": "main" },
     view.main.map((c, i) =>
       el(
         "li",
-        {},
+        { class: "slot" },
+        el("span", { class: "tipmark" }, i === tip ? "tip" : ""),
         commit(c, {
           tip: i === tip,
           pickable: pickable(c),
           onclick: onpick && pickable(c) ? () => onpick(c) : null,
         }),
+        label(c, view),
         el(
           "span",
           { class: "pointers" },
-          at(i).map((id) => el("span", { class: `chip${id === view.you?.player ? " you" : ""}` }, id)),
+          at(i).map((id) =>
+            id === view.you?.player
+              ? el("span", { class: "chip you", title: id }, "you")
+              : el("span", { class: "chip", title: id }, id),
+          ),
         ),
       ),
     ),
   );
+  globalThis.requestAnimationFrame?.(() => (list.scrollLeft = list.scrollWidth));
+
+  return el(
+    "section",
+    { class: "strip-wrap" },
+    el(
+      "header",
+      { class: "strip-head" },
+      el("span", {}, "main"),
+      el("span", {}, `${view.main.length - 1}/${view.release_at} commits`),
+    ),
+    list,
+  );
 }
 
+// a token's sign is how it scores: every one is a penalty but a fix
 const tokens = (t) =>
   [
-    t.merge && `${t.merge} merge`,
-    t.grudges && `${t.grudges} grudge`,
-    t.sins && `${t.sins} sin`,
-    t.blame && `${t.blame} blame`,
-    t.fixes && `${t.fixes} fix`,
+    t.merge && ["neg", `merge ×${t.merge}`],
+    t.grudges && ["neg", `grudge ×${t.grudges}`],
+    t.sins && ["neg", `sin ×${t.sins}`],
+    t.blame && ["neg", `blame ×${t.blame}`],
+    t.fixes && ["pos", `fix ×${t.fixes}`],
   ].filter(Boolean);
 
 function seat(view, id) {
@@ -49,8 +85,8 @@ function seat(view, id) {
     p.staged && `${p.staged} staged`,
     p.to_push && `${p.to_push} to push`,
     p.behind ? `${p.behind} behind` : "at the tip",
-    ...tokens(p.tokens),
   ].filter(Boolean);
+  const held = tokens(p.tokens);
 
   return el(
     "li",
@@ -58,25 +94,31 @@ function seat(view, id) {
     el("span", { class: "who" }, id),
     el("span", { class: "score" }, s.total),
     el("span", { class: "facts" }, p.left ? "left the company" : facts.join(" · ")),
+    held.length > 0 &&
+      el(
+        "span",
+        { class: "toks" },
+        held.map(([sign, text]) => el("span", { class: `tok ${sign}` }, text)),
+      ),
     // only a day still open has packs in or out; a replay's days, and a finished game, have none
     view.deadline && !p.left && el("span", { class: "sent" }, sent ? "pack sent" : "writing…"),
   );
 }
 
 export function table(view) {
-  const commits = view.main.length - 1;
-
   return el(
     "section",
     { class: "table", "aria-label": "the table" },
-    el(
-      "header",
-      {},
-      el("span", {}, `day ${view.day}/${view.final_day}`),
-      el("span", {}, `main ${commits}/${view.release_at}`),
-      view.incident && el("span", { class: "incident", title: view.incident.text }, view.incident.name),
-    ),
     strip(view),
+    view.incident &&
+      el(
+        "p",
+        { class: "incident-line" },
+        el("span", { class: "k" }, "incident"),
+        " ",
+        el("b", {}, view.incident.name),
+        ` — ${view.incident.text}`,
+      ),
     el(
       "ol",
       { class: "seats" },

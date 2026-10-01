@@ -6,7 +6,8 @@ import { view } from "./view.fixture.js";
 const render = (v, draft = { ops: [], selected: [], picking: null }) => {
   const changes = [];
   const node = hub({ view: v, draft, change: (d) => changes.push(d), send: () => changes.push("sent") });
-  const button = (label) => [...node.querySelectorAll("button")].find((b) => b.firstChild?.textContent === label);
+  const button = (label) =>
+    [...node.querySelectorAll("button:not(.card)")].find((b) => b.firstChild?.textContent === label);
   return { node, changes, button };
 };
 

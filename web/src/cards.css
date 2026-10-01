@@ -1,0 +1,164 @@
+/* The card (event-screens §4): one component at every size, everything in it scaled by its width, --w. A colored
+   band says what kind of card it is; the file is in monospace, the lines big; the BUG tag sits top left, the one
+   corner an overlapping hand never covers. A commit has two sides so it can flip in place: a hatch with its hash,
+   and the printed face. */
+
+.card {
+  --w: var(--card-md);
+  position: relative;
+  flex: none;
+  display: grid;
+  grid-template-rows: 1.4em 1fr;
+  width: var(--w);
+  height: calc(var(--w) * 1.4);
+  min-height: 0;
+  padding: 0;
+  font: 600 calc(var(--w) * 0.145) / 1.2 var(--mono);
+  text-align: center;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--w) * 0.09);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  user-select: none;
+}
+.card.sm {
+  --w: var(--card-sm);
+}
+.card.lg {
+  --w: var(--card-lg);
+}
+.card.xl {
+  --w: var(--card-xl);
+}
+.card .band {
+  background: var(--band, var(--faint));
+  color: #fff;
+  font: 700 0.6em/2.35em var(--sans);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 0 0.7em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.card .face {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.25em;
+  padding: 0.3em 0.2em;
+  min-width: 0;
+}
+.card .file {
+  font-size: 0.86em;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.card .big {
+  font: 700 2.3em/1 var(--sans);
+}
+.card .bug {
+  position: absolute;
+  left: 0.35em;
+  top: 2.2em;
+  padding: 0 0.5em;
+  border-radius: 0.35em;
+  background: var(--reject);
+  color: #fff;
+  font: 800 0.66em/1.8em var(--sans);
+  letter-spacing: 0.06em;
+}
+.card.command {
+  --band: var(--cmd);
+}
+.card.command .face {
+  align-content: start;
+  padding-top: 0.9em;
+}
+.card .name {
+  font-size: 0.95em;
+  font-weight: 700;
+}
+.card.initial {
+  --band: var(--faint);
+}
+.card.initial .file {
+  color: var(--muted);
+}
+.card.selected {
+  box-shadow:
+    0 0 0 3px var(--ink),
+    var(--shadow);
+}
+.card.used {
+  opacity: 0.3;
+}
+
+.card.commit {
+  display: block;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
+  perspective: calc(var(--w) * 8);
+}
+.card.commit .flipper {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 600ms ease-in-out;
+}
+.card.commit.up .flipper {
+  transform: rotateY(180deg);
+}
+.card.commit .side {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1.4em 1fr;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--w) * 0.09);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.card.commit .back {
+  display: grid;
+  grid-template-rows: none;
+  place-items: center;
+  background: repeating-linear-gradient(135deg, var(--back-1) 0 0.3em, var(--back-2) 0.3em 0.6em);
+  border-color: var(--back-2);
+}
+.card.commit .sha {
+  padding: 0.1em 0.35em;
+  border-radius: 0.3em;
+  background: rgb(0 0 0 / 0.18);
+  color: rgb(255 255 255 / 0.78);
+  font-size: 0.7em;
+}
+.card.commit .front {
+  background: var(--paper);
+  transform: rotateY(180deg);
+}
+.card.commit.bug .front {
+  border-color: var(--reject);
+}
+/* crossed out by someone's keep-mine: it stays on main, and no longer counts */
+.card.commit.overwritten .front::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top right, transparent 46%, var(--reject) 46%, var(--reject) 54%, transparent 54%);
+}
+.card.commit.reverted {
+  opacity: 0.45;
+}
+.card.commit.pickable .side {
+  box-shadow: 0 0 0 3px var(--warn);
+}
+button.card {
+  cursor: pointer;
+}

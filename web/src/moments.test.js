@@ -154,7 +154,8 @@ describe("the moments that always stop the day", () => {
     expect(forced).toMatchObject({ command: "git push --force", tone: "reject", screen: true });
     expect(forced.output).toEqual([" + c37ef9a...9dea397 main -> main (forced update)"]);
     expect(forced.notes).toEqual(["erased 0b330b6"]);
-    expect(reflog).toMatchObject({ player: "ana", kind: "reflog", screen: true });
+    expect(reflog).toMatchObject({ player: "ana", kind: "reflog", screen: true, output: [] });
+    expect(reflog.notes).toEqual(["restored 0b330b6: back on top of main"]);
     expect(reflog.coach).toMatch(/^Your trap fired/);
   });
 

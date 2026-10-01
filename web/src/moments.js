@@ -154,7 +154,7 @@ function moment(events, you) {
       ]);
 
     case "reflog_fired":
-      return m("reflog", "git reflog", [`restored ${e.restored.join(" ")}: back on top of main`], "ok");
+      return m("reflog", "git reflog", [], "ok", [`restored ${e.restored.join(" ")}: back on top of main`]);
 
     case "armed":
       return m("armed", null, [`${commandName(e.trap)} armed, face-down`]);
