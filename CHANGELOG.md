@@ -7,6 +7,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Added
+- The beta report reads the deployment (M13a): `bin/beta_report` in the release image prints what `mix gitgame.beta_report` prints, and both take `--since YYYY-MM-DD` to count only the games started that day or later, and the visits and replays marked since, so games played while the beta was built don't count as strangers'.
+
 ## [0.1.2] - 2026-09-30
 
 ### Changed

@@ -2,7 +2,8 @@ defmodule GitGame.Beta.ReportTest do
   @moduledoc "M12's done-when: the report's numbers match what this test computes from the same games' logs."
   use GitGame.DataCase, async: true
   alias GitGame.{Beta, Games, Players}
-  alias GitGame.Beta.{Mark, Report}
+  alias GitGame.Beta.{Mark, Printout, Report}
+  alias GitGame.Games.Record
 
   defp game(player, seed) do
     {:ok, %{id: id}} =
@@ -89,11 +90,49 @@ defmodule GitGame.Beta.ReportTest do
     assert r.returning == %{came_back_another_day: 1, played_again_after_finishing: 1}
   end
 
-  test "the task prints the report, and --json gives the same numbers" do
-    report = Report.build()
-    text = Mix.Tasks.Gitgame.BetaReport.format(report)
-    assert text =~ "# beta report"
+  test "since a date, only the games started on or after it, and the visits and replays marked since, count" do
+    {:ok, ana} = Players.create_anonymous()
+
+    # a game played out while the beta was being built, then one started on launch day
+    built = game(ana, 1)
+    play_out(built, ana.handle)
+
+    Repo.update_all(from(g in Record, where: g.id == ^built),
+      set: [inserted_at: ~U[2026-09-01 12:00:00.000000Z]]
+    )
+
+    _launched = game(ana, 2)
+
+    for {kind, day} <- [
+          {"visit", ~D[2026-09-01]},
+          {"visit", ~D[2026-09-02]},
+          {"replay", ~D[2026-09-02]}
+        ],
+        do: Repo.insert!(%Mark{kind: kind, player_id: ana.id, day: day, game_id: built})
+
+    all = Report.build()
+    assert all.games.started == 2 and all.games.finished == 1
+    assert all.replays.opened == 1
+    assert all.returning == %{came_back_another_day: 1, played_again_after_finishing: 1}
+
+    since = Report.build(since: Date.utc_today())
+    assert since.games == %{started: 1, finished: 0, finished_by_people: 0, share: 0.0}
+    assert since.replays.opened == 0
+    assert since.returning == %{came_back_another_day: 0, played_again_after_finishing: 0}
+  end
+
+  test "the printout is the report as text, or as JSON with --json, from --since a date" do
+    text = Printout.run([])
+    assert text =~ "# beta report\n"
     assert text =~ "third of the day"
-    assert JSON.decode!(JSON.encode!(report))["games"]["started"] == report.games.started
+
+    assert Printout.run(["--since", "2026-10-05"]) =~ "# beta report, since 2026-10-05"
+
+    json = JSON.decode!(Printout.run(["--json", "--since", "2026-10-05"]))
+    assert json["since"] == "2026-10-05"
+    assert json["games"]["started"] == 0
+
+    assert_raise ArgumentError, fn -> Printout.run(["--since", "next week"]) end
+    assert_raise ArgumentError, fn -> Printout.run(["--sinse", "2026-10-05"]) end
   end
 end

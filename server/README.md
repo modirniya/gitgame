@@ -56,9 +56,18 @@ A GitHub OAuth app has one callback URL, so production has an app of its own ("T
 What the beta records for the playtest it stands in for ([ADR-0002](../docs/adr/0002-beta-before-human-playtest.md), M12): games started and finished, when packs were sent against how they went, failed pushes and what followed, absences, replays, and players who came back. It reads every game's log and the few marks the log can't hold (visits, replays opened); nothing is shown to players.
 
 ```bash
-mix gitgame.beta_report          # readable
-mix gitgame.beta_report --json   # for a script
+mix gitgame.beta_report                      # readable
+mix gitgame.beta_report --json               # for a script
+mix gitgame.beta_report --since 2026-10-05   # only games started that day or later, and visits and replays since
 ```
+
+On the deployment, where the release has no Mix, `bin/beta_report` prints the same report from its database and takes the same options:
+
+```bash
+fly ssh console -a gitgame-online -C "/app/bin/beta_report --since 2026-10-05"
+```
+
+Count from the beta's launch date: games played before it, while the beta was built and tested, aren't strangers'.
 
 ## Production
 

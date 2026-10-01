@@ -11,17 +11,18 @@ defmodule GitGame.Beta.Report do
   - **failed pushes** (question 2): what the player who failed did next;
   - **absences** (question 3): packs that never came, and who left the company;
   - **replays**, and **returning** players: back on another day unprompted, or starting a game after finishing one.
+
+  `since:` a date counts only the games started on or after it, and the visits and replays marked on or after it, so the
+  games played while the beta was built and tested don't count as strangers' (M13a).
   """
   import Ecto.Query
   alias GitGame.{Games, Repo}
   alias GitGame.Beta.Mark
   alias GitGame.Games.{Record, Seat}
 
-  def build do
-    held =
-      Repo.all(
-        from s in Seat, where: not is_nil(s.player_id), select: {s.game_id, s.seat, s.player_id}
-      )
+  def build(opts \\ []) do
+    since = opts[:since]
+    held = Repo.all(seats(since))
 
     people = Enum.group_by(held, &elem(&1, 0), &elem(&1, 1))
 
@@ -33,10 +34,24 @@ defmodule GitGame.Beta.Report do
       send_timing: timing(histories, people),
       failed_pushes: failed(histories, people),
       absences: absences(histories, people),
-      replays: replays(histories),
-      returning: returning(held, histories)
+      replays: replays(histories, since),
+      returning: returning(held, histories, since)
     }
   end
+
+  # people's seats, in the games started since the date
+  defp seats(nil),
+    do: from(s in Seat, where: not is_nil(s.player_id), select: {s.game_id, s.seat, s.player_id})
+
+  defp seats(since) do
+    from s in seats(nil),
+      join: g in Record,
+      on: g.id == s.game_id,
+      where: g.inserted_at >= ^DateTime.new!(since, ~T[00:00:00.000000])
+  end
+
+  defp marks(kind, nil), do: from(m in Mark, where: m.kind == ^kind)
+  defp marks(kind, since), do: from(m in marks(kind, nil), where: m.day >= ^since)
 
   # A game whose people have all left the company plays itself to its release with the bots, since a bot sends as each
   # day opens; it reached a release, but nobody finished it. The share is of games people finished.
@@ -162,8 +177,8 @@ defmodule GitGame.Beta.Report do
 
   # ---------- the exit: replays, and people coming back ----------
 
-  defp replays(histories) do
-    marks = Repo.all(from m in Mark, where: m.kind == "replay")
+  defp replays(histories, since) do
+    marks = Repo.all(marks("replay", since))
     finished = for h <- histories, h.state.game.released, into: MapSet.new(), do: h.record.id
 
     %{
@@ -179,11 +194,11 @@ defmodule GitGame.Beta.Report do
     }
   end
 
-  defp returning(held, histories) do
+  defp returning(held, histories, since) do
     unprompted_days =
       Repo.all(
-        from m in Mark,
-          where: m.kind == "visit" and is_nil(m.via),
+        from m in marks("visit", since),
+          where: is_nil(m.via),
           group_by: m.player_id,
           having: count(m.day) >= 2,
           select: m.player_id

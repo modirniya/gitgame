@@ -173,9 +173,9 @@ The maintainer, playing the beta, found it poorer than the mobile prototype. The
 
 Strangers play the beta, and it answers what the playtest would have ([ADR-0002](../adr/0002-beta-before-human-playtest.md)). The milestone is read through M12's report: every number below is one `mix gitgame.beta_report` prints. What is the maintainer's to decide is marked **open**. M13a needs no decision; the rest wait on the ones they name.
 
-- [ ] **M13a · The report reads production, and only the beta.**
-  - The release has no Mix, so the report gets a command of its own in the image. It prints what `mix gitgame.beta_report` prints, read where the data is (`fly ssh console -a gitgame-online -C /app/bin/beta_report`).
-  - It counts from a date (`--since`), so games played while the beta was built and tested don't count as strangers'. Those include the maintainer's own and the ones sessions played to check the deployment.
+- [x] **M13a · The report reads production, and only the beta.**
+  - The release has no Mix, so the report gets a command of its own in the image, `bin/beta_report`. It prints what `mix gitgame.beta_report` prints, read where the data is (`fly ssh console -a gitgame-online -C /app/bin/beta_report`). CI runs it inside the release image, after the exit game.
+  - It counts from a date (`--since`), so games played while the beta was built and tested don't count as strangers'. Those include the maintainer's own and the ones sessions played to check the deployment. `ReportTest` checks what it leaves out.
   - **Open:** the launch date to count from, and whether the team's own games after it are left out too, and how.
 - [ ] **M13b · Ready for strangers.** Done once, before anyone is invited:
   - **The optional features.** Each one launched is tried once on the deployment (`server/README.md`, "Turning on the optional features"), which closes the open item "Checks only a deployment can make". **Open:** which of GitHub sign-in, email and push are on at launch. Anonymous play needs none of them.

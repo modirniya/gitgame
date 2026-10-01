@@ -1,0 +1,6 @@
+#!/bin/sh
+# Prints the beta report (M12, M13a) from the database the release points at (DATABASE_URL): what
+# `mix gitgame.beta_report` prints in development, with the same options (--json, --since YYYY-MM-DD).
+set -eu
+cd -P -- "$(dirname -- "$0")"
+exec ./gitgame eval 'GitGame.Deploy.beta_report(System.argv())' "$@"
