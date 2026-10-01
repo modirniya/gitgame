@@ -21,8 +21,13 @@ defmodule GitGame.Ops.RemoteTest do
     end)
   end
 
-  defp commit(game, player, card_ids),
-    do: play(game, player, [%{op: :add, cards: card_ids}, %{op: :commit}]) |> elem(0)
+  defp commit(game, player, card_ids, message \\ ""),
+    do:
+      play(game, player, [%{op: :add, cards: card_ids}, %{op: :commit, message: message}])
+      |> elem(0)
+
+  @merge_failed "Automatic merge failed; fix conflicts and then commit the result."
+  @rebased "Successfully rebased and updated refs/heads/main."
 
   describe "push" do
     test "with nothing to push is free: Everything up-to-date", %{rules: rules} do
@@ -139,11 +144,15 @@ defmodule GitGame.Ops.RemoteTest do
       game = commit(game, "ana", ["a2"])
       assert Ops.cost(game, "ana", %{op: :pull, rebase: true}) == 2
 
-      {game,
-       [%{merge_token: false, message: "Successfully rebased and updated refs/heads/main."}]} =
+      {game, [%{merge_token: false, message: @rebased}]} =
         play(game, "ana", [%{op: :pull, rebase: true}])
 
       assert game.players["ana"].merge == 0
+    end
+
+    test "--rebase with nothing of yours is a fast-forward, as Git does it", %{game: game} do
+      assert {:ok, _, [%{message: "Fast-forward"}]} =
+               Ops.run(game, "ana", %{op: :pull, rebase: true})
     end
 
     test "a conflict with -X ours overwrites their commit and takes a grudge", %{
@@ -155,13 +164,13 @@ defmodule GitGame.Ops.RemoteTest do
 
       {game, [detected, resolved, pulled]} = play(game, "ana", [%{op: :pull, strategy: :ours}])
 
-      assert %{type: :conflict_detected, message: "CONFLICT (content): Merge conflict in auth.js"} =
-               detected
+      # Git settles the file itself: no CONFLICT, and a merge
+      assert %{type: :conflict_detected, message: "Auto-merging auth.js"} = detected
 
       assert %{type: :conflict_resolved, strategy: :ours, crossed_out: [^theirs], discarded: []} =
                resolved
 
-      assert %{merge_token: true} = pulled
+      assert %{merge_token: true, message: "Merge made by the 'ort' strategy."} = pulled
       assert %{overwritten: true, flipped: true} = Enum.find(game.main, &(&1.id == theirs))
       assert game.players["ana"].grudges == 1
       assert length(game.players["ana"].local) == 1
@@ -173,11 +182,13 @@ defmodule GitGame.Ops.RemoteTest do
       game = commit(game, "ana", ["a1"])
       [mine] = game.players["ana"].local
 
-      {game, [_, resolved, pulled]} = play(game, "ana", [%{op: :pull}])
+      {game, [detected, resolved, pulled]} = play(game, "ana", [%{op: :pull}])
+      assert %{message: "Auto-merging auth.js"} = detected
       assert %{strategy: :theirs, discarded: [id]} = resolved
       assert id == mine.id
-      # nothing of ana's was left to merge, so it was a fast-forward after all
-      assert %{merge_token: false, message: "Fast-forward"} = pulled
+      # Git made a merge, but nothing of ana's was left in it: no merge token
+      assert %{merge_token: false, message: "Merge made by the 'ort' strategy."} = pulled
+      assert game.players["ana"].merge == 0
       assert game.players["ana"].local == []
       assert game.players["ana"].grudges == 0
     end
@@ -187,11 +198,75 @@ defmodule GitGame.Ops.RemoteTest do
       assert Ops.cost(game, "ana", %{op: :pull, strategy: :resolve}) == 2
       assert Ops.cost(game, "ana", %{op: :pull, rebase: true, strategy: :resolve}) == 3
 
-      {game, [_, %{crossed_out: [], discarded: []}, _]} =
+      {game, [detected, %{crossed_out: [], discarded: []}, pulled]} =
         play(game, "ana", [%{op: :pull, strategy: :resolve}])
 
+      assert detected.message ==
+               "Auto-merging auth.js\nCONFLICT (content): Merge conflict in auth.js\n" <>
+                 @merge_failed
+
+      assert %{merge_token: true, message: "Merge made by the 'ort' strategy."} = pulled
       assert length(game.players["ana"].local) == 1
       refute Enum.any?(game.main, & &1[:overwritten])
+    end
+
+    test "--rebase -X theirs drops your commit, as patch contents already upstream", %{
+      game: game
+    } do
+      game = commit(game, "ana", ["a1"], "feat(auth): refresh tokens before they expire")
+      [mine] = game.players["ana"].local
+
+      {game, [detected, %{discarded: [_]}, pulled]} =
+        play(game, "ana", [%{op: :pull, rebase: true, strategy: :theirs}])
+
+      # a rebase settled by -X says nothing of the file
+      assert detected.message == ""
+
+      assert pulled.message ==
+               "dropping #{mine.id} feat(auth): refresh tokens before they expire" <>
+                 " -- patch contents already upstream\n" <> @rebased
+
+      assert %{merge_token: false} = pulled
+      assert game.players["ana"].local == []
+    end
+
+    test "--rebase -X ours keeps your commit on top", %{game: game} do
+      game = commit(game, "ana", ["a1"])
+
+      {game, [%{message: ""}, %{crossed_out: [_]}, %{message: @rebased, merge_token: false}]} =
+        play(game, "ana", [%{op: :pull, rebase: true, strategy: :ours}])
+
+      assert game.players["ana"].merge == 0
+    end
+
+    test "--rebase resolved by hand stops at each clashing commit; a merge once, every file in path order",
+         %{rules: rules} do
+      {game, _} =
+        table(rules, [card("a1", "auth.js", 4), card("a2", "api.py", 2)], [
+          card("r1", "auth.js", 5),
+          card("r2", "api.py", 3)
+        ])
+        |> commit("raj", ["r1", "r2"])
+        |> play("raj", [%{op: :push}])
+
+      game =
+        game
+        |> commit("ana", ["a1"], "feat(auth): rate-limit login attempts")
+        |> commit("ana", ["a2"], "feat(api): paginate /users")
+
+      [first, second] = game.players["ana"].local
+      stopped_on = &"Auto-merging #{&1}\nCONFLICT (content): Merge conflict in #{&1}\n"
+
+      {_, [detected | _]} = play(game, "ana", [%{op: :pull, rebase: true, strategy: :resolve}])
+
+      assert detected.message ==
+               stopped_on.("auth.js") <>
+                 "error: could not apply #{first.id}... feat(auth): rate-limit login attempts\n" <>
+                 stopped_on.("api.py") <>
+                 "error: could not apply #{second.id}... feat(api): paginate /users"
+
+      {_, [detected | _]} = play(game, "ana", [%{op: :pull, strategy: :resolve}])
+      assert detected.message == stopped_on.("api.py") <> stopped_on.("auth.js") <> @merge_failed
     end
 
     test "resolve costs nothing extra when there is no conflict", %{game: game} do

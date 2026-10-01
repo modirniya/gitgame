@@ -6,7 +6,7 @@ defmodule GitGame.Ops.Remote do
   a commit touching the same file as one of your unpushed commits is a conflict, settled by the strategy declared on
   the op, because nobody is there to answer a prompt: `ours` overwrites their commit and takes a grudge, `theirs` drops
   yours, `resolve` keeps both for an extra op. A plain pull takes a merge token only if it actually merged something of
-  yours; with nothing to merge it is a fast-forward, and Git makes no merge commit.
+  yours; with nothing of yours it is a fast-forward, and Git makes no merge commit.
   """
   @behaviour GitGame.Ops
   import GitGame.Ops, only: [failed: 4]
@@ -110,12 +110,14 @@ defmodule GitGame.Ops.Remote do
   end
 
   defp pull(game, player, rebase, strategy) do
-    p = game.players[player]
+    before = game.players[player]
     found = conflicts(game, player)
-    incoming = Enum.drop(game.main, p.pointer)
-    {game, p, settled} = settle(game, player, p, found, strategy)
+    incoming = Enum.drop(game.main, before.pointer)
+    {game, p, settled} = settle(game, player, before, found, strategy, rebase)
     merged = p.local != []
 
+    # The token is a rule, not Git's words: a merge whose -X theirs dropped all of yours still prints a merge, but
+    # nothing of yours was merged, so it takes no token.
     token =
       cond do
         rebase -> game.rules.merge_token_on_rebase
@@ -125,24 +127,29 @@ defmodule GitGame.Ops.Remote do
 
     p = %{p | pointer: length(game.main), merge: p.merge + if(token, do: 1, else: 0)}
 
-    message =
-      cond do
-        rebase -> "Successfully rebased and updated refs/heads/main."
-        merged -> "Merge made by the 'ort' strategy."
-        true -> "Fast-forward"
-      end
-
     pulled = %{
       type: :pulled,
       player: player,
       rebase: rebase,
       incoming: Enum.map(incoming, & &1.id),
       merge_token: token,
-      message: message
+      message: pulled_message(before.local, before.local -- p.local, rebase)
     }
 
     {:ok, put_player(game, player, p), settled ++ [pulled]}
   end
+
+  # Git's words depend on what you had before the pull: with nothing of yours it fast-forwards, even under --rebase.
+  defp pulled_message([], _dropped, _rebase), do: "Fast-forward"
+
+  defp pulled_message(_local, dropped, true) do
+    drops =
+      for c <- dropped, do: "dropping #{c.id} #{c.message} -- patch contents already upstream"
+
+    Enum.join(drops ++ ["Successfully rebased and updated refs/heads/main."], "\n")
+  end
+
+  defp pulled_message(_local, _dropped, false), do: "Merge made by the 'ort' strategy."
 
   # Every pair of one of your unpushed commits and an incoming commit that touch a file in common.
   defp conflicts(game, player) do
@@ -163,14 +170,14 @@ defmodule GitGame.Ops.Remote do
 
   defp strategy(game, op), do: op[:strategy] || game.rules.default_conflict_strategy
 
-  defp settle(game, _player, p, [], _), do: {game, p, []}
+  defp settle(game, _player, p, [], _strategy, _rebase), do: {game, p, []}
 
-  defp settle(game, player, p, found, strategy) do
+  defp settle(game, player, p, found, strategy, rebase) do
     detected = %{
       type: :conflict_detected,
       player: player,
       conflicts: found,
-      message: conflict_message(found)
+      message: conflict_message(found, strategy, rebase, p.local)
     }
 
     {game, p, crossed, dropped} =
@@ -215,10 +222,41 @@ defmodule GitGame.Ops.Remote do
     }
   end
 
-  defp conflict_message(found) do
-    found
-    |> Enum.flat_map(& &1.files)
-    |> Enum.uniq()
-    |> Enum.map_join("\n", &"CONFLICT (content): Merge conflict in #{&1}")
+  # What Git prints as the pull meets the clash. Under -X, Git settles each file itself: a merge says `Auto-merging`,
+  # a rebase says nothing until it drops or keeps your commit. Resolving by hand stops on the CONFLICT: a merge once
+  # for every file, a rebase at each of your clashing commits in turn.
+  defp conflict_message(found, strategy, rebase, local) do
+    lines =
+      case {strategy, rebase} do
+        {:resolve, false} ->
+          Enum.flat_map(clashing(found), &stopped_on/1) ++
+            ["Automatic merge failed; fix conflicts and then commit the result."]
+
+        {:resolve, true} ->
+          Enum.flat_map(local, fn c ->
+            case clashing(Enum.filter(found, &(&1.mine == c.id))) do
+              [] ->
+                []
+
+              files ->
+                Enum.flat_map(files, &stopped_on/1) ++
+                  ["error: could not apply #{c.id}... #{c.message}"]
+            end
+          end)
+
+        {_, false} ->
+          Enum.map(clashing(found), &"Auto-merging #{&1}")
+
+        {_, true} ->
+          []
+      end
+
+    Enum.join(lines, "\n")
   end
+
+  # in path order, as Git reports them
+  defp clashing(found), do: found |> Enum.flat_map(& &1.files) |> Enum.uniq() |> Enum.sort()
+
+  defp stopped_on(file),
+    do: ["Auto-merging #{file}", "CONFLICT (content): Merge conflict in #{file}"]
 end
