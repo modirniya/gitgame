@@ -131,7 +131,7 @@ defmodule GitGame.Bot do
 
   defp blame(s) do
     target =
-      s.view.main
+      main(s)
       |> Enum.filter(
         &(&1[:author] not in [nil, s.me] and &1[:flipped] == false and !&1[:overwritten] and
             !&1[:revert_of])
@@ -157,7 +157,7 @@ defmodule GitGame.Bot do
   defp revert(s) do
     own =
       Enum.find(
-        s.view.main,
+        main(s),
         &(&1[:author] == s.me and &1[:bug] == true and !&1[:reverted] and !&1[:overwritten] and
             !&1[:revert_of])
       )
@@ -300,6 +300,10 @@ defmodule GitGame.Bot do
       true -> {"theirs", 0}
     end
   end
+
+  # main as the rest of the pack finds it: a force-push earlier in the pack erases everything past the bot's pointer
+  defp main(%{forced: true} = s), do: Enum.take(s.view.main, s.pub.pointer)
+  defp main(s), do: s.view.main
 
   defp commands?(s, card),
     do: s.view.commands_allowed and Enum.any?(s.you.hand, &(&1[:command] == card))

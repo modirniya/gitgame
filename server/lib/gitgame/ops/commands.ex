@@ -15,7 +15,15 @@ defmodule GitGame.Ops.Commands do
   def cost(game, _player, %{op: op}), do: game.rules.commands[@cards[op]].cost
 
   @impl true
-  def run(game, player, %{op: op} = o) do
+  def run(game, player, op), do: game |> command(player, op) |> with_target(op)
+
+  # A failed blame or revert names its commit, so the log can show `git blame 0c10117`, the command as it was typed.
+  defp with_target({:failed, game, events}, %{target: sha}),
+    do: {:failed, game, Enum.map(events, &Map.put(&1, :target, sha))}
+
+  defp with_target(result, _op), do: result
+
+  defp command(game, player, %{op: op} = o) do
     cond do
       game.incident && game.incident.effect.kind == :no_commands ->
         failed(game, player, op, "error: #{game.incident.name}: no command cards today")

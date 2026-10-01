@@ -79,6 +79,26 @@ defmodule GitGame.BotTest do
     assert Enum.any?(pack["ops"], &match?(%{"op" => "blame", "target" => "t2"}, &1))
   end
 
+  test "never blames a commit its own force-push erases in the same pack" do
+    erased = commit("t2", "ana", [card("a2", "api.py", 7)])
+    pack = fn main -> Bot.write_pack(view(forcing_blamer(main, erased))) end
+
+    assert ops(pack.([])) == ["force", "add", "commit"]
+
+    # a face-down commit the force-push keeps is still fair game
+    kept = commit("t1", "ana", [card("a1", "auth.js", 5)])
+    assert %{"op" => "blame", "target" => "t1"} = Enum.at(pack.([kept])["ops"], 1)
+  end
+
+  defp forcing_blamer(kept, erased) do
+    [
+      hand: [cmd("f1", "force"), cmd("b1", "blame"), card("c1", "styles.css", 3)],
+      local: [commit("x1", "bot", [card("c0", "README.md", 2)])],
+      main: kept ++ [erased],
+      pointer: 1 + length(kept)
+    ]
+  end
+
   test "arms a reflog it holds, for free" do
     pack = Bot.write_pack(view(hand: [cmd("r1", "reflog")]))
     assert %{"op" => "arm", "trap" => "reflog"} = List.last(pack["ops"])

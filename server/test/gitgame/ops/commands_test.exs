@@ -92,6 +92,19 @@ defmodule GitGame.Ops.CommandsTest do
       assert {:failed, ^game, [%{message: "error: no git blame card in hand"}]} =
                Ops.run(game, "raj", %{op: :blame, target: bug})
     end
+
+    test "a failure names its target, so the log can print the command as it was typed", %{
+      game: game
+    } do
+      assert {:failed, _, [%{type: :op_failed, op: :blame, target: "abc1234"}]} =
+               Ops.run(game, "ana", %{op: :blame, target: "abc1234"})
+
+      assert {:failed, _, [%{type: :op_failed, op: :revert, target: "abc1234"}]} =
+               Ops.run(game, "raj", %{op: :revert, target: "abc1234"})
+
+      assert {:failed, _, [failed]} = Ops.run(game, "ana", %{op: :force})
+      refute Map.has_key?(failed, :target)
+    end
   end
 
   describe "git revert" do

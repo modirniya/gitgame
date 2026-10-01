@@ -18,6 +18,8 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 - A pull's conflict strategy is offered by what it does (keep theirs, keep mine, keep both by hand) and printed as Git's flag, which swaps `ours` and `theirs` under `--rebase`; keeping both prints no flag, as in Git. What a rule took (a dropped or crossed-out commit, a merge token, what a force-push erased) is a `#` comment, not a line in Git's voice, and a failed command names its target (M15a).
 - A commit starts with a real message for the files staged, with others to pick from, instead of `git commit -m ""` (M15a).
 - A pack can tag v1.0 only once (M15a).
+- A pull whose conflict is settled by `-X ours` or `-X theirs` prints what Git prints: `Auto-merging` and a merge, or under `--rebase` the commits it dropped and `Successfully rebased`, rather than a CONFLICT and, when `-X theirs` took your only commit, a `Fast-forward`. CONFLICT is printed only for `--resolve`, resolved by hand, and a `pull --rebase` with nothing of yours is a fast-forward, as in Git.
+- A failed `git blame` or `git revert` names its commit in the day log, and the bot no longer blames a commit that its own force-push erased earlier in the same pack, which failed with `fatal: no such commit`.
 
 ## [0.2.1] - 2026-09-30
 
