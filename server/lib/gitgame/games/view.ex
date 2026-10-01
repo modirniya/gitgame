@@ -68,9 +68,22 @@ defmodule GitGame.Games.View do
       days:
         Enum.map(
           Map.get(state, :days, []),
-          &%{day: &1.day, log: Projection.events(&1.log, viewer)}
+          &%{day: &1.day, log: Projection.events(&1.log, viewer), opened: &1.opened}
         ),
       today: Projection.events(Map.get(state, :opened, []), viewer)
+    }
+  end
+
+  @doc """
+  The table as a day opened, as everyone may see it: `main`, each pointer and how far behind it is, and the scores.
+  Each closed day keeps one, so a client can draw `main` at every step of that day's playback (M15f) and show the
+  scores as the day opened rather than recompute them step by step, which would mean writing the scoring rules twice.
+  """
+  def opening(%Game{} = game) do
+    %{
+      main: Enum.map(game.main, &commit/1),
+      players: Map.new(game.seats, &{&1, Map.take(player(game, &1), [:pointer, :behind])}),
+      scores: Release.scores(game)
     }
   end
 

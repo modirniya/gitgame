@@ -41,7 +41,9 @@ defmodule GitGame.Games.ViewPropertyTest do
         %{
           state
           | game: game,
-            days: state.days ++ [%{day: state.game.day, log: closed}],
+            days:
+              state.days ++
+                [%{day: state.game.day, log: closed, opened: View.opening(state.game)}],
             opened: opened
         },
         rand
@@ -66,8 +68,11 @@ defmodule GitGame.Games.ViewPropertyTest do
       assert JSON.decode!(view)["you"]["armed"] == game.players[reader].armed
     end
 
-    # a face-down commit never says whether it is a bug, whoever reads
-    for c <- JSON.decode!(public)["main"],
+    # a face-down commit never says whether it is a bug, whoever reads: on `main` now, or as any day opened
+    decoded = JSON.decode!(public)
+
+    for main <- [decoded["main"] | Enum.map(decoded["days"], & &1["opened"]["main"])],
+        c <- main,
         c["flipped"] == false,
         do: refute(Map.has_key?(c, "bug"))
   end

@@ -1,7 +1,7 @@
 defmodule GitGame.GamesTest do
   use GitGame.DataCase, async: true
   alias GitGame.{Game, Games, Resolver, Rules}
-  alias GitGame.Games.{Event, Pack, Record}
+  alias GitGame.Games.{Event, Pack, Record, View}
 
   defp new_game(opts \\ []), do: Games.create(["ana", "raj"], Keyword.merge([seed: 42], opts))
 
@@ -162,6 +162,39 @@ defmodule GitGame.GamesTest do
       assert day1.game == now.game
 
       assert {:error, :not_found, "fatal: day 2 hasn't closed"} = Games.load(id, through_day: 2)
+    end
+
+    test "each closed day carries the table as it opened: the one the day before closed on (M15f)" do
+      {:ok, %{id: id}} = new_game()
+
+      # ana ships every day and raj only sends empty packs, so main grows and raj's pointer falls behind
+      for _ <- 1..3 do
+        {:ok, %{game: game, version: v}} = Games.load(id)
+        {:ok, _} = Games.send_pack(id, "ana", v, ship(game, "ana"))
+        {:ok, %{closed: true}} = Games.send_pack(id, "raj", v, %{"ops" => []})
+      end
+
+      {:ok, state} = Games.load(id)
+      days = View.public(state, id).days
+      assert [[%{initial: true}], [_, _], [_, _, _]] = Enum.map(days, & &1.opened.main)
+      assert List.last(days).opened.players["raj"] == %{pointer: 1, behind: 2}
+
+      for %{day: day, opened: opened} <- days do
+        {:ok, before} = Games.load(id, through_day: day - 1)
+        table = View.public(before, id)
+
+        assert opened.main == table.main
+        assert opened.scores == table.scores
+
+        assert opened.players ==
+                 Map.new(table.players, fn {seat, p} ->
+                   {seat, Map.take(p, [:pointer, :behind])}
+                 end)
+      end
+
+      # a replay carries them too: the same fold
+      {:ok, replay} = Games.load(id, through_day: 2)
+      assert View.public(replay, id).days == Enum.take(days, 2)
     end
   end
 

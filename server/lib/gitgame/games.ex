@@ -74,8 +74,9 @@ defmodule GitGame.Games do
   end
 
   @doc """
-  The game as its log makes it: `%{game: current state, version: ..., days: [%{day, log}], opened: this day's opening
-  events, sent: who has sent a pack for the open day, bots: the seats bots play}`, or `{:error, :not_found}`.
+  The game as its log makes it: `%{game: current state, version: ..., days: [%{day, log, opened: the table as that day
+  opened}], opened: this day's opening events, sent: who has sent a pack for the open day, bots: the seats bots
+  play}`, or `{:error, :not_found}`.
 
   With `through_day: n`, the game as it stood when day `n` closed (day 0: as created), folded from the log up to that
   point and no further, so a replay shows nothing that happened later: not even which packs were in for the next day.
@@ -376,7 +377,8 @@ defmodule GitGame.Games do
         %{
           acc
           | game: game,
-            days: acc.days ++ [%{day: day, log: closed}],
+            # kept already as everyone may see it, and only what a day's playback draws (M15f), not the whole game
+            days: acc.days ++ [%{day: day, log: closed, opened: View.opening(acc.game)}],
             opened: opened,
             pending: %{},
             version: seq,
