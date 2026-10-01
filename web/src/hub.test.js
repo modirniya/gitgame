@@ -35,6 +35,8 @@ describe("the hub", () => {
     // ana is one behind: the push brings its pull, which costs an op now
     expect(action("pull").querySelector(".cost").textContent).toBe("1 op");
     expect(node.querySelector(".actions .send").textContent).toBe("send pack");
+    // one sentence for a screen reader
+    expect(action("add").getAttribute("aria-label")).toBe("git add, 1 op: stage 1 card, +5");
   });
 
   it("adds the selected cards, and a pull before a push", () => {
