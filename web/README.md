@@ -52,7 +52,7 @@ npm run build          # the PWA in dist/
 | `src/whoami.js`               | Who this device is: handle and avatar, "link GitHub", sign out, and the nudge after a finished game                       |
 | `src/room.js`                 | A room (M9): who is in, the link to share, the host's bots, day length and start                                          |
 | `src/games.js`                | Your games on the start screen, those waiting on your pack first                                                          |
-| `src/guide.js`                | The guided first game: one sentence and one highlighted thing over the hub, through the first day                         |
+| `src/guide.js`                | The guided first game: one sentence and one highlighted thing, counted, on the hub and the days played back, for two days |
 | `src/release.js`              | The release: CI turning `main` face-up one commit at a time, and the scoreboard, read across; `release.css` beside it     |
 | `src/verdict.js`              | Who won, as the remote decides it, and the scoreboard's "what decided it"                                                 |
 | `src/feedback.js`             | The scoreboard's feedback box: a note of up to 1000 characters for the maintainer, one per game, rewritable               |

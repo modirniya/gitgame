@@ -16,7 +16,7 @@ import { catchup, recall, remember } from "./catchup.js";
 import { offerReminders, remindButton } from "./remind.js";
 import { scoreboard } from "./release.js";
 import { feedbackBox } from "./feedback.js";
-import { guideLayer, guideStep, highlight, isGuided, setGuided } from "./guide.js";
+import { guideLayer, guideOnStep, guideStep, highlight, isGuided, setGuided } from "./guide.js";
 
 const fresh = () => ({ ops: [], selected: [], picking: null });
 
@@ -132,6 +132,14 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
       play(now, before);
     }
     if (writing) guide(view);
+    // the guide speaks on the days played back too (M15h)
+    const said = playing && isGuided(id) && guideOnStep(playing, you);
+    if (said) node.querySelector(".view > .body")?.prepend(guideLayer(said, { done: leaveGuide }));
+  }
+
+  function leaveGuide() {
+    setGuided(id, false);
+    render();
   }
 
   // What the frame holds: a moment of the days you haven't seen, the handoff, the scoreboard, or your pack to write.
@@ -197,7 +205,7 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
     const step = guideStep(view, s.draft);
     if (!step) return setGuided(id, false);
     // at the top of the pack being written, where it covers nothing the guide asks for
-    node.querySelector(".hub > .body")?.prepend(guideLayer(step, { done: () => (setGuided(id, false), render()) }));
+    node.querySelector(".hub > .body")?.prepend(guideLayer(step, { done: leaveGuide }));
     highlight(node, step.target);
   }
 
