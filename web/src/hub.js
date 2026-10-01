@@ -1,74 +1,15 @@
-// I-Hub (event-screens §3): where a day's pack is written. `main` at the top, your branch and hand below, one row of
-// actions each saying why when it can't be played, and the pack as a list of commands with what each will cost. The
-// hub holds nothing: it renders a view and a draft (`{ops, selected, picking}`), and hands every change to `change`,
-// except a commit message, which is written into its op as it is typed (see `row`).
+// I-Hub (event-screens §3): where a day's pack is written, laid out as the prototype's table. `main` at the top with
+// what your pack pushes waiting at its end, your branch as the pack would leave it, your hand, and at the thumb the
+// four big actions, each saying what it would do now or why it can't, with a command card's action once you pick one.
+// The hub holds nothing: it renders a view and a draft (`{ops, selected, picking}`) and hands every change to `change`.
 import { el } from "./dom.js";
-import { card, commandName, commit } from "./cards.js";
+import { card } from "./cards.js";
 import { strip } from "./table.js";
-import { actions, add, consequences, gitFlag, price, STRATEGIES, unspent } from "./pack.js";
+import { actions, add, consequences, price, unspent } from "./pack.js";
 import { suggestions } from "./messages.js";
-
-/** An op as the command a terminal would show. */
-export function command(op, view) {
-  const hand = view.you.hand;
-  switch (op.op) {
-    case "add":
-      return `git add ${[...new Set(op.cards.map((id) => hand.find((c) => c.id === id)?.file ?? id))].join(" ")}`;
-    case "commit":
-      return `git commit -m ${JSON.stringify(op.message ?? "")}`;
-    case "pull":
-      return ["git pull", op.rebase && "--rebase", gitFlag(op.strategy ?? view.default_strategy, op.rebase)]
-        .filter(Boolean)
-        .join(" ");
-    case "push":
-      return "git push";
-    case "force":
-      return "git push --force";
-    case "blame":
-      return `git blame ${op.target}`;
-    case "revert":
-      return `git revert ${op.target}`;
-    case "tag":
-      return "git tag -a v1.0";
-    case "arm":
-      return `# arm ${commandName(op.trap)}, face-down`;
-  }
-}
-
-// Your own commits, face-up to you (bug and all), as they would look on main.
-const own = (c) => ({
-  id: c.id,
-  author: c.author,
-  message: c.message,
-  files: [...new Set(c.cards.map((k) => k.file))],
-  lines: c.cards.reduce((n, k) => n + k.lines, 0),
-  flipped: true,
-  bug: c.cards.some((k) => k.bug),
-});
-
-/** Your branch: what you have committed and not pushed, and what is staged for the next commit. */
-function branch(view) {
-  const { local, staged } = view.you;
-  if (!local.length && !staged.length) return null;
-  return el(
-    "section",
-    { class: "branch", "aria-label": "your branch" },
-    el("h2", {}, `your branch · ${local.length} to push`),
-    local.length > 0 &&
-      el(
-        "ol",
-        { class: "strip" },
-        local.map((c) => el("li", {}, commit(own(c), { faceUp: true }))),
-      ),
-    staged.length > 0 &&
-      el(
-        "div",
-        { class: "cards staged" },
-        el("span", {}, "staged"),
-        staged.map((c) => card(c, { size: "sm" })),
-      ),
-  );
-}
+import { branch, own } from "./branch.js";
+import { packList } from "./packlist.js";
+import { incidentText } from "./copy.js";
 
 // A hand card is 96 px wide; a fanned one shows at least this much of itself, a finger's width.
 const CARD = 96;
@@ -104,81 +45,7 @@ function fan(cards) {
   );
 }
 
-const range = (r) => (r.cost === r.most ? `${r.cost}` : `${r.cost}–${r.most}`);
-
-function row(view, draft, change, r, i) {
-  const set = (patch) => change({ ...draft, ops: draft.ops.map((o, j) => (j === i ? { ...o, ...patch } : o)) });
-  const remove = () => change({ ...draft, ops: draft.ops.filter((_, j) => j !== i) });
-  const op = r.op;
-
-  const cmd = el("span", { class: "cmd" }, command(op, view));
-  // No re-render while a message is written: one when the field lost focus replaced the send button under the very
-  // tap that took the focus away, and the pack wasn't sent.
-  const write = (message) => {
-    op.message = message;
-    cmd.textContent = command(op, view);
-  };
-  const field =
-    op.op === "commit" &&
-    el("input", {
-      class: "message",
-      "aria-label": "commit message",
-      placeholder: "commit message",
-      maxlength: 200,
-      value: op.message ?? "",
-      oninput: (e) => write(e.target.value),
-    });
-
-  return el(
-    "li",
-    { class: `op${r.runs ? "" : " over"}${r.maybe ? " maybe" : ""}` },
-    cmd,
-    el("span", { class: "cost", title: "ops this costs: now, or at most" }, range(r)),
-    el("button", { class: "remove", "aria-label": `remove ${command(op, view)}`, onclick: remove }, "×"),
-    field,
-    op.op === "commit" &&
-      el(
-        "span",
-        { class: "suggestions" },
-        suggestions(r.cards)
-          .filter((text) => text !== op.message)
-          .map((text) =>
-            el(
-              "button",
-              { class: "suggestion", type: "button", onclick: () => ((field.value = text), write(text)) },
-              text,
-            ),
-          ),
-      ),
-    op.op === "pull" &&
-      el(
-        "span",
-        { class: "flags" },
-        el(
-          "label",
-          {},
-          el("input", {
-            type: "checkbox",
-            "aria-label": "--rebase",
-            checked: !!op.rebase,
-            onchange: (e) => set({ rebase: e.target.checked }),
-          }),
-          " --rebase",
-        ),
-        el(
-          "select",
-          { "aria-label": "on a conflict", onchange: (e) => set({ strategy: e.target.value || undefined }) },
-          el("option", { value: "" }, `on a conflict: ${STRATEGIES[view.default_strategy]}`),
-          ["theirs", "ours", "resolve"]
-            .filter((x) => x !== view.default_strategy)
-            .map((x) => el("option", { value: x, selected: op.strategy === x }, `on a conflict: ${STRATEGIES[x]}`)),
-        ),
-      ),
-    el("span", { class: "note" }, r.runs ? r.note : "not run: over budget", r.maybe ? " · may not run" : ""),
-  );
-}
-
-// the action buttons' names, which the warning about unspent ops repeats
+// short names, as the warning about unspent ops lists them
 const LABELS = {
   add: "add",
   commit: "commit",
@@ -190,6 +57,22 @@ const LABELS = {
   arm: "arm reflog",
   tag: "tag v1.0",
 };
+// as the buttons name them: the command
+const NAMES = {
+  add: "git add",
+  commit: "git commit",
+  pull: "git pull",
+  push: "git push",
+  blame: "git blame",
+  revert: "git revert",
+  force: "git push --force",
+  arm: "arm reflog",
+  tag: "git tag v1.0",
+};
+// the action a command card in your hand plays
+const PLAYS = { blame: "blame", revert: "revert", force: "force", reflog: "arm" };
+
+const ops = (n) => (n === 0 ? "free" : `${n} op${n === 1 ? "" : "s"}`);
 
 /**
  * `warned`: the send button was tapped with ops left unspent, so the hub says what could still be done. `extra` is
@@ -197,32 +80,60 @@ const LABELS = {
  */
 export function hub({ view, draft, change, send, sending = false, error = "", warned = false, extra = null }) {
   const priced = price(view, draft.ops);
+  const left = priced.left;
   const unused = warned && unspent(view, draft.ops);
-  const can = actions(view, draft.ops, draft.selected);
-  const will = consequences(view, draft.ops, draft.selected);
+  const inHand = new Set(left.hand.map((c) => c.id));
+  const selected = draft.selected.filter((id) => inHand.has(id));
+  const can = actions(view, draft.ops, selected);
+  const will = consequences(view, draft.ops, selected);
   const put = (op) => change({ ...draft, ops: add(view, draft.ops, op), selected: [], picking: null });
   const sent = view.sent_today.includes(view.you.player);
+  const picked = left.hand.find((c) => c.kind === "command" && selected.includes(c.id));
 
-  const action = (key, op) =>
+  // what an action costs as the pack stands: the op's own cost, now and at most
+  const cost = (key) => {
+    if (key === "add") return ops(view.costs.ops.add);
+    if (key === "blame" || key === "revert") return ops(view.costs.commands[key]);
+    if (draft.ops.length >= view.max_ops) return "";
+    const r = price(view, add(view, draft.ops, OPS[key]())).rows.at(-1);
+    return r.cost === r.most ? ops(r.cost) : `${r.cost}–${r.most} ops`;
+  };
+  const OPS = {
+    add: () => ({ op: "add", cards: selected }),
+    commit: () => ({ op: "commit", message: suggestions(left.staged)[0] }),
+    pull: () => ({ op: "pull" }),
+    push: () => ({ op: "push" }),
+    force: () => ({ op: "force" }),
+    arm: () => ({ op: "arm", trap: "reflog" }),
+    tag: () => ({ op: "tag" }),
+  };
+  const action = (key, wide = false) =>
     el(
       "button",
       {
-        class: "action",
+        class: `op${wide ? " wide" : ""}${!can[key] && key === "push" && left.behind ? " danger" : ""}`,
         "data-guide": key,
         disabled: !!can[key],
-        title: can[key] ?? "",
-        onclick: () => (op ? put(op()) : change({ ...draft, picking: key })),
+        onclick: () => (OPS[key] ? put(OPS[key]()) : change({ ...draft, selected: [], picking: key })),
       },
-      LABELS[key],
+      el("span", { class: "opname" }, NAMES[key]),
+      el("span", { class: "cost" }, cost(key)),
       // what it would do, in your situation; or, when it can't be played, why not
-      can[key] ? el("span", { class: "why" }, can[key]) : will[key] && el("span", { class: "will" }, will[key]),
+      el("span", { class: can[key] ? "why" : "will" }, can[key] ?? will[key] ?? ""),
     );
 
-  const inHand = new Set(priced.left.hand.map((c) => c.id));
-  const toggle = (id) =>
+  // a commit card joins the cards to add; a command card is played alone, so picking one puts the rest down
+  const toggle = (c) =>
     change({
       ...draft,
-      selected: draft.selected.includes(id) ? draft.selected.filter((x) => x !== id) : [...draft.selected, id],
+      selected:
+        c.kind === "command"
+          ? selected.includes(c.id)
+            ? []
+            : [c.id]
+          : selected.includes(c.id)
+            ? selected.filter((x) => x !== c.id)
+            : [...selected.filter((x) => left.hand.find((h) => h.id === x)?.kind === "commit"), c.id],
     });
 
   const picking = draft.picking;
@@ -230,6 +141,7 @@ export function hub({ view, draft, change, send, sending = false, error = "", wa
     picking === "blame"
       ? !c.initial && !c.revert_of && !c.flipped && c.author !== view.you.player
       : picking === "revert" && c.flipped && c.bug && !c.reverted && !c.overwritten;
+  const undo = () => change({ ...draft, ops: draft.ops.slice(0, -1), picking: null });
 
   return el(
     "section",
@@ -237,52 +149,28 @@ export function hub({ view, draft, change, send, sending = false, error = "", wa
     el(
       "div",
       { class: "body" },
-      strip(view, { pickable: picking ? pickable : () => false, onpick: (c) => put({ op: picking, target: c.id }) }),
+      strip(view, {
+        pickable: picking ? pickable : () => false,
+        onpick: (c) => put({ op: picking, target: c.id }),
+        ghosts: left.pushed.map((c) => own(c, view.you.player)),
+      }),
       view.incident &&
         el(
           "p",
           { class: "incident-note" },
           el("span", { class: "k" }, "incident"),
-          ` ${view.incident.name} — ${view.incident.text}`,
+          ` ${view.incident.name} — ${incidentText(view.incident)}`,
         ),
       picking &&
         el(
           "p",
-          { class: "picking" },
-          `git ${picking}: pick a commit on main `,
+          { class: "picking-line" },
+          `git ${picking}: tap a commit on main `,
           el("button", { onclick: () => change({ ...draft, picking: null }) }, "cancel"),
         ),
-      branch(view),
-      fan(
-        view.you.hand.map((c) =>
-          inHand.has(c.id)
-            ? card(c, {
-                selected: draft.selected.includes(c.id),
-                onclick: c.kind === "commit" ? () => toggle(c.id) : null,
-              })
-            : card(c, { used: true }),
-        ),
-      ),
-      el(
-        "div",
-        { class: "ops-grid" },
-        action("add", () => ({ op: "add", cards: draft.selected.filter((id) => inHand.has(id)) })),
-        action("commit", () => ({ op: "commit", message: suggestions(priced.left.staged)[0] })),
-        action("pull", () => ({ op: "pull" })),
-        action("push", () => ({ op: "push" })),
-        action("blame"),
-        action("revert"),
-        action("force", () => ({ op: "force" })),
-        action("arm", () => ({ op: "arm", trap: "reflog" })),
-        action("tag", () => ({ op: "tag" })),
-      ),
-      el(
-        "ol",
-        { class: "pack", "aria-label": "your pack" },
-        priced.rows.length
-          ? priced.rows.map((r, i) => row(view, draft, change, r, i))
-          : el("li", { class: "empty" }, "# an empty pack: nothing happens, and two in a row leaves the company"),
-      ),
+      branch(view, left, draft.ops),
+      fan(left.hand.map((c) => card(c, { selected: selected.includes(c.id), onclick: () => toggle(c) }))),
+      packList(view, draft, change, priced),
       unused &&
         el(
           "p",
@@ -294,11 +182,23 @@ export function hub({ view, draft, change, send, sending = false, error = "", wa
     ),
     el(
       "div",
-      { class: "actions" },
+      { class: "actions hub-actions" },
+      !can.tag && action("tag", true),
+      picked && action(PLAYS[picked.command], true),
       el(
-        "button",
-        { class: "primary send", "data-guide": "send", disabled: sending, onclick: send },
-        sending ? "sending…" : unused ? "send anyway" : sent ? "replace today's pack" : "send pack",
+        "div",
+        { class: "grid4" },
+        ["add", "commit", "push", "pull"].map((k) => action(k)),
+      ),
+      el(
+        "div",
+        { class: "minor" },
+        el("button", { class: "undo", disabled: !draft.ops.length, onclick: undo }, "undo"),
+        el(
+          "button",
+          { class: "primary send", "data-guide": "send", disabled: sending, onclick: send },
+          sending ? "sending…" : unused ? "send anyway" : sent ? "replace today's pack" : "send pack",
+        ),
       ),
     ),
   );

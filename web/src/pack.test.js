@@ -37,7 +37,7 @@ describe("pricing a pack as the remote will charge it", () => {
     expect(rows[1].note).toBe("+8 lines");
     expect(spent).toBe(2);
     expect(left.hand.map((c) => c.id)).toEqual(["k3"]);
-    expect(left.local).toEqual([["auth.js", "api.py"]]);
+    expect(left.local.map((c) => c.files)).toEqual([["auth.js", "api.py"]]);
   });
 
   it("a pull when behind costs 1; at the tip it's free now and 1 if someone pushes first", () => {
@@ -59,7 +59,7 @@ describe("pricing a pack as the remote will charge it", () => {
 
     const resolve = price(v, [{ op: "pull", strategy: "resolve" }]);
     expect(resolve.rows[0]).toMatchObject({ cost: 2, most: 2 });
-    expect(resolve.left.local).toEqual([["README.md"]]);
+    expect(resolve.left.local.map((c) => c.files)).toEqual([["README.md"]]);
   });
 
   it("a merge takes a token; a push from behind is rejected; a push of nothing is free", () => {

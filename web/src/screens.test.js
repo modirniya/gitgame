@@ -122,6 +122,10 @@ it("opens a day with the incident, your draws, today's ops, and where you stand"
 
   expect(node.querySelector("h1").textContent).toBe("day 2 of 12");
   expect(node.querySelector(".incident-card h2").textContent).toBe("Flaky CI");
+  // in a day's words: the deck's own text speaks of the tabletop's rounds
+  expect(node.querySelector(".incident-card p").textContent).toBe(
+    "The day's first push rolls a die: on 1 or 2 it is rejected, and the op is spent.",
+  );
   expect([...node.querySelectorAll(".drawn .card")].map((c) => c.dataset.id)).toEqual(["d1", "d2"]);
   expect(node.querySelectorAll(".bigpips .pips i.on")).toHaveLength(3);
   expect(node.querySelector(".said").textContent).toBe("You drew two cards.");

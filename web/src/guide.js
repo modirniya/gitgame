@@ -68,7 +68,10 @@ export function guideLayer(step, { done }) {
 /** Highlights the step's target inside `node`: a card by its id, or an action by its name. */
 export function highlight(node, target) {
   if (!target) return;
-  node.querySelector(`[data-guide="${target}"], .hub [data-id="${target}"]`)?.classList.add("guide-target");
+  const t = node.querySelector(`[data-guide="${target}"], .hub [data-id="${target}"]`);
+  t?.classList.add("guide-target");
+  // the one thing to tap must be on screen: a card can sit below the fold of the pack
+  t?.scrollIntoView?.({ block: "nearest" });
 }
 
 // Whether a game is guided is this device's to remember (localStorage): "on" until the guide is done or skipped.

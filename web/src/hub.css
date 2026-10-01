@@ -1,0 +1,246 @@
+/* I-Hub (event-screens §3), as the prototype laid it out: `main`, your branch with where you stand and its two zones,
+   the hand fanned, the pack as a receipt, and at the thumb the four big actions, a command card's action when one is
+   picked, undo and send. */
+
+.branch {
+  display: grid;
+  gap: 6px;
+}
+.branch-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.standing {
+  font: 600 13px var(--mono);
+}
+.standing.ok {
+  color: var(--ok);
+}
+.standing.behind {
+  color: var(--warn);
+}
+.zones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.zone {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-height: 84px;
+  padding: 6px 8px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+}
+.zcards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.zone .empty {
+  font: 12px var(--mono);
+  color: var(--faint);
+}
+/* a commit the pack pushes, waiting past the tip */
+.slot.ghost .card {
+  opacity: 0.55;
+  outline: 2px dashed var(--you);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.slot.ghost .tipmark {
+  color: var(--you);
+}
+.picking-line {
+  margin: 0;
+  color: var(--warn);
+}
+.picking-line button {
+  min-height: 36px;
+  margin-left: 6px;
+  padding: 0 10px;
+}
+
+.hub-actions {
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+}
+.grid4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+button.op {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 2px 6px;
+  min-height: 64px;
+  padding: 8px 10px;
+  text-align: left;
+}
+button.op .opname {
+  font: 700 15px var(--mono);
+}
+button.op .cost {
+  font: 600 11px var(--mono);
+  color: var(--muted);
+}
+button.op .why,
+button.op .will {
+  grid-column: 1 / -1;
+  font: 400 12px/1.3 var(--sans);
+  color: var(--muted);
+}
+button.op:not(:disabled) {
+  border-color: var(--muted);
+}
+button.op.danger .will {
+  color: var(--reject);
+  font-weight: 600;
+}
+button.op.wide {
+  width: 100%;
+}
+.minor {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 8px;
+}
+@media (min-width: 600px) and (max-width: 999px) {
+  .grid4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.incident-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+.incident-note .k {
+  color: var(--warn);
+  margin-right: 4px;
+}
+/* The hand, fanned (event-screens §3): each card overlaps the one before by --overlap, set by the hub so a row fits
+   the screen and every card keeps at least 44 px to tap. The one under the finger, or selected, comes forward. */
+.hand-rows {
+  padding: 14px 0 4px;
+}
+.hand-fan {
+  display: flex;
+  padding-bottom: 6px;
+}
+.hand-fan .card + .card {
+  margin-left: calc(-1 * var(--overlap, 0px));
+}
+.hand-fan .card {
+  box-shadow: -2px 0 6px rgb(0 0 0 / 0.25);
+  transition: transform 120ms ease-out;
+}
+.hand-fan .card:hover,
+.hand-fan .card:focus-visible,
+.hand-fan .card.selected {
+  z-index: 1;
+}
+.hand-fan .card.selected {
+  transform: translateY(-12px);
+}
+
+ol.pack {
+  font-family: var(--mono);
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--term);
+  color: var(--term-ink);
+  font-size: 0.85rem;
+}
+.pack .op {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 2px 8px;
+  padding: 4px 0;
+}
+.pack .cmd::before {
+  content: "$ ";
+  color: var(--accent);
+}
+.pack .cost {
+  padding: 0 6px;
+  border-radius: 3px;
+  background: var(--line);
+  color: var(--term-ink);
+}
+.pack .remove {
+  min-height: 32px;
+  min-width: 32px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--term-muted);
+}
+.pack .note,
+.pack .flags,
+.pack .message,
+.pack .suggestions {
+  grid-column: 1 / -1;
+}
+.pack .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pack .suggestion {
+  font-family: var(--mono);
+  min-height: 32px;
+  padding: 0 8px;
+  font-size: 0.75rem;
+  background: var(--term-field);
+  color: var(--term-ink);
+  border-color: var(--term-field);
+}
+.pack .note {
+  font-size: 0.75rem;
+  color: var(--term-muted);
+}
+.pack .over .cmd,
+.pack .over .note {
+  color: var(--reject);
+  text-decoration: line-through;
+}
+.pack .maybe .note {
+  color: var(--warn);
+}
+.pack .message,
+.pack select {
+  min-height: 36px;
+  background: var(--term-field);
+  color: var(--term-ink);
+}
+.pack .flags {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.pack .flags label {
+  margin: 0;
+  color: var(--term-ink);
+}
+.pack .flags input {
+  min-height: auto;
+}
+.pack .empty {
+  color: var(--term-muted);
+}
+.unspent {
+  color: var(--warn);
+}

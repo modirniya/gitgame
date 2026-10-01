@@ -19,7 +19,9 @@ function start(view) {
   return {
     hand: you.hand,
     staged: you.staged,
-    local: you.local.map((c) => files(c.cards)),
+    // your unpushed commits, those already made and those the pack makes, and what the pack pushes of them
+    local: you.local.map((c) => ({ id: c.id, cards: c.cards, message: c.message, files: files(c.cards) })),
+    pushed: [],
     armed: you.armed,
     behind: me.behind,
     // the commits you would pull, and whose files they touch: a conflict can be seen coming
@@ -50,12 +52,13 @@ function step(view, s, op) {
     case "commit": {
       if (!s.staged.length) return [k.commit, k.commit, "nothing added to commit", s];
       const lines = s.staged.reduce((n, c) => n + c.lines, 0);
-      return [k.commit, k.commit, `+${lines} lines`, { ...s, staged: [], local: [...s.local, files(s.staged)] }];
+      const made = { id: null, cards: s.staged, message: op.message ?? "", files: files(s.staged) };
+      return [k.commit, k.commit, `+${lines} lines`, { ...s, staged: [], local: [...s.local, made] }];
     }
 
     case "pull": {
       const base = op.rebase ? k.pull_rebase : k.pull;
-      const hits = (mine) => s.incoming.flatMap((c) => c.files.filter((f) => mine.includes(f)));
+      const hits = (mine) => s.incoming.flatMap((c) => c.files.filter((f) => mine.files.includes(f)));
       const clash = s.local.flatMap(hits);
       const strategy = op.strategy ?? view.default_strategy;
       const extra = strategy === "resolve" ? k.resolve_by_hand_extra : 0;
@@ -80,7 +83,12 @@ function step(view, s, op) {
       if (!s.local.length)
         return [k.push_with_nothing_to_push, k.push_with_nothing_to_push, "nothing to push: free", s];
       if (s.behind > 0) return [k.push, k.push, "! [rejected] you're behind: pull first", s];
-      return [k.push, k.push, "accepted unless someone pushes first", { ...s, local: [] }];
+      return [
+        k.push,
+        k.push,
+        "accepted unless someone pushes first",
+        { ...s, local: [], pushed: [...s.pushed, ...s.local] },
+      ];
 
     case "blame":
       return [
@@ -105,7 +113,14 @@ function step(view, s, op) {
         s.behind > 0
           ? `erases ${s.behind} commit${s.behind === 1 ? "" : "s"}; you take a sin`
           : "nothing ahead to overwrite",
-        { ...s, hand: without(s.hand, [card(s, "force")]), local: [], behind: 0, incoming: [] },
+        {
+          ...s,
+          hand: without(s.hand, [card(s, "force")]),
+          local: [],
+          pushed: [...s.pushed, ...s.local],
+          behind: 0,
+          incoming: [],
+        },
       ];
 
     case "tag":

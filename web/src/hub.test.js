@@ -1,15 +1,17 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
-import { command, hub } from "./hub.js";
+import { fanLayout, hub } from "./hub.js";
+import { command } from "./packlist.js";
+import { price } from "./pack.js";
 import { view } from "./view.fixture.js";
 
 const render = (v, draft = { ops: [], selected: [], picking: null }) => {
   const changes = [];
   const node = hub({ view: v, draft, change: (d) => changes.push(d), send: () => changes.push("sent") });
-  const button = (label) =>
-    [...node.querySelectorAll("button:not(.card)")].find((b) => b.firstChild?.textContent === label);
-  return { node, changes, button };
+  const action = (key) => node.querySelector(`.actions [data-guide="${key}"]`);
+  return { node, changes, action };
 };
+const at = (ops, selected = []) => ({ ops, selected, picking: null });
 
 describe("the hub", () => {
   it("writes each op as the command a terminal would show", () => {
@@ -24,27 +26,86 @@ describe("the hub", () => {
     expect(command({ op: "force" }, v)).toBe("git push --force");
   });
 
+  it("puts the four actions and send at the thumb, each with its cost and what it would do", () => {
+    const { node, action } = render(view(), at([], ["k1"]));
+    const names = [...node.querySelectorAll(".actions .grid4 .opname")].map((b) => b.textContent);
+    expect(names).toEqual(["git add", "git commit", "git push", "git pull"]);
+    expect(action("add").querySelector(".cost").textContent).toBe("1 op");
+    expect(action("add").querySelector(".will").textContent).toBe("stage 1 card, +5");
+    // ana is one behind: the push brings its pull, which costs an op now
+    expect(action("pull").querySelector(".cost").textContent).toBe("1 op");
+    expect(node.querySelector(".actions .send").textContent).toBe("send pack");
+  });
+
   it("adds the selected cards, and a pull before a push", () => {
-    const { changes, button } = render(view(), { ops: [], selected: ["k1"], picking: null });
-    button("add").click();
+    const { changes, action } = render(view(), at([], ["k1"]));
+    action("add").click();
     expect(changes[0].ops).toEqual([{ op: "add", cards: ["k1"] }]);
     expect(changes[0].selected).toEqual([]);
 
-    button("push").click();
+    action("push").click();
     expect(changes[1].ops.map((o) => o.op)).toEqual(["pull", "push"]);
   });
 
   it("greys out what can't be played, and says why", () => {
-    const blame = render(view()).button("blame");
-    expect(blame.disabled).toBe(true);
-    expect(blame.textContent).toContain("no git blame card");
+    const add = render(view()).action("add");
+    expect(add.disabled).toBe(true);
+    expect(add.querySelector(".why").textContent).toBe("select cards in your hand");
   });
 
-  it("lists the pack with each op's cost, now and at most", () => {
-    const { node } = render(view(), { ops: [{ op: "pull" }, { op: "push" }], selected: [], picking: null });
-    const rows = [...node.querySelectorAll(".pack .op")];
-    expect(rows.map((r) => r.querySelector(".cmd").textContent)).toEqual(["git pull -X theirs", "git push"]);
-    expect(rows.map((r) => r.querySelector(".cost").textContent)).toEqual(["1", "0"]);
+  it("plays a command card once it is picked from the hand, on its own", () => {
+    const { node, changes } = render(view(), at([], ["k1"]));
+    expect(node.querySelector('.actions [data-guide="force"]')).toBeNull();
+    node.querySelector('.hand-rows [data-id="k3"]').click();
+    expect(changes[0].selected).toEqual(["k3"]);
+
+    const picked = render(view(), changes[0]);
+    const force = picked.action("force");
+    expect(force.classList.contains("wide")).toBe(true);
+    force.click();
+    expect(picked.changes[0].ops).toEqual([{ op: "force" }]);
+  });
+
+  it("draws your branch as the pack leaves it after every op", () => {
+    const v = view();
+    // after git add: the card is staged, out of the hand
+    let { node } = render(v, at([{ op: "add", cards: ["k1"] }]));
+    expect(node.querySelector('[data-zone="staged"] [data-id="k1"]')).not.toBeNull();
+    expect(node.querySelector('.hand-rows [data-id="k1"]')).toBeNull();
+
+    // after git commit: one commit to push, of the pack model's lines
+    const ops = [
+      { op: "add", cards: ["k1"] },
+      { op: "commit", message: "feat(auth): rate-limit login attempts" },
+    ];
+    ({ node } = render(v, at(ops)));
+    const made = price(v, ops).left.local;
+    expect(made).toHaveLength(1);
+    expect(node.querySelector('[data-zone="staged"] .empty')).not.toBeNull();
+    expect(node.querySelector('[data-zone="local"] .card').getAttribute("aria-label")).toBe(
+      "new by ana: auth.js +5, clean",
+    );
+
+    // after git push: the commit waits past the tip, where it lands if it does
+    ({ node } = render(v, at([...ops, { op: "pull" }, { op: "push" }])));
+    expect(node.querySelector('[data-zone="local"] .empty')).not.toBeNull();
+    const ghost = node.querySelector(".strip .slot.ghost");
+    expect(ghost.querySelector(".tipmark").textContent).toBe("your push");
+    expect(ghost.querySelector(".who").textContent).toBe("you auth.js +5");
+  });
+
+  it("says where you stand, and when the pack's pull catches you up", () => {
+    expect(render(view()).node.querySelector(".standing").textContent).toBe("1 behind");
+    expect(render(view(), at([{ op: "pull" }])).node.querySelector(".standing").textContent).toBe(
+      "1 behind · the pack catches up",
+    );
+  });
+
+  it("takes back the last op", () => {
+    const { node, changes } = render(view(), at([{ op: "pull" }, { op: "push" }]));
+    node.querySelector(".actions .undo").click();
+    expect(changes[0].ops).toEqual([{ op: "pull" }]);
+    expect(render(view()).node.querySelector(".actions .undo").disabled).toBe(true);
   });
 
   it("shows your unpushed commits face-up, bug and all", () => {
@@ -58,15 +119,11 @@ describe("the hub", () => {
       },
     ];
     const { node } = render(view({ you: { ...view().you, local } }));
-    const mine = node.querySelector('.branch [data-id="x1"]');
-    expect(mine.classList.contains("bug")).toBe(true);
-    expect(node.querySelector(".branch h2").textContent).toBe("your branch · 1 to push");
-    // nothing staged: no staging row, and no stray count either
-    expect(node.querySelector(".branch").textContent).not.toMatch(/0$/);
+    expect(node.querySelector('.branch [data-id="x1"]').classList.contains("bug")).toBe(true);
   });
 
   it("takes a commit message as it is typed, with no re-render to swallow the tap on send", () => {
-    const draft = { ops: [{ op: "commit", message: "" }], selected: [], picking: null };
+    const draft = at([{ op: "commit", message: "" }]);
     const { node, changes } = render(view(), draft);
     const input = node.querySelector(".pack .message");
     input.value = "fix: the login";
@@ -79,8 +136,8 @@ describe("the hub", () => {
   });
 
   it("starts a commit with a real message for what is staged, and offers others", () => {
-    const { changes, button } = render(view(), { ops: [{ op: "add", cards: ["k1"] }], selected: [], picking: null });
-    button("commit").click();
+    const { changes, action } = render(view(), at([{ op: "add", cards: ["k1"] }]));
+    action("commit").click();
     const message = changes[0].ops[1].message;
     expect(message).toMatch(/^\w+(\(\w+\))?: /);
 
@@ -93,11 +150,11 @@ describe("the hub", () => {
     expect(node.querySelector(".pack .message").value).toBe(offered[1].textContent);
   });
 
-  it("tags v1.0 once a pack", () => {
+  it("offers the tag once main is the release size, and once a pack", () => {
     const main = [view().main[0], ...Array.from({ length: 10 }, (_, i) => ({ ...view().main[1], id: `c${i}` }))];
-    const { button } = render(view({ main }), { ops: [{ op: "tag" }], selected: [], picking: null });
-    expect(button("tag v1.0").disabled).toBe(true);
-    expect(button("tag v1.0").textContent).toContain("already tagged");
+    expect(render(view({ main })).action("tag").classList.contains("wide")).toBe(true);
+    expect(render(view({ main }), at([{ op: "tag" }])).action("tag")).toBeNull();
+    expect(render(view()).action("tag")).toBeNull();
   });
 
   it("offers to replace a pack already sent today", () => {
@@ -105,8 +162,6 @@ describe("the hub", () => {
     expect(render(v).node.querySelector(".send").textContent).toBe("replace today's pack");
   });
 });
-
-import { fanLayout } from "./hub.js";
 
 it("fans the hand in one row while every card keeps a finger's width, and in two rows past that", () => {
   // a phone's 343 px: six cards fit in one row, seven need two
