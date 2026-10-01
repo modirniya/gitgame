@@ -7,6 +7,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Changed
+- The game's page at `/play` asks search engines not to index it (`noindex`), and leaves the sitemap: a search lands on the landing page, whose "play" leads in. Links to `/play` work as before.
+
 ## [0.2.0] - 2026-09-30
 
 gitgame.online becomes a landing page for the public launch, and the game moves to `/play` (ADR-0009).
