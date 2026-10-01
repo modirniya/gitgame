@@ -100,6 +100,10 @@ export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
     fetchView: (id, seat) =>
       call(fetcher, `/games/${encodeURIComponent(id)}${seat ? `?seat=${encodeURIComponent(seat)}` : ""}`),
 
+    /** What a good player would write today from `seat` (M15k): the bot's own policy on that seat's view, `{ops}`. */
+    hint: (id, seat) =>
+      call(fetcher, `/games/${encodeURIComponent(id)}/hint${seat ? `?seat=${encodeURIComponent(seat)}` : ""}`),
+
     /** A replay: the view as it stood when `day` closed (0: as created), folded by the remote from the log. */
     fetchDay: (id, day, seat) =>
       call(fetcher, `/games/${encodeURIComponent(id)}/days/${day}${seat ? `?seat=${encodeURIComponent(seat)}` : ""}`),

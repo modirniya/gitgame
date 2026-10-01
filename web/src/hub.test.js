@@ -157,6 +157,36 @@ describe("the hub", () => {
     expect(render(view()).action("tag")).toBeNull();
   });
 
+  it("offers a hint, and writes it into the pack on a tap, its reasons left out", () => {
+    const asked = [];
+    const hint = {
+      ops: [
+        { op: "add", cards: ["k1"], why: "you build a commit" },
+        { op: "commit", message: "feat(auth): rate-limit login attempts", why: "you commit what you staged" },
+      ],
+    };
+    const changes = [];
+    const node = hub({
+      view: view(),
+      draft: at([]),
+      change: (d) => changes.push(d),
+      send() {},
+      hint,
+      onHint: () => asked.push(1),
+    });
+    expect(node.querySelector(".hintline .cmds").textContent).toBe(
+      'git add auth.js · git commit -m "feat(auth): rate-limit login attempts"',
+    );
+    expect(node.querySelector(".hintline .why").textContent).toBe("you build a commit");
+    node.querySelector(".hintline .use").click();
+    expect(changes[0].ops).toEqual([
+      { op: "add", cards: ["k1"] },
+      { op: "commit", message: "feat(auth): rate-limit login attempts" },
+    ]);
+    node.querySelector(".actions .hint").click();
+    expect(asked).toEqual([1]);
+  });
+
   it("offers to replace a pack already sent today", () => {
     const v = view({ sent_today: ["ana", "bot"] });
     expect(render(v).node.querySelector(".send").textContent).toBe("replace today's pack");

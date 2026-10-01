@@ -8,6 +8,7 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 ## [Unreleased]
 
 ### Added
+- A hint on the hub, as the prototype had (M15k): "hint" shows the pack a good player would write today, the bot's own policy run on your seat's view, with its first reason, and writes it into your pack on a tap.
 - The game's view carries, for each closed day, `main`, the pointers and the scores as the day opened (`opened`), so a client can draw the table at every step of the day's playback (M15f). Replays carry them too.
 - The remote answers "what would a good player do now?" (`GET /api/games/:id/hint`): the pack the bot's own policy would write from your seat's view, knowing nothing you don't, each op with its why in your words ("you pull first, in case someone pushes before you"), for the hub's hint (M15k). Nothing is sent.
 

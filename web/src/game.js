@@ -41,6 +41,7 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
     queue: [],
     at: 0,
     handoff: null,
+    hint: null,
   };
   let pending = null;
   // made once, so re-rendering doesn't ask the browser again
@@ -64,6 +65,7 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
         view,
         error,
         draft: moved ? fresh() : s.draft,
+        hint: moved ? null : s.hint,
         warned: moved ? false : s.warned,
         queue: next.queue,
         at: Math.min(s.at, next.queue.length),
@@ -137,6 +139,15 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
     if (said) node.querySelector(".view > .body")?.prepend(guideLayer(said, { done: leaveGuide }));
   }
 
+  // what a good player would write today, from the remote's bot policy on this seat's view (M15k)
+  async function askHint() {
+    try {
+      set({ hint: await remote.hint(id, s.view.you.player) });
+    } catch (e) {
+      set({ error: e.message });
+    }
+  }
+
   function leaveGuide() {
     setGuided(id, false);
     render();
@@ -170,12 +181,14 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
     return hub({
       view,
       draft: s.draft,
-      change: (draft) => set({ draft, warned: false }),
+      change: (draft) => set({ draft, warned: false, hint: null }),
       send,
       sending: s.sending,
       error: s.error,
       warned: s.warned,
       extra: offerReminders(view) && (remind ??= remindButton(remote)),
+      hint: s.hint,
+      onHint: askHint,
     });
   }
 

@@ -19,6 +19,12 @@ describe("the remote", () => {
     expect(JSON.parse(calls[0].init.body)).toEqual({ hotseat: ["raj"], bots: ["bot"], day_length: "lunch" });
   });
 
+  it("asks for a hint from a seat, as the seat this device holds", async () => {
+    const { calls, api } = fake(200, { ops: [{ op: "pull" }] });
+    expect(await api.hint("g1", "raj")).toEqual({ ops: [{ op: "pull" }] });
+    expect(calls[0].url).toBe("/api/games/g1/hint?seat=raj");
+  });
+
   it("asks for a guided game only when it is one", async () => {
     const { calls, api } = fake(201, { id: "g1" });
     await api.createGame({ bots: ["bot"], dayLength: "lunch", guided: true });
