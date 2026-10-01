@@ -2,6 +2,7 @@
 import { expect, it, vi } from "vitest";
 import { gameScreen } from "./game.js";
 import { view } from "./view.fixture.js";
+import game from "./game.fixture.json";
 
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -53,4 +54,21 @@ it("shows a finished game's scoreboard to someone who held no seat in it", async
   // nor a feedback box: a note is for those who played
   expect(screen.node.querySelector(".feedback")).toBeNull();
   screen.leave();
+});
+
+it("keeps a log of every day in the Table, newest first", async () => {
+  // this reader has read every day already: nothing plays back, the hub is up
+  localStorage.setItem("gitgame:g1:ana", JSON.stringify({ logs: 3, opened: 4 }));
+  const v = view({ day: 4, days: game.days.slice(0, 3), main: game.main, today: [] });
+  const remote = { fetchView: async () => v, live: () => () => {} };
+  const screen = gameScreen({ remote, go: () => {}, id: "g1" });
+  await settle();
+  expect(screen.node.querySelector(".view.hub")).not.toBeNull();
+  expect([...screen.node.querySelectorAll(".table-panel .log h3")].map((h) => h.textContent)).toEqual([
+    "day 3",
+    "day 2",
+    "day 1",
+  ]);
+  screen.leave();
+  localStorage.clear();
 });
