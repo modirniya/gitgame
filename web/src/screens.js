@@ -1,10 +1,13 @@
-// The consequence screens (event-screens §3, the O- screens): one moment at a time, the command and Git's output in the
-// terminal, the cards it moved, and the coach line. Forward only (§1.6): continue, or skip to your pack.
+// The screens of a day played back (event-screens §3, the O- screens; M15f): one step at a time, titled with its
+// command, Git's output under it, `main` as the step left it with the step's motion on it (event-screens §4), and one
+// sentence of what it means. Forward only (§1.6): continue, or skip to the end of the day.
 import { el } from "./dom.js";
 import { card, commit } from "./cards.js";
 import { pips } from "./frame.js";
+import { asOf, strip } from "./table.js";
 import { ciGrid } from "./release.js";
 import { incidentText, OPENER } from "./copy.js";
+import { summaryScreen } from "./summary.js";
 
 // A commit as the reader may see it: from main, from their own branch, or else face-down, as the table would show a
 // commit it can't read (another player's, gone back to their branch).
@@ -22,87 +25,73 @@ function find(view, id, author) {
   );
 }
 
-const commits = (view, ids) => ids.map((id) => view.main.find((c) => c.id === id)).filter(Boolean);
-
-// The motions of event-screens §4, as CSS animations keyed by `motion` (styles.css), one card after another (--i);
-// prefers-reduced-motion turns them all off.
-const strip = (cs, motion = "") =>
-  cs.length > 0 &&
-  el(
-    "ol",
-    { class: `strip moved ${motion}` },
-    cs.map((c, i) => el("li", { style: `--i: ${i}` }, commit(c))),
-  );
-
-/** What a moment moved, drawn: the commits it put on main or flipped, the CI's flips, the incident. */
-function picture(m, view, you) {
+/** What a step moved, drawn on the table as it stood: the commits that arrived, flipped or fell, the pointer that slid. */
+function scene(step, view, you) {
+  const m = step.moment;
   const e = m.events.at(-1);
+  const after = step.after && asOf(view, step.after);
+  const from = m.player === you ? "below" : "above";
+  const slide = { seat: m.player, from: step.before?.pointers[m.player] };
+
   switch (m.kind) {
-    // a push: the commits fly onto the end of main
     case "pushed":
-      return strip(commits(view, e.commits), "fly-in");
-    // a rejection: the commit flies at the tip and is knocked back
+      return strip(after, { motion: { arrive: e.commits, from } });
+    // the commit flies at the tip and is knocked back: main as it was, which the push didn't change
     case "rejected": {
-      const tip = view.main.at(-1);
       const mine = m.player === you ? view.you.local.at(-1) : null;
-      const bounced = mine
-        ? find(view, mine.id, you)
-        : { id: "?", author: m.player, files: [], lines: "?", flipped: false };
-      return el(
-        "div",
-        { class: "stage reject" },
-        el("div", { class: "tip-card" }, commit(tip, { tip: true })),
-        el("div", { class: "bouncer" }, commit(bounced)),
-      );
+      const bounced = mine ? find(view, mine.id, you) : { id: "?", author: m.player, files: [], lines: "?" };
+      return [strip(after), el("div", { class: "stage reject" }, el("div", { class: "bouncer" }, commit(bounced)))];
     }
-    // a pull: the pointer slides along what came in
-    case "pulled": {
-      const incoming = commits(view, e.incoming ?? []);
-      return (
-        incoming.length > 0 &&
-        el(
-          "div",
-          { class: "stage pull", style: `--n: ${incoming.length}` },
-          strip(incoming),
-          el("span", { class: `chip slider${m.player === you ? " you" : ""}` }, m.player),
-        )
-      );
-    }
-    // a conflict: the two commits meet over the file they share
+    case "pulled":
+      return strip(after, { motion: { slide } });
+    // the two commits meet over the file they share, and the pointer still comes to the tip
     case "conflict": {
       const c = m.events.find((x) => x.type === "conflict_detected")?.conflicts?.[0];
-      if (!c) return null;
-      return el(
-        "div",
-        { class: "stage clash" },
-        el("div", { class: "from-left" }, commit(find(view, c.mine, m.player))),
-        el("span", { class: "clash-file" }, c.files.join(" ")),
-        el("div", { class: "from-right" }, commit(find(view, c.theirs))),
-      );
+      return [
+        strip(after, { motion: { slide } }),
+        c &&
+          el(
+            "div",
+            { class: "stage clash" },
+            el("div", { class: "from-left" }, commit(find(view, c.mine, m.player))),
+            el("span", { class: "clash-file" }, c.files.join(" ")),
+            el("div", { class: "from-right" }, commit(find(view, c.theirs))),
+          ),
+      ];
     }
-    // blame: the commit flips over
     case "blamed":
-      return strip(commits(view, [e.target]), "flip-over");
-    // a revert lands on the bug
+      return [
+        strip(after, { motion: { flip: [e.target] } }),
+        el("span", { class: `stamp ${e.bug ? "bad" : "ok"}` }, e.bug ? `BUG · −3 ${e.author}` : "clean"),
+      ];
     case "reverted":
-      return strip(commits(view, [e.target, e.revert]), "land");
-    // a force-push: what was ahead falls off main, and the pusher's commits land
+      return strip(after, { motion: { arrive: [e.revert], from } });
+    // what was ahead falls off main, and the pusher's commits land
     case "forced":
-      return el(
-        "div",
-        { class: "stage force" },
-        strip(
-          e.erased.map((id) => find(view, id)),
-          "fall-off",
-        ),
-        strip(commits(view, e.pushed), "fly-in late"),
-      );
-    // a reflog: what the force-push erased rises back onto main
+      return [
+        strip(after, { motion: { arrive: e.pushed, from } }),
+        e.erased.length > 0 &&
+          el(
+            "ol",
+            { class: "fallen" },
+            e.erased.map((id, i) => el("li", { style: `--i: ${i}` }, commit(find(view, id)))),
+          ),
+      ];
     case "reflog":
-      return strip(commits(view, e.restored), "rise");
+      return strip(after, { motion: { arrive: e.restored, from: "below" } });
+    // someone else's commit is on their branch now, face-down: nobody sees it until it is pushed
+    case "committed":
+      return [
+        strip(after),
+        el(
+          "div",
+          { class: "their-branch" },
+          commit({ id: e.commit, author: m.player, files: [], lines: "?", flipped: false }, { size: "sm" }),
+          el("span", { class: "k" }, `${m.player}'s branch`),
+        ),
+      ];
     case "ci":
       return ciGrid(m, view);
-    // the day's opener: the incident dealt, your two cards drawn, today's ops
     case "incident": {
       const drew = view.today.find((x) => x.type === "drew" && x.player === you);
       return [
@@ -123,7 +112,7 @@ function picture(m, view, you) {
       ];
     }
     default:
-      return null;
+      return after && strip(after);
   }
 }
 
@@ -150,20 +139,27 @@ function opener(view, you) {
   ];
 }
 
-/** One moment's screen. `step` is `{at, of}` for the progress line; `next` continues, `skip` goes to the hub. */
-export function momentScreen(m, { view, you, step, next, skip }) {
-  const title =
-    m.kind === "incident"
-      ? el("h1", {}, `day ${m.day} of ${view.final_day}`)
-      : m.kind === "ci"
-        ? el("h1", {}, "CI runs")
-        : m.command
-          ? el("h1", { class: "cmd" }, m.command)
-          : el("h1", {}, `${m.player === you ? "you" : m.player} ${m.output.join("; ")}`);
+function title(m, view, you) {
+  if (m.kind === "incident") return el("h1", {}, `day ${m.day} of ${view.final_day}`);
+  if (m.kind === "ci") return el("h1", {}, "CI runs");
+  if (m.command) return el("h1", { class: "cmd" }, m.command);
+  return el("h1", {}, `${m.player === you ? "you" : m.player} ${m.output.join("; ")}`);
+}
+
+/**
+ * One step of the days you haven't seen: a moment, a day's receipt, or today's opener. `step` is `{at, of}` for the
+ * progress line; `next` continues, `skip` goes on to the end of the day.
+ */
+export function stepScreen(s, { view, you, step, next, skip }) {
+  const last = step.at >= step.of;
+  if (s.kind === "summary") return summaryScreen(s, { view, you, next, last });
+
+  const m = s.moment;
+  const whose = m.pack && (m.player === you ? "your pack" : `${m.player}'s pack`);
   return el(
     "section",
     {
-      class: `view moment ${m.kind}${m.tone ? ` ${m.tone}` : ""}${m.player === you ? " mine" : ""}`,
+      class: `view moment ${m.kind}${m.tone ? ` ${m.tone}` : ""}${m.player === you ? " mine" : ""}${s.auto ? " auto" : ""}`,
       "aria-live": "polite",
     },
     el(
@@ -172,12 +168,11 @@ export function momentScreen(m, { view, you, step, next, skip }) {
       el(
         "p",
         { class: "progress muted" },
-        `${step.at} of ${step.of}`,
-        m.pack && ` · ${m.player === you ? "your" : `${m.player}'s`} pack`,
+        [s.day && m.kind !== "incident" && `day ${s.day}`, whose].filter(Boolean).join(" · "),
       ),
-      title,
+      title(m, view, you),
       m.command && output(m),
-      el("div", { class: "scene" }, picture(m, view, you)),
+      el("div", { class: "scene" }, scene(s, view, you)),
       // the bot thinking out loud (event-screens §5), above what it means for you
       m.why && el("p", { class: "bubble" }, el("span", { class: "who" }, m.player), " ", m.why),
       m.kind === "incident" ? opener(view, you) : m.coach && el("p", { class: "said coach" }, m.coach),
@@ -185,11 +180,11 @@ export function momentScreen(m, { view, you, step, next, skip }) {
     el(
       "div",
       { class: "actions" },
-      step.at < step.of && el("button", { onclick: skip }, "skip to your pack"),
+      !last && el("button", { onclick: skip }, "skip to the day's end"),
       el(
         "button",
         { class: "primary", onclick: next, autofocus: true },
-        step.at < step.of ? "continue" : view.released ? "the scores" : "write your pack",
+        !last ? "continue" : view.released ? "the scores" : "write your pack",
       ),
     ),
   );

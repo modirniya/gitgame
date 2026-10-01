@@ -1,0 +1,247 @@
+/* A day played back (M15f): each step on `main` as it left it, with its motion (event-screens §4, 300–600 ms; none
+   under prefers-reduced-motion, in styles.css): commits arriving at the end of the strip, yours from below and
+   anyone else's from above; a commit turning over in place; a pointer sliding from the slot it was at (a slot is a
+   card and a gap wide); what a force-push erased falling away; a push knocked back off the tip. Then the receipt. */
+
+.scene .strip-wrap {
+  width: 100%;
+}
+.slot.arrive {
+  animation: arrive 520ms var(--ease) both;
+  animation-delay: calc(150ms + var(--i, 0) * 120ms);
+}
+.slot.arrive.above {
+  --rise: -90px;
+  --tilt: 8deg;
+}
+.slot.arrive.below {
+  --rise: 140px;
+  --tilt: -4deg;
+}
+@keyframes arrive {
+  from {
+    transform: translate(30px, var(--rise)) rotate(var(--tilt));
+    opacity: 0;
+  }
+}
+.slot.flipping .flipper {
+  animation: turn-over 650ms 250ms ease-in-out both;
+}
+@keyframes turn-over {
+  from {
+    transform: none;
+  }
+}
+.chip.slide {
+  animation: slide-in 700ms 150ms ease-in-out both;
+}
+@keyframes slide-in {
+  from {
+    transform: translateX(calc(var(--from) * (var(--card-md) + 8px)));
+  }
+}
+ol.fallen {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+ol.fallen li {
+  animation: fall-off 760ms var(--ease) both;
+  animation-delay: calc(150ms + var(--i, 0) * 90ms);
+}
+@keyframes fall-off {
+  from {
+    transform: translateY(-120px);
+  }
+  to {
+    transform: translateY(10px) rotate(8deg);
+    opacity: 0.45;
+  }
+}
+
+.stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.stage.reject .bouncer {
+  animation: bounce 900ms 150ms ease-in-out both;
+}
+@keyframes bounce {
+  0% {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  40% {
+    transform: translate(40px, -110px) scale(0.85);
+    opacity: 1;
+  }
+  68% {
+    transform: none;
+  }
+  76% {
+    transform: translateX(-8px);
+  }
+  84% {
+    transform: translateX(8px);
+  }
+  92% {
+    transform: translateX(-4px);
+  }
+}
+.stage.reject .bouncer .side {
+  border-color: var(--reject);
+}
+.clash .from-left {
+  animation: from-left 640ms var(--ease) both;
+}
+.clash .from-right {
+  animation: from-right 640ms var(--ease) both;
+}
+.clash-file {
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--reject-soft);
+  color: var(--reject);
+  font: 700 13px var(--mono);
+  animation: flash 900ms 350ms both;
+}
+@keyframes from-left {
+  from {
+    transform: translateX(-70px);
+  }
+  55% {
+    transform: translateX(18px);
+  }
+}
+@keyframes from-right {
+  from {
+    transform: translateX(70px);
+  }
+  55% {
+    transform: translateX(-18px);
+  }
+}
+@keyframes flash {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  25%,
+  75% {
+    opacity: 0.2;
+  }
+}
+.their-branch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: pop 380ms 200ms var(--ease) both;
+}
+@keyframes pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.06);
+  }
+}
+.stamp {
+  padding: 4px 12px;
+  border: 2px solid currentColor;
+  border-radius: 8px;
+  font: 800 15px var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.stamp.ok {
+  color: var(--ok);
+}
+.stamp.bad {
+  color: var(--reject);
+}
+.moment .stamp {
+  transform: rotate(-4deg);
+  animation: pop 380ms 900ms var(--ease) both;
+}
+/* the bar that says a step moves on by itself (event-screens §5) */
+.view.moment.auto {
+  position: relative;
+}
+.view.moment.auto::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  height: 3px;
+  background: var(--other);
+  animation: auto-bar 1200ms linear forwards;
+}
+@keyframes auto-bar {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* the day's receipt */
+.order {
+  margin: 0;
+}
+ol.receipt-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 12px 14px;
+  list-style: none;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  font: 13px/1.5 var(--mono);
+}
+.receipt-list li {
+  display: grid;
+  grid-template-columns: 1.2em auto 1fr;
+  gap: 8px;
+  align-items: baseline;
+}
+.receipt-list .did {
+  color: var(--muted);
+}
+.receipt-list .ok .mark {
+  color: var(--ok);
+}
+.receipt-list .reject .mark,
+.receipt-list .reject .did {
+  color: var(--reject);
+}
+.receipt-list .warn .mark {
+  color: var(--warn);
+}
+.deltas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+.deltas .stamp {
+  color: var(--other);
+}
+.deltas .stamp.you {
+  color: var(--you);
+}
+.deltas .stamp.bad {
+  color: var(--reject);
+}
+.said.warn {
+  color: var(--warn);
+}

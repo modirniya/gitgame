@@ -5,6 +5,15 @@ import { el } from "./dom.js";
 import { commit } from "./cards.js";
 import { incidentText } from "./copy.js";
 
+/** `view` with `main` and the pointers as the table `t` stood at some step of a day (playback.js). */
+export const asOf = (view, t) => ({
+  ...view,
+  main: t.main,
+  players: Object.fromEntries(
+    Object.entries(view.players).map(([id, p]) => [id, { ...p, pointer: t.pointers[id] ?? p.pointer }]),
+  ),
+});
+
 /** The announced log under a commit on `main`: who pushed it, and its files and lines, colored by whose it is. */
 export function label(c, view) {
   if (c.initial) return el("span", { class: "who" });
@@ -21,9 +30,11 @@ export function label(c, view) {
  * `main` as a strip, initial commit at the left and the tip at the right, marked; each slot labelled with what was
  * announced, and each seat's pointer as a chip under the commit it's at. Only the strip scrolls sideways, and it opens
  * scrolled to the tip. `ghosts` are commits your pack pushes, drawn waiting past the tip: where they land if they do.
- * `pointers` overrides where a seat's chip is drawn.
+ * `pointers` overrides where a seat's chip is drawn. `motion` plays a step of the day on it (event-screens §4): commits
+ * that `arrive` (from `below`, yours, or above, someone else's), commits that `flip`, and one seat's chip that slides
+ * from the slot it was at (`slide: {seat, from}`).
  */
-export function strip(view, { onpick, pickable = () => false, ghosts = [], pointers = {} } = {}) {
+export function strip(view, { onpick, pickable = () => false, ghosts = [], pointers = {}, motion = {} } = {}) {
   const tip = view.main.length - 1;
   // `pointers` moves a seat's chip to where something else leaves it (the hub: where your pack's pull takes you)
   const pointer = (id) => pointers[id] ?? view.players[id].pointer;
@@ -35,7 +46,16 @@ export function strip(view, { onpick, pickable = () => false, ghosts = [], point
     view.main.map((c, i) =>
       el(
         "li",
-        { class: "slot" },
+        {
+          class: [
+            "slot",
+            motion.arrive?.includes(c.id) && `arrive ${motion.from ?? "above"}`,
+            motion.flip?.includes(c.id) && "flipping",
+          ]
+            .filter(Boolean)
+            .join(" "),
+          style: motion.arrive?.includes(c.id) ? `--i: ${motion.arrive.indexOf(c.id)}` : null,
+        },
         el("span", { class: "tipmark" }, i === tip ? "tip" : ""),
         commit(c, {
           tip: i === tip,
@@ -46,11 +66,17 @@ export function strip(view, { onpick, pickable = () => false, ghosts = [], point
         el(
           "span",
           { class: "pointers" },
-          at(i).map((id) =>
-            id === view.you?.player
-              ? el("span", { class: "chip you", title: id, "data-seat": id }, "you")
-              : el("span", { class: "chip", title: id, "data-seat": id }, id),
-          ),
+          at(i).map((id) => {
+            // a slot is a card and a gap wide: the chip starts that many slots back
+            const slide = motion.slide?.seat === id && motion.slide.from !== i + 1;
+            const props = {
+              class: `chip${id === view.you?.player ? " you" : ""}${slide ? " slide" : ""}`,
+              title: id,
+              "data-seat": id,
+              style: slide ? `--from: ${motion.slide.from - (i + 1)}` : null,
+            };
+            return el("span", props, id === view.you?.player ? "you" : id);
+          }),
         ),
       ),
     ),
