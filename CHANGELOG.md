@@ -7,8 +7,11 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Added
+- A landing page at gitgame.online (ADR-0009): what the game is, how a day plays, and questions answered, as plain HTML that search engines read without running anything, with a title and description, Open Graph and X previews (a 1200×630 image), structured data, `robots.txt` and a sitemap. "play" leads to the game at `/play`.
+
 ### Changed
-- The game moved to `/play` (ADR-0009): gitgame.online is becoming a landing page. Every link the game, its emails and its notifications write points to `/play`, room links included, and links from before the move still arrive: those with a query (`/?via=…`) by a redirect, and those with only a hash (`/#/room/…`) by the landing page's script. The installed app opens at `/play`.
+- The game moved to `/play` (ADR-0009), so gitgame.online can be the landing page. Every link the game, its emails and its notifications write points to `/play`, room links included, and links from before the move still arrive: those with a query (`/?via=…`) by a redirect, and those with only a hash (`/#/room/…`) by the landing page's script. The installed app opens at `/play`.
 
 ## [0.1.4] - 2026-09-30
 
