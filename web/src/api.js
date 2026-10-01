@@ -58,12 +58,19 @@ export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
 
     /**
      * A new game: you take the first seat, `hotseat` names the other people at this device, and the remote plays the
-     * `bots`. The answer is the game from your seat.
+     * `bots`. A `guided` game, a player's first, is dealt so that their first push lands (M15h). The answer is the
+     * game from your seat.
      */
-    createGame: ({ hotseat = [], bots = [], dayLength = "live", seed }) =>
+    createGame: ({ hotseat = [], bots = [], dayLength = "live", seed, guided = false }) =>
       call(fetcher, "/games", {
         method: "POST",
-        body: JSON.stringify({ hotseat, bots, day_length: dayLength, ...(seed != null && { seed }) }),
+        body: JSON.stringify({
+          hotseat,
+          bots,
+          day_length: dayLength,
+          ...(seed != null && { seed }),
+          ...(guided && { guided }),
+        }),
       }),
 
     /** Reminders by email (ADR-0006): `{email: {address, confirmed, digest} | null, available}`, set, removed. */

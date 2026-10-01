@@ -10,6 +10,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 ### Added
 - The game's view carries, for each closed day, `main`, the pointers and the scores as the day opened (`opened`), so a client can draw the table at every step of the day's playback (M15f). Replays carry them too.
 
+### Changed
+- A player's first game against the bot is dealt so that its first day is a full one, with a clean card to play, and their pack resolves first, so their first push lands (M15h). The remote chooses the game's seed; the rules are those of any game.
+
 ### Fixed
 - Git's output wraps on a phone instead of hiding the end of a long line behind a sideways scroll (M15a).
 - A pull's conflict strategy is offered by what it does (keep theirs, keep mine, keep both by hand) and printed as Git's flag, which swaps `ours` and `theirs` under `--rebase`; keeping both prints no flag, as in Git. What a rule took (a dropped or crossed-out commit, a merge token, what a force-push erased) is a `#` comment, not a line in Git's voice, and a failed command names its target (M15a).

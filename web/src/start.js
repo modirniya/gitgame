@@ -47,11 +47,12 @@ export function startScreen({ remote, go, me, failure = null, notice = "", signO
   const button = el("button", { class: "primary", type: "submit", disabled: !me }, "git init");
 
   // Five-minute days: a first game against the bot shouldn't mark someone absent for reading the screens slowly.
-  // A player's first game is guided (M14d): nothing else they've played to learn from yet.
+  // A player's first game is guided (M14d): nothing else they've played to learn from yet. The remote deals it so that
+  // their first push lands (M15h).
   const quick = () =>
     busy(async () => {
       const first = (await remote.listGames().catch(() => [null])).length === 0;
-      const view = await remote.createGame({ bots: ["bot"], dayLength: "lunch" });
+      const view = await remote.createGame({ bots: ["bot"], dayLength: "lunch", guided: first });
       if (first) setGuided(view.id, true);
       go(`/g/${view.id}`);
     });

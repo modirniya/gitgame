@@ -127,4 +127,5 @@ The production client ([`web/`](../../web/README.md), M7) plays the online game,
 - **I-Pull and I-Conflict are not screens.** A strategy is declared on the pull, because nobody can be asked in the middle of the night (charter decision 3). It is offered by what it does (keep theirs, keep mine, keep both by hand) and printed as Git's flag, which swaps under `--rebase`. What a rule takes from someone (a dropped commit, a crossed-out one, a merge token, what a force-push erased) is printed as a `#` comment, never as a line Git would print.
 - **The Table** is a sheet on phones and a panel beside the hub on wide screens, as §4 says, with the last day's log as a transcript.
 - **Replays** (`#/r/<id>`) show any game day by day, each day the view the remote folds from the log.
+- **The guided first game is dealt, not given a head start** (M15h). Instead of a bot with a commit ready, the remote chooses the game's seed (`server/lib/gitgame/games/guided.ex`) so that day 1 is a full day, a clean card is in your hand, and your pack resolves before the bot's, so the push the guide has you write lands; the rules are those of any game.
 

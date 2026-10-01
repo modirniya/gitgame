@@ -50,6 +50,11 @@ defmodule GitGame.GamesTest do
     assert Games.seats_held(Ecto.UUID.generate(), player.id) == {:error, :not_found}
   end
 
+  test "a seed given wins over the one a guided game would choose" do
+    {:ok, %{id: id}} = Games.create(["ana", "bot"], bots: ["bot"], seed: 42, guided: true)
+    assert Repo.get!(Record, id).seed == 42
+  end
+
   test "a game that can't exist isn't created" do
     assert {:error, :invalid, "a game needs 2 to 5 different players" <> _} =
              Games.create(["ana"])
