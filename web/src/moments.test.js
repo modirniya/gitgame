@@ -89,6 +89,25 @@ describe("the day log as moments", () => {
     expect(pull("resolve", false)).toBe("git pull");
   });
 
+  it("prints no empty line for a rebase that Git settled without a word at the clash", () => {
+    const [m] = moments(
+      [
+        { type: "conflict_detected", player: "ana", message: "", conflicts: [] },
+        { type: "conflict_resolved", player: "ana", strategy: "ours", crossed_out: ["15efd4d"], discarded: [] },
+        {
+          type: "pulled",
+          player: "ana",
+          rebase: true,
+          incoming: [],
+          merge_token: false,
+          message: "Successfully rebased and updated refs/heads/main.",
+        },
+      ],
+      { you: "ana" },
+    ).moments;
+    expect(m.output).toEqual(["Successfully rebased and updated refs/heads/main."]);
+  });
+
   it("gives the big moments a screen, and a push its first time only", () => {
     expect(ms.filter((m) => m.screen).map((m) => m.kind)).toEqual(["pushed", "conflict"]);
     expect([...seen].sort()).toEqual(["conflict", "pushed"]);

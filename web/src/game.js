@@ -5,8 +5,9 @@
 // remote would refuse it.
 import { el, mount } from "./dom.js";
 import { table } from "./table.js";
+import { frame } from "./frame.js";
 import { hub } from "./hub.js";
-import { unspent } from "./pack.js";
+import { price, unspent } from "./pack.js";
 import { moments } from "./moments.js";
 import { transcript } from "./transcript.js";
 import { momentScreen } from "./screens.js";
@@ -101,66 +102,81 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
 
   function render() {
     clearTimeout(auto);
+    const view = s.view;
+    const you = view.you?.player ?? null;
+    // the pips count the ops your pack still leaves today, while there is a pack to write
+    const writing = you && !view.released && !(s.queue.length && s.at < s.queue.length) && !s.handoff;
+    const left = writing ? view.budget - Math.min(price(view, s.draft.ops).spent, view.budget) : null;
+    const tableOpen = s.tableOpen;
+    const onTable = () => set({ tableOpen: !tableOpen });
+
+    mount(node, frame(view, { left, tableOpen, onTable }), screenFor(view, you), tablePanel(view, you, onTable));
+    if (writing) guide(view);
+  }
+
+  // What the frame holds: a moment of the days you haven't seen, the handoff, the scoreboard, or your pack to write.
+  function screenFor(view, you) {
     if (s.queue.length && s.at < s.queue.length) {
       const next = () => (s.at + 1 < s.queue.length ? set({ at: s.at + 1 }) : caughtUp());
       const step = { at: s.at + 1, of: s.queue.length };
-      const you = s.view.you.player;
       const m = s.queue[s.at];
       if (m.bot) {
         const at = s.at;
         auto = setTimeout(() => alive && s.at === at && next(), 1200);
       }
-      return mount(node, momentScreen(m, { view: s.view, you, step, next, skip: caughtUp }));
+      return momentScreen(m, { view, you, step, next, skip: caughtUp });
     }
-    if (s.handoff) return mount(node, handoff(s.handoff));
+    if (s.handoff) return handoff(s.handoff);
+    if (view.released) return scoreboard(view, me, you && (note ??= feedbackBox(remote, id)));
+    if (!you)
+      return el(
+        "section",
+        { class: "view" },
+        el(
+          "div",
+          { class: "body" },
+          el("p", { class: "muted" }, "# you hold no seat in this game: this is what the table sees"),
+        ),
+      );
+    return hub({
+      view,
+      draft: s.draft,
+      change: (draft) => set({ draft, warned: false }),
+      send,
+      sending: s.sending,
+      error: s.error,
+      warned: s.warned,
+      extra: offerReminders(view) && (remind ??= remindButton(remote)),
+    });
+  }
 
-    const view = s.view;
-    const you = view.you?.player ?? null;
+  // The Table: a sheet over the screen on a phone, opened from the frame; a panel beside the screen on a wide one, with
+  // the last day's log as a transcript (event-screens §4).
+  function tablePanel(view, you, close) {
     const last = view.days.at(-1);
     const log = last && moments(last.log, { you }).moments;
-
-    mount(
-      node,
-      view.released
-        ? scoreboard(view, me, you && (note ??= feedbackBox(remote, id)))
-        : you
-          ? hub({
-              view,
-              draft: s.draft,
-              change: (draft) => set({ draft, warned: false }),
-              send,
-              sending: s.sending,
-              error: s.error,
-              warned: s.warned,
-            })
-          : el("p", { class: "muted" }, "# you hold no seat in this game: this is what the table sees"),
-      offerReminders(view) && (remind ??= remindButton(remote)),
+    return el(
+      "aside",
+      { class: `table-panel${s.tableOpen ? " open" : ""}`, "aria-label": "the table" },
       el(
-        "button",
-        {
-          class: "table-toggle",
-          "aria-expanded": String(s.tableOpen),
-          onclick: () => set({ tableOpen: !s.tableOpen }),
-        },
-        s.tableOpen ? "close the table" : "the table",
+        "div",
+        { class: "sheet-head" },
+        el("h2", {}, "the table"),
+        el("button", { class: "close", onclick: close }, "close"),
       ),
-      el(
-        "aside",
-        { class: `table-panel${s.tableOpen ? " open" : ""}` },
-        table(view),
-        log && el("h2", {}, `$ git log  # day ${last.day}`),
-        log && transcript(log, you, { label: `day ${last.day}` }),
-      ),
+      table(view),
+      log && el("h2", {}, `$ git log  # day ${last.day}`),
+      log && transcript(log, you, { label: `day ${last.day}` }),
     );
-    guide(view);
   }
 
   // The guided first game (M14d): one sentence and one highlighted thing over the hub, until done or skipped.
   function guide(view) {
-    if (!view.you || view.released || !isGuided(id)) return;
+    if (!isGuided(id)) return;
     const step = guideStep(view, s.draft);
     if (!step) return setGuided(id, false);
-    node.append(guideLayer(step, { done: () => (setGuided(id, false), render()) }));
+    // at the top of the pack being written, where it covers nothing the guide asks for
+    node.querySelector(".hub > .body")?.prepend(guideLayer(step, { done: () => (setGuided(id, false), render()) }));
     highlight(node, step.target);
   }
 
@@ -168,11 +184,19 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
   function handoff(next) {
     return el(
       "section",
-      { class: "screen handoff" },
-      el("h1", {}, "pack sent"),
-      el("p", {}, `Pass the device to ${next}. Your hand is hidden until you come back to it.`),
-      el("button", { class: "primary", onclick: () => go(`/g/${id}/${encodeURIComponent(next)}`) }, `I'm ${next}`),
-      el("button", { onclick: () => set({ handoff: null }) }, `back to ${s.view.you.player}'s pack`),
+      { class: "view handoff" },
+      el(
+        "div",
+        { class: "body" },
+        el("h1", {}, "pack sent"),
+        el("p", {}, `Pass the device to ${next}. Your hand is hidden until you come back to it.`),
+      ),
+      el(
+        "div",
+        { class: "actions stack" },
+        el("button", { class: "primary", onclick: () => go(`/g/${id}/${encodeURIComponent(next)}`) }, `I'm ${next}`),
+        el("button", { onclick: () => set({ handoff: null }) }, `back to ${s.view.you.player}'s pack`),
+      ),
     );
   }
 
@@ -193,11 +217,26 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
   }
 
   function fail(e) {
-    mount(node, el("p", { class: "error", role: "alert" }, e.message), el("a", { href: "#/" }, "new game"));
+    mount(
+      node,
+      el(
+        "section",
+        { class: "view" },
+        el(
+          "div",
+          { class: "body" },
+          el("p", { class: "error", role: "alert" }, e.message),
+          el("a", { href: "#/" }, "new game"),
+        ),
+      ),
+    );
   }
 
   document.addEventListener("keydown", key);
-  mount(node, el("p", { class: "muted" }, "$ git fetch"));
+  mount(
+    node,
+    el("section", { class: "view" }, el("div", { class: "body" }, el("p", { class: "muted" }, "$ git fetch"))),
+  );
   fetchView();
   const stop = remote.live(id, () => fetchView());
 
@@ -222,35 +261,38 @@ function scoreboard(view, me, feedback) {
 
   return el(
     "section",
-    { class: "scoreboard" },
-    el("h1", {}, "v1.0 shipped"),
+    { class: "view scoreboard" },
     el(
-      "p",
-      { class: view.released.production_down ? "error" : "muted" },
-      view.released.production_down ? "Production is down." : `${view.released.bugs} bugs reached production.`,
-    ),
-    el("p", { class: "verdict" }, whatDecidedIt(view.scores)),
-    el(
-      "ol",
-      { class: "seats" },
-      rows.map((id) =>
-        el(
-          "li",
-          { class: `seat${id === view.you?.player ? " you" : ""}` },
-          el("span", { class: "who" }, id),
-          el("span", { class: "score" }, view.scores[id].total),
-          el("span", { class: "facts" }, parts(view.scores[id]).join(" · ")),
+      "div",
+      { class: "body" },
+      el("h1", {}, "v1.0 shipped"),
+      el(
+        "p",
+        { class: view.released.production_down ? "error" : "muted" },
+        view.released.production_down ? "Production is down." : `${view.released.bugs} bugs reached production.`,
+      ),
+      el("p", { class: "verdict" }, whatDecidedIt(view.scores)),
+      el(
+        "ol",
+        { class: "seats" },
+        rows.map((id) =>
+          el(
+            "li",
+            { class: `seat${id === view.you?.player ? " you" : ""}` },
+            el("span", { class: "who" }, id),
+            el("span", { class: "score" }, view.scores[id].total),
+            el("span", { class: "facts" }, parts(view.scores[id]).join(" · ")),
+          ),
         ),
       ),
+      feedback,
+      me && nudge(me),
     ),
-    feedback,
-    me && nudge(me),
     el(
-      "p",
-      {},
-      el("a", { href: `#/r/${view.id}` }, "replay this game, day by day"),
-      " · ",
-      el("a", { href: "#/" }, "new game"),
+      "div",
+      { class: "actions" },
+      el("a", { class: "button", href: `#/r/${view.id}` }, "replay it"),
+      el("a", { class: "button primary", href: "#/" }, "new game"),
     ),
   );
 }

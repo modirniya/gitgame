@@ -85,8 +85,15 @@ export function fanLayout(n, width) {
   return { rows, perRow, overlap: Math.max(0, CARD - Math.floor(step(perRow))) };
 }
 
+// The hub's width: the phone's, or on a wide screen the column beside the Table (frame.css), less its gutters.
+function column() {
+  const w = globalThis.innerWidth || 390;
+  const h = globalThis.innerHeight || 844;
+  return (w >= 1000 && h >= 560 ? Math.min(560, Math.max(460, w * 0.38)) : Math.min(w, 520)) - 32;
+}
+
 function fan(cards) {
-  const width = Math.min(globalThis.innerWidth || 640, 640) - 32;
+  const width = column();
   const { perRow, overlap } = fanLayout(cards.length, width);
   const rows = [];
   for (let i = 0; i < cards.length; i += perRow) rows.push(cards.slice(i, i + perRow));
@@ -184,8 +191,11 @@ const LABELS = {
   tag: "tag v1.0",
 };
 
-/** `warned`: the send button was tapped with ops left unspent, so the hub says what could still be done. */
-export function hub({ view, draft, change, send, sending = false, error = "", warned = false }) {
+/**
+ * `warned`: the send button was tapped with ops left unspent, so the hub says what could still be done. `extra` is
+ * anything the game adds under the pack (the "remind me" button).
+ */
+export function hub({ view, draft, change, send, sending = false, error = "", warned = false, extra = null }) {
   const priced = price(view, draft.ops);
   const unused = warned && unspent(view, draft.ops);
   const can = actions(view, draft.ops, draft.selected);
@@ -223,69 +233,73 @@ export function hub({ view, draft, change, send, sending = false, error = "", wa
 
   return el(
     "section",
-    { class: "hub", "aria-label": "write your pack" },
+    { class: `view hub${picking ? " picking" : ""}`, "aria-label": "write your pack" },
     el(
-      "header",
-      { class: "status" },
-      el("span", {}, `day ${view.day}/${view.final_day}`),
-      el("span", {}, `main ${view.main.length - 1}/${view.release_at}`),
+      "div",
+      { class: "body" },
+      strip(view, { pickable: picking ? pickable : () => false, onpick: (c) => put({ op: picking, target: c.id }) }),
+      view.incident &&
+        el(
+          "p",
+          { class: "incident-note" },
+          el("span", { class: "k" }, "incident"),
+          ` ${view.incident.name} — ${view.incident.text}`,
+        ),
+      picking &&
+        el(
+          "p",
+          { class: "picking" },
+          `git ${picking}: pick a commit on main `,
+          el("button", { onclick: () => change({ ...draft, picking: null }) }, "cancel"),
+        ),
+      branch(view),
+      fan(
+        view.you.hand.map((c) =>
+          inHand.has(c.id)
+            ? card(c, {
+                selected: draft.selected.includes(c.id),
+                onclick: c.kind === "commit" ? () => toggle(c.id) : null,
+              })
+            : card(c, { used: true }),
+        ),
+      ),
       el(
-        "span",
-        { class: "budget", title: "ops the pack spends now, of today's budget" },
-        `ops ${priced.spent}/${view.budget}`,
+        "div",
+        { class: "ops-grid" },
+        action("add", () => ({ op: "add", cards: draft.selected.filter((id) => inHand.has(id)) })),
+        action("commit", () => ({ op: "commit", message: suggestions(priced.left.staged)[0] })),
+        action("pull", () => ({ op: "pull" })),
+        action("push", () => ({ op: "push" })),
+        action("blame"),
+        action("revert"),
+        action("force", () => ({ op: "force" })),
+        action("arm", () => ({ op: "arm", trap: "reflog" })),
+        action("tag", () => ({ op: "tag" })),
       ),
-      view.incident && el("span", { class: "incident", title: view.incident.text }, view.incident.name),
-    ),
-    strip(view, { pickable: picking ? pickable : () => false, onpick: (c) => put({ op: picking, target: c.id }) }),
-    picking &&
       el(
-        "p",
-        { class: "picking" },
-        `git ${picking}: pick a commit on main `,
-        el("button", { onclick: () => change({ ...draft, picking: null }) }, "cancel"),
+        "ol",
+        { class: "pack", "aria-label": "your pack" },
+        priced.rows.length
+          ? priced.rows.map((r, i) => row(view, draft, change, r, i))
+          : el("li", { class: "empty" }, "# an empty pack: nothing happens, and two in a row leaves the company"),
       ),
-    branch(view),
-    fan(
-      view.you.hand.map((c) =>
-        inHand.has(c.id)
-          ? card(c, {
-              selected: draft.selected.includes(c.id),
-              onclick: c.kind === "commit" ? () => toggle(c.id) : null,
-            })
-          : card(c, { used: true }),
-      ),
+      unused &&
+        el(
+          "p",
+          { class: "unspent", role: "alert" },
+          `# ${unused.left} of today's ${view.budget} ops unspent: you could still ${unused.moves.map((k) => LABELS[k]).join(", ")}`,
+        ),
+      el("p", { class: "error", role: "alert" }, error),
+      extra,
     ),
     el(
       "div",
       { class: "actions" },
-      action("add", () => ({ op: "add", cards: draft.selected.filter((id) => inHand.has(id)) })),
-      action("commit", () => ({ op: "commit", message: suggestions(priced.left.staged)[0] })),
-      action("pull", () => ({ op: "pull" })),
-      action("push", () => ({ op: "push" })),
-      action("blame"),
-      action("revert"),
-      action("force", () => ({ op: "force" })),
-      action("arm", () => ({ op: "arm", trap: "reflog" })),
-      action("tag", () => ({ op: "tag" })),
-    ),
-    el(
-      "ol",
-      { class: "pack", "aria-label": "your pack" },
-      priced.rows.length
-        ? priced.rows.map((r, i) => row(view, draft, change, r, i))
-        : el("li", { class: "empty" }, "# an empty pack: nothing happens, and two in a row leaves the company"),
-    ),
-    unused &&
       el(
-        "p",
-        { class: "unspent", role: "alert" },
-        `# ${unused.left} of today's ${view.budget} ops unspent: you could still ${unused.moves.map((k) => LABELS[k]).join(", ")}`,
+        "button",
+        { class: "primary send", "data-guide": "send", disabled: sending, onclick: send },
+        sending ? "sending…" : unused ? "send anyway" : sent ? "replace today's pack" : "send pack",
       ),
-    el("p", { class: "error", role: "alert" }, error),
-    el(
-      "button",
-      { class: "primary send", "data-guide": "send", disabled: sending, onclick: send },
-      sending ? "sending…" : unused ? "send anyway" : sent ? "replace today's pack" : "send pack",
     ),
   );
 }

@@ -4,6 +4,7 @@
    from 600 px. Semantic colors only ever mean one thing: red a rejection or a bug, green accepted, amber a warning. */
 @import "./cards.css";
 @import "./table.css";
+@import "./frame.css";
 
 :root {
   --ground: #14181c;
@@ -175,6 +176,26 @@ button.primary {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
+/* a link that leads somewhere as a button would: the game's button, for an <a> */
+a.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+a.button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ground);
+  font-weight: 700;
+}
 @media (hover: hover) {
   button:hover:not([disabled]):not(.card) {
     border-color: var(--muted);
@@ -240,19 +261,15 @@ button.primary {
 
 /* ---------- the hub ---------- */
 
-.status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
+.incident-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.35;
   color: var(--muted);
-  font: 500 0.8rem var(--mono);
-  margin-bottom: 8px;
 }
-.status .incident {
+.incident-note .k {
   color: var(--warn);
-}
-.status .budget {
-  color: var(--ink);
+  margin-right: 4px;
 }
 .picking {
   color: var(--warn);
@@ -282,11 +299,10 @@ button.primary {
   transform: translateY(-12px);
 }
 
-.actions {
+.ops-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
   gap: 6px;
-  margin: 12px 0;
 }
 .action {
   font-family: var(--mono);
@@ -398,42 +414,6 @@ ol.pack {
   color: var(--warn);
 }
 
-/* The Table: a sheet on phones, opened from its button; a panel beside the hub on wide screens (event-screens §4). */
-.table-toggle {
-  width: 100%;
-  margin: 12px 0;
-}
-.table-panel {
-  display: none;
-}
-.table-panel.open {
-  display: block;
-}
-
-@media (min-width: 1000px) {
-  #app:has(.game) {
-    max-width: 1180px;
-  }
-  .game {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 24px;
-    align-items: start;
-  }
-  .table-toggle {
-    display: none;
-  }
-  .table-panel {
-    display: block;
-    position: sticky;
-    top: 16px;
-  }
-  .table-panel ol.strip {
-    flex-wrap: wrap;
-    overflow: visible;
-  }
-}
-
 .branch h2 {
   color: var(--you);
   font-size: 0.85rem;
@@ -449,16 +429,40 @@ ol.pack {
 
 /* ---------- moments, the handoff, the scoreboard ---------- */
 
-.moment,
-.handoff,
-.scoreboard {
-  display: grid;
-  gap: 14px;
-  align-content: start;
-  min-height: 70vh;
-}
 .moment .transcript {
-  font-size: 0.95rem;
+  margin: 0;
+  font-size: 0.85rem;
+}
+h1.cmd {
+  margin: 0;
+  font-size: 1.375rem;
+}
+.moment.ok h1.cmd {
+  color: var(--ok);
+}
+.moment.reject h1.cmd {
+  color: var(--reject);
+}
+.moment.warn h1.cmd {
+  color: var(--warn);
+}
+.scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.said {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.45;
+}
+.then {
+  margin: 0;
+  color: var(--muted);
+}
+.then.warn {
+  color: var(--warn);
 }
 .moment.reject .transcript {
   box-shadow: inset 3px 0 0 var(--reject);
@@ -472,25 +476,37 @@ ol.pack {
 .progress {
   font: 500 0.8rem var(--mono);
 }
-.coach {
-  margin: 0;
-  padding-left: 12px;
-  border-left: 2px solid var(--muted);
+.incident-card {
+  width: min(280px, 100%);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
 }
-.moment-actions {
-  display: grid;
-  gap: 8px;
+.incident-card .band {
+  display: block;
+  padding: 0 14px;
+  background: var(--warn);
+  color: #fff;
+  font: 700 11px/28px var(--sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 .incident-card h2 {
-  font-size: 1.3rem;
-  color: var(--warn);
+  margin: 0;
+  padding: 18px 16px 6px;
+  font: 700 1.5rem/1.2 var(--sans);
 }
-.incident-card .cards {
+.incident-card p {
+  margin: 0;
+  padding: 0 16px 20px;
+  color: var(--muted);
+}
+.drawn {
   display: flex;
-  gap: 8px;
-}
-.handoff button {
-  width: 100%;
+  gap: 12px;
+  justify-content: center;
 }
 
 /* CI flips every commit in order, 250 ms apart (event-screens §4); reduced motion shows them flipped at once. */
@@ -789,15 +805,10 @@ label.check input {
 /* ---------- the guided first game ---------- */
 
 .guide {
-  position: sticky;
-  bottom: max(12px, env(safe-area-inset-bottom));
-  z-index: 5;
-  margin-top: 16px;
   padding: 12px 14px;
-  border-radius: 10px;
-  background: var(--raised);
-  border: 1px solid var(--accent);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  border-radius: 14px;
+  background: var(--ok-soft);
+  border: 2px solid var(--ok);
 }
 .guide p {
   margin: 0 0 6px;

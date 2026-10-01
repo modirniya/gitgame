@@ -21,12 +21,14 @@ it("shows a moment's command and output, the commit it moved, and the coach line
     skip: () => calls.push("skip"),
   });
 
-  expect(node.querySelector(".transcript").textContent).toBe("bot@main $ git push   53d8cce..15efd4d  main -> main");
+  expect(node.querySelector("h1.cmd").textContent).toBe("git push");
+  expect(node.querySelector(".transcript").textContent).toBe("   53d8cce..15efd4d  main -> main");
   expect(node.querySelector('.moved [data-id="15efd4d"]')).not.toBeNull();
   expect(node.querySelector(".coach").textContent).toMatch(/^bot pushed, so the tip moved/);
   expect(node.querySelector(".progress").textContent).toBe("1 of 3 · bot's pack");
 
-  const [go, skip] = node.querySelectorAll("button");
+  // the answer at the thumb, skipping beside it (event-screens §4)
+  const [skip, go] = node.querySelectorAll(".actions button");
   go.click();
   skip.click();
   expect(calls).toEqual(["next", "skip"]);
@@ -100,4 +102,29 @@ it("a conflict brings the two commits together over the file they share", () => 
   expect(node.querySelector(".clash-file").textContent).toBe("README.md");
   expect(node.querySelector(".from-right [data-id]").dataset.id).toBe("15efd4d");
   expect(node.querySelector(".from-left .card").classList.contains("down")).toBe(true);
+});
+
+it("opens a day with the incident, your draws, today's ops, and where you stand", () => {
+  const opening = { type: "day_opened", day: 2, incident: "flaky_ci", budget: 3 };
+  const today = [
+    opening,
+    {
+      type: "drew",
+      player: "ana",
+      cards: [
+        { id: "d1", kind: "commit", file: "auth.js", lines: 3, bug: false },
+        { id: "d2", kind: "command", command: "blame" },
+      ],
+    },
+  ];
+  const m = { kind: "incident", player: null, command: null, output: [], tone: "warn", events: [opening], day: 2 };
+  const node = momentScreen(m, { view: view({ today }), you: "ana", step: { at: 1, of: 1 }, next() {}, skip() {} });
+
+  expect(node.querySelector("h1").textContent).toBe("day 2 of 12");
+  expect(node.querySelector(".incident-card h2").textContent).toBe("Flaky CI");
+  expect([...node.querySelectorAll(".drawn .card")].map((c) => c.dataset.id)).toEqual(["d1", "d2"]);
+  expect(node.querySelectorAll(".bigpips .pips i.on")).toHaveLength(3);
+  expect(node.querySelector(".said").textContent).toBe("You drew two cards.");
+  // ana is one behind in the fixture
+  expect(node.querySelector(".then").textContent).toMatch(/^You are 1 behind: a push would be rejected/);
 });

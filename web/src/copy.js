@@ -68,6 +68,14 @@ const table = {
         : "Every commit is clean. Ship it.",
 };
 
+/** The day's opener, under the incident and what you drew: where you stand, and what that means for your pack. */
+export const OPENER = {
+  drew: (n) => `You drew ${n === 2 ? "two cards" : n === 1 ? "a card" : `${n} cards`}.`,
+  atTip: "You are at the tip: a push would land, unless someone else's lands first.",
+  behind: (n) =>
+    `You are ${n} behind: a push would be rejected. The pull your pack writes before it costs an op today.`,
+};
+
 /** The coach line for moment `m` as `you` reads it, or null for a moment that needs none. */
 export function coach(m, you) {
   const line = table[m.kind] ?? (m.player === you ? yours[m.kind] : theirs[m.kind]);
