@@ -87,6 +87,30 @@ export const OPENER = {
     `You are ${n} behind: a push would be rejected. The pull your pack writes before it costs an op today.`,
 };
 
+/** A day's receipt (summary.js): what each of your ops did, in a few words. */
+export const RECEIPT = {
+  staged: () => "staged",
+  committed: (m) => `${m.events.at(-1).commit?.id ?? m.events.at(-1).commit} on your branch`,
+  pull_noop: () => "already up to date",
+  pulled: (m) => (m.events.at(-1).merge_token ? "caught up, and a merge token" : "caught up"),
+  pushed: (m) => `${m.events.at(-1).commits.join(", ")} on main`,
+  push_noop: () => "nothing to push",
+  rejected: (m) => (m.output[0].startsWith("CI failed") ? "flaky CI rejected it" : "rejected: main had moved"),
+  skipped: () => "didn't run: no ops left",
+  blamed: (m) => (m.tone === "reject" ? "a bug: −3 to its author" : "clean"),
+  reverted: () => "reverted: +1 to you",
+  tagged: () => "v1.0 tagged",
+};
+
+/** The end of a day's receipt: the order the packs ran in, and where you stand for tomorrow. */
+export const SUMMARY = {
+  order: ([first, ...rest]) => `the remote ran ${first} first, then ${rest.join(", then ")}`,
+  empty: "you sent no pack today",
+  atTip: "You are at the tip: tomorrow, a push lands unless someone else's lands first.",
+  behind: (n) =>
+    `The tip moved: you are ${n} behind. Tomorrow's pack needs a pull before its push, and the pull costs an op.`,
+};
+
 /** The coach line for moment `m` as `you` reads it, or null for a moment that needs none. */
 export function coach(m, you) {
   const line = table[m.kind] ?? (m.player === you ? yours[m.kind] : theirs[m.kind]);

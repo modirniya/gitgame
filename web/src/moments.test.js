@@ -37,7 +37,7 @@ const day = [
 ];
 
 describe("the day log as moments", () => {
-  const { moments: ms, seen } = moments(day, { you: "ana" });
+  const { moments: ms } = moments(day, { you: "ana" });
 
   it("makes one moment per op, in order, with each pack's player", () => {
     expect(ms.map((m) => [m.player, m.kind])).toEqual([
@@ -108,14 +108,6 @@ describe("the day log as moments", () => {
     expect(m.output).toEqual(["Successfully rebased and updated refs/heads/main."]);
   });
 
-  it("gives the big moments a screen, and a push its first time only", () => {
-    expect(ms.filter((m) => m.screen).map((m) => m.kind)).toEqual(["pushed", "conflict"]);
-    expect([...seen].sort()).toEqual(["conflict", "pushed"]);
-
-    const again = moments(day, { you: "ana", seen }).moments;
-    expect(again.filter((m) => m.screen).map((m) => m.kind)).toEqual(["conflict"]);
-  });
-
   it("coaches the reader in the second person, and speaks of others by name", () => {
     expect(ms[3].coach).toMatch(/^Your commit is on main/);
     expect(ms[6].coach).toMatch(/^bot hit a conflict/);
@@ -138,7 +130,7 @@ describe("the moments that always stop the day", () => {
       op: "push",
       message: "! [rejected]        main -> main (non-fast-forward)",
     });
-    expect(m).toMatchObject({ kind: "rejected", command: "git push", tone: "reject", screen: true });
+    expect(m).toMatchObject({ kind: "rejected", command: "git push", tone: "reject" });
     expect(m.coach).toMatch(/pull before your push/);
   });
 
@@ -170,17 +162,17 @@ describe("the moments that always stop the day", () => {
       { you: "ana" },
     ).moments;
 
-    expect(forced).toMatchObject({ command: "git push --force", tone: "reject", screen: true });
+    expect(forced).toMatchObject({ command: "git push --force", tone: "reject" });
     expect(forced.output).toEqual([" + c37ef9a...9dea397 main -> main (forced update)"]);
     expect(forced.notes).toEqual(["erased 0b330b6"]);
-    expect(reflog).toMatchObject({ player: "ana", kind: "reflog", screen: true, output: [] });
+    expect(reflog).toMatchObject({ player: "ana", kind: "reflog", output: [] });
     expect(reflog.notes).toEqual(["restored 0b330b6: back on top of main"]);
     expect(reflog.coach).toMatch(/^Your trap fired/);
   });
 
   it("CI at the release, counting what reached production", () => {
     const m = one({ type: "ci_ran", by: "bot", bugs: 3, production_down: true, day: 11, flips: [] });
-    expect(m).toMatchObject({ kind: "ci", tone: "reject", screen: true });
+    expect(m).toMatchObject({ kind: "ci", tone: "reject" });
     expect(m.coach).toMatch(/production is down/);
   });
 
@@ -192,8 +184,8 @@ describe("the moments that always stop the day", () => {
       ],
       { you: "ana" },
     ).moments;
-    expect(empty).toMatchObject({ tone: "warn", screen: false });
-    expect(left).toMatchObject({ tone: "reject", screen: true });
+    expect(empty).toMatchObject({ tone: "warn" });
+    expect(left).toMatchObject({ tone: "reject" });
   });
 
   it("the parts of a pack that aren't ops leave no moment", () => {
@@ -201,72 +193,47 @@ describe("the moments that always stop the day", () => {
   });
 });
 
-// `game` is a whole bot-vs-bot game (seed 7) as ana read it, from GET /api/games/:id?player=ana. To regenerate after
-// the server's events change: create ["ana", "bot"] with both as bots and seed 7, and save {you, days} from ana's view.
+// `game` is a whole bot-vs-bot game (seed 7) as ana read it. To regenerate after the server's events change, from
+// server/: create ["ana", "bot"] with both as bots and seed 7 (`GitGame.Games.create(["ana", "bot"], seed: 7, bots:
+// ["ana", "bot"])`, which plays itself to the release), and save {you, seats, days, main, players, scores, released}
+// from `GitGame.Games.View.for_player(state, id, "ana")` as JSON.
 // Every event type the resolver makes (grep "type: :" server/lib); the ones that aren't ops only mark boundaries.
 const BOUNDARIES = ["pack_opened", "pack_closed", "day_closed", "conflict_detected", "conflict_resolved"];
 
 describe("a whole game", () => {
-  let seen = new Set();
-  const days = game.days.map((d) => {
-    const r = moments(d.log, { you: game.you, seen });
-    seen = r.seen;
-    return r.moments;
-  });
-  const all = days.flat();
+  const all = game.days.flatMap((d) => moments(d.log, { you: game.you }).moments);
 
   it("maps every event to a moment, except the boundaries between them", () => {
     const events = game.days.flatMap((d) => d.log).filter((e) => !BOUNDARIES.includes(e.type));
     expect(all.length).toBe(events.length);
   });
 
-  it("gives every moment something to show, and every screen a coach line", () => {
+  it("gives every moment something to show, and every moment that moves main a coach line", () => {
     for (const m of all) expect(m.command || m.output.length || m.kind === "ci").toBeTruthy();
-    for (const m of all.filter((m) => m.screen)) expect(m.coach, m.kind).toBeTruthy();
-  });
-
-  it("gives the routine a screen once a game, and the big moments every time", () => {
-    const screens = all.filter((m) => m.screen).map((m) => m.kind);
-    expect(screens.filter((k) => k === "pushed")).toHaveLength(1);
-    expect(screens).toContain("forced");
-    expect(screens.at(-1)).toBe("ci");
+    const moves = [
+      "pushed",
+      "pulled",
+      "conflict",
+      "rejected",
+      "blamed",
+      "reverted",
+      "forced",
+      "reflog",
+      "tagged",
+      "ci",
+    ];
+    for (const m of all.filter((m) => moves.includes(m.kind))) expect(m.coach, m.kind).toBeTruthy();
   });
 });
 
-describe("the bot, one step at a time (M14b)", () => {
-  const botDay = [
-    { type: "pack_opened", player: "bot", budget: 3, ops: 4 },
-    { type: "staged", player: "bot", count: 2, why: "it builds a commit" },
-    { type: "committed", player: "bot", commit: "2887386", why: "it commits what it staged" },
-    {
-      type: "pull_up_to_date",
-      player: "bot",
-      message: "Already up to date.",
-      why: "it pulls first, in case someone pushes before it",
-    },
-    {
-      type: "push_accepted",
-      player: "bot",
-      commits: ["2887386"],
-      message: "   a..b  main -> main",
-      why: "it ships what it has committed",
-    },
-    { type: "pack_closed", player: "bot", spent: 3 },
-  ];
-
-  it("gives each of the bot's ops a screen with its reasoning, folding staging into the commit", () => {
-    const ms = moments(botDay, { you: "ana", bots: ["bot"] }).moments;
-    expect(ms.filter((m) => m.screen).map((m) => [m.kind, m.why])).toEqual([
-      ["committed", "it commits what it staged"],
-      ["pull_noop", "it pulls first, in case someone pushes before it"],
-      ["pushed", "it ships what it has committed"],
-    ]);
-    // routine steps move on by themselves; the big moments wait for a tap
-    expect(ms.filter((m) => m.screen).map((m) => m.bot)).toEqual([true, true, true]);
-  });
-
-  it("a person's ops, or a game without bots, keep the old rule", () => {
-    const ms = moments(botDay, { you: "ana" }).moments;
-    expect(ms.filter((m) => m.screen).map((m) => m.kind)).toEqual(["pushed"]);
-  });
+it("carries the bot's reasoning with each of its ops (M14b)", () => {
+  const ms = moments(
+    [
+      { type: "pack_opened", player: "bot", budget: 3, ops: 2 },
+      { type: "committed", player: "bot", commit: "2887386", why: "it commits what it staged" },
+      { type: "push_accepted", player: "bot", commits: ["2887386"], message: "   a..b  main -> main", why: "it ships" },
+    ],
+    { you: "ana" },
+  ).moments;
+  expect(ms.map((m) => m.why)).toEqual(["it commits what it staged", "it ships"]);
 });

@@ -2,34 +2,13 @@
 // A moment is one op as a terminal would show it: the prompt, the command, Git's output, and a coach line. The events
 // an op makes stay together: a pull that hit a conflict is one moment, CONFLICT line and all.
 //
-// Some moments get a screen of their own, the rest are lines in the transcript. The mobile prototype found one screen
-// per event clear for the big moments and slow for the routine (event-screens §8), so: a rejection, a conflict, blame,
-// a force-push, a reflog, the tag, CI and someone leaving always get one; a push and a pull get one the first time
-// each happens in a game; everything else is a line.
+// Which moments a day's playback shows, and how, is playback.js's to decide; here they are only what happened.
 import { coach } from "./copy.js";
 import { commandName } from "./cards.js";
 import { gitFlag, STRATEGIES } from "./pack.js";
 
-const ALWAYS = new Set([
-  "rejected",
-  "conflict",
-  "blamed",
-  "reverted",
-  "forced",
-  "reflog",
-  "tagged",
-  "ci",
-  "left",
-  "incident",
-]);
-const FIRST_TIME = new Set(["pushed", "pulled"]);
-
-/**
- * `log` is a day's events as `you` may see them. `seen` is the kinds this reader has already had a screen for in this
- * game; the moments that give a kind its first screen add it to the returned `seen`.
- */
-export function moments(log, { you, seen = new Set(), bots = [] } = {}) {
-  seen = new Set(seen);
+/** `log` is a day's events as `you` may see them. */
+export function moments(log, { you } = {}) {
   const out = [];
   let pack = null;
   let held = [];
@@ -57,18 +36,10 @@ export function moments(log, { you, seen = new Set(), bots = [] } = {}) {
     m.coach = coach(m, you);
     // a bot says why it played each op (M14b), in words anyone at the table may read
     m.why = m.events.findLast((x) => x.why)?.why ?? null;
-    m.screen = ALWAYS.has(m.kind) || (FIRST_TIME.has(m.kind) && !seen.has(m.kind));
-    if (m.screen) seen.add(m.kind);
-    // The bot is a character (event-screens §5): each of its ops is a step on screen, with its reasoning, except
-    // staging, which folds into the commit it makes (the prototype's finding: "it staged a card" shows nothing).
-    if (bots.includes(m.player) && m.kind !== "staged" && m.kind !== "armed") {
-      m.screen = true;
-      m.bot = !ALWAYS.has(m.kind);
-    }
     out.push(m);
   }
 
-  return { moments: out, seen };
+  return { moments: out };
 }
 
 const cards = (cs) => cs.map((c) => (c.kind === "command" ? commandName(c.command) : `${c.file} +${c.lines}`));

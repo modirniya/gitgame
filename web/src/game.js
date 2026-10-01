@@ -4,14 +4,14 @@
 // live stream only ever says "fetch again". When a new day's view arrives, a draft for the old one is dropped, as the
 // remote would refuse it.
 import { el, mount } from "./dom.js";
-import { table } from "./table.js";
+import { asOf, table } from "./table.js";
 import { frame } from "./frame.js";
 import { hub } from "./hub.js";
 import { price, unspent } from "./pack.js";
 import { play, snapshot } from "./motion.js";
 import { moments } from "./moments.js";
 import { transcript } from "./transcript.js";
-import { momentScreen } from "./screens.js";
+import { stepScreen } from "./screens.js";
 import { catchup, recall, remember } from "./catchup.js";
 import { offerReminders, remindButton } from "./remind.js";
 import { scoreboard } from "./release.js";
@@ -100,21 +100,32 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
   // A bot's routine step moves on by itself after a moment (event-screens §5: 1.2 s); a tap moves on sooner.
   let auto = null;
 
+  // On to the end of the day being played back (its receipt), or out of the days altogether if none is left.
+  function skip() {
+    const end = s.queue.findIndex((x, k) => k > s.at && x.kind === "summary");
+    return end < 0 ? caughtUp() : set({ at: end });
+  }
+
   function render() {
     clearTimeout(auto);
     const view = s.view;
     const you = view.you?.player ?? null;
+    const playing = s.queue.length && s.at < s.queue.length ? s.queue[s.at] : null;
     // the pips count the ops your pack still leaves today, while there is a pack to write
-    const writing = you && !view.released && !(s.queue.length && s.at < s.queue.length) && !s.handoff;
+    const writing = you && !view.released && !playing && !s.handoff;
     const left = writing ? view.budget - Math.min(price(view, s.draft.ops).spent, view.budget) : null;
     const tableOpen = s.tableOpen;
     const onTable = () => set({ tableOpen: !tableOpen });
+    // a day played back draws its own day, main as the step left it, and the score as the day opened (M15f)
+    const shown = playing?.after
+      ? { ...asOf(view, playing.after), day: playing.day, scores: playing.score ?? view.scores }
+      : view;
 
     // the hub drawn again after an op: keep the pack where it was scrolled to, and play what moved (M15e)
     const was = node.querySelector(".view.hub");
     const before = was && snapshot(was);
     const scrolled = was?.querySelector(".body").scrollTop ?? 0;
-    mount(node, frame(view, { left, tableOpen, onTable }), screenFor(view, you), tablePanel(view, you, onTable));
+    mount(node, frame(shown, { left, tableOpen, onTable }), screenFor(view, you), tablePanel(shown, you, onTable));
     const now = node.querySelector(".view.hub");
     if (was && now) {
       now.querySelector(".body").scrollTop = scrolled;
@@ -128,12 +139,13 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
     if (s.queue.length && s.at < s.queue.length) {
       const next = () => (s.at + 1 < s.queue.length ? set({ at: s.at + 1 }) : caughtUp());
       const step = { at: s.at + 1, of: s.queue.length };
-      const m = s.queue[s.at];
-      if (m.bot) {
+      const playing = s.queue[s.at];
+      // someone else's routine moves on by itself after a moment (event-screens §5: 1.2 s); a tap moves on sooner
+      if (playing.auto) {
         const at = s.at;
         auto = setTimeout(() => alive && s.at === at && next(), 1200);
       }
-      return momentScreen(m, { view, you, step, next, skip: caughtUp });
+      return stepScreen(playing, { view, you, step, next, skip });
     }
     if (s.handoff) return handoff(s.handoff);
     if (view.released) return scoreboard(view, me, you && (note ??= feedbackBox(remote, id)));
@@ -213,9 +225,9 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
   function key(e) {
     if (!s.view || e.target.closest?.("input, select, textarea")) return;
     if (s.handoff) return;
-    // on a moment's screen: Enter continues, Escape skips to the hub, as its buttons do
+    // on a day played back: Enter continues, Escape skips to the day's end, as its buttons do
     if (s.queue.length && s.at < s.queue.length) {
-      if (e.key === "Escape") caughtUp();
+      if (e.key === "Escape") skip();
       if (e.key === "Enter" && !e.target.closest?.("button"))
         s.at + 1 < s.queue.length ? set({ at: s.at + 1 }) : caughtUp();
       return;
