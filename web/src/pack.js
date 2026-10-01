@@ -9,6 +9,9 @@
 const files = (cards) => [...new Set(cards.map((c) => c.file))];
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
+/** What each conflict strategy does, in the words the pack editor offers it in (round-resolution §3). */
+export const STRATEGIES = { theirs: "keep theirs", ours: "keep mine", resolve: "keep both, by hand" };
+
 /** Your side of the table as the view shows it, before any op of the pack. */
 function start(view) {
   const you = view.you;
@@ -63,7 +66,7 @@ function step(view, s, op) {
       if (s.behind === 0)
         return [k.pull_when_up_to_date, base + extra, "free if nothing moved; more if someone pushes first", after];
       const note = clash.length
-        ? `CONFLICT coming in ${[...new Set(clash)].join(", ")}: -X ${strategy}`
+        ? `CONFLICT coming in ${[...new Set(clash)].join(", ")}: ${STRATEGIES[strategy]}`
         : op.rebase
           ? "rebases your commits on the tip"
           : s.local.length
@@ -122,21 +125,43 @@ function step(view, s, op) {
 }
 
 /**
- * The pack as it stands: every op with its cost now (`cost`), the most it could cost (`most`), a note, and whether it
- * will run within the budget (`runs`) or only might (`maybe`). `left` is your side after the pack's local ops.
+ * The pack as it stands: every op with its cost now (`cost`), the most it could cost (`most`), a note, a commit's
+ * `cards`, and whether it will run within the budget (`runs`) or only might (`maybe`). `left` is your side after the
+ * pack's local ops.
  */
 export function price(view, ops) {
   let s = start(view);
   let spent = 0;
   let most = 0;
   const rows = ops.map((op) => {
+    // what a commit will be made of: the cards staged when it runs
+    const cards = op.op === "commit" ? s.staged : null;
     const [cost, max, note, next] = step(view, s, op);
     s = next;
     spent += cost;
     most += max;
-    return { op, cost, most: max, note, runs: spent <= view.budget, maybe: most > view.budget && spent <= view.budget };
+    return {
+      op,
+      cost,
+      most: max,
+      note,
+      cards,
+      runs: spent <= view.budget,
+      maybe: most > view.budget && spent <= view.budget,
+    };
   });
   return { rows, spent, most, budget: view.budget, full: ops.length >= view.max_ops, left: s };
+}
+
+/**
+ * The `-X` flag Git spells a strategy with. The pack keeps the game's meaning (`theirs`: their commit wins), but Git
+ * names the sides from where the merge runs: during a rebase "ours" is the upstream being rebased onto, so keeping
+ * their side is `-X ours`. Resolving by hand has no flag at all: Git stops at the conflict and you fix it.
+ */
+export function gitFlag(strategy, rebase = false) {
+  if (strategy !== "ours" && strategy !== "theirs") return null;
+  const swap = { ours: "theirs", theirs: "ours" };
+  return `-X ${rebase ? swap[strategy] : strategy}`;
 }
 
 // Ops that land on main from your pointer: without a pull first they are rejected once main has moved.
@@ -182,10 +207,12 @@ export function actions(view, ops, selected = []) {
       has("force") && !commands && s.behind > 0,
       commands ?? (has("force") ? "nothing ahead of your pointer" : "no push --force card"),
     ),
-    tag: why(
-      commits >= view.release_at,
-      `main has ${plural(view.main.length - 1, "commit")}; v1.0 needs ${view.release_at}`,
-    ),
+    tag: ops.some((o) => o.op === "tag")
+      ? why(false, "v1.0 is already tagged in this pack")
+      : why(
+          commits >= view.release_at,
+          `main has ${plural(view.main.length - 1, "commit")}; v1.0 needs ${view.release_at}`,
+        ),
     arm: why(
       has("reflog") && !s.armed.includes("reflog"),
       has("reflog") ? "a reflog is already armed" : "no reflog card",

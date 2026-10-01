@@ -335,8 +335,11 @@ ol.seats {
 .transcript .mine .who {
   color: var(--you);
 }
-.transcript .out {
-  white-space: pre;
+/* Git's alignment survives, and a long line wraps on a phone instead of hiding behind a sideways scroll */
+.transcript .out,
+.transcript .note {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .transcript .note {
   color: var(--term-muted);
@@ -452,8 +455,22 @@ ol.pack {
 }
 .pack .note,
 .pack .flags,
-.pack .message {
+.pack .message,
+.pack .suggestions {
   grid-column: 1 / -1;
+}
+.pack .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pack .suggestion {
+  min-height: 32px;
+  padding: 0 8px;
+  font-size: 0.75rem;
+  background: var(--term-field);
+  color: var(--term-ink);
+  border-color: var(--term-field);
 }
 .pack .note {
   font-size: 0.75rem;

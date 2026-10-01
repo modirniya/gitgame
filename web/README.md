@@ -42,6 +42,7 @@ npm run build          # the PWA in dist/
 | `src/copy.js`                 | Every coach line, keyed by moment: the one file a translation replaces (event-screens §6)                               |
 | `src/transcript.js`           | Moments as a terminal prints them: `ana@main $ git push` and Git's output                                               |
 | `src/pack.js`                 | The pack editor's model: ops in the remote's shapes, a pull before each push, and each op's cost now and at most        |
+| `src/messages.js`             | The commit messages offered for what is staged, so no commit goes out as `-m ""`                                        |
 | `src/hub.js`                  | I-Hub: `main`, your branch and hand, the actions (greyed with the reason), and the pack as commands                     |
 | `src/screens.js`              | The consequence screens: one moment at a time, what it moved, the coach line; continue or skip                          |
 | `src/catchup.js`              | What this reader hasn't seen: each closed day's big moments, then today's incident; remembered per device               |

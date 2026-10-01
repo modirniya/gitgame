@@ -8,6 +8,7 @@
 // each happens in a game; everything else is a line.
 import { coach } from "./copy.js";
 import { commandName } from "./cards.js";
+import { gitFlag, STRATEGIES } from "./pack.js";
 
 const ALWAYS = new Set([
   "rejected",
@@ -76,7 +77,16 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 function moment(events, you) {
   const e = events.at(-1);
   const who = e.player;
-  const m = (kind, command, output = [], tone = null) => ({ kind, player: who, command, output, tone, events });
+  // `notes` are the game's own remarks, printed as comments: Git never says what a rule took from you
+  const m = (kind, command, output = [], tone = null, notes = []) => ({
+    kind,
+    player: who,
+    command,
+    output,
+    tone,
+    notes,
+    events,
+  });
 
   switch (e.type) {
     case "day_opened":
@@ -106,14 +116,19 @@ function moment(events, you) {
     case "pulled": {
       const conflict = events.find((x) => x.type === "conflict_detected");
       const resolved = events.find((x) => x.type === "conflict_resolved");
-      const flag = [e.rebase && "--rebase", resolved && `-X ${resolved.strategy}`].filter(Boolean).join(" ");
-      const output = [
-        ...(conflict ? conflict.message.split("\n") : []),
+      const flag = [e.rebase && "--rebase", resolved && gitFlag(resolved.strategy, e.rebase)].filter(Boolean).join(" ");
+      const output = [...(conflict ? conflict.message.split("\n") : []), ...e.message.split("\n")];
+      const notes = [
         ...(resolved ? resolution(resolved, who === you) : []),
-        e.message,
-        ...(e.merge_token ? ["(merge token taken)"] : []),
+        ...(e.merge_token ? ["a merge token: -1 at the release"] : []),
       ];
-      return m(conflict ? "conflict" : "pulled", `git pull${flag ? ` ${flag}` : ""}`, output, conflict ? "warn" : null);
+      return m(
+        conflict ? "conflict" : "pulled",
+        `git pull${flag ? ` ${flag}` : ""}`,
+        output,
+        conflict ? "warn" : null,
+        notes,
+      );
     }
 
     case "push_accepted":
@@ -134,7 +149,9 @@ function moment(events, you) {
       return m("reverted", `git revert ${e.target}`, [e.message], "ok");
 
     case "forced":
-      return m("forced", "git push --force", [e.message, `erased ${e.erased.join(" ") || "nothing"}`], "reject");
+      return m("forced", "git push --force", [e.message], "reject", [
+        e.erased.length ? `erased ${e.erased.join(" ")}` : "nothing was ahead to erase",
+      ]);
 
     case "reflog_fired":
       return m("reflog", "git reflog", [`restored ${e.restored.join(" ")}: back on top of main`], "ok");
@@ -157,7 +174,12 @@ function moment(events, you) {
       };
 
     case "op_failed":
-      return m(e.op === "push" ? "rejected" : "failed", `git ${e.op}`, [e.message ?? "failed"], "reject");
+      return m(
+        e.op === "push" ? "rejected" : "failed",
+        `git ${e.op}${e.target ? ` ${e.target}` : ""}`,
+        [e.message ?? "failed"],
+        "reject",
+      );
 
     case "op_skipped":
       return m("skipped", `git ${e.op}`, [e.message], "warn");
@@ -180,8 +202,9 @@ function moment(events, you) {
 
 function resolution(r, mine) {
   const lines = [];
-  if (r.discarded.length) lines.push(`dropped ${mine ? "your" : "their"} ${r.discarded.join(" ")}`);
-  if (r.crossed_out.length) lines.push(`crossed out ${r.crossed_out.join(" ")} on main (a grudge)`);
-  if (!lines.length) lines.push("kept both, resolved by hand");
+  if (r.discarded.length)
+    lines.push(`${STRATEGIES.theirs}: ${mine ? "your" : "their"} ${r.discarded.join(" ")} is gone`);
+  if (r.crossed_out.length) lines.push(`${STRATEGIES.ours}: ${r.crossed_out.join(" ")} crossed out on main, a grudge`);
+  if (!lines.length) lines.push(`${STRATEGIES.resolve}: both kept, for an extra op`);
   return lines;
 }

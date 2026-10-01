@@ -5,7 +5,8 @@
 import { el } from "./dom.js";
 import { card, commandName, commit } from "./cards.js";
 import { strip } from "./table.js";
-import { actions, add, consequences, price, unspent } from "./pack.js";
+import { actions, add, consequences, gitFlag, price, STRATEGIES, unspent } from "./pack.js";
+import { suggestions } from "./messages.js";
 
 /** An op as the command a terminal would show. */
 export function command(op, view) {
@@ -16,7 +17,9 @@ export function command(op, view) {
     case "commit":
       return `git commit -m ${JSON.stringify(op.message ?? "")}`;
     case "pull":
-      return ["git pull", op.rebase && "--rebase", op.strategy && `-X ${op.strategy}`].filter(Boolean).join(" ");
+      return ["git pull", op.rebase && "--rebase", gitFlag(op.strategy ?? view.default_strategy, op.rebase)]
+        .filter(Boolean)
+        .join(" ");
     case "push":
       return "git push";
     case "force":
@@ -102,6 +105,22 @@ function row(view, draft, change, r, i) {
   const op = r.op;
 
   const cmd = el("span", { class: "cmd" }, command(op, view));
+  // No re-render while a message is written: one when the field lost focus replaced the send button under the very
+  // tap that took the focus away, and the pack wasn't sent.
+  const write = (message) => {
+    op.message = message;
+    cmd.textContent = command(op, view);
+  };
+  const field =
+    op.op === "commit" &&
+    el("input", {
+      class: "message",
+      "aria-label": "commit message",
+      placeholder: "commit message",
+      maxlength: 200,
+      value: op.message ?? "",
+      oninput: (e) => write(e.target.value),
+    });
 
   return el(
     "li",
@@ -109,20 +128,21 @@ function row(view, draft, change, r, i) {
     cmd,
     el("span", { class: "cost", title: "ops this costs: now, or at most" }, range(r)),
     el("button", { class: "remove", "aria-label": `remove ${command(op, view)}`, onclick: remove }, "×"),
+    field,
     op.op === "commit" &&
-      el("input", {
-        class: "message",
-        "aria-label": "commit message",
-        placeholder: "commit message",
-        maxlength: 200,
-        value: op.message ?? "",
-        // No re-render: one when the field lost focus replaced the send button under the very tap that took the
-        // focus away, and the pack wasn't sent.
-        oninput: (e) => {
-          op.message = e.target.value;
-          cmd.textContent = command(op, view);
-        },
-      }),
+      el(
+        "span",
+        { class: "suggestions" },
+        suggestions(r.cards)
+          .filter((text) => text !== op.message)
+          .map((text) =>
+            el(
+              "button",
+              { class: "suggestion", type: "button", onclick: () => ((field.value = text), write(text)) },
+              text,
+            ),
+          ),
+      ),
     op.op === "pull" &&
       el(
         "span",
@@ -141,8 +161,10 @@ function row(view, draft, change, r, i) {
         el(
           "select",
           { "aria-label": "on a conflict", onchange: (e) => set({ strategy: e.target.value || undefined }) },
-          el("option", { value: "" }, `-X ${view.default_strategy} (default)`),
-          ["ours", "theirs", "resolve"].map((x) => el("option", { value: x, selected: op.strategy === x }, `-X ${x}`)),
+          el("option", { value: "" }, `on a conflict: ${STRATEGIES[view.default_strategy]}`),
+          ["theirs", "ours", "resolve"]
+            .filter((x) => x !== view.default_strategy)
+            .map((x) => el("option", { value: x, selected: op.strategy === x }, `on a conflict: ${STRATEGIES[x]}`)),
         ),
       ),
     el("span", { class: "note" }, r.runs ? r.note : "not run: over budget", r.maybe ? " · may not run" : ""),
@@ -237,7 +259,7 @@ export function hub({ view, draft, change, send, sending = false, error = "", wa
       "div",
       { class: "actions" },
       action("add", () => ({ op: "add", cards: draft.selected.filter((id) => inHand.has(id)) })),
-      action("commit", () => ({ op: "commit", message: "" })),
+      action("commit", () => ({ op: "commit", message: suggestions(priced.left.staged)[0] })),
       action("pull", () => ({ op: "pull" })),
       action("push", () => ({ op: "push" })),
       action("blame"),

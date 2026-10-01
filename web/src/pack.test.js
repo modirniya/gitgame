@@ -54,7 +54,7 @@ describe("pricing a pack as the remote will charge it", () => {
 
   it("sees a conflict coming, and what the declared strategy will do about it", () => {
     const v = at({ local: [mine("x1", "README.md")] });
-    expect(price(v, [{ op: "pull" }]).rows[0].note).toBe("CONFLICT coming in README.md: -X theirs");
+    expect(price(v, [{ op: "pull" }]).rows[0].note).toBe("CONFLICT coming in README.md: keep theirs");
     expect(price(v, [{ op: "pull" }]).left.local).toEqual([]);
 
     const resolve = price(v, [{ op: "pull", strategy: "resolve" }]);

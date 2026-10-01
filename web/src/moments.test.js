@@ -67,12 +67,26 @@ describe("the day log as moments", () => {
 
   it("keeps a conflict with the pull that met it, strategy and all", () => {
     expect(ms[6].command).toBe("git pull -X theirs");
-    expect(ms[6].output).toEqual([
-      "CONFLICT (content): Merge conflict in styles.css",
-      "dropped their 2887386",
-      "Fast-forward",
-    ]);
+    // Git's words come from the remote; what the rule took is the game's remark, a comment
+    expect(ms[6].output).toEqual(["CONFLICT (content): Merge conflict in styles.css", "Fast-forward"]);
+    expect(ms[6].notes).toEqual(["keep theirs: their 2887386 is gone"]);
     expect(ms[6].tone).toBe("warn");
+  });
+
+  it("spells a strategy as Git does, which swaps ours and theirs under --rebase", () => {
+    const pull = (strategy, rebase) =>
+      moments(
+        [
+          { type: "conflict_detected", player: "ana", message: "Auto-merging api.py", conflicts: [] },
+          { type: "conflict_resolved", player: "ana", strategy, crossed_out: [], discarded: [] },
+          { type: "pulled", player: "ana", rebase, incoming: [], merge_token: false, message: "Merge" },
+        ],
+        { you: "ana" },
+      ).moments[0].command;
+    expect(pull("theirs", false)).toBe("git pull -X theirs");
+    expect(pull("theirs", true)).toBe("git pull --rebase -X ours");
+    expect(pull("ours", true)).toBe("git pull --rebase -X theirs");
+    expect(pull("resolve", false)).toBe("git pull");
   });
 
   it("gives the big moments a screen, and a push its first time only", () => {
@@ -88,7 +102,7 @@ describe("the day log as moments", () => {
     expect(ms[6].coach).toMatch(/^bot hit a conflict/);
 
     // the reader's own conflict names the strategy that settled it, declared or the default
-    expect(moments(day, { you: "bot" }).moments[6].coach).toMatch(/and -X theirs settled it/);
+    expect(moments(day, { you: "bot" }).moments[6].coach).toMatch(/keeping theirs dropped yours/);
 
     const asBot = moments(day, { you: "bot" }).moments;
     expect(asBot.find((m) => m.kind === "pushed").coach).toMatch(/^ana pushed, so the tip moved/);
@@ -107,6 +121,11 @@ describe("the moments that always stop the day", () => {
     });
     expect(m).toMatchObject({ kind: "rejected", command: "git push", tone: "reject", screen: true });
     expect(m.coach).toMatch(/pull before your push/);
+  });
+
+  it("a failed command names its target", () => {
+    const m = one({ type: "op_failed", player: "bot", op: "blame", target: "0c10117", message: "fatal: gone" });
+    expect(m.command).toBe("git blame 0c10117");
   });
 
   it("blame that finds a bug in your commit calls your bluff", () => {
@@ -133,6 +152,8 @@ describe("the moments that always stop the day", () => {
     ).moments;
 
     expect(forced).toMatchObject({ command: "git push --force", tone: "reject", screen: true });
+    expect(forced.output).toEqual([" + c37ef9a...9dea397 main -> main (forced update)"]);
+    expect(forced.notes).toEqual(["erased 0b330b6"]);
     expect(reflog).toMatchObject({ player: "ana", kind: "reflog", screen: true });
     expect(reflog.coach).toMatch(/^Your trap fired/);
   });
