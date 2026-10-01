@@ -163,3 +163,13 @@ ol.seats {
 .tok.pos {
   color: var(--ok);
 }
+.log {
+  display: grid;
+  gap: 6px;
+}
+.log h3 {
+  margin: 6px 0 0;
+}
+.log .transcript {
+  margin: 0;
+}

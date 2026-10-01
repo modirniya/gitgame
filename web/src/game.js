@@ -127,7 +127,12 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
     const was = node.querySelector(".view.hub");
     const before = was && snapshot(was);
     const scrolled = was?.querySelector(".body").scrollTop ?? 0;
-    mount(node, frame(shown, { left, tableOpen, onTable }), screenFor(view, you), tablePanel(shown, you, onTable));
+    mount(
+      node,
+      frame(shown, { left, tableOpen, onTable }),
+      screenFor(view, you),
+      tablePanel(shown, you, onTable, playing?.day),
+    );
     const now = node.querySelector(".view.hub");
     if (was && now) {
       now.querySelector(".body").scrollTop = scrolled;
@@ -194,9 +199,9 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
 
   // The Table: a sheet over the screen on a phone, opened from the frame; a panel beside the screen on a wide one, with
   // the last day's log as a transcript (event-screens §4).
-  function tablePanel(view, you, close) {
-    const last = view.days.at(-1);
-    const log = last && moments(last.log, { you }).moments;
+  // `before`: while a day plays back, the log stops at the day before it, so the panel never tells what is coming.
+  function tablePanel(view, you, close, before = Infinity) {
+    const days = view.days.filter((d) => d.day < before).reverse();
     return el(
       "aside",
       { class: `table-panel${s.tableOpen ? " open" : ""}`, "aria-label": "the table" },
@@ -207,8 +212,17 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
         el("button", { class: "close", onclick: close }, "close"),
       ),
       table(view),
-      log && el("h2", {}, `$ git log  # day ${last.day}`),
-      log && transcript(log, you, { label: `day ${last.day}` }),
+      // the log of every day, newest first (the prototype's "what happened")
+      days.length > 0 &&
+        el(
+          "section",
+          { class: "log", "aria-label": "what happened" },
+          el("h2", {}, "$ git log"),
+          days.map((d) => [
+            el("h3", { class: "k" }, `day ${d.day}`),
+            transcript(moments(d.log, { you }).moments, you, { label: `day ${d.day}` }),
+          ]),
+        ),
     );
   }
 
