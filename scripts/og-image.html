@@ -1,0 +1,134 @@
+<!doctype html>
+<!-- The landing page's link-preview image (ADR-0009), drawn at 1200×630 by scripts/og-image.sh into web/public/og.png.
+     The game's colors (web/src/styles.css) and the deck's file colors (rules/deck.json); the name is drawn in, so a
+     rename (docs/branding.md) runs the script again. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+      }
+      body {
+        background: #14161a;
+        color: #e6e3dc;
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-variant-ligatures: none;
+        padding: 64px 72px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto 1fr auto;
+        column-gap: 48px;
+      }
+      h1 {
+        grid-column: 1 / -1;
+        margin: 0;
+        font-size: 76px;
+      }
+      h1 span {
+        color: #3ec1b3;
+      }
+      .lede {
+        grid-column: 1 / -1;
+        margin: 14px 0 0;
+        font-size: 30px;
+        color: #8a8f99;
+      }
+      .term {
+        align-self: end;
+        background: #0d0f12;
+        border-radius: 12px;
+        padding: 22px 26px;
+        font-size: 22px;
+        line-height: 1.55;
+        white-space: pre;
+        color: #d8d5ce;
+      }
+      .who {
+        color: #ff6ac1;
+      }
+      .bot {
+        color: #9aa3b5;
+      }
+      .ok {
+        color: #5ec27a;
+      }
+      .no {
+        color: #f0605d;
+      }
+      .cards {
+        align-self: end;
+        display: flex;
+        gap: 14px;
+      }
+      .card {
+        position: relative;
+        width: 118px;
+        height: 166px;
+        border-radius: 10px;
+        border: 1px solid #2c3038;
+        background: #1d2026;
+        padding: 22px 10px 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+      }
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto;
+        height: 10px;
+        background: var(--band);
+      }
+      .file {
+        font-size: 17px;
+        color: #8a8f99;
+      }
+      .big {
+        font-size: 40px;
+        font-weight: 700;
+      }
+      .bug {
+        position: absolute;
+        left: 8px;
+        top: 50px;
+        padding: 0 6px;
+        border-radius: 4px;
+        background: #f0605d;
+        color: #14161a;
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .domain {
+        grid-column: 1 / -1;
+        align-self: end;
+        margin-top: 26px;
+        font-size: 26px;
+        color: #3ec1b3;
+      }
+    </style>
+  </head>
+  <body>
+    <h1><span>$</span> Git Game</h1>
+    <p class="lede">a multiplayer card game whose rules are Git</p>
+    <div class="term"><span class="who">ana@main</span> $ git push
+<span class="ok">   3f2c1d9..8e1da02  main -&gt; main</span>
+<span class="bot">bot@main</span> $ git push
+<span class="no"> ! [rejected]        main -&gt; main (non-fast-forward)</span></div>
+    <div class="cards">
+      <div class="card" style="--band: #3ec1b3"><span class="file">auth.js</span><span class="big">+5</span></div>
+      <div class="card" style="--band: #a88bfa">
+        <span class="file">api.py</span><span class="bug">BUG</span><span class="big">+6</span>
+      </div>
+    </div>
+    <p class="domain">gitgame.online · play free in your browser</p>
+  </body>
+</html>

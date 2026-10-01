@@ -40,6 +40,7 @@ scripts/brand-audit.sh
 1. Decide the three new forms and update the table above.
 2. Change the `BRAND`-marked definitions.
 3. Run the audit; replace every listed occurrence, in this order: docs, rules data, code identifiers, package names, then the domain and any external accounts.
+   The landing page's link-preview image has the name drawn into it: once `scripts/og-image.html` is changed, `scripts/og-image.sh` draws `web/public/og.png` again.
 4. Update this document's history section below, and the README notice.
 5. Write an ADR recording the change and the reason.
 
