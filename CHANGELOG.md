@@ -7,6 +7,10 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-30
+
+gitgame.online becomes a landing page for the public launch, and the game moves to `/play` (ADR-0009).
+
 ### Added
 - A landing page at gitgame.online (ADR-0009): what the game is, how a day plays, and questions answered, as plain HTML that search engines read without running anything, with a title and description, Open Graph and X previews (a 1200×630 image), structured data, `robots.txt` and a sitemap. "play" leads to the game at `/play`.
 
@@ -152,7 +156,8 @@ The first version on the hosted service: the beta ADR-0002 makes the playtest, l
 - Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.
 
-[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/modirniya/gitgame/compare/v0.1.4...v0.2.0
 [0.1.4]: https://github.com/modirniya/gitgame/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/modirniya/gitgame/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/modirniya/gitgame/compare/v0.1.1...v0.1.2
