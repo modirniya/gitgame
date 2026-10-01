@@ -8,7 +8,7 @@ import { strip } from "./table.js";
 import { actions, add, consequences, price, unspent } from "./pack.js";
 import { suggestions } from "./messages.js";
 import { branch, own } from "./branch.js";
-import { packList } from "./packlist.js";
+import { command, packList } from "./packlist.js";
 import { incidentText } from "./copy.js";
 
 // A hand card is 96 px wide; a fanned one shows at least this much of itself, a finger's width.
@@ -71,6 +71,17 @@ const NAMES = {
 };
 // the action a command card in your hand plays
 const PLAYS = { blame: "blame", revert: "revert", force: "force", reflog: "arm" };
+
+function receipt(view, r) {
+  const cost = r.cost === r.most ? ops(r.cost) : `${r.cost}–${r.most} ops`;
+  return el(
+    "p",
+    { class: `receipt${r.runs ? "" : " over"}`, "aria-live": "polite" },
+    el("span", { class: "cmd" }, command(r.op, view)),
+    ` · ${cost}`,
+    (r.note || !r.runs) && ` · ${r.runs ? r.note : "not run: over budget"}`,
+  );
+}
 
 const ops = (n) => (n === 0 ? "free" : `${n} op${n === 1 ? "" : "s"}`);
 
@@ -153,6 +164,8 @@ export function hub({ view, draft, change, send, sending = false, error = "", wa
         pickable: picking ? pickable : () => false,
         onpick: (c) => put({ op: picking, target: c.id }),
         ghosts: left.pushed.map((c) => own(c, view.you.player)),
+        // a pull (or a force-push) in the pack takes your pointer to the tip, as it will if it runs
+        pointers: left.behind === 0 ? { [view.you.player]: view.main.length } : {},
       }),
       view.incident &&
         el(
@@ -183,6 +196,8 @@ export function hub({ view, draft, change, send, sending = false, error = "", wa
     el(
       "div",
       { class: "actions hub-actions" },
+      // the last op written, answered at the thumb: what it will do, and what the day could still change
+      priced.rows.length > 0 && receipt(view, priced.rows.at(-1)),
       !can.tag && action("tag", true),
       picked && action(PLAYS[picked.command], true),
       el(

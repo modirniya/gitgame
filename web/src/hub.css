@@ -244,3 +244,18 @@ ol.pack {
 .unspent {
   color: var(--warn);
 }
+.receipt {
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font: 12px/1.35 var(--mono);
+  color: var(--muted);
+}
+.receipt .cmd {
+  color: var(--ink);
+}
+.receipt.over {
+  color: var(--reject);
+}
