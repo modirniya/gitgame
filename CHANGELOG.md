@@ -11,6 +11,7 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 - The game's view carries, for each closed day, `main`, the pointers and the scores as the day opened (`opened`), so a client can draw the table at every step of the day's playback (M15f). Replays carry them too.
 
 ### Changed
+- The game looks like the mobile prototype (M15c): prose in a sans-serif and Git in monospace; cards with a colored band saying what they are, the BUG tag where a fanned hand can't hide it, and face-down commits as a hatch showing their hash; `main` with each commit labelled by who pushed it and what it announced, its tip marked, and the pointers as chips; the Table's seats with their tokens. The landing page and its link preview follow.
 - A player's first game against the bot is dealt so that its first day is a full one, with a clean card to play, and their pack resolves first, so their first push lands (M15h). The remote chooses the game's seed; the rules are those of any game.
 
 ### Fixed
