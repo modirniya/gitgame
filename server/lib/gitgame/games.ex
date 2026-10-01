@@ -14,7 +14,7 @@ defmodule GitGame.Games do
   import Ecto.Query
   alias GitGame.{Bot, Game, Notifications, Repo, Resolver, Rules}
   alias GitGame.Signal
-  alias GitGame.Games.{CloseDay, Event, Pack, Record, Seat, View}
+  alias GitGame.Games.{CloseDay, Event, Guided, Pack, Record, Seat, View}
 
   # Seeds stay below 2^53, so they survive a round trip through JSON numbers in any client.
   @max_seed 9_007_199_254_740_991
@@ -22,8 +22,10 @@ defmodule GitGame.Games do
 
   @doc """
   A new game for `seats`, with the rules as they are now. Options: `:day_length` (default "live"), `:seed`, `:bots`,
-  the seats a bot plays, and `:holders`, a map from seat to the id of the player who holds it (ADR-0005). A bot sends
-  its pack the moment each day opens, so a game of bots alone plays itself to the release as soon as it is created.
+  the seats a bot plays, `:holders`, a map from seat to the id of the player who holds it (ADR-0005), and `:guided`,
+  for a player's first game: its seed is chosen so that their first push lands (`GitGame.Games.Guided`), unless
+  `:seed` names one. A bot sends its pack the moment each day opens, so a game of bots alone plays itself to the
+  release as soon as it is created.
   """
   def create(seats, opts \\ []) do
     maps = Rules.read_maps!()
@@ -40,6 +42,11 @@ defmodule GitGame.Games do
              Map.keys(holders) -- (seats -- bots) == [],
              "fatal: only a person's seat is held"
            ) do
+      seed =
+        if Keyword.get(opts, :guided, false) and not Keyword.has_key?(opts, :seed),
+          do: Guided.seed(rules, seats, length, bots, seed),
+          else: seed
+
       Repo.transaction(fn ->
         record =
           Repo.insert!(%Record{

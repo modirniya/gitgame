@@ -267,6 +267,31 @@ defmodule GitGameWeb.GameControllerTest do
            end)
   end
 
+  test "a guided first game against the bot (M15h): your first push lands on day 1, whatever seed was drawn",
+       %{conn: conn, me: me} do
+    for _ <- 1..10 do
+      game = create(conn, %{"bots" => ["bot"], "day_length" => "lunch", "guided" => true})
+      card = Enum.find(game["you"]["hand"], &(&1["kind"] == "commit" and not &1["bug"]))
+
+      ops = [
+        %{"op" => "add", "cards" => [card["id"]]},
+        %{"op" => "commit"},
+        %{"op" => "pull"},
+        %{"op" => "push"}
+      ]
+
+      # the bot sent its pack as the day opened, so yours closes the day
+      conn
+      |> post(~p"/api/games/#{game["id"]}/packs", %{"version" => game["version"], "ops" => ops})
+      |> json_response(202)
+
+      assert %{"days" => [%{"log" => log}]} =
+               conn |> get(~p"/api/games/#{game["id"]}") |> json_response(200)
+
+      assert Enum.any?(log, &(&1["type"] == "push_accepted" and &1["player"] == me))
+    end
+  end
+
   describe "your games (M9c)" do
     test "lists the games you hold a seat in: waiting on your pack first, finished last", %{
       conn: conn,

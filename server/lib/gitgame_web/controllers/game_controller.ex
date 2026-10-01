@@ -21,7 +21,8 @@ defmodule GitGameWeb.GameController do
   def index(conn, _params), do: json(conn, %{games: Games.list_for(conn.assigns.player.id)})
 
   # {"hotseat": ["raj"], "bots": ["bot"], "day_length": "live", "seed": 42}: you take the first seat, under your
-  # handle; the people named in `hotseat` sit at your device, and you hold their seats too.
+  # handle; the people named in `hotseat` sit at your device, and you hold their seats too. `"guided": true`, for your
+  # first game, has the remote choose a seed whose first push lands (M15h); a `seed` given as well wins.
   def create(conn, params) do
     me = conn.assigns.player
     people = [me.handle | List.wrap(params["hotseat"])]
@@ -31,7 +32,8 @@ defmodule GitGameWeb.GameController do
       [
         day_length: Map.get(params, "day_length", "live"),
         bots: bots,
-        holders: Map.new(people, &{&1, me.id})
+        holders: Map.new(people, &{&1, me.id}),
+        guided: params["guided"] == true
       ] ++ if(is_integer(params["seed"]), do: [seed: params["seed"]], else: [])
 
     with :ok <- names(people ++ bots),

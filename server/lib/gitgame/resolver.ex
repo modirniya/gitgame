@@ -104,8 +104,11 @@ defmodule GitGame.Resolver do
   defp normalize(%{} = pack),
     do: %{ops: Map.get(pack, :ops, []), discard: Map.get(pack, :discard, [])}
 
-  # Everyone who sent a pack, and everyone who didn't: an empty pack resolves too (and is where absence is noticed).
-  defp order(game, arrived) do
+  @doc """
+  The order the open day's packs resolve in, given who has sent one (`arrived`, in the order they did): everyone who
+  sent a pack, and everyone who didn't, since an empty pack resolves too (and is where absence is noticed).
+  """
+  def order(game, arrived) do
     case game.rules.resolution_order do
       :batch_at_close ->
         game
