@@ -85,11 +85,36 @@ function receipt(view, r) {
 
 const ops = (n) => (n === 0 ? "free" : `${n} op${n === 1 ? "" : "s"}`);
 
+// What a good player would write today (M15k): the pack the bot's own policy writes from your seat, its first reason,
+// and an offer to write it into your pack.
+function hintLine(view, hint, use) {
+  return el(
+    "div",
+    { class: "hintline", role: "status" },
+    el("span", { class: "k" }, "hint"),
+    el("span", { class: "cmds" }, hint.ops.map((op) => command(op, view)).join(" · ")),
+    hint.ops[0]?.why && el("span", { class: "why" }, hint.ops.find((op) => op.op !== "pull")?.why ?? hint.ops[0].why),
+    el("button", { class: "use", onclick: use }, "write it into my pack"),
+  );
+}
+
 /**
  * `warned`: the send button was tapped with ops left unspent, so the hub says what could still be done. `extra` is
- * anything the game adds under the pack (the "remind me" button).
+ * anything the game adds under the pack (the "remind me" button). `hint` is what a good player would write, once asked
+ * for with `onHint`.
  */
-export function hub({ view, draft, change, send, sending = false, error = "", warned = false, extra = null }) {
+export function hub({
+  view,
+  draft,
+  change,
+  send,
+  sending = false,
+  error = "",
+  warned = false,
+  extra = null,
+  hint = null,
+  onHint = null,
+}) {
   const priced = price(view, draft.ops);
   const left = priced.left;
   const unused = warned && unspent(view, draft.ops);
@@ -196,8 +221,10 @@ export function hub({ view, draft, change, send, sending = false, error = "", wa
     el(
       "div",
       { class: "actions hub-actions" },
+      hint &&
+        hintLine(view, hint, () => change({ ops: hint.ops.map(({ why, ...op }) => op), selected: [], picking: null })),
       // the last op written, answered at the thumb: what it will do, and what the day could still change
-      priced.rows.length > 0 && receipt(view, priced.rows.at(-1)),
+      !hint && priced.rows.length > 0 && receipt(view, priced.rows.at(-1)),
       !can.tag && action("tag", true),
       picked && action(PLAYS[picked.command], true),
       el(
@@ -208,6 +235,7 @@ export function hub({ view, draft, change, send, sending = false, error = "", wa
       el(
         "div",
         { class: "minor" },
+        onHint && el("button", { class: "hint", onclick: onHint }, "hint"),
         el("button", { class: "undo", disabled: !draft.ops.length, onclick: undo }, "undo"),
         el(
           "button",

@@ -107,9 +107,37 @@ button.op.wide {
   width: 100%;
 }
 .minor {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
+  display: flex;
   gap: 8px;
+}
+.minor button {
+  flex: 1;
+}
+.minor .send {
+  flex: 2;
+}
+.hintline {
+  display: grid;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--warn-soft);
+}
+.hintline .k {
+  color: var(--warn);
+}
+.hintline .cmds {
+  font: 12px/1.4 var(--mono);
+}
+.hintline .why {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+.hintline .use {
+  justify-self: start;
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 0.875rem;
 }
 @media (min-width: 600px) and (max-width: 999px) {
   .grid4 {
