@@ -1,6 +1,6 @@
 # Phase 1 and the beta: build plan
 
-*Status: Draft · Last verified: 2026-09-30 · Deleted when the beta ships; its decisions live in ADRs and the specs*
+*Status: Draft · Last verified: 2026-10-01 · Deleted when the beta ships; its decisions live in ADRs and the specs*
 
 The plan from rules v0.2 to a beta that strangers can finish games in. The [charter](../adr/0000-project-charter.md) sets the phases. [ADR-0002](../adr/0002-beta-before-human-playtest.md) makes the beta the playtest, and [ADR-0003](../adr/0003-batch-packs-at-the-deadline.md) sets how a day resolves. Each milestone below is several pull requests; a session starting work reads the charter, [conventions.md](../conventions.md), [workflow.md](../workflow.md) and this plan, and picks up at the first unchecked box.
 
@@ -168,6 +168,40 @@ The maintainer, playing the beta, found it poorer than the mobile prototype. The
 - [x] **M14b · The bot's reasoning.** The bot writes a public "why" for each op it plays, from what anyone at the table could see, and the day's screens show it beside the bot's commands.
 - [x] **M14c · Animations.** The motions of event-screens §4 on the moment screens: a push flying onto `main`, a rejection bouncing back, a pull sliding the pointer, a force-push dropping commits and a reflog raising them; none under `prefers-reduced-motion`.
 - [x] **M14d · The guided first game.** A first game against the bot that highlights one thing and says one sentence at each step, through a whole day: build a commit, push (and the pull written for you), send, and see what the day did.
+
+### M15 · The prototype's feel, online
+
+The maintainer, having played both, still finds the live game short of the mobile prototype after M14. A session played both the same way at 390 × 844 and 1280 × 800, guided and unguided, as fresh players, and published the comparison, screen by screen, with every gap classified. The gap: the prototype answers every op the moment you take it, on a table you can see; the live game has you write a pack as a form, then plays the day back as terminal screens, most of them the bot's routine, and after the first day never shows what became of your own push. The online rules explain why the answer comes later (ADR-0003); they don't explain the rest. M15 closes it within the rules: presentation, pacing and response, not the resolver. Steps, most important first; each is a PR or a short stack.
+
+- [ ] **M15a · Git's words, and all of them.** Lines of output wrap on a phone instead of hiding behind a sideways scroll. A pull settled by a declared strategy prints what Git prints (`Auto-merging`, then the merge or the rebase, and CONFLICT only for `--resolve`, which is resolved by hand), and a merge says so even when `-X theirs` took your commit. The game's own notes (what a force-push erased, what a strategy dropped or crossed out, a merge token) are `#` comments, never lines Git would print; a failed command shows its target. A commit is written with a real message for the files staged, offered as suggestions, never `-m ""`. A pack holds one `git tag`. The bot no longer blames a commit its own force-push erases in the same pack.
+- [ ] **M15b · The frame.** A status bar on every game screen, as the prototype has: the day, `main` against the release size, the ops as pips, the live score, and the Table one tap away (a sheet on phones, the panel on wide screens). The day's opener deals the incident and your draws and says where you stand: at the tip, or behind and what that costs.
+- [ ] **M15c · The look.** The prototype's visual language on the online client: prose in a sans-serif, commands and Git's output in monospace; cards with their band and label (commit, command, incident), the BUG tag where overlap can't hide it, face-down commits as a hatch with their hash; `main` with each slot labelled (author, file, lines), its tip marked and the pointers as chips; big actions with their cost and what they'd do. The landing page and its preview image follow.
+- [ ] **M15d · The hub is a table.** Your branch, with where you stand, and its two zones (staged, to push) drawn as the pack would leave them; four big actions (add, commit, push, pull) at the thumb, the action of a command card once you pick one, and the tag when it can be played; the pack as a short receipt you can undo from the end; send always in reach. The pull's conflict strategy is chosen by what it does (keep theirs, keep mine, keep both), and the command shows Git's flag for it, which swaps under `--rebase`.
+- [ ] **M15e · Each op answered as you write it.** Adding an op moves the cards it moves, on the hub: the card into staging, staging into a commit, the commit to a ghost at the end of `main` with your pointer at the tip, and the pips fill. A one-line receipt says what the op will do, and what could still change that once the day resolves.
+- [ ] **M15f · The day plays back.** Each closed day in the view carries `main`, the pointers and the scores as the day opened, so the client can draw the table at every step of the day. The playback shows each step on that table with its motion; the order the remote drew for the packs; every remote op of yours, a push that landed, was rejected or didn't fit the budget; and ends on the day's receipt: your ops and how each went, the score it changed, and where you now stand.
+- [ ] **M15g · The bot is a character.** An avatar and a speech bubble; its local ops fold into one step ("built a commit"), and a pull that changes nothing folds into what follows; one step per remote op with its ops counted; a reason that says what it meant and how it went, so it never claims to ship what turned out up to date; auto-advance with a visible bar, and "skip" that still stops on what you must not miss.
+- [ ] **M15h · The guided first game, again.** The server chooses a guided game's seed so that day 1 is a full day, a clean card is in hand, and your pack resolves first, so the first push lands, as the prototype's did. The guide counts its steps, sits where it covers nothing you need, speaks during the day's playback, explains day 2 from what day 1 did, and teaches the pull when you are behind.
+- [ ] **M15i · The release.** CI flips the real commits on `main` one by one, the bugs turning red, and tallies them; the scoreboard reads across: a headline, who won, each part of the score by player, and what decided it.
+- [ ] **M15j · Wide screens.** The hand stays inside the hub beside the Table panel; the panel keeps a log of the days; every screen above is checked at 1280 × 800.
+- [ ] **M15k · A hint.** What a good player would do now, from the bot's own policy run on your view (nothing a player couldn't see), shown on the hub when asked for.
+
+*Done when:* a side-by-side play-through at 390 × 844, the prototype's guided game against the online guided game and then an unguided game of each, shows every op you write answered on the hub as you write it, and every day's close showing what became of your pack and where you stand, with the screenshots in the analysis; and tests show it:
+- the hub's table after each op is the pack's own model of it (`pack.js` `price`), for every action;
+- a day's playback draws `main` at each step as the resolver left it (checked against games the server played);
+- the bot's routine is at most one step a day, and its bubble agrees with what its op did;
+- a guided game's first push lands on day 1, over many seeds;
+- every pull settled by a strategy prints Git's own output, checked against a transcript of real Git.
+
+Decided by the session, for the maintainer's review:
+- **The guided game's first push lands because of the seed, not a head start.** The prototype gave the bot a commit ready to push; that is a rules change online. Choosing the seed (a full day 1, a clean card, your pack first that day) teaches the same lesson with the rules untouched. It means guided games share a handful of openings.
+- **Player colors stay as M14a chose** (you in pink, everyone else in grey-blue, both outside the deck's file colors). The prototype's violet bot collided with `api.py`; the bot becomes a character through its avatar and bubble instead.
+- **During a day's playback the frame shows the score as the day opened**, and the day's receipt shows the change. Scores aren't recomputed step by step in the client, which would mean writing the scoring rules twice.
+- **The bot's local ops fold into one step**, as the prototype's findings recommended; its remote ops keep one step each.
+- **Prose in a sans-serif.** Charter decision 14 asks for a terminal-style UI; the terminal stays where Git speaks (commands, output, the transcript), and the sentences around it read as the prototype's did.
+- **Strategies are chosen by what they do, and printed as Git's flags.** The pack format keeps the game's meaning (`theirs`: their commit wins); under `--rebase` the command shows `-X ours` for it, because that is what Git calls keeping the upstream side while rebasing. No rule changes.
+- **Hands are not revealed at the scoreboard** (the prototype revealed both). Showing a person's hand after the game is a privacy choice, not presentation; it is left for the maintainer.
+
+Needs a rules change, so written as a Proposed ADR and not built: **`-X theirs` drops your whole commit**, where Git loses only your side of the files that clashed.
 
 ### M13 · Beta launch
 
