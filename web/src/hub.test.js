@@ -14,7 +14,12 @@ describe("the hub", () => {
   it("writes each op as the command a terminal would show", () => {
     const v = view();
     expect(command({ op: "add", cards: ["k1", "k2"] }, v)).toBe("git add auth.js api.py");
-    expect(command({ op: "pull", rebase: true, strategy: "ours" }, v)).toBe("git pull --rebase -X ours");
+    // Git names the sides from where the merge runs: under --rebase, keeping your side is -X theirs
+    expect(command({ op: "pull", rebase: true, strategy: "ours" }, v)).toBe("git pull --rebase -X theirs");
+    expect(command({ op: "pull", strategy: "ours" }, v)).toBe("git pull -X ours");
+    // the default is written out, since it is what happens on a conflict; by hand has no flag, as in Git
+    expect(command({ op: "pull" }, v)).toBe("git pull -X theirs");
+    expect(command({ op: "pull", strategy: "resolve" }, v)).toBe("git pull");
     expect(command({ op: "force" }, v)).toBe("git push --force");
   });
 
@@ -37,7 +42,7 @@ describe("the hub", () => {
   it("lists the pack with each op's cost, now and at most", () => {
     const { node } = render(view(), { ops: [{ op: "pull" }, { op: "push" }], selected: [], picking: null });
     const rows = [...node.querySelectorAll(".pack .op")];
-    expect(rows.map((r) => r.querySelector(".cmd").textContent)).toEqual(["git pull", "git push"]);
+    expect(rows.map((r) => r.querySelector(".cmd").textContent)).toEqual(["git pull -X theirs", "git push"]);
     expect(rows.map((r) => r.querySelector(".cost").textContent)).toEqual(["1", "0"]);
   });
 
@@ -70,6 +75,28 @@ describe("the hub", () => {
     expect(changes).toEqual([]);
     expect(draft.ops[0].message).toBe("fix: the login");
     expect(node.querySelector(".pack .cmd").textContent).toBe('git commit -m "fix: the login"');
+  });
+
+  it("starts a commit with a real message for what is staged, and offers others", () => {
+    const { changes, button } = render(view(), { ops: [{ op: "add", cards: ["k1"] }], selected: [], picking: null });
+    button("commit").click();
+    const message = changes[0].ops[1].message;
+    expect(message).toMatch(/^\w+(\(\w+\))?: /);
+
+    const { node } = render(view(), changes[0]);
+    expect(node.querySelectorAll(".pack .cmd")[1].textContent).toBe(`git commit -m ${JSON.stringify(message)}`);
+    const offered = [...node.querySelectorAll(".pack .suggestion")];
+    expect(offered.length).toBeGreaterThan(1);
+    offered[1].click();
+    expect(changes[0].ops[1].message).toBe(offered[1].textContent);
+    expect(node.querySelector(".pack .message").value).toBe(offered[1].textContent);
+  });
+
+  it("tags v1.0 once a pack", () => {
+    const main = [view().main[0], ...Array.from({ length: 10 }, (_, i) => ({ ...view().main[1], id: `c${i}` }))];
+    const { button } = render(view({ main }), { ops: [{ op: "tag" }], selected: [], picking: null });
+    expect(button("tag v1.0").disabled).toBe(true);
+    expect(button("tag v1.0").textContent).toContain("already tagged");
   });
 
   it("offers to replace a pack already sent today", () => {

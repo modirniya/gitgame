@@ -20,6 +20,7 @@ export function lines(m, you, { why = true } = {}) {
     { class: cls },
     el("div", { class: "prompt" }, el("span", { class: "who" }, `${m.player}@main`), " $ ", m.command),
     m.output.map((line) => el("div", { class: "out" }, line)),
+    (m.notes ?? []).map((note) => el("div", { class: "note" }, `# ${note}`)),
     why && m.why && el("div", { class: "note" }, `# ${m.why}`),
   );
 }
