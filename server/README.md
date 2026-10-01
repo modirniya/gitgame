@@ -73,7 +73,7 @@ Count from the beta's launch date: games played before it, while the beta was bu
 
 ## Production
 
-The root `Dockerfile` builds the whole game into one image: the web client, the server's release, and the rules. It serves the client from the same origin as `/api`, which the session cookie needs, and migrates its database before it starts. It needs:
+The root `Dockerfile` builds the whole game into one image: the web client, the server's release, and the rules. It serves the landing page at `/` and the game at `/play` ([ADR-0009](../docs/adr/0009-a-landing-page-and-the-game-at-play.md)) from the same origin as `/api`, which the session cookie needs, and migrates its database before it starts. It needs:
 
 | | |
 |---|---|

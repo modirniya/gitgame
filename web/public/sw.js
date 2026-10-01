@@ -28,7 +28,7 @@ self.addEventListener("fetch", (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request).then((hit) => hit || caches.match("/index.html"))),
+      .catch(() => caches.match(event.request).then((hit) => hit || caches.match("/play", { ignoreSearch: true }))),
   );
 });
 
@@ -59,7 +59,7 @@ async function remind() {
     body,
     icon: "/icon.svg",
     tag: game ? game.id : "games",
-    data: { url: game ? `/?via=notification#/g/${game.id}` : "/?via=notification" },
+    data: { url: game ? `/play?via=notification#/g/${game.id}` : "/play?via=notification" },
   });
 }
 

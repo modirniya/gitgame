@@ -177,6 +177,8 @@ jobs:
         run: |
           curl -sf -D headers.txt localhost:4000/ | grep -q "<title>"
           grep -qi "content-security-policy" headers.txt
+          curl -sf localhost:4000/play | grep -q 'id="app"'
+          test "$(curl -s -o /dev/null -w '%{redirect_url}' 'localhost:4000/?via=notification')" = "http://localhost:4000/play?via=notification"
           curl -sf localhost:4000/manifest.webmanifest > /dev/null
       - uses: actions/setup-node@v7
         with:

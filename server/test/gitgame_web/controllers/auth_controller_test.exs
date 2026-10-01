@@ -44,7 +44,7 @@ defmodule GitGameWeb.AuthControllerTest do
     %{"id" => game} = conn |> post(~p"/api/games", %{"bots" => ["bot"]}) |> json_response(201)
 
     conn = link(conn, "octo-42")
-    assert redirected_to(conn) == GitGameWeb.public_url() <> "/"
+    assert redirected_to(conn) == GitGameWeb.public_url() <> "/play"
 
     assert %{"player" => %{"id" => id, "handle" => handle, "github" => github}} = me(conn)
     assert {id, handle} == {me["id"], me["handle"]}
@@ -83,7 +83,7 @@ defmodule GitGameWeb.AuthControllerTest do
     {conn, me} = device()
 
     forged = link(conn, "octo-42", "not-the-state")
-    assert redirected_to(forged) == GitGameWeb.public_url() <> "/?github=failed"
+    assert redirected_to(forged) == GitGameWeb.public_url() <> "/play?github=failed"
     assert %{"player" => %{"github" => nil, "id" => id}} = me(forged)
     assert id == me["id"]
 

@@ -35,8 +35,8 @@ config :phoenix,
 # Jobs run only when a test drains the queue: the tests are the clock.
 config :gitgame, Oban, testing: :manual
 
-# the client's page, as a build would leave it, whether or not this machine has built the client
-config :gitgame, client_page: Path.expand("../test/support/client_page.html", __DIR__)
+# the client's pages, as a build would leave them, whether or not this machine has built the client
+config :gitgame, client_dir: Path.expand("../test/support/client", __DIR__)
 
 # Web Push in tests: a key pair made for the tests alone, and a stand-in for the push services
 # (test/support/push_stub.ex).

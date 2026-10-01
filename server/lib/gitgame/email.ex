@@ -107,7 +107,7 @@ defmodule GitGame.Email do
 
     lines =
       Enum.map_join(games, "\n", fn g ->
-        "  - day #{g.day} of #{g.final_day}, vs #{Enum.join(g.seats -- g.yours, ", ")}: #{link("/#/g/#{g.id}", "digest")}"
+        "  - day #{g.day} of #{g.final_day}, vs #{Enum.join(g.seats -- g.yours, ", ")}: #{link("/play#/g/#{g.id}", "digest")}"
       end)
 
     email(a, "#{n} game#{if n == 1, do: "", else: "s"} wait on your pack", """
@@ -149,8 +149,11 @@ defmodule GitGame.Email do
     |> text_body(body <> "\nNo more emails: #{unsubscribe}\n")
   end
 
-  defp link(path, via),
-    do: "#{GitGameWeb.public_url()}/?via=#{via}#{String.replace_prefix(path, "/", "")}"
+  # where the email came from goes in the query, before the client's `#/…`
+  defp link(path, via) do
+    [page, hash] = String.split(path, "#", parts: 2)
+    "#{GitGameWeb.public_url()}#{page}?via=#{via}##{hash}"
+  end
 
   defp deliver(email) do
     {:ok, _} = Mailer.deliver(email)

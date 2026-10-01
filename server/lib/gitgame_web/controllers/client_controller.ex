@@ -1,9 +1,14 @@
 defmodule GitGameWeb.ClientController do
   @moduledoc """
-  The client's page, served from the API's own origin so the session cookie works (ADR-0005). The client routes by
-  the address's hash, so `/` is the only page; its scripts, styles and icons are static files beside it.
+  The client's pages, served from the API's own origin so the session cookie works (ADR-0005): the landing page at
+  `/`, and the game at `/play` (ADR-0009). The game routes by the address's hash, so `/play` is its only page; the
+  scripts, styles and icons of both are static files beside them.
 
-  The page carries a Content Security Policy: scripts, styles and connections only from this origin, images also from
+  Links from before the game moved to `/play` that carry a query (`/?via=…` from notifications and emails, `/?email=…`,
+  `/?github=…`) are sent on to `/play` with it, and the browser keeps their `#/…`. A link with only a hash never
+  reaches the server; the landing page's own script sends it on.
+
+  Both pages carry a Content Security Policy: scripts, styles and connections only from this origin, images also from
   GitHub's avatars, and no framing. Cards set CSS custom properties through `style` attributes, which the policy
   allows (`style-src-attr`) without allowing any inline script.
   """
@@ -22,10 +27,22 @@ defmodule GitGameWeb.ClientController do
          "; "
        )
 
-  def index(conn, _params) do
-    page =
-      Application.get_env(:gitgame, :client_page) ||
-        Application.app_dir(:gitgame, "priv/static/index.html")
+  # the queries only links to the game ever carried; anything else (a campaign's `?utm_…`) stays on the landing page
+  @moved ~w(via email github)
+
+  def landing(conn, params) do
+    if Enum.any?(@moved, &Map.has_key?(params, &1)),
+      do: redirect(conn, to: "/play?" <> conn.query_string),
+      else: page(conn, "index.html")
+  end
+
+  def play(conn, _params), do: page(conn, "play/index.html")
+
+  defp page(conn, file) do
+    dir =
+      Application.get_env(:gitgame, :client_dir) || Application.app_dir(:gitgame, "priv/static")
+
+    page = Path.join(dir, file)
 
     if File.exists?(page) do
       conn

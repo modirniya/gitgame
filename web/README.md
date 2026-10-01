@@ -13,7 +13,7 @@ cd server && mix phx.server
 cd web && npm install && npm run dev
 ```
 
-Open http://localhost:5173. The first time it opens, the device signs in as a new anonymous player ([ADR-0005](../docs/adr/0005-sign-in-written-fresh.md)). You take the first seat of every game you start; anyone else at the device can take one too (hotseat), and the remote plays the bots.
+Open http://localhost:5173/play for the game (http://localhost:5173 is the landing page, [ADR-0009](../docs/adr/0009-a-landing-page-and-the-game-at-play.md)). The first time it opens, the device signs in as a new anonymous player ([ADR-0005](../docs/adr/0005-sign-in-written-fresh.md)). You take the first seat of every game you start; anyone else at the device can take one too (hotseat), and the remote plays the bots.
 
 ## Checks
 
@@ -29,7 +29,9 @@ npm run build          # the PWA in dist/
 
 | File                          | What it is                                                                                                              |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `src/main.js`, `src/route.js` | The entry and the addresses (`#/`, `#/g/<id>[/<seat>]`, `#/room/<code>`, `#/r/<id>/<day>`)                              |
+| `play/index.html`             | The game's page, served at `/play`; `index.html` is the landing page at `/` (ADR-0009)                                  |
+| `src/main.js`, `src/route.js` | The entry and the addresses (`/play#/`, `#/g/<id>[/<seat>]`, `#/room/<code>`, `#/r/<id>/<day>`)                         |
+| `src/landing.js`              | The landing page's one script: sends links from before the move (`/#/room/<code>`) on to `/play`                        |
 | `src/api.js`                  | The remote's JSON API; errors carry the remote's own words                                                              |
 | `src/dom.js`                  | Building DOM without innerHTML, so other players' text is only ever text                                                |
 | `src/brand.js`                | The name, defined once (`// BRAND`, [branding.md](../docs/branding.md))                                                 |

@@ -59,9 +59,10 @@ defmodule GitGameWeb.Router do
     post "/unsubscribe", EmailController, :unsubscribe
   end
 
-  # The client's page, from the same origin as everything under /api (ADR-0005).
+  # The landing page and the game, from the same origin as everything under /api (ADR-0005, ADR-0009).
   scope "/", GitGameWeb do
-    get "/", ClientController, :index
+    get "/", ClientController, :landing
+    get "/play", ClientController, :play
   end
 
   # Server-Sent Events: the browser asks for text/event-stream, which the JSON pipeline would refuse.

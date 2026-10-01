@@ -34,12 +34,12 @@ defmodule GitGameWeb.AuthController do
 
       conn
       |> Identity.put(token, expires_at)
-      |> redirect(external: GitGameWeb.public_url() <> "/")
+      |> redirect(external: GitGameWeb.public_url() <> "/play")
     else
       failed ->
         # the reason's kind only: an error from GitHub can quote what it was sent
         Logger.info("GitHub link failed: #{inspect(kind(failed))}")
-        redirect(conn, external: GitGameWeb.public_url() <> "/?github=failed")
+        redirect(conn, external: GitGameWeb.public_url() <> "/play?github=failed")
     end
   end
 
