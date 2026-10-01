@@ -40,3 +40,16 @@ it("ends a game on the scoreboard, with a box for a note to the maintainer", asy
   expect(screen.node.querySelector(".scoreboard form.feedback textarea")).not.toBeNull();
   screen.leave();
 });
+
+it("shows a finished game's scoreboard to someone who held no seat in it", async () => {
+  // the table's view: what anyone may see, with no seat of theirs in it
+  const over = view({ released: { day: 12, bugs: 0, production_down: false }, you: null, yours: null });
+  const remote = { fetchView: async () => over, live: () => () => {} };
+  const screen = gameScreen({ remote, go: () => {}, id: "g1" });
+  await settle();
+  expect(screen.node.querySelector(".scoreboard h1").textContent).toBe("v1.0 shipped");
+  expect(screen.node.querySelectorAll(".scoreboard .seat.you")).toHaveLength(0);
+  // nor a feedback box: a note is for those who played
+  expect(screen.node.querySelector(".feedback")).toBeNull();
+  screen.leave();
+});

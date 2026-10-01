@@ -10,6 +10,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 ### Added
 - A feedback box at the end of every game (M13b): the scoreboard takes a note of up to 1000 characters for the maintainer, one per player and game, which they can change later. Only someone who held a seat can leave one, and only once the game is over; nobody else sees it. The beta report counts the notes, and `--feedback` prints them.
 
+### Fixed
+- A finished game opened by someone who held no seat in it (a shared link, or a room's "watch the table" after its game) stayed on `$ git fetch`: the scoreboard looked for the reader's seat. It now shows the scoreboard.
+
 ## [0.1.3] - 2026-09-30
 
 ### Added
