@@ -1,0 +1,128 @@
+/* The release (event-screens §3, O-CI and O-Scoreboard). CI turns every commit on main face-up in order, 250 ms apart
+   (§4): each card's flipper plays from face-down to its resting state, face-up, after a delay set by its place on
+   main (--i); the bugs that counted turn red once they are up, and the tally lands after the last. With
+   prefers-reduced-motion no animation runs (styles.css), so the cards simply rest face-up and the tally is there. */
+
+.ci-grid {
+  display: grid;
+  /* the grid wraps on a phone: main never scrolls sideways here */
+  grid-template-columns: repeat(auto-fill, var(--card-sm));
+  justify-content: center;
+  gap: 10px 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ci-grid .flipper {
+  animation: ci-flip 500ms ease-in-out both;
+  animation-delay: calc(var(--i) * 250ms);
+}
+@keyframes ci-flip {
+  from {
+    transform: none;
+  }
+}
+.ci-grid .counts .front {
+  background: var(--reject-soft);
+  box-shadow:
+    0 0 0 3px var(--reject),
+    var(--shadow);
+  animation: ci-red 300ms ease-out both;
+  animation-delay: calc(var(--i) * 250ms + 450ms);
+}
+@keyframes ci-red {
+  from {
+    background: var(--paper);
+    box-shadow: var(--shadow);
+  }
+}
+
+.stamp {
+  margin: 4px 0 0;
+  padding: 4px 12px;
+  border: 2px solid currentColor;
+  border-radius: 8px;
+  font: 800 1rem var(--mono);
+  letter-spacing: 0.06em;
+  transform: rotate(-4deg);
+  animation: stamp 380ms var(--ease) both;
+  animation-delay: calc(var(--n) * 250ms + 300ms);
+}
+.stamp.ok {
+  color: var(--ok);
+}
+.stamp.bad {
+  color: var(--reject);
+}
+@keyframes stamp {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: rotate(-4deg) scale(1.06);
+    opacity: 1;
+  }
+}
+
+.scoreboard h1.down {
+  color: var(--reject);
+}
+.winner {
+  margin: 0;
+  font: 700 1.75rem/1.2 var(--sans);
+  overflow-wrap: anywhere;
+}
+.winner.you {
+  color: var(--you);
+}
+.winner.other {
+  color: var(--other);
+}
+
+/* Reads across: a part of the score per row, a seat per column. The columns share what the labels leave, and a long
+   handle is cut short (its title has it whole), so five seats fit at 360 px. */
+table.scores {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font: 0.9rem var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.scores th,
+.scores td {
+  padding: 6px;
+  text-align: right;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+.scores thead th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* as wide as the longest label, "lines on main" */
+.scores thead td {
+  width: calc(13ch + 14px);
+}
+.scores th[scope="row"] {
+  text-align: left;
+  font-weight: 400;
+  color: var(--muted);
+}
+.scores th.you {
+  color: var(--you);
+}
+.scores th.other {
+  color: var(--other);
+}
+.scores tfoot th[scope="row"],
+.scores tfoot td {
+  font-weight: 700;
+  color: var(--ink);
+}
+.scores tfoot > tr > * {
+  border-top: 2px solid var(--ink);
+  border-bottom: 0;
+}

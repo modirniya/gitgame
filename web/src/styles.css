@@ -6,6 +6,7 @@
 @import "./table.css";
 @import "./frame.css";
 @import "./hub.css";
+@import "./release.css";
 
 :root {
   --ground: #14181c;
@@ -260,7 +261,7 @@ a.button.primary {
   color: var(--warn);
 }
 
-/* ---------- moments, the handoff, the scoreboard ---------- */
+/* ---------- moments and the handoff (the release is in release.css) ---------- */
 
 .moment .transcript {
   margin: 0;
@@ -340,28 +341,6 @@ h1.cmd {
   display: flex;
   gap: 12px;
   justify-content: center;
-}
-
-/* CI flips every commit in order, 250 ms apart (event-screens §4); reduced motion shows them flipped at once. */
-.strip.ci .flip {
-  justify-content: center;
-  align-items: center;
-  animation: flip 450ms ease-out both;
-  animation-delay: calc(var(--i) * 250ms);
-}
-.strip.ci .flip.bug {
-  color: var(--reject);
-}
-.strip.ci .flip.clean {
-  color: var(--ok);
-}
-@keyframes flip {
-  from {
-    transform: rotateY(90deg);
-  }
-  to {
-    transform: none;
-  }
 }
 
 /* ---------- the replay ---------- */
@@ -472,9 +451,6 @@ label.check input {
 .action .will {
   font-size: 0.65rem;
   color: var(--accent);
-}
-.verdict {
-  font-weight: 700;
 }
 
 /* the bot thinking out loud (event-screens §5) */

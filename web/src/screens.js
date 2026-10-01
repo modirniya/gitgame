@@ -3,6 +3,7 @@
 import { el } from "./dom.js";
 import { card, commit } from "./cards.js";
 import { pips } from "./frame.js";
+import { ciGrid } from "./release.js";
 import { incidentText, OPENER } from "./copy.js";
 
 // A commit as the reader may see it: from main, from their own branch, or else face-down, as the table would show a
@@ -100,22 +101,7 @@ function picture(m, view, you) {
     case "reflog":
       return strip(commits(view, e.restored), "rise");
     case "ci":
-      return el(
-        "ol",
-        { class: "strip ci" },
-        m.ci.flips.map((f, i) =>
-          el(
-            "li",
-            { style: `--i: ${i}` },
-            el(
-              "div",
-              { class: `card strip flip ${f.bug ? "bug" : "clean"}` },
-              el("span", { class: "big" }, f.bug ? "BUG" : "ok"),
-              el("span", { class: "author" }, f.author),
-            ),
-          ),
-        ),
-      );
+      return ciGrid(m, view);
     // the day's opener: the incident dealt, your two cards drawn, today's ops
     case "incident": {
       const drew = view.today.find((x) => x.type === "drew" && x.player === you);
