@@ -176,16 +176,17 @@ Strangers play the beta, and it answers what the playtest would have ([ADR-0002]
 - [x] **M13a · The report reads production, and only the beta.**
   - The release has no Mix, so the report gets a command of its own in the image, `bin/beta_report`. It prints what `mix gitgame.beta_report` prints, read where the data is (`fly ssh console -a gitgame-online -C /app/bin/beta_report`). CI runs it inside the release image, after the exit game.
   - It counts from a date (`--since`), so games played while the beta was built and tested don't count as strangers'. Those include the maintainer's own and the ones sessions played to check the deployment. `ReportTest` checks what it leaves out.
-  - **Open:** the launch date to count from, and whether the team's own games after it are left out too, and how.
+  - *Decided 2026-10-01:* the beta counts from **2026-10-01** (`--since 2026-10-01`), which leaves out every game played while it was built and tested. **Open:** whether the team's own games after that are left out too, and how.
 - [ ] **M13b · Ready for strangers.** Done once, before anyone is invited:
   - **The optional features.** Each one launched is tried once on the deployment (`server/README.md`, "Turning on the optional features"), which closes the open item "Checks only a deployment can make". **Open:** which of GitHub sign-in, email and push are on at launch. Anonymous play needs none of them.
   - **A restore.** `rps-db`'s snapshot is restored once into a scratch app, so a restore has been done before one is needed ([ADR-0008](../adr/0008-the-beta-shares-a-postgres.md)). The maintainer's to do: it creates an app.
   - **Feedback.** Somewhere for players to say what broke or what they think. *Decided 2026-09-30:* a box on every game's scoreboard, up to 1000 characters, one note per player and game that they can rewrite; read with `bin/beta_report --feedback`. Built.
   - **Capacity.** One `shared-cpu-1x` machine with 512 MB, with live streams capped at 2,000 connections (`fly.toml`). New players are capped at 60 an hour from one address (`config :gitgame, :rate_limits`), which an office or a conference behind one address could reach. **Open:** whether that is enough for the invitations below; more costs money.
-- [ ] **M13c · Invite.** **Open:**
-  - who, how many and when, in waves or at once;
-  - whether the charter's launch (Hacker News, r/git, a badge for READMEs) is part of this milestone or waits for a first, smaller wave's numbers;
-  - whether the badge, which doesn't exist yet, is wanted now.
+- [ ] **M13c · Invite.** *Decided 2026-10-01:*
+  - a public launch now, on Hacker News and r/git, with no private wave first, aiming at 5–10 people to begin with;
+  - the README badge waits for later.
+
+  The maintainer posts; the repository's README says where to play first. Ticked once the posts are up.
 - [ ] **M13d · Read it.** Every week while the beta runs, the report's output is recorded, dated, in [round-resolution.md](round-resolution.md) §7, beside the simulations' provisional answers to the playtest questions:
   1. **When packs are sent** against how their pushes went: whether batching at the deadline ([ADR-0003](../adr/0003-batch-packs-at-the-deadline.md)) stays, or arrival order (one setting) is tried.
   2. **What people do after a failed push:** whether paying for a rejected push stays.
