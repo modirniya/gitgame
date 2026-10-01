@@ -245,3 +245,54 @@ ol.receipt-list {
 .said.warn {
   color: var(--warn);
 }
+
+/* the bot as a character (event-screens §5): an avatar, its ops as dots, and a speech bubble */
+.bot-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--other);
+  color: var(--ground);
+  font: 700 12px var(--mono);
+}
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font: 500 12px var(--mono);
+  color: var(--muted);
+}
+.dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line);
+}
+.dots i.on {
+  background: var(--other);
+}
+.dots span {
+  margin-left: 6px;
+}
+.moment.bot h1.cmd {
+  color: var(--other);
+}
+.bubble {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 4px 14px 14px 14px;
+  background: var(--other-soft);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+.moment.bot .bubble {
+  margin-left: 50px;
+}

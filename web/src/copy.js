@@ -29,7 +29,10 @@ const yours = {
   reflog: () => "Your trap fired: the commits a force-push erased are back on top of main, for free.",
   tagged: () => "You tagged v1.0. CI now flips every commit on main.",
   failed: () => "That op failed and its cost is spent. The rest of your pack still ran.",
-  skipped: () => "Your budget ran out before this op. A pull or push that turns out free leaves room for more.",
+  skipped: (m) =>
+    m.command === "git push"
+      ? "Your budget ran out before the push: the pull before it costs an op when main has moved. Your commit waits on your branch, to push tomorrow."
+      : "Your budget ran out before this op. A pull or a push that turns out free leaves room for more.",
   empty: () => "No pack arrived, so the day ran without you. Two in a row and you leave the company.",
   left: () => "You left the company. Your commits stay on main, and still take the blame.",
   staged: () => "Staged. Commit them into one card on your local branch, then push.",
@@ -39,7 +42,13 @@ const yours = {
 const theirs = {
   pushed: (m) => `${m.player} pushed, so the tip moved. Unless you pull first, your next push is rejected.`,
   pulled: (m) => `${m.player} pulled to the tip.`,
-  conflict: (m) => `${m.player} hit a conflict and settled it with the strategy they declared.`,
+  conflict: (m) => {
+    const r = m.events.find((x) => x.type === "conflict_resolved");
+    if (r?.crossed_out.length)
+      return `${m.player} kept their commit: ${r.crossed_out.join(", ")} is crossed out on main and no longer counts, and ${m.player} takes a grudge for it.`;
+    if (r?.discarded.length) return `${m.player}'s commit lost the clash: its lines are gone, and main is as it was.`;
+    return `${m.player} kept both commits, by hand, for an extra op.`;
+  },
   rejected: (m) => `${m.player}'s push was rejected.`,
   blamed: (m) =>
     m.events.at(-1).author === m.you

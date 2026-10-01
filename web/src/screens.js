@@ -8,6 +8,7 @@ import { asOf, strip } from "./table.js";
 import { ciGrid } from "./release.js";
 import { incidentText, OPENER } from "./copy.js";
 import { summaryScreen } from "./summary.js";
+import { botHead, says } from "./bot.js";
 
 // A commit as the reader may see it: from main, from their own branch, or else face-down, as the table would show a
 // commit it can't read (another player's, gone back to their branch).
@@ -156,10 +157,13 @@ export function stepScreen(s, { view, you, step, next, skip }) {
 
   const m = s.moment;
   const whose = m.pack && (m.player === you ? "your pack" : `${m.player}'s pack`);
+  // the bot is a character (event-screens §5): its avatar and ops above, and what it says about this one
+  const bot = (view.bots ?? []).includes(m.player) && m.kind !== "incident";
+  const said = bot ? says(s, { you }) : m.why;
   return el(
     "section",
     {
-      class: `view moment ${m.kind}${m.tone ? ` ${m.tone}` : ""}${m.player === you ? " mine" : ""}${s.auto ? " auto" : ""}`,
+      class: `view moment ${m.kind}${m.tone ? ` ${m.tone}` : ""}${m.player === you ? " mine" : ""}${bot ? " bot" : ""}${s.auto ? " auto" : ""}`,
       "aria-live": "polite",
     },
     el(
@@ -170,11 +174,12 @@ export function stepScreen(s, { view, you, step, next, skip }) {
         { class: "progress muted" },
         [s.day && m.kind !== "incident" && `day ${s.day}`, whose].filter(Boolean).join(" · "),
       ),
+      bot && botHead(s),
       title(m, view, you),
       m.command && output(m),
       el("div", { class: "scene" }, scene(s, view, you)),
-      // the bot thinking out loud (event-screens §5), above what it means for you
-      m.why && el("p", { class: "bubble" }, el("span", { class: "who" }, m.player), " ", m.why),
+      // the bot thinking out loud, above what it means for you
+      said && el("p", { class: "bubble" }, said),
       m.kind === "incident" ? opener(view, you) : m.coach && el("p", { class: "said coach" }, m.coach),
     ),
     el(

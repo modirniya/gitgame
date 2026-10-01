@@ -110,7 +110,7 @@ describe("the day log as moments", () => {
 
   it("coaches the reader in the second person, and speaks of others by name", () => {
     expect(ms[3].coach).toMatch(/^Your commit is on main/);
-    expect(ms[6].coach).toMatch(/^bot hit a conflict/);
+    expect(ms[6].coach).toBe("bot's commit lost the clash: its lines are gone, and main is as it was.");
 
     // the reader's own conflict names the strategy that settled it, declared or the default
     expect(moments(day, { you: "bot" }).moments[6].coach).toMatch(/keeping theirs dropped yours/);
@@ -141,7 +141,9 @@ describe("the moments that always stop the day", () => {
 
   it("blame that finds a bug in your commit calls your bluff", () => {
     const m = one({ type: "blamed", player: "bot", author: "ana", target: "53d8cce", bug: true });
-    expect(m).toMatchObject({ command: "git blame 53d8cce", tone: "reject" });
+    expect(m).toMatchObject({ command: "git blame 53d8cce", tone: "reject", output: [] });
+    // the verdict is the game's: Git's blame annotates lines and judges nothing
+    expect(m.notes).toEqual(["BUG in 53d8cce: ana takes the blame"]);
     expect(m.coach).toBe("bot called your bluff: -3 for you.");
   });
 

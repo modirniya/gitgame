@@ -110,12 +110,10 @@ function moment(events, you) {
       return m("push_noop", "git push", [e.message]);
 
     case "blamed":
-      return m(
-        "blamed",
-        `git blame ${e.target}`,
-        [e.bug ? `BUG in ${e.target}: ${e.author} takes the blame` : `${e.target} is clean`],
-        e.bug ? "reject" : null,
-      );
+      // what blame found is the game's verdict, a remark: Git's blame annotates lines and judges nothing
+      return m("blamed", `git blame ${e.target}`, [], e.bug ? "reject" : null, [
+        e.bug ? `BUG in ${e.target}: ${e.author} takes the blame` : `${e.target} is clean`,
+      ]);
 
     case "reverted":
       return m("reverted", `git revert ${e.target}`, [e.message], "ok");
@@ -154,7 +152,8 @@ function moment(events, you) {
       );
 
     case "op_skipped":
-      return m("skipped", `git ${e.op}`, [e.message], "warn");
+      // the game's own remark: Git never says an op didn't fit a budget
+      return m("skipped", `git ${e.op}`, [], "warn", [e.message]);
 
     case "hand_limit":
       return m("hand_limit", null, [
