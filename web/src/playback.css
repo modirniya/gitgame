@@ -210,11 +210,13 @@ ol.receipt-list {
 }
 .receipt-list li {
   display: grid;
-  grid-template-columns: 1.2em auto 1fr;
-  gap: 8px;
+  grid-template-columns: 1.2em minmax(0, 1fr);
+  gap: 0 8px;
   align-items: baseline;
 }
+/* what it did under the command, so a long commit message never squeezes it */
 .receipt-list .did {
+  grid-column: 2;
   color: var(--muted);
 }
 .receipt-list .ok .mark {
@@ -233,13 +235,21 @@ ol.receipt-list {
   gap: 8px;
   margin: 0;
 }
-.deltas .stamp {
+.delta {
+  max-width: 100%;
+  padding: 2px 10px;
+  border: 1.5px solid currentColor;
+  border-radius: 8px;
+  font: 700 14px var(--mono);
   color: var(--other);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.deltas .stamp.you {
+.delta.you {
   color: var(--you);
 }
-.deltas .stamp.bad {
+.delta.bad {
   color: var(--reject);
 }
 .said.warn {

@@ -69,7 +69,7 @@ function moment(events, you) {
     case "staged":
       return e.cards
         ? m("staged", `git add ${[...new Set(e.cards.map((c) => c.file))].join(" ")}`)
-        : m("staged", "git add", [`(${plural(e.count, "card")}, face-down)`]);
+        : m("staged", "git add", [], null, [`${plural(e.count, "card")}, face-down`]);
 
     case "committed": {
       const c = e.commit;

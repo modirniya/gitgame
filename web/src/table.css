@@ -35,6 +35,10 @@ ol.strip::-webkit-scrollbar {
 ol.strip > li {
   flex: none;
   display: grid;
+  /* the slot's one column is the card's width: a long handle is cut short, never widens the slot */
+  grid-template-columns: minmax(0, 1fr);
+  /* a slot with more chips under it is taller: its card stays level with the others */
+  align-content: start;
   justify-items: center;
   gap: 3px;
   width: var(--card-md);

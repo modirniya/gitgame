@@ -43,7 +43,7 @@ export function summaryScreen(step, { view, you, next, last }) {
         seats.map((id) =>
           el(
             "span",
-            { class: `stamp${id === you ? " you" : ""}${delta(id) < 0 ? " bad" : ""}` },
+            { class: `delta${id === you ? " you" : ""}${delta(id) < 0 ? " bad" : ""}` },
             `${id === you ? "you" : id} ${signed(delta(id))}`,
           ),
         ),
