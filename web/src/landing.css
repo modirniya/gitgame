@@ -1,0 +1,173 @@
+/* The landing page (ADR-0009), on the game's own stylesheet (styles.css): its tokens, the transcript and the cards
+   are the game's, so the page looks like what it leads to. This file only lays the page out: a column that widens
+   from 720 px, the steps side by side from there. */
+
+.site-head,
+.landing,
+.site-foot {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.site-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: max(16px, env(safe-area-inset-top));
+}
+.site-head .brand {
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+.site-head nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* a link that leads somewhere as a button would: the game's button, for an <a> */
+a.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--raised);
+  color: var(--ink);
+  text-decoration: none;
+}
+a.button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ground);
+  font-weight: 700;
+}
+
+.landing section {
+  padding: 40px 0 8px;
+}
+.landing h1 {
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  line-height: 1.2;
+  margin: 24px 0 16px;
+}
+.landing h2 {
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+}
+.landing h2::before {
+  content: "# ";
+  color: var(--muted);
+}
+.landing h3 {
+  font-size: 1rem;
+  margin: 0 0 6px;
+  color: var(--accent);
+}
+.landing .lede {
+  font-size: 1.05rem;
+  max-width: 62ch;
+}
+.landing code {
+  color: var(--ink);
+  background: var(--raised);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 24px 0;
+}
+
+.look {
+  margin: 32px 0 0;
+  display: grid;
+  gap: 20px;
+}
+.look .transcript {
+  margin: 0;
+  font-size: 0.85rem;
+}
+.look .hand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+}
+.steps li {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--raised);
+}
+.steps p,
+.why li,
+#faq p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.why ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+.why strong {
+  color: var(--ink);
+}
+
+#faq details {
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+}
+#faq summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+#faq details p {
+  margin-top: 8px;
+}
+
+.again {
+  text-align: center;
+  padding-bottom: 40px;
+}
+
+.site-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding-top: 24px;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+@media (min-width: 720px) {
+  .steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .why ul {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 32px;
+  }
+}

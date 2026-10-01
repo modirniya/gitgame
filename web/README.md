@@ -29,9 +29,9 @@ npm run build          # the PWA in dist/
 
 | File                          | What it is                                                                                                              |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `play/index.html`             | The game's page, served at `/play`; `index.html` is the landing page at `/` (ADR-0009)                                  |
+| `play/index.html`             | The game's page, served at `/play`                                                                                      |
+| `index.html`, `src/landing.*` | The landing page at `/` (ADR-0009): static HTML for search engines and link previews, on the game's stylesheet          |
 | `src/main.js`, `src/route.js` | The entry and the addresses (`/play#/`, `#/g/<id>[/<seat>]`, `#/room/<code>`, `#/r/<id>/<day>`)                         |
-| `src/landing.js`              | The landing page's one script: sends links from before the move (`/#/room/<code>`) on to `/play`                        |
 | `src/api.js`                  | The remote's JSON API; errors carry the remote's own words                                                              |
 | `src/dom.js`                  | Building DOM without innerHTML, so other players' text is only ever text                                                |
 | `src/brand.js`                | The name, defined once (`// BRAND`, [branding.md](../docs/branding.md))                                                 |

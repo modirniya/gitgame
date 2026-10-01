@@ -24,8 +24,9 @@ defmodule GitGameWeb do
   def public_url, do: Application.get_env(:gitgame, :public_url) || GitGameWeb.Endpoint.url()
 
   # The built client (web/dist, copied into priv/static by the Dockerfile) is served from the same origin as the API,
-  # which the session cookie needs (ADR-0005). "/" itself is GitGameWeb.ClientController.
-  def static_paths, do: ~w(assets icon.svg manifest.webmanifest sw.js robots.txt)
+  # which the session cookie needs (ADR-0005). "/" and "/play" are GitGameWeb.ClientController (ADR-0009).
+  def static_paths,
+    do: ~w(assets icon.svg og.png manifest.webmanifest sw.js robots.txt sitemap.xml)
 
   def router do
     quote do

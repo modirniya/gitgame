@@ -1,17 +1,227 @@
 <!doctype html>
+<!-- The landing page (ADR-0009): everything a search engine or a link preview needs is in this file, readable without
+     running anything. %BRAND% and %DOMAIN% come from src/brand.js at build time (docs/branding.md). Its words describe
+     rules v0.2: a rules change checks them. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>%BRAND%</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>%BRAND% · a multiplayer card game whose rules are Git</title>
+    <meta
+      name="description"
+      content="Ship commits to a shared main, pull before you push, blame the bugs you can't see and survive push --force. A free card game about Git, in your browser."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="%BRAND%: a multiplayer card game whose rules are Git" />
+    <meta
+      property="og:description"
+      content="Ship commits to a shared main, pull before you push, and survive push --force. Free, in your browser, no sign-up."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "%BRAND%",
+        "url": "https://%DOMAIN%/",
+        "image": "https://%DOMAIN%/og.png",
+        "description": "An asynchronous multiplayer card game whose rules are Git: commit, push, pull, rebase, resolve conflicts, blame hidden bugs and survive push --force.",
+        "genre": ["Card game", "Strategy game"],
+        "gamePlatform": "Web browser",
+        "applicationCategory": "Game",
+        "operatingSystem": "Any",
+        "playMode": ["SinglePlayer", "MultiPlayer"],
+        "numberOfPlayers": { "@type": "QuantitativeValue", "minValue": 2, "maxValue": 5 },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
     <script type="module" src="/src/landing.js"></script>
   </head>
   <body>
-    <main>
-      <h1>%BRAND%</h1>
-      <p>A card game whose rules are Git.</p>
-      <p><a href="/play">play</a></p>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="this page">
+        <a href="#how">how it plays</a>
+        <a href="#faq">questions</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="landing">
+      <section class="hero">
+        <h1>A multiplayer card game whose rules are Git.</h1>
+        <p class="lede">
+          Ship commits to a shared <code>main</code>. Pull before you push, blame the bugs you can't see, and survive
+          <code>git push --force</code>. Free, in your browser, with nothing to sign up for.
+        </p>
+        <p class="cta">
+          <a class="button primary" href="/play">play the bot now</a>
+          <a class="button" href="/play">or open a room for friends</a>
+        </p>
+
+        <figure class="look" aria-label="a day of the game, as its terminal prints it">
+          <!-- Git's output keeps its own columns -->
+          <!-- prettier-ignore -->
+          <div class="transcript">
+            <div class="lines mine ok">
+              <div class="prompt"><span class="who">ana@main</span> $ git pull --rebase -X ours</div>
+              <div class="out">Successfully rebased and updated refs/heads/main.</div>
+            </div>
+            <div class="lines mine ok">
+              <div class="prompt"><span class="who">ana@main</span> $ git push</div>
+              <div class="out">   3f2c1d9..8e1da02  main -&gt; main</div>
+            </div>
+            <div class="lines reject">
+              <div class="prompt"><span class="who">bot@main</span> $ git push</div>
+              <div class="out"> ! [rejected]        main -&gt; main (non-fast-forward)</div>
+            </div>
+            <div class="lines warn">
+              <div class="prompt"><span class="who">bot@main</span> $ git push --force</div>
+              <div class="out"> + 8e1da02...b0ba026 main -&gt; main (forced update)</div>
+            </div>
+            <div class="lines mine ok">
+              <div class="prompt"><span class="who">ana@main</span> $ git reflog</div>
+              <div class="out">restored 8e1da02: back on top of main</div>
+            </div>
+          </div>
+          <!-- the cards as the deck draws them; band colors are rules/deck.json's file colors -->
+          <div class="hand" aria-label="a hand of cards">
+            <span class="card hand" style="--band: #3ec1b3"
+              ><span class="band"></span><span class="file">auth.js</span><span class="big">+5</span></span
+            >
+            <span class="card hand" style="--band: #a88bfa"
+              ><span class="band"></span><span class="file">api.py</span><span class="big">+6</span
+              ><span class="bug">BUG</span></span
+            >
+            <span class="card hand" style="--band: #f2755c"
+              ><span class="band"></span><span class="file">styles.css</span><span class="big">+3</span></span
+            >
+            <span class="card hand command"
+              ><span class="band"></span><span class="file">command</span><span class="big">push --force</span></span
+            >
+          </div>
+        </figure>
+      </section>
+
+      <section id="how">
+        <h2>How a day plays</h2>
+        <ol class="steps">
+          <li>
+            <h3>Write a pack</h3>
+            <p>
+              Each day you have three ops (two on some days, four on others) and a pack of up to four commands:
+              <code>git add</code>, <code>commit</code>, <code>pull</code> and <code>push</code>, and the cards in your
+              hand, <code>blame</code>, <code>revert</code>, <code>push --force</code> and <code>reflog</code>.
+            </p>
+          </li>
+          <li>
+            <h3>The day closes</h3>
+            <p>
+              Everyone's packs run against the shared <code>main</code> together, in a random order. Push after someone
+              else got there first, without pulling, and you're rejected, in Git's own words.
+            </p>
+          </li>
+          <li>
+            <h3>Ship v1.0</h3>
+            <p>
+              When <code>main</code> is long enough, someone tags <code>v1.0</code> and CI flips every commit face-up.
+              The most clean lines wins, unless four bugs reach production: then it's down, and the least blamed wins.
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="why">
+        <h2>Why play it</h2>
+        <ul>
+          <li>
+            <strong>Git's own words.</strong> <code>! [rejected]</code>, <code>CONFLICT (content)</code>,
+            <code>Already up to date.</code> If you know Git, the details are right. If you don't, you'll learn it
+            without meaning to.
+          </li>
+          <li>
+            <strong>A minute or a day.</strong> A day lasts 60 seconds, 5 minutes or 24 hours, so a lunch-break game and
+            a week-long one by correspondence are the same game.
+          </li>
+          <li>
+            <strong>The bot, or your team.</strong> One tap starts a game against a bot that says why it plays every
+            command. A room's link brings friends, up to five seats.
+          </li>
+          <li>
+            <strong>Nothing to install.</strong> No account and no download. Your first game is guided, on a phone or a
+            laptop.
+          </li>
+        </ul>
+      </section>
+
+      <section id="faq">
+        <h2>Questions</h2>
+        <details>
+          <summary>Do I need to know Git?</summary>
+          <p>
+            No. Your first game walks you through a day, and every command says what it did. If you do know Git, it's
+            all accurate.
+          </p>
+        </details>
+        <details>
+          <summary>Is it free?</summary>
+          <p>Yes: no account, no ads, nothing to buy.</p>
+        </details>
+        <details>
+          <summary>How long is a game?</summary>
+          <p>
+            Twelve days of 60 seconds or 5 minutes, or seven days of 24 hours. A day ends early once every pack is in,
+            and the game ends as soon as someone ships <code>v1.0</code>.
+          </p>
+        </details>
+        <details>
+          <summary>How many players?</summary>
+          <p>Two to five: you and the bot, or a room of friends, with bots in any seats left over.</p>
+        </details>
+        <details>
+          <summary>Is it finished?</summary>
+          <p>
+            It's a beta, and the beta is the playtest: the rules are at v0.2 and will change with what people say. Every
+            game ends with a box for telling us how it went.
+          </p>
+        </details>
+        <details>
+          <summary>Is it open source?</summary>
+          <p>
+            Yes, under the AGPL-3.0, on
+            <a href="https://github.com/modirniya/gitgame">GitHub</a>. Much of it was written with AI and reviewed by
+            people; <a href="https://github.com/modirniya/gitgame/blob/main/AI_DISCLOSURE.md">here's how</a>.
+          </p>
+        </details>
+      </section>
+
+      <section class="again">
+        <h2>One tap to a game</h2>
+        <p><a class="button primary" href="/play">play now</a></p>
+      </section>
     </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
   </body>
 </html>

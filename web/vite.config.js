@@ -7,7 +7,8 @@ import { name, domain } from "./src/brand.js";
 
 const api = { "/api": { target: "http://localhost:4000", changeOrigin: true } };
 
-// The PWA manifest and the page title carry the name, which is defined once in src/brand.js (docs/branding.md).
+// The PWA manifest, the pages, robots.txt and the sitemap carry the name and the domain, which are defined once in
+// src/brand.js (docs/branding.md).
 const manifest = () =>
   JSON.stringify({
     name,
@@ -24,7 +25,7 @@ const manifest = () =>
 
 const brand = {
   name: "brand",
-  transformIndexHtml: (html) => html.replaceAll("%BRAND%", name),
+  transformIndexHtml: (html) => html.replaceAll("%BRAND%", name).replaceAll("%DOMAIN%", domain),
   configureServer(server) {
     server.middlewares.use("/manifest.webmanifest", (_req, res) => {
       res.setHeader("Content-Type", "application/manifest+json");
@@ -33,6 +34,17 @@ const brand = {
   },
   generateBundle() {
     this.emitFile({ type: "asset", fileName: "manifest.webmanifest", source: manifest() });
+    // search engines index the landing page; the game is one page of hash addresses, and /api is no page at all
+    this.emitFile({
+      type: "asset",
+      fileName: "robots.txt",
+      source: `User-agent: *\nDisallow: /api/\n\nSitemap: https://${domain}/sitemap.xml\n`,
+    });
+    this.emitFile({
+      type: "asset",
+      fileName: "sitemap.xml",
+      source: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://${domain}/</loc></url>\n  <url><loc>https://${domain}/play</loc></url>\n</urlset>\n`,
+    });
   },
 };
 
