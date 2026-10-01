@@ -236,7 +236,7 @@ function scoreboard(view, me, feedback) {
       rows.map((id) =>
         el(
           "li",
-          { class: `seat${id === view.you.player ? " you" : ""}` },
+          { class: `seat${id === view.you?.player ? " you" : ""}` },
           el("span", { class: "who" }, id),
           el("span", { class: "score" }, view.scores[id].total),
           el("span", { class: "facts" }, parts(view.scores[id]).join(" · ")),
