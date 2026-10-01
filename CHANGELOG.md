@@ -9,6 +9,7 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ### Added
 - The game's view carries, for each closed day, `main`, the pointers and the scores as the day opened (`opened`), so a client can draw the table at every step of the day's playback (M15f). Replays carry them too.
+- The remote answers "what would a good player do now?" (`GET /api/games/:id/hint`): the pack the bot's own policy would write from your seat's view, knowing nothing you don't, each op with its why in your words ("you pull first, in case someone pushes before you"), for the hub's hint (M15k). Nothing is sent.
 
 ### Changed
 - The hub is a table, as in the prototype (M15d): your branch shows where you stand and, as you write the pack, what it leaves staged and to push, with the commit it pushes waiting past the tip of `main`; the four actions (`git add`, `git commit`, `git push`, `git pull`) sit at the thumb with their cost and what each would do; picking a command card from the hand brings up its action, and the tag appears once `main` is the release size; undo takes back the last op. The online incidents say "today", not the tabletop's "this round".

@@ -1,20 +1,20 @@
 defmodule GitGameWeb.GameController do
   @moduledoc """
-  The games API (M4): create a game, fetch its view as it is or as it was when a day closed, send or replace a pack.
-  Errors carry Git's words where Git has them; a stale pack is `409`, after which the client refetches (charter
-  decision 10).
+  The games API (M4): create a game, fetch its view as it is or as it was when a day closed, send or replace a pack,
+  ask for a hint. Errors carry Git's words where Git has them; a stale pack is `409`, after which the client refetches
+  (charter decision 10).
 
   Seats belong to players (ADR-0005). You see a game as the seat you hold, and write packs only for it. In a hotseat
   game you hold every seat of the people at your device, and `seat` says which one. Anyone else sees what the table
   sees: the public view.
   """
   use GitGameWeb, :controller
-  alias GitGame.{Beta, Games}
+  alias GitGame.{Beta, Bot, Games}
   alias GitGame.Games.View
 
   action_fallback GitGameWeb.FallbackController
 
-  plug :signed_in when action in [:index, :create, :send_pack]
+  plug :signed_in when action in [:index, :create, :send_pack, :hint]
   plug GitGameWeb.Plugs.RateLimit, [bucket: :games, by: :player] when action == :create
 
   # Your games (M9c): the ones waiting on your pack first.
@@ -74,6 +74,20 @@ defmodule GitGameWeb.GameController do
       {:error, :invalid,
        "a pack is sent with \"version\" and \"ops\", and \"seat\" in a hotseat game"}
 
+  # A hint (M15k): the pack the bot's policy would write for your seat today, from that seat's own view, so it knows
+  # no more than you do. It is only read: nothing is stored, and the pack is never sent. As with `show`, a device
+  # holding several seats gets its first unless it names one.
+  def hint(conn, %{"id" => id} = params) do
+    with {:ok, id} <- uuid(id),
+         {:ok, held} <- Games.seats_held(id, conn.assigns.player.id),
+         {:ok, seat} <- writing_as(held, seat(params) || List.first(held)),
+         {:ok, state} <- Games.load(id),
+         :ok <- not_released(state) do
+      %{"ops" => ops} = state |> View.for_player(id, seat) |> Bot.write_pack(voice: :you)
+      json(conn, %{ops: ops})
+    end
+  end
+
   # The view for this device: a seat it holds (the one asked for, or its first), with `yours` listing them all, or the
   # public view for a device that holds none.
   defp view(conn, state, id, wanted) do
@@ -106,6 +120,9 @@ defmodule GitGameWeb.GameController do
       do: {:ok, seat},
       else: {:error, :not_a_player, "fatal: #{seat} is not your seat"}
   end
+
+  defp not_released(%{game: %{released: nil}}), do: :ok
+  defp not_released(_state), do: {:error, :over, "fatal: v1.0 has shipped; the game is over"}
 
   defp signed_in(%{assigns: %{player: nil}} = conn, _opts) do
     conn |> put_status(:unauthorized) |> json(%{error: "fatal: not signed in"}) |> halt()

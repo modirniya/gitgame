@@ -106,39 +106,53 @@ defmodule GitGame.BotTest do
 
   test "every op says why, in a sentence that names nothing only the bot can see (M14b)" do
     whys =
-      for seed <- 1..100, op <- play_packs(seed), reduce: MapSet.new() do
+      for seed <- 1..100,
+          view <- play_views(seed),
+          voice <- [:it, :you],
+          op <- Bot.write_pack(view, voice: voice)["ops"],
+          reduce: MapSet.new() do
         whys ->
           assert is_binary(op["why"]), "#{inspect(op)} says nothing"
           MapSet.put(whys, op["why"])
       end
 
-    # a handful of fixed sentences, nothing put into them: so no card, file or bug can be in one
-    assert MapSet.size(whys) in 5..12
+    # a handful of fixed sentences in each voice, nothing put into them: so no card, file or bug can be in one
+    assert MapSet.size(whys) in 10..22
     for why <- whys, do: refute(why =~ ~r/\.(js|py|css|md)|Dockerfile|bug in|clean/)
   end
 
-  # every op of the bot's packs over one game against the chaos player
-  defp play_packs(seed) do
+  test "in your voice, for a hint (M15k), the pack is the same and only its whys are about you" do
+    for seed <- 1..100, view <- play_views(seed) do
+      its = Bot.write_pack(view)["ops"]
+      yours = Bot.write_pack(view, voice: :you)["ops"]
+      assert Enum.map(yours, &Map.delete(&1, "why")) == Enum.map(its, &Map.delete(&1, "why"))
+
+      # a why about no one ("a trap, face-down") reads the same in both voices
+      for {it, you} <- Enum.zip(its, yours) do
+        assert you["why"] =~ ~r/\byour?\b/ or
+                 (you["why"] == it["why"] and not (it["why"] =~ ~r/\bits?\b/))
+      end
+    end
+  end
+
+  # the bot's view on each day of one game against the chaos player
+  defp play_views(seed) do
     game = Game.new(@rules, seed, ["p1", "p2"])
     {game, _} = Resolver.open_day(game)
     collect(game, :rand.seed_s(:exsss, seed), [])
   end
 
-  defp collect(%Game{released: r}, _rand, ops) when r != nil, do: ops
+  defp collect(%Game{released: r}, _rand, views) when r != nil, do: views
 
-  defp collect(game, rand, ops) do
+  defp collect(game, rand, views) do
     {chaos, rand} = GitGame.Chaos.packs(game, rand)
-
-    json =
-      View.for_player(%{game: game, version: 1, days: [], opened: [], sent: []}, "g", "p1")
-      |> Bot.write_pack()
-
-    {:ok, pack} = Pack.decode(json, 4)
+    view = View.for_player(%{game: game, version: 1, days: [], opened: [], sent: []}, "g", "p1")
+    {:ok, pack} = Pack.decode(Bot.write_pack(view), 4)
 
     {game, _} =
       Resolver.close_day(game, [{"p1", pack} | Enum.reject(chaos, &(elem(&1, 0) == "p1"))])
 
-    collect(game, rand, ops ++ json["ops"])
+    collect(game, rand, views ++ [view])
   end
 
   # Bots against each other and against the chaos player, without the database: the same views, the same door.

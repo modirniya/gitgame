@@ -331,6 +331,83 @@ defmodule GitGameWeb.GameControllerTest do
     end
   end
 
+  describe "a hint (M15k)" do
+    test "is the pack the bot's policy would write for your seat, from what that seat sees; ?seat= picks it",
+         %{conn: conn, me: me} do
+      %{"id" => id, "version" => version} = create(conn)
+
+      for seat <- [me, "raj"] do
+        view = conn |> get(~p"/api/games/#{id}?seat=#{seat}") |> json_response(200)
+        assert %{"ops" => [_ | _] = ops} = hint(conn, id, %{"seat" => seat}) |> json_response(200)
+        only_seen(ops, view)
+        assert {:ok, _} = GitGame.Games.Pack.decode(%{"ops" => ops}, view["max_ops"])
+        assert Enum.all?(ops, &(&1["why"] =~ ~r/\byour?\b|trap/))
+      end
+
+      # as with the view, a device holding several seats is answered for its first
+      assert hint(conn, id) |> json_response(200) ==
+               hint(conn, id, %{"seat" => me}) |> json_response(200)
+
+      # only read: no pack was sent, and the game hasn't moved
+      assert %{"version" => ^version, "sent_today" => []} =
+               conn |> get(~p"/api/games/#{id}") |> json_response(200)
+    end
+
+    test "only for a seat you hold", %{conn: conn} do
+      %{"id" => id} = create(conn)
+      {stranger, _} = signed_in()
+
+      assert %{"error" => "fatal: you hold no seat in this game"} =
+               hint(stranger, id) |> json_response(403)
+
+      assert %{"error" => "fatal: kim is not your seat"} =
+               hint(conn, id, %{"seat" => "kim"}) |> json_response(403)
+
+      assert %{"error" => "fatal: not signed in"} = hint(build_conn(), id) |> json_response(401)
+      assert hint(conn, Ecto.UUID.generate()) |> json_response(404)
+    end
+
+    test "following the hints plays a game against the bot to the release, after which there are none",
+         %{conn: conn} do
+      %{"id" => id} = create(conn, %{"bots" => ["bot"], "seed" => 7})
+      assert follow_hints(conn, id, 0)["released"]
+
+      assert %{"error" => "fatal: v1.0 has shipped; the game is over"} =
+               hint(conn, id) |> json_response(409)
+    end
+  end
+
+  defp hint(conn, id, params \\ %{}), do: get(conn, ~p"/api/games/#{id}/hint", params)
+
+  # A hint names only what its seat can see: cards in that seat's own hand, commits on main, traps it holds.
+  defp only_seen(ops, view) do
+    hand = view["you"]["hand"]
+    main = Enum.map(view["main"], & &1["id"])
+
+    for op <- ops do
+      assert Enum.all?(Map.get(op, "cards", []), fn id -> Enum.any?(hand, &(&1["id"] == id)) end)
+      assert Map.get(op, "target") in [nil | main]
+      assert Map.get(op, "trap") in [nil | Enum.map(hand, & &1["command"])]
+    end
+  end
+
+  defp follow_hints(conn, id, day) do
+    view = conn |> get(~p"/api/games/#{id}") |> json_response(200)
+
+    if view["released"] || day > 20 do
+      view
+    else
+      %{"ops" => ops} = hint(conn, id) |> json_response(200)
+      only_seen(ops, view)
+
+      conn
+      |> post(~p"/api/games/#{id}/packs", %{"version" => view["version"], "ops" => ops})
+      |> json_response(202)
+
+      follow_hints(conn, id, day + 1)
+    end
+  end
+
   # You ship your biggest card every day, the way a script calling the API would.
   defp play(conn, id, day) do
     view = conn |> get(~p"/api/games/#{id}") |> json_response(200)
