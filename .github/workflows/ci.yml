@@ -190,6 +190,10 @@ jobs:
         run: |
           npm ci
           npx vitest run src/exit.test.js
+      - name: The beta report, read inside the release (M13a)
+        run: |
+          docker exec gitgame /app/bin/beta_report --since "$(date -u +%F)"
+          docker exec gitgame /app/bin/beta_report --json | jq -e '.games.started >= 1'
       - name: The release's log, if anything failed
         if: failure()
         run: docker logs gitgame

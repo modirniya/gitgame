@@ -37,7 +37,9 @@ RUN mix compile && mix release
 
 # ---------- what runs ----------
 FROM debian:trixie-20260610-slim
-RUN apt-get update && apt-get install -y --no-install-recommends libstdc++6 openssl libncurses6 locales ca-certificates \
+# libsctp1: Erlang's socket library looks for it as the VM starts, and without it every command the release runs
+# prints a warning to stdout first, ahead of what `bin/beta_report --json` prints for a script.
+RUN apt-get update && apt-get install -y --no-install-recommends libstdc++6 openssl libncurses6 libsctp1 locales ca-certificates \
   && rm -rf /var/lib/apt/lists/* && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8 MIX_ENV=prod
 WORKDIR /app
