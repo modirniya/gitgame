@@ -36,3 +36,4 @@ Copy [template.md](template.md).
 | [0006](0006-notifications-web-push-and-email.md) | Notifications through standard Web Push and email, written fresh | Accepted |
 | [0007](0007-where-the-beta-runs.md) | Where the beta runs | Accepted; its managed Postgres superseded by 0008 |
 | [0008](0008-the-beta-shares-a-postgres.md) | The beta's database lives on an existing Postgres, for now | Accepted |
+| [0009](0009-a-landing-page-and-the-game-at-play.md) | A landing page at gitgame.online, and the game at /play | Accepted |
