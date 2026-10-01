@@ -7,6 +7,8 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-09-30
+
 ### Changed
 - Sending a pack that leaves some of the day's ops unspent now asks first: the hub says how many are left and what could still spend them ("# 2 of today's 3 ops unspent: you could still add, push"), and "send anyway" sends it. An empty pack can still be sent.
 
@@ -128,6 +130,7 @@ The first version on the hosted service: the beta ADR-0002 makes the playtest, l
 - Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.
 
-[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/modirniya/gitgame/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/modirniya/gitgame/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/modirniya/gitgame/releases/tag/v0.1.0
