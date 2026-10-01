@@ -93,7 +93,7 @@ defmodule GitGame.Notifications do
       day: day,
       title: "your pack is due",
       body: "day #{day} of #{game.final_day}: send your pack before the day closes",
-      path: "/#/g/#{game_id}"
+      path: "/play#/g/#{game_id}"
     }
   end
 
@@ -104,7 +104,7 @@ defmodule GitGame.Notifications do
       day: day,
       title: "v1.0 has shipped",
       body: "the game is over: see how it went, and replay it",
-      path: "/#/g/#{game_id}"
+      path: "/play#/g/#{game_id}"
     }
   end
 

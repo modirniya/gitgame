@@ -63,12 +63,12 @@ defmodule GitGame.EmailTest do
       EmailChannel.deliver(p, %{
         title: "your pack is due",
         body: "day 2 of 7: send your pack",
-        path: "/#/g/abc"
+        path: "/play#/g/abc"
       })
 
     assert_email_sent(fn email ->
       assert email.subject == "your pack is due"
-      assert email.text_body =~ "/?via=email#/g/abc"
+      assert email.text_body =~ "/play?via=email#/g/abc"
       assert email.headers["List-Unsubscribe-Post"] == "List-Unsubscribe=One-Click"
       assert email.headers["List-Unsubscribe"] =~ "/api/email/unsubscribe?token="
       send(self(), {:unsubscribe, token(email, "unsubscribe")})
@@ -92,7 +92,7 @@ defmodule GitGame.EmailTest do
 
     assert_email_sent(fn email ->
       assert email.subject == "1 game wait on your pack"
-      assert email.text_body =~ "/?via=digest#/g/#{waiting}"
+      assert email.text_body =~ "/play?via=digest#/g/#{waiting}"
     end)
   end
 

@@ -47,7 +47,7 @@ defmodule GitGame.NotificationsTest do
     assert :ok = perform_job(Remind, args)
     assert_received {:notified, a, %{kind: "pack_due", title: "your pack is due", path: path}}
     assert a == ana.id
-    assert path == "/#/g/#{id}"
+    assert path == "/play#/g/#{id}"
     refute_received {:notified, _, _}
 
     # the quarter-left job, or the same job run twice: at most once a game a day on each channel

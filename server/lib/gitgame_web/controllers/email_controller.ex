@@ -43,7 +43,7 @@ defmodule GitGameWeb.EmailController do
   end
 
   defp back(conn, what),
-    do: redirect(conn, external: GitGameWeb.public_url() <> "/?email=" <> what)
+    do: redirect(conn, external: GitGameWeb.public_url() <> "/play?email=" <> what)
 
   defp view(nil), do: %{email: nil, available: Email.enabled?()}
 

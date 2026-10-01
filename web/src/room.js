@@ -6,7 +6,7 @@ import { el, mount } from "./dom.js";
 const LENGTHS = { live: "live · 60s days", lunch: "lunch · 5m days", correspondence: "correspondence · 24h days" };
 
 /** The link to this room, as someone else would open it. */
-export const roomLink = (code, origin = location.origin) => `${origin}/#/room/${code}`;
+export const roomLink = (code, origin = location.origin) => `${origin}/play#/room/${code}`;
 
 export function roomScreen({ remote, go, code }) {
   const node = el("section", { class: "screen room" });

@@ -26,7 +26,7 @@ defmodule GitGameWeb.EmailControllerTest do
 
     token = link_token("confirm")
     confirmed = get(build_conn(), ~p"/api/email/confirm?token=#{token}")
-    assert redirected_to(confirmed) == GitGameWeb.public_url() <> "/?email=confirmed"
+    assert redirected_to(confirmed) == GitGameWeb.public_url() <> "/play?email=confirmed"
 
     assert %{"email" => %{"confirmed" => true}} =
              conn |> get(~p"/api/email") |> json_response(200)
