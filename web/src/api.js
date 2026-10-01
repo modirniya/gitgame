@@ -117,6 +117,11 @@ export function remote(fetcher = globalThis.fetch.bind(globalThis)) {
     /** Watch a room, as `live` watches a game; its stream closes once the game has started. */
     liveRoom: (code, signal, Source) => watch(`/api/rooms/${encodeURIComponent(code)}/live`, signal, Source),
 
+    /** Your note on a game once it's over (M13b): `{body, max}`, `body` null until you've left one; and leaving it. */
+    feedback: (id) => call(fetcher, `/games/${encodeURIComponent(id)}/feedback`),
+    sendFeedback: (id, body) =>
+      call(fetcher, `/games/${encodeURIComponent(id)}/feedback`, { method: "PUT", body: JSON.stringify({ body }) }),
+
     /** Send, or replace, today's pack for `seat`. `version` is the one the pack was written against. */
     sendPack: (id, { seat, version, ops, discard = [] }) =>
       call(fetcher, `/games/${encodeURIComponent(id)}/packs`, {

@@ -6,6 +6,7 @@ defmodule GitGameWeb.FallbackController do
     not_found: :not_found,
     stale: :conflict,
     over: :conflict,
+    not_over: :conflict,
     invalid: :unprocessable_entity,
     unauthorized: :unauthorized,
     not_a_player: :forbidden,

@@ -7,6 +7,7 @@ defmodule Mix.Tasks.Gitgame.BetaReport do
       mix gitgame.beta_report                      # a readable report
       mix gitgame.beta_report --json               # the same numbers, for a script
       mix gitgame.beta_report --since 2026-10-05   # only what happened since then (M13a)
+      mix gitgame.beta_report --feedback           # and the notes people left at the end of their games (M13b)
 
   It reads the database of the environment it runs in (`MIX_ENV`). Inside a release, where there is no Mix,
   `bin/beta_report` takes the same options (`GitGame.Beta.Printout`).

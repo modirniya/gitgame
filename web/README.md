@@ -49,5 +49,6 @@ npm run build          # the PWA in dist/
 | `src/games.js`                | Your games on the start screen, those waiting on your pack first                                                        |
 | `src/guide.js`                | The guided first game: one sentence and one highlighted thing over the hub, through the first day                       |
 | `src/verdict.js`              | The scoreboard's "what decided it"                                                                                      |
+| `src/feedback.js`             | The scoreboard's feedback box: a note of up to 1000 characters for the maintainer, one per game, rewritable             |
 | `src/start.js`, `src/game.js` | I-Start, and a game as one player sees it                                                                               |
 | `public/sw.js`                | The service worker: the app's files offline, never the game                                                             |

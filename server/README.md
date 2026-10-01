@@ -27,6 +27,7 @@ JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has
 | `GET /games/:id` | The game from your seat: your own cards, branch and traps, every day log as you may see it, and `yours`, the seats you hold (`?seat=` picks one in a hotseat game). A device holding no seat gets the table's view |
 | `GET /games/:id/days/:day` | A replay: the view as it stood when `day` closed (`0`: as created), folded from the log up to there; seats as above |
 | `POST /games/:id/packs` | Signed in: `{"version", "ops", "discard"}`, and `"seat"` if you hold several, sends or replaces today's pack for a seat you hold (an op may carry a one-line `"why"`, which the whole table reads: bots explain themselves with it); `409` if the day has moved on (`fetch first`) |
+| `GET /games/:id/feedback`, `PUT /games/:id/feedback` | Signed in: your note on a game once it's over (M13b), `{"body"}` of 1 to 1000 characters, one per player and game, rewritable; only from a seat you held, after the release (`409` before it) |
 | `POST /rooms` | Signed in: opens a room (M9) with you as its host and first member → the room: its `code`, host, members, bots, day length |
 | `GET /rooms/:code` | The room, and whether you're in it (`you.member`) or host it (`you.host`); `game_id` once its game has started |
 | `POST /rooms/:code/join` | Signed in: joins the room; `409` once it is full (five seats, members and bots) or started |
@@ -58,7 +59,8 @@ What the beta records for the playtest it stands in for ([ADR-0002](../docs/adr/
 ```bash
 mix gitgame.beta_report                      # readable
 mix gitgame.beta_report --json               # for a script
-mix gitgame.beta_report --since 2026-10-05   # only games started that day or later, and visits and replays since
+mix gitgame.beta_report --since 2026-10-05   # only games started that day or later, and visits, replays and notes since
+mix gitgame.beta_report --feedback           # and the notes people left at the end of their games, to read
 ```
 
 On the deployment, where the release has no Mix, `bin/beta_report` prints the same report from its database and takes the same options:

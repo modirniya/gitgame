@@ -100,6 +100,7 @@ label {
 }
 input,
 select,
+textarea,
 button {
   font: inherit;
   color: inherit;
@@ -905,4 +906,25 @@ label.check input {
   50% {
     outline-color: transparent;
   }
+}
+
+/* ---------- the feedback box (M13b) ---------- */
+
+.feedback {
+  display: grid;
+  gap: 6px;
+}
+.feedback textarea {
+  padding: 10px 12px;
+  resize: vertical;
+}
+.feedback-send {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.feedback .count {
+  color: var(--muted);
+  font-size: 0.8rem;
 }

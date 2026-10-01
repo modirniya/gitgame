@@ -14,6 +14,7 @@ import { catchup, recall, remember } from "./catchup.js";
 import { nudge } from "./whoami.js";
 import { offerReminders, remindButton } from "./remind.js";
 import { whatDecidedIt } from "./verdict.js";
+import { feedbackBox } from "./feedback.js";
 import { guideLayer, guideStep, highlight, isGuided, setGuided } from "./guide.js";
 
 const fresh = () => ({ ops: [], selected: [], picking: null });
@@ -43,6 +44,8 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
   let pending = null;
   // made once, so re-rendering doesn't ask the browser again
   let remind = null;
+  // and so is the feedback box, so a re-render doesn't throw away what is being typed in it
+  let note = null;
 
   function set(patch) {
     s = { ...s, ...patch };
@@ -119,7 +122,7 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
     mount(
       node,
       view.released
-        ? scoreboard(view, me)
+        ? scoreboard(view, me, you && (note ??= feedbackBox(remote, id)))
         : you
           ? hub({
               view,
@@ -210,7 +213,7 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
 }
 
 // O-Scoreboard: the totals, and the points each was made of (rules/deck.json scoring).
-function scoreboard(view, me) {
+function scoreboard(view, me, feedback) {
   const rows = [...view.seats].sort((a, b) => view.scores[b].total - view.scores[a].total);
   const parts = (s) =>
     ["lines", "fixes", "blame", "sins", "grudges", "merge"]
@@ -240,6 +243,7 @@ function scoreboard(view, me) {
         ),
       ),
     ),
+    feedback,
     me && nudge(me),
     el(
       "p",
