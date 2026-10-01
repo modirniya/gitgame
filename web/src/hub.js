@@ -149,6 +149,8 @@ export function hub({
       {
         class: `op${wide ? " wide" : ""}${!can[key] && key === "push" && left.behind ? " danger" : ""}`,
         "data-guide": key,
+        // the button's parts are drawn for the eye; a screen reader gets them as one sentence, as the prototype did
+        "aria-label": `${NAMES[key]}, ${cost(key) || "no cost"}: ${can[key] ?? will[key] ?? ""}`,
         disabled: !!can[key],
         onclick: () => (OPS[key] ? put(OPS[key]()) : change({ ...draft, selected: [], picking: key })),
       },

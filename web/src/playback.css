@@ -262,7 +262,7 @@ ol.receipt-list {
   align-items: center;
   gap: 10px;
 }
-.avatar {
+.bot-head .avatar {
   flex: none;
   display: grid;
   place-items: center;
