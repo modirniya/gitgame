@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
-import { fanLayout, hub } from "./hub.js";
+import { fanLayout, gridLayout, hub } from "./hub.js";
 import { command } from "./packlist.js";
 import { price } from "./pack.js";
 import { view } from "./view.fixture.js";
@@ -196,25 +196,45 @@ describe("the hub", () => {
 });
 
 it("fans the hand in one row while every card keeps a finger's width, and in two rows past that", () => {
-  // a phone's 343 px: six cards fit in one row, seven need two
-  expect(fanLayout(6, 343)).toEqual({ rows: 1, perRow: 6, overlap: 47, stagger: true });
-  expect(fanLayout(7, 343)).toEqual({ rows: 2, perRow: 4, overlap: 14, stagger: false });
-  expect(fanLayout(10, 343)).toMatchObject({ rows: 2, perRow: 5 });
-  expect(fanLayout(10, 343).overlap).toBeLessThanOrEqual(96 - 44);
-  // few cards on a wide screen don't overlap at all
-  expect(fanLayout(3, 608)).toMatchObject({ overlap: 0, stagger: false });
+  // the hub's column on a laptop, 454 px: nine cards fit in one row, ten need two
+  expect(fanLayout(9, 454)).toEqual({ rows: 1, perRow: 9, overlap: 52 });
+  expect(fanLayout(10, 454)).toEqual({ rows: 2, perRow: 5, overlap: 7 });
+  expect(fanLayout(10, 454).overlap).toBeLessThanOrEqual(96 - 44);
+  // few cards don't overlap at all
+  expect(fanLayout(3, 454).overlap).toBe(0);
 });
 
-it("staggers the labels only where one would be printed on the next card's", () => {
-  // the hub's column on a laptop: ten cards in two rows of five leave each label its own 89 px; nine in a row, 44
-  expect(fanLayout(10, 454)).toMatchObject({ rows: 2, perRow: 5, stagger: false });
-  expect(fanLayout(9, 454)).toMatchObject({ rows: 1, perRow: 9, stagger: true });
+it("prints fanned cards like a playing card's corner only where a centred label would run under the next card", () => {
+  const fan = (n) => {
+    const cards = Array.from({ length: n }, (_, i) => ({ id: `h${i}`, kind: "commit", file: "README.md", lines: 2 }));
+    return render(view({ you: { ...view().you, hand: cards } })).node.querySelector(".hand-fan").className;
+  };
+  // jsdom's 1024 × 768 is a laptop, its hub 428 px wide: seven cards show 55 px of each, five show 83
+  expect(fan(7)).toBe("hand-fan fanned");
+  expect(fan(5)).toBe("hand-fan fanned");
+  expect(fan(4)).toBe("hand-fan");
 });
 
-it("marks a hand that overlaps, and one whose labels take two heights", () => {
-  const fan = (v) => render(v).node.querySelector(".hand-fan").className;
+it("lays a phone's hand in as many columns as keep the longest file name on one line", () => {
+  // 390, 375 and 360 px phones: four columns; a tablet held upright: five
+  expect(gridLayout(358)).toEqual({ cols: 4, cell: 83 });
+  expect(gridLayout(343)).toEqual({ cols: 4, cell: 79 });
+  expect(gridLayout(328)).toEqual({ cols: 4, cell: 76 });
+  expect(gridLayout(488)).toEqual({ cols: 5, cell: 91 });
+});
+
+it("fans the hand on a laptop and lays it in a grid on a phone", () => {
   const seven = Array.from({ length: 7 }, (_, i) => ({ id: `h${i}`, kind: "commit", file: "README.md", lines: 2 }));
+  const hand = () => render(view({ you: { ...view().you, hand: seven } })).node.querySelector(".hand-rows");
   // jsdom's 1024 × 768 is a laptop: the hub's column beside the Table
-  expect(fan(view())).toBe("hand-fan");
-  expect(fan(view({ you: { ...view().you, hand: seven } }))).toBe("hand-fan fanned stagger");
+  expect(hand().querySelector(".hand-fan").className).toBe("hand-fan fanned");
+  const width = globalThis.innerWidth;
+  globalThis.innerWidth = 390;
+  try {
+    expect(hand().className).toBe("hand-rows hand-grid");
+    expect(hand().getAttribute("style")).toBe("--cols: 4; --cell: 83px");
+    expect(hand().querySelectorAll(":scope > .card")).toHaveLength(7);
+  } finally {
+    globalThis.innerWidth = width;
+  }
 });

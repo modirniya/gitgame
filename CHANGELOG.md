@@ -7,6 +7,12 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Changed
+- The hand is laid out for the screen it's on. On a phone it's a grid, as many columns as keep the longest file name on one line, with nothing overlapping and every card printed in full. On a laptop it still fans, every card solid, and where the fan is tight each card is printed like a playing card's corner: its lines at the top of the strip the next card leaves showing, its file or command running down the edge. This replaces 0.3.1's see-through cards and labels at two heights.
+
+### Fixed
+- A command's name wraps at its spaces, never inside a flag: `push` over `--force`, not `push --` over `force`.
+
 ## [0.3.1] - 2026-10-01
 
 A fanned hand can be read card by card.

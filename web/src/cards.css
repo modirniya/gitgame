@@ -81,6 +81,9 @@
   font-size: 0.95em;
   font-weight: 700;
 }
+.card .name .flag {
+  white-space: nowrap;
+}
 .card.initial {
   --band: var(--faint);
 }

@@ -14,36 +14,55 @@ import { incidentText } from "./copy.js";
 // A hand card is 96 px wide; a fanned one shows at least this much of itself, a finger's width.
 const CARD = 96;
 const TAP = 44;
-// A fanned card's label (its file and lines, or a command's name) is at most 86 px from the card's edge (`git bisect`),
-// and the next card's own label starts 6 px into that card: cards closer than this would print one label on another.
-const LABEL = 80;
+// A card's longest label (`git bisect`), centred, is clear of the next card while the card shows this much of itself;
+// fanned closer, each card is printed like a playing card's corner instead.
+const LABEL = 88;
+// A card in the phone's grid is at least this wide, so the deck's longest file name fits on one line.
+const CELL = 76;
+const GAP = 8;
 
 /**
  * How the hand fans on a screen `width` wide: the cards in each row, and how much each overlaps the one before. One
- * row if every card keeps TAP pixels to tap, otherwise two. `stagger` when the cards are so close that one label
- * would be printed on the next card's, so the labels take two heights in turn.
+ * row if every card keeps TAP pixels to tap, otherwise two.
  */
 export function fanLayout(n, width) {
   const step = (count) => (count > 1 ? Math.min(CARD + 8, (width - CARD) / (count - 1)) : CARD + 8);
   const rows = n > 1 && step(n) < TAP ? 2 : 1;
   const perRow = Math.ceil(n / rows);
-  const shown = Math.floor(step(perRow));
-  return { rows, perRow, overlap: Math.max(0, CARD - shown), stagger: shown < LABEL };
+  return { rows, perRow, overlap: Math.max(0, CARD - Math.floor(step(perRow))) };
 }
 
-// The hub's width: the phone's, or on a wide screen the column beside the Table (frame.css), less its gutters.
+/** How the hand lies in a grid `width` wide: as many columns as keep each card CELL wide, and each card's width. */
+export function gridLayout(width) {
+  const cols = Math.max(1, Math.floor((width + GAP) / (CELL + GAP)));
+  return { cols, cell: Math.floor((width - (cols - 1) * GAP) / cols) };
+}
+
+// A laptop's layout, the Table beside the hub (frame.css).
+const wide = () => (globalThis.innerWidth || 390) >= 1000 && (globalThis.innerHeight || 844) >= 560;
+
+// The hub's width: the phone's, or on a wide screen the column beside the Table, less its gutters.
 function column() {
   const w = globalThis.innerWidth || 390;
-  const h = globalThis.innerHeight || 844;
-  return (w >= 1000 && h >= 560 ? Math.min(560, Math.max(460, w * 0.38)) : Math.min(w, 520)) - 32;
+  return (wide() ? Math.min(560, Math.max(460, w * 0.38)) : Math.min(w, 520)) - 32;
 }
 
-function fan(cards) {
+// On a laptop the hand fans, as the prototype's did; on a phone, where a fan would hide most of each card, it lies in
+// a grid with nothing overlapping.
+function hand(cards) {
   const width = column();
-  const { perRow, overlap, stagger } = fanLayout(cards.length, width);
+  if (!wide()) {
+    const { cols, cell } = gridLayout(width);
+    return el(
+      "div",
+      { class: "hand-rows hand-grid", "aria-label": "your hand", style: `--cols: ${cols}; --cell: ${cell}px` },
+      cards,
+    );
+  }
+  const { perRow, overlap } = fanLayout(cards.length, width);
   const rows = [];
   for (let i = 0; i < cards.length; i += perRow) rows.push(cards.slice(i, i + perRow));
-  const kind = ["hand-fan", overlap > 0 && "fanned", stagger && "stagger"].filter(Boolean).join(" ");
+  const kind = CARD - overlap < LABEL ? "hand-fan fanned" : "hand-fan";
   return el(
     "div",
     { class: "hand-rows", "aria-label": "your hand" },
@@ -215,7 +234,7 @@ export function hub({
           el("button", { onclick: () => change({ ...draft, picking: null }) }, "cancel"),
         ),
       branch(view, left, draft.ops),
-      fan(left.hand.map((c) => card(c, { selected: selected.includes(c.id), onclick: () => toggle(c) }))),
+      hand(left.hand.map((c) => card(c, { selected: selected.includes(c.id), onclick: () => toggle(c) }))),
       packList(view, draft, change, priced),
       unused &&
         el(
