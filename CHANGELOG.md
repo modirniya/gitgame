@@ -7,6 +7,10 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-01
+
+A fanned hand can be read card by card.
+
 ### Fixed
 - Every card in a tightly fanned hand can be read. Overlapped cards are see-through below their band, each card's file and lines sit at the edge the next card leaves showing, and where the cards are too close for that, every other card puts its label low, so a label that runs under its neighbour shows through the half of it that has none. The BUG tag moves into the band's corner, and a selected card shows its ring again.
 
@@ -195,7 +199,9 @@ The first version on the hosted service: the beta ADR-0002 makes the playtest, l
 - Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.
 
-[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/modirniya/gitgame/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/modirniya/gitgame/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/modirniya/gitgame/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/modirniya/gitgame/compare/v0.1.4...v0.2.0
 [0.1.4]: https://github.com/modirniya/gitgame/compare/v0.1.3...v0.1.4
