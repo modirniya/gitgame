@@ -197,10 +197,24 @@ describe("the hub", () => {
 
 it("fans the hand in one row while every card keeps a finger's width, and in two rows past that", () => {
   // a phone's 343 px: six cards fit in one row, seven need two
-  expect(fanLayout(6, 343)).toEqual({ rows: 1, perRow: 6, overlap: 47 });
-  expect(fanLayout(7, 343)).toEqual({ rows: 2, perRow: 4, overlap: 14 });
+  expect(fanLayout(6, 343)).toEqual({ rows: 1, perRow: 6, overlap: 47, stagger: true });
+  expect(fanLayout(7, 343)).toEqual({ rows: 2, perRow: 4, overlap: 14, stagger: false });
   expect(fanLayout(10, 343)).toMatchObject({ rows: 2, perRow: 5 });
   expect(fanLayout(10, 343).overlap).toBeLessThanOrEqual(96 - 44);
   // few cards on a wide screen don't overlap at all
-  expect(fanLayout(3, 608).overlap).toBe(0);
+  expect(fanLayout(3, 608)).toMatchObject({ overlap: 0, stagger: false });
+});
+
+it("staggers the labels only where one would be printed on the next card's", () => {
+  // the hub's column on a laptop: ten cards in two rows of five leave each label its own 89 px; nine in a row, 44
+  expect(fanLayout(10, 454)).toMatchObject({ rows: 2, perRow: 5, stagger: false });
+  expect(fanLayout(9, 454)).toMatchObject({ rows: 1, perRow: 9, stagger: true });
+});
+
+it("marks a hand that overlaps, and one whose labels take two heights", () => {
+  const fan = (v) => render(v).node.querySelector(".hand-fan").className;
+  const seven = Array.from({ length: 7 }, (_, i) => ({ id: `h${i}`, kind: "commit", file: "README.md", lines: 2 }));
+  // jsdom's 1024 × 768 is a laptop: the hub's column beside the Table
+  expect(fan(view())).toBe("hand-fan");
+  expect(fan(view({ you: { ...view().you, hand: seven } }))).toBe("hand-fan fanned stagger");
 });
