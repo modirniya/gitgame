@@ -155,8 +155,9 @@ button.op.wide {
   color: var(--warn);
   margin-right: 4px;
 }
-/* The hand, fanned (event-screens §3): each card overlaps the one before by --overlap, set by the hub so a row fits
-   the screen and every card keeps at least 44 px to tap. The one under the finger, or selected, comes forward. */
+/* The hand on a laptop, fanned (event-screens §3): each card overlaps the one before by --overlap, set by the hub so a
+   row fits the column and every card keeps at least 44 px to tap. The one under the finger, or selected, comes
+   forward. */
 .hand-rows {
   padding: 14px 0 4px;
 }
@@ -182,27 +183,60 @@ button.op.wide {
     0 0 0 3px var(--ink),
     -2px 0 6px rgb(0 0 0 / 0.25);
 }
-/* Overlapped, a card is see-through below its band, and its label sits left-aligned at the edge the next card leaves
-   showing; the BUG tag moves into the band's corner, which no card covers. Where cards are so close that one label
-   would be printed on the next (.stagger, hub.js), every other card puts its label low: a label that runs under the
-   next card shows through the half of it that has none. */
-.hand-fan.fanned .card {
-  background: color-mix(in srgb, var(--paper) 55%, transparent);
-}
+/* Overlapped, a card is printed like a playing card's corner, in the strip the next card leaves showing: its lines at
+   the top and its file (or command) running down the edge. The band names the card's kind only where all of it
+   shows. */
 .hand-fan.fanned .card .face {
   align-content: start;
   justify-items: start;
-  padding: 0.3em 0.45em;
+  gap: 0.2em;
+  padding: 0.35em 0.45em;
+}
+.hand-fan.fanned .card .big {
+  order: -1;
+  font-size: 2em;
+}
+.hand-fan.fanned .card .file,
+.hand-fan.fanned .card .name {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.8em;
+  white-space: nowrap;
+}
+.hand-fan.fanned .card:not(:last-child) .band {
+  color: transparent;
+}
+/* On a phone (hub.js) the hand is a grid, nothing overlapping: each card printed in full, its file and lines from the
+   top left, sized by its column (--cell). */
+.hand-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: 8px;
+}
+.hand-grid .card {
+  --w: var(--cell);
+  width: auto;
+  height: calc(var(--w) * 1.1);
+  transition: transform 120ms ease-out;
+}
+.hand-grid .card .face {
+  align-content: start;
+  justify-items: start;
+  padding: 0.35em 0.3em;
   text-align: left;
 }
-.hand-fan.fanned .card .bug {
+.hand-grid .card .file {
+  font-size: 1em;
+}
+.hand-grid .card.selected {
+  transform: translateY(-3px);
+}
+/* In either, the BUG tag sits in the band's corner, clear of the card's lines. */
+.hand-rows .card .bug {
   top: 0.17em;
 }
-.hand-fan.fanned .card:has(.bug) .band {
+.hand-rows .card:has(.bug) .band {
   padding-left: 4.4em;
-}
-.hand-fan.stagger .card:nth-child(even) .face {
-  align-content: end;
 }
 
 ol.pack {

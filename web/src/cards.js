@@ -12,6 +12,10 @@ export const commandName = (id) => commands[id]?.name ?? id;
 export const commandText = (id) => commands[id]?.text ?? "";
 export const fileColor = (file) => colors[file] ?? "var(--faint)";
 
+// A command's name as it may wrap on a narrow card: at its spaces, never inside a flag (`push --force`, not `push --`).
+const words = (name) =>
+  name.split(" ").flatMap((w, i) => [i > 0 && " ", w.startsWith("-") ? el("span", { class: "flag" }, w) : w]);
+
 /** A card in a hand: a commit card (file, lines, bug) or a command card. `used`: already spent by the pack. */
 export function card(c, { size = "lg", selected = false, used = false, onclick } = {}) {
   const props = {
@@ -31,7 +35,7 @@ export function card(c, { size = "lg", selected = false, used = false, onclick }
       tag,
       { ...props, title: commandText(c.command) },
       el("span", { class: "band" }, "command"),
-      el("span", { class: "face" }, el("span", { class: "name" }, commandName(c.command))),
+      el("span", { class: "face" }, el("span", { class: "name" }, words(commandName(c.command)))),
     );
 
   return el(
