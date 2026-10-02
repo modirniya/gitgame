@@ -14,16 +14,21 @@ import { incidentText } from "./copy.js";
 // A hand card is 96 px wide; a fanned one shows at least this much of itself, a finger's width.
 const CARD = 96;
 const TAP = 44;
+// A fanned card's label (its file and lines, or a command's name) is at most 86 px from the card's edge (`git bisect`),
+// and the next card's own label starts 6 px into that card: cards closer than this would print one label on another.
+const LABEL = 80;
 
 /**
  * How the hand fans on a screen `width` wide: the cards in each row, and how much each overlaps the one before. One
- * row if every card keeps TAP pixels to tap, otherwise two.
+ * row if every card keeps TAP pixels to tap, otherwise two. `stagger` when the cards are so close that one label
+ * would be printed on the next card's, so the labels take two heights in turn.
  */
 export function fanLayout(n, width) {
   const step = (count) => (count > 1 ? Math.min(CARD + 8, (width - CARD) / (count - 1)) : CARD + 8);
   const rows = n > 1 && step(n) < TAP ? 2 : 1;
   const perRow = Math.ceil(n / rows);
-  return { rows, perRow, overlap: Math.max(0, CARD - Math.floor(step(perRow))) };
+  const shown = Math.floor(step(perRow));
+  return { rows, perRow, overlap: Math.max(0, CARD - shown), stagger: shown < LABEL };
 }
 
 // The hub's width: the phone's, or on a wide screen the column beside the Table (frame.css), less its gutters.
@@ -35,13 +40,14 @@ function column() {
 
 function fan(cards) {
   const width = column();
-  const { perRow, overlap } = fanLayout(cards.length, width);
+  const { perRow, overlap, stagger } = fanLayout(cards.length, width);
   const rows = [];
   for (let i = 0; i < cards.length; i += perRow) rows.push(cards.slice(i, i + perRow));
+  const kind = ["hand-fan", overlap > 0 && "fanned", stagger && "stagger"].filter(Boolean).join(" ");
   return el(
     "div",
     { class: "hand-rows", "aria-label": "your hand" },
-    rows.map((row) => el("div", { class: "hand-fan", style: `--overlap: ${overlap}px` }, row)),
+    rows.map((row) => el("div", { class: kind, style: `--overlap: ${overlap}px` }, row)),
   );
 }
 

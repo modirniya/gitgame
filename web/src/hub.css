@@ -178,6 +178,31 @@ button.op.wide {
 }
 .hand-fan .card.selected {
   transform: translateY(-12px);
+  box-shadow:
+    0 0 0 3px var(--ink),
+    -2px 0 6px rgb(0 0 0 / 0.25);
+}
+/* Overlapped, a card is see-through below its band, and its label sits left-aligned at the edge the next card leaves
+   showing; the BUG tag moves into the band's corner, which no card covers. Where cards are so close that one label
+   would be printed on the next (.stagger, hub.js), every other card puts its label low: a label that runs under the
+   next card shows through the half of it that has none. */
+.hand-fan.fanned .card {
+  background: color-mix(in srgb, var(--paper) 55%, transparent);
+}
+.hand-fan.fanned .card .face {
+  align-content: start;
+  justify-items: start;
+  padding: 0.3em 0.45em;
+  text-align: left;
+}
+.hand-fan.fanned .card .bug {
+  top: 0.17em;
+}
+.hand-fan.fanned .card:has(.bug) .band {
+  padding-left: 4.4em;
+}
+.hand-fan.stagger .card:nth-child(even) .face {
+  align-content: end;
 }
 
 ol.pack {

@@ -7,6 +7,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Fixed
+- Every card in a tightly fanned hand can be read. Overlapped cards are see-through below their band, each card's file and lines sit at the edge the next card leaves showing, and where the cards are too close for that, every other card puts its label low, so a label that runs under its neighbour shows through the half of it that has none. The BUG tag moves into the band's corner, and a selected card shows its ring again.
+
 ## [0.3.0] - 2026-10-01
 
 The game feels and looks like the mobile prototype (M15): every op you write is answered on the hub as you write it, and every day's close plays back step by step on `main` as it stood, ending on what your pack did and where you stand. The bot is a character again, the guided first game lands its first push and goes on to day 3, and Git's output is Git's own. The online rules are unchanged.
