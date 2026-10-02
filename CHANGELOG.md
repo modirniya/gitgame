@@ -7,6 +7,10 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-10-01
+
+The hand is laid out for the screen it's on: a grid on a phone, a fan on a laptop.
+
 ### Changed
 - The hand is laid out for the screen it's on. On a phone it's a grid, as many columns as keep the longest file name on one line, with nothing overlapping and every card printed in full. On a laptop it still fans, every card solid, and where the fan is tight each card is printed like a playing card's corner: its lines at the top of the strip the next card leaves showing, its file or command running down the edge. This replaces 0.3.1's see-through cards and labels at two heights.
 
@@ -205,7 +209,8 @@ The first version on the hosted service: the beta ADR-0002 makes the playtest, l
 - Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.
 
-[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/modirniya/gitgame/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/modirniya/gitgame/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/modirniya/gitgame/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/modirniya/gitgame/compare/v0.2.0...v0.2.1
