@@ -1,0 +1,94 @@
+/* The maintainer's pulse (M13e): one screen in the game's colors, the pulse line and totals first, then the bars. */
+
+#stats {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+}
+#stats .page {
+  display: grid;
+  gap: 16px;
+}
+.pulse {
+  margin: 0;
+  color: var(--muted);
+}
+.pulse b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.totals div,
+.chart {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.totals dt {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.totals dd {
+  margin: 0;
+  font: 700 1.6rem/1.2 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.periods {
+  display: flex;
+  gap: 8px;
+}
+.periods button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ground);
+}
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+.chart {
+  display: grid;
+  gap: 6px;
+}
+.chart header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+.chart h2 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.chart .total {
+  font: 700 1.1rem/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.chart svg {
+  display: block;
+  width: 100%;
+  height: 96px;
+}
+.chart rect {
+  fill: var(--accent);
+}
+.chart rect.zero {
+  fill: var(--line);
+}
+.chart .axis {
+  display: flex;
+  justify-content: space-between;
+  color: var(--faint);
+  font: 0.75rem/1.2 var(--mono);
+}
+.note {
+  margin: 0;
+  font-size: 0.85rem;
+}

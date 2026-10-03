@@ -66,6 +66,18 @@ defmodule GitGameWeb.Router do
     get "/play", ClientController, :play
   end
 
+  # The maintainer's pulse (M13e): the page and its numbers, both behind the token.
+  pipeline :stats do
+    plug GitGameWeb.Plugs.StatsToken
+  end
+
+  scope "/", GitGameWeb do
+    pipe_through :stats
+
+    get "/stats", ClientController, :stats
+    get "/api/stats", StatsController, :show
+  end
+
   # Server-Sent Events: the browser asks for text/event-stream, which the JSON pipeline would refuse.
   scope "/api", GitGameWeb do
     get "/games/:id/live", LiveController, :show

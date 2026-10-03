@@ -53,6 +53,11 @@ if client_id = System.get_env("GITGAME_GITHUB_CLIENT_ID") do
     client_secret: System.fetch_env!("GITGAME_GITHUB_CLIENT_SECRET")
 end
 
+# The maintainer's pulse at /stats (M13e) is there when its token is in the environment, and isn't otherwise.
+if token = System.get_env("STATS_TOKEN") do
+  config :gitgame, :stats_token, token
+end
+
 if config_env() == :prod do
   # a release carries the rules it was built with, in its priv (the Dockerfile copies rules/ there)
   config :gitgame,

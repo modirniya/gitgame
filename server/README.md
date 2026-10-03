@@ -42,6 +42,7 @@ JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has
 | `DELETE /push/subscriptions` | Signed in: forgets it (`{"endpoint"}`) |
 | `GET /games/:id/live` | Server-Sent Events: `refetch` on connecting and whenever the log grows, nothing else; ends after the release |
 | `GET /health` | Whether the server and its database are up |
+| `GET /stats` | The maintainer's pulse (M13e), behind `STATS_TOKEN` as HTTP Basic auth's password: by day for the last year, new players, games started, packs sent by people and visits; totals; and when a person last sent a pack, when the last game started, how many games are in progress. `404` while the token isn't set, `401` without it |
 
 ## Linking GitHub
 
@@ -71,6 +72,16 @@ fly ssh console -a gitgame-online -C "/app/bin/beta_report --since 2026-10-05"
 ```
 
 Count from the beta's launch date: games played before it, while the beta was built and tested, aren't strangers'.
+
+### The pulse
+
+Between reports, `/stats` on the deployment shows at a glance that the game is being played (M13e): when a person last sent a pack, totals, and bars by day, week or month. It is a pulse, not a measurement: test players and the team count like anyone else. It is there once its token is set, which restarts the app:
+
+```bash
+fly secrets set STATS_TOKEN=… -a gitgame-online
+```
+
+The browser asks for a user name and password: any name, and the token as the password. Without the token set, `/stats` and `/api/stats` answer `404`.
 
 ## Production
 
