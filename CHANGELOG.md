@@ -7,6 +7,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Changed
+- The maintainer's pulse at `/stats` counts from a fresh start and leaves out the team's test players: `STATS_SINCE`, a moment to count from, and `STATS_TEAM`, their handles, both secrets on the deployment. The page says what it leaves out. Nothing is deleted: the beta's data is all kept, and the report still reads it.
+
 ## [0.3.3] - 2026-10-02
 
 A private pulse for the maintainer at `/stats`.

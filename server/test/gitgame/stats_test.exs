@@ -55,5 +55,41 @@ defmodule GitGame.StatsTest do
 
     assert s.pulse.in_progress == 1
     assert s.pulse.last_pack != nil and s.pulse.last_game != nil
+    assert %{since: nil, left_out: 0} = s
+  end
+
+  test "counts from a fresh start, and leaves the team's test players out" do
+    {:ok, old} = Players.create_anonymous()
+    before = game(old, 3)
+    since = DateTime.utc_now()
+
+    {:ok, ana} = Players.create_anonymous()
+    {:ok, tester} = Players.create_anonymous()
+    playing = game(ana, 1)
+    testing = game(tester, 4)
+
+    for {id, seat} <- [{playing, ana.handle}, {testing, tester.handle}, {before, old.handle}] do
+      {:ok, %{version: v}} = Games.load(id)
+      {:ok, _} = Games.send_pack(id, seat, v, %{"ops" => [%{"op" => "pull"}]})
+    end
+
+    for p <- [ana, tester, old],
+        do: Repo.insert!(%Mark{kind: "visit", player_id: p.id, day: Date.utc_today()})
+
+    s = Stats.build(Date.utc_today(), since: since, team: [tester.handle, "nobody-00"])
+    today = List.last(s.days)
+
+    # the old player and their game came before the start, and the tester is the team's; but what the old player did
+    # after the start counts, as a player coming back does
+    assert Map.take(today, [:players, :games, :packs, :visits]) == %{
+             players: 1,
+             games: 1,
+             packs: 2,
+             visits: 2
+           }
+
+    assert s.totals == %{players: 1, games: 1, packs: 2}
+    assert s.pulse.in_progress == 1
+    assert %{since: ^since, left_out: 1} = s
   end
 end

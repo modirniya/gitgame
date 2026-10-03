@@ -42,7 +42,7 @@ JSON, under `/api`. Errors are `{"error": message}` in Git's words where Git has
 | `DELETE /push/subscriptions` | Signed in: forgets it (`{"endpoint"}`) |
 | `GET /games/:id/live` | Server-Sent Events: `refetch` on connecting and whenever the log grows, nothing else; ends after the release |
 | `GET /health` | Whether the server and its database are up |
-| `GET /stats` | The maintainer's pulse (M13e), behind `STATS_TOKEN` as HTTP Basic auth's password: by day for the last year, new players, games started, packs sent by people and visits; totals; and when a person last sent a pack, when the last game started, how many games are in progress. `404` while the token isn't set, `401` without it |
+| `GET /stats` | The maintainer's pulse (M13e), behind `STATS_TOKEN` as HTTP Basic auth's password: by day for the last year, new players, games started, packs sent by people and visits; totals; when a person last sent a pack, when the last game started, how many games are in progress; counted from `STATS_SINCE` and without `STATS_TEAM`'s players (`since`, `left_out`). `404` while the token isn't set, `401` without it |
 
 ## Linking GitHub
 
@@ -82,6 +82,12 @@ fly secrets set STATS_TOKEN=… -a gitgame-online
 ```
 
 The browser asks for a user name and password: any name, and the token as the password. Without the token set, `/stats` and `/api/stats` answer `404`.
+
+Two more secrets shape what it counts: `STATS_SINCE`, an ISO 8601 moment to count from, and `STATS_TEAM`, the handles of the team's test players, comma-separated, whose packs, visits and games it leaves out. Unset, it counts everything. Secrets, not config, so the handles stay out of this public repository:
+
+```bash
+fly secrets set STATS_SINCE=2026-10-03T03:00:00Z STATS_TEAM=one-handle-12,another-34 -a gitgame-online
+```
 
 ## Production
 

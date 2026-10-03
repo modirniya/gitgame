@@ -53,9 +53,20 @@ if client_id = System.get_env("GITGAME_GITHUB_CLIENT_ID") do
     client_secret: System.fetch_env!("GITGAME_GITHUB_CLIENT_SECRET")
 end
 
-# The maintainer's pulse at /stats (M13e) is there when its token is in the environment, and isn't otherwise.
+# The maintainer's pulse at /stats (M13e) is there when its token is in the environment, and isn't otherwise. It counts
+# from `STATS_SINCE` (an ISO 8601 moment), and leaves out `STATS_TEAM`, the team's test players' handles, comma-separated:
+# Fly secrets, like the token, so the handles stay out of the public repository.
 if token = System.get_env("STATS_TOKEN") do
   config :gitgame, :stats_token, token
+end
+
+if since = System.get_env("STATS_SINCE") do
+  {:ok, at, _offset} = DateTime.from_iso8601(since)
+  config :gitgame, :stats_since, at
+end
+
+if team = System.get_env("STATS_TEAM") do
+  config :gitgame, :stats_team, team |> String.split(",", trim: true) |> Enum.map(&String.trim/1)
 end
 
 if config_env() == :prod do

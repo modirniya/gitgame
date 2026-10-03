@@ -1,5 +1,5 @@
-// The maintainer's pulse (M13e): that the game is being played, not how well. Everyone's activity counts alike, the
-// team's and tests' too, and days are UTC days. The server serves this page and /api/stats only behind STATS_TOKEN.
+// The maintainer's pulse (M13e): that the game is being played, not how well. The server counts from a fresh start
+// and leaves the team's test players out, by UTC day, and serves this page and /api/stats only behind STATS_TOKEN.
 import { el, mount } from "./dom.js";
 
 const SERIES = [
@@ -42,6 +42,15 @@ export function ago(iso, now = Date.now()) {
   if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
   const d = Math.floor(s / 86400);
   return `${d} ${d === 1 ? "day" : "days"} ago`;
+}
+
+/** What the counts leave out, in a sentence: before the start (`since`), and the team's test players (`left_out`). */
+export function scope({ since, left_out }) {
+  const from = since
+    ? `Counting since ${MONTHS[since.slice(5, 7) - 1]} ${Number(since.slice(8, 10))}, ${since.slice(11, 16)} UTC`
+    : "Counting from the first day";
+  const team = left_out ? `, leaving out ${left_out} test ${left_out === 1 ? "player" : "players"}` : "";
+  return `${from}${team}. Days are UTC days; bots' packs don't count.`;
 }
 
 const label = (key, period) => {
@@ -137,11 +146,7 @@ export function statsPage(data, { period = "day", onPeriod = () => {}, now = Dat
       { class: "charts" },
       SERIES.map((s) => chart(s, bars, period)),
     ),
-    el(
-      "p",
-      { class: "muted note" },
-      "Days are UTC days. Everyone counts, tests and the team included; bots' packs don't.",
-    ),
+    el("p", { class: "muted note" }, scope(data)),
   );
 }
 

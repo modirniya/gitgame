@@ -33,5 +33,6 @@ defmodule GitGameWeb.StatsControllerTest do
     assert length(body["days"]) == 365
     assert Map.keys(body["totals"]) |> Enum.sort() == ~w(games packs players)
     assert body["pulse"]["in_progress"] == 0
+    assert %{"since" => nil, "left_out" => 0} = body
   end
 end
