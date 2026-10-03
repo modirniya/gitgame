@@ -1,6 +1,6 @@
 // The client is static files; the remote is the Phoenix app in ../server. In development and preview, /api is proxied
 // to it, so the browser sees one origin and the server needs no CORS; in production the server serves both (M11).
-// Two pages (ADR-0009): the landing page at /, and the game at /play.
+// Three pages: the landing page at /, the game at /play (ADR-0009), and the maintainer's pulse at /stats (M13e).
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import { name, domain } from "./src/brand.js";
@@ -49,12 +49,13 @@ const brand = {
   },
 };
 
-// The server serves the game at /play; Vite's own address for that page is /play/.
+// The server serves the game at /play and the pulse at /stats; Vite's own addresses for them end in a slash.
 const pages = {
   name: "pages",
   configureServer(server) {
     server.middlewares.use((req, _res, next) => {
-      if (req.url === "/play" || req.url.startsWith("/play?")) req.url = req.url.replace("/play", "/play/");
+      for (const page of ["/play", "/stats"])
+        if (req.url === page || req.url.startsWith(`${page}?`)) req.url = req.url.replace(page, `${page}/`);
       next();
     });
   },
@@ -64,7 +65,11 @@ const page = (path) => fileURLToPath(new URL(path, import.meta.url));
 
 export default defineConfig({
   plugins: [brand, pages],
-  build: { rollupOptions: { input: { landing: page("index.html"), play: page("play/index.html") } } },
+  build: {
+    rollupOptions: {
+      input: { landing: page("index.html"), play: page("play/index.html"), stats: page("stats/index.html") },
+    },
+  },
   // the cards read rules/deck.json, one level up
   server: { proxy: api, fs: { allow: [".."] } },
   preview: { proxy: api },

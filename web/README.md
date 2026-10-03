@@ -31,6 +31,7 @@ npm run build          # the PWA in dist/
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `play/index.html`             | The game's page, served at `/play`                                                                                        |
 | `index.html`, `src/landing.*` | The landing page at `/` (ADR-0009): static HTML for search engines and link previews, on the game's stylesheet            |
+| `stats/`, `src/stats.*`       | The maintainer's pulse at `/stats` (M13e), behind `STATS_TOKEN`: the pulse line, totals, bars by day, week or month       |
 | `public/og.png`               | The link-preview image, drawn by `scripts/og-image.sh` from `scripts/og-image.html`                                       |
 | `src/main.js`, `src/route.js` | The entry and the addresses (`/play#/`, `#/g/<id>[/<seat>]`, `#/room/<code>`, `#/r/<id>/<day>`)                           |
 | `src/api.js`                  | The remote's JSON API; errors carry the remote's own words                                                                |

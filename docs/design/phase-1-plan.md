@@ -242,7 +242,7 @@ Strangers play the beta, and it answers what the playtest would have ([ADR-0002]
   - **Tests:** the lock refuses without the token, and the counts add up over a few seeded rows.
   - The maintainer's to do: `fly secrets set STATS_TOKEN=… -a gitgame-online`. Setting a secret restarts the app.
 
-  *Decided 2026-10-02:* the page is for the maintainer only, and test players aren't filtered out. Where visitors come from would mean recording something new, so it is a separate question and not part of this. *Done when:* with `STATS_TOKEN` set, `/stats` on the deployment shows the pulse, the totals and the four charts in each period, and without the token both paths refuse.
+  *Built 2026-10-02, in v0.3.3; ticked once `STATS_TOKEN` is set and the page is checked on the deployment.* *Decided 2026-10-02:* the page is for the maintainer only, and test players aren't filtered out. Where visitors come from would mean recording something new, so it is a separate question and not part of this. *Done when:* with `STATS_TOKEN` set, `/stats` on the deployment shows the pulse, the totals and the four charts in each period, and without the token both paths refuse.
 
 *Done when:* the report, run on production over the beta (M13a), shows two things.
 

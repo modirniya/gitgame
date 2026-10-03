@@ -1,14 +1,15 @@
 defmodule GitGameWeb.ClientController do
   @moduledoc """
   The client's pages, served from the API's own origin so the session cookie works (ADR-0005): the landing page at
-  `/`, and the game at `/play` (ADR-0009). The game routes by the address's hash, so `/play` is its only page; the
-  scripts, styles and icons of both are static files beside them.
+  `/`, the game at `/play` (ADR-0009), and the maintainer's pulse at `/stats` behind its token (M13e). The game routes
+  by the address's hash, so `/play` is its only page; the scripts, styles and icons of all three are static files beside
+  them.
 
   Links from before the game moved to `/play` that carry a query (`/?via=…` from notifications and emails, `/?email=…`,
   `/?github=…`) are sent on to `/play` with it, and the browser keeps their `#/…`. A link with only a hash never
   reaches the server; the landing page's own script sends it on.
 
-  Both pages carry a Content Security Policy: scripts, styles and connections only from this origin, images also from
+  Every page carries a Content Security Policy: scripts, styles and connections only from this origin, images also from
   GitHub's avatars, and no framing. Cards set CSS custom properties through `style` attributes, which the policy
   allows (`style-src-attr`) without allowing any inline script.
   """
@@ -37,6 +38,9 @@ defmodule GitGameWeb.ClientController do
   end
 
   def play(conn, _params), do: page(conn, "play/index.html")
+
+  # the maintainer's pulse (M13e); the router has already checked the token
+  def stats(conn, _params), do: page(conn, "stats/index.html")
 
   defp page(conn, file) do
     dir =

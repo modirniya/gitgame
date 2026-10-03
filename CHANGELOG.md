@@ -7,6 +7,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Added
+- A private pulse for the maintainer at `/stats` (M13e): when a person last sent a pack, when the last game started and how many games are in progress, the totals, and bars of new players, games started, packs sent by people and visits, by day, week or month. Everyone counts alike, tests included. It's behind `STATS_TOKEN`, given as the browser's password, and isn't there at all until the token is set (`GET /api/stats`).
+
 ## [0.3.2] - 2026-10-01
 
 The hand is laid out for the screen it's on: a grid on a phone, a fan on a laptop.
