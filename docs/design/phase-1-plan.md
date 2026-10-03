@@ -227,7 +227,7 @@ Strangers play the beta, and it answers what the playtest would have ([ADR-0002]
   3. **Absences and who left the company:** whether an absent player's pack is written by a bot instead of left empty.
 
   **Open:** how many finished games are enough to decide each. Each decision is a rules change, and gets an ADR where it changes a locked line.
-- [x] **M13e · A pulse.** A private page at `/stats` shows at a glance that the game is being played, between the weekly reports. It is a pulse, not a measurement: the team's own and test players count like anyone else's, and the numbers that decide anything stay the report's (M13a, M13d).
+- [x] **M13e · A pulse.** A private page at `/stats` shows at a glance that the game is being played, between the weekly reports. It is a pulse, not a measurement: the numbers that decide anything stay the report's (M13a, M13d).
   - **What it shows, on one screen.**
     - A pulse line: when a person last sent a pack, when the last game was started, and how many games are in progress.
     - Totals: players, games, and packs sent by people.
@@ -239,10 +239,11 @@ Strangers play the beta, and it answers what the playtest would have ([ADR-0002]
     - The page is a third entry in the web client (`stats/index.html`), with plain SVG bars and no chart library, kept out of search results as `/play` is.
     - Nothing new is recorded: no tracking, no cookies, no table or migration, no other app, and nothing in `rps-db` beyond the `gitgame` database. No ADR, since no rule or locked decision changes.
   - **Locked by a token.** One plug guards both `/stats` and `/api/stats` with HTTP Basic auth, the token as its password (any user name), so a browser asks once and remembers it for the page's own requests. The token is `STATS_TOKEN`, a Fly secret; until it is set, both paths answer 404, so nothing is exposed by default. It may start as a plain shared secret and become a real token later; the name already allows for that.
-  - **Tests:** the lock refuses without the token, and the counts add up over a few seeded rows.
+  - **A fresh start, without the team.** The counts start at `STATS_SINCE`, an ISO 8601 moment, and leave out the players whose handles are in `STATS_TEAM`, comma-separated: their packs, their visits, and the games only they hold seats in. Both are Fly secrets, like the token, so the team's handles stay out of this public repository; unset, the page counts everything. A player who joined before the start still counts for what they do after it. The page says what it leaves out.
+  - **Tests:** the lock refuses without the token, and the counts add up over a few seeded rows, from a start and without a team.
   - The maintainer's to do: `fly secrets set STATS_TOKEN=… -a gitgame-online`. Setting a secret restarts the app.
 
-  *Done 2026-10-03* (#109, in v0.3.3): `STATS_TOKEN` is set on the deployment, and `/stats` there shows the pulse, the totals and the four charts in each period, and refuses without the token. *Decided 2026-10-02:* the page is for the maintainer only, and test players aren't filtered out. Where visitors come from would mean recording something new, so it is a separate question and not part of this. *Done when:* with `STATS_TOKEN` set, `/stats` on the deployment shows the pulse, the totals and the four charts in each period, and without the token both paths refuse.
+  *Done 2026-10-03* (#109, in v0.3.3): `STATS_TOKEN` is set on the deployment, and `/stats` there shows the pulse, the totals and the four charts in each period, and refuses without the token. *Decided 2026-10-02:* the page is for the maintainer only. *Decided 2026-10-03:* it counts from a fresh start and leaves the team's test players out (`STATS_SINCE`, `STATS_TEAM`, in v0.3.4); the beta's own data is kept, and the report still reads all of it. Where visitors come from would mean recording something new, so it is a separate question and not part of this. *Done when:* with `STATS_TOKEN` set, `/stats` on the deployment shows the pulse, the totals and the four charts in each period, and without the token both paths refuse.
 
 *Done when:* the report, run on production over the beta (M13a), shows two things.
 

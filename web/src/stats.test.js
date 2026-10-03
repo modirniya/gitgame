@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { expect, it } from "vitest";
-import { ago, buckets, statsPage } from "./stats.js";
+import { ago, buckets, scope, statsPage } from "./stats.js";
 
 // fourteen days from Monday 2026-09-21 to Sunday 2026-10-04: one new player a day, a game every other day
 const days = Array.from({ length: 14 }, (_, i) => ({
@@ -71,4 +71,13 @@ it("shows the pulse, the totals and four charts, the period picked pressed", () 
   ]);
   buttons[2].click();
   expect(picked).toEqual(["month"]);
+});
+
+it("says what the counts leave out", () => {
+  expect(scope({ since: "2026-10-03T02:45:00Z", left_out: 4 })).toBe(
+    "Counting since Oct 3, 02:45 UTC, leaving out 4 test players. Days are UTC days; bots' packs don't count.",
+  );
+  expect(scope({ since: null, left_out: 0 })).toBe(
+    "Counting from the first day. Days are UTC days; bots' packs don't count.",
+  );
 });
