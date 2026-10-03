@@ -227,6 +227,22 @@ Strangers play the beta, and it answers what the playtest would have ([ADR-0002]
   3. **Absences and who left the company:** whether an absent player's pack is written by a bot instead of left empty.
 
   **Open:** how many finished games are enough to decide each. Each decision is a rules change, and gets an ADR where it changes a locked line.
+- [ ] **M13e · A pulse.** A private page at `/stats` shows at a glance that the game is being played, between the weekly reports. It is a pulse, not a measurement: the team's own and test players count like anyone else's, and the numbers that decide anything stay the report's (M13a, M13d).
+  - **What it shows, on one screen.**
+    - A pulse line: when a person last sent a pack, when the last game was started, and how many games are in progress.
+    - Totals: players, games, and packs sent by people.
+    - Bars for new players, games started, packs sent by people, and visits, per day (the last 30), per week (the last 12) or per month.
+    - Bots' packs are left out, since they only echo the people's.
+  - **How.**
+    - `GitGame.Stats` counts by day, over the last year, from the tables there already are: `players`, `games`, `game_events` and `beta_marks`. Days with nothing come back as zeros.
+    - `GET /api/stats` returns the counts as JSON, and the page adds days up into weeks and months.
+    - The page is a third entry in the web client (`stats/index.html`), with plain SVG bars and no chart library, kept out of search results as `/play` is.
+    - Nothing new is recorded: no tracking, no cookies, no table or migration, no other app, and nothing in `rps-db` beyond the `gitgame` database. No ADR, since no rule or locked decision changes.
+  - **Locked by a token.** One plug guards both `/stats` and `/api/stats` with HTTP Basic auth, the token as its password (any user name), so a browser asks once and remembers it for the page's own requests. The token is `STATS_TOKEN`, a Fly secret; until it is set, both paths answer 404, so nothing is exposed by default. It may start as a plain shared secret and become a real token later; the name already allows for that.
+  - **Tests:** the lock refuses without the token, and the counts add up over a few seeded rows.
+  - The maintainer's to do: `fly secrets set STATS_TOKEN=… -a gitgame-online`. Setting a secret restarts the app.
+
+  *Decided 2026-10-02:* the page is for the maintainer only, and test players aren't filtered out. Where visitors come from would mean recording something new, so it is a separate question and not part of this. *Done when:* with `STATS_TOKEN` set, `/stats` on the deployment shows the pulse, the totals and the four charts in each period, and without the token both paths refuse.
 
 *Done when:* the report, run on production over the beta (M13a), shows two things.
 
