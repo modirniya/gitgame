@@ -7,6 +7,10 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-10-02
+
+A private pulse for the maintainer at `/stats`.
+
 ### Added
 - A private pulse for the maintainer at `/stats` (M13e): when a person last sent a pack, when the last game started and how many games are in progress, the totals, and bars of new players, games started, packs sent by people and visits, by day, week or month. Everyone counts alike, tests included. It's behind `STATS_TOKEN`, given as the browser's password, and isn't there at all until the token is set (`GET /api/stats`).
 
@@ -212,7 +216,8 @@ The first version on the hosted service: the beta ADR-0002 makes the playtest, l
 - Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.
 
-[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/modirniya/gitgame/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/modirniya/gitgame/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/modirniya/gitgame/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/modirniya/gitgame/compare/v0.2.1...v0.3.0
