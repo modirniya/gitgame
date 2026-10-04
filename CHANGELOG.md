@@ -7,6 +7,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Fixed
+- On the pulse at `/stats`, a chart with nothing to count says "most 0", not "most 1".
+
 ## [0.3.4] - 2026-10-02
 
 The pulse counts from a fresh start, without the team's test players.

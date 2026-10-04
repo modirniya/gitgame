@@ -66,10 +66,11 @@ const svg = (tag, attrs, ...children) => {
 };
 
 function chart([series, title], bars, period) {
-  const max = Math.max(1, ...bars.map((b) => b[series]));
+  const most = Math.max(0, ...bars.map((b) => b[series]));
   const total = bars.reduce((n, b) => n + b[series], 0);
   const columns = bars.map((b, i) => {
-    const h = (b[series] / max) * 100;
+    // an empty chart scales against 1, so no bar divides by nothing
+    const h = (b[series] / Math.max(most, 1)) * 100;
     return svg(
       "rect",
       { x: i * 10 + 1, width: 8, y: 100 - Math.max(h, 1), height: Math.max(h, 1), class: b[series] ? "" : "zero" },
@@ -100,7 +101,7 @@ function chart([series, title], bars, period) {
       "div",
       { class: "axis" },
       el("span", {}, bars.length ? label(bars[0].key, period) : ""),
-      el("span", {}, `most ${max}`),
+      el("span", {}, `most ${most}`),
       el("span", {}, bars.length ? label(bars.at(-1).key, period) : ""),
     ),
   );
