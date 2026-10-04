@@ -73,6 +73,17 @@ it("shows the pulse, the totals and four charts, the period picked pressed", () 
   expect(picked).toEqual(["month"]);
 });
 
+it("says the most is 0 when there's nothing to count", () => {
+  const empty = days.map((d) => ({ ...d, players: 0, games: 0, packs: 0, visits: 0 }));
+  const data = {
+    days: empty,
+    totals: { players: 0, games: 0, packs: 0 },
+    pulse: { last_pack: null, last_game: null, in_progress: 0 },
+  };
+  const axis = statsPage(data).querySelector('[data-series="players"] .axis');
+  expect(axis.children[1].textContent).toBe("most 0");
+});
+
 it("says what the counts leave out", () => {
   expect(scope({ since: "2026-10-03T02:45:00Z", left_out: 4 })).toBe(
     "Counting since Oct 3, 02:45 UTC, leaving out 4 test players. Days are UTC days; bots' packs don't count.",
