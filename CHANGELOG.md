@@ -7,6 +7,10 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+## [0.3.5] - 2026-10-04
+
+A fix to the pulse's empty charts.
+
 ### Fixed
 - On the pulse at `/stats`, a chart with nothing to count says "most 0", not "most 1".
 
@@ -226,7 +230,8 @@ The first version on the hosted service: the beta ADR-0002 makes the playtest, l
 - Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.
 
-[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.3.4...HEAD
+[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.3.5...HEAD
+[0.3.5]: https://github.com/modirniya/gitgame/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/modirniya/gitgame/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/modirniya/gitgame/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/modirniya/gitgame/compare/v0.3.1...v0.3.2
