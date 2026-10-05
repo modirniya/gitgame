@@ -1,7 +1,7 @@
 {
   "name": "gitgame-web",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "type": "module",
   "description": "The terminal: the web client for the remote in ../server.",
   "license": "AGPL-3.0-or-later",
