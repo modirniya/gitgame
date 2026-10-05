@@ -53,6 +53,9 @@ defmodule GitGameWeb.ClientController do
 
   def git(conn, _params), do: page(conn, "git/index.html")
 
+  # the page for teachers (M16d)
+  def teach(conn, _params), do: page(conn, "teach/index.html")
+
   defp client_file(file) do
     dir =
       Application.get_env(:gitgame, :client_dir) || Application.app_dir(:gitgame, "priv/static")

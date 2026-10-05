@@ -87,8 +87,24 @@ const addresses = {
   },
 };
 
+// Files the site serves from elsewhere in the repository: the print-and-play deck, built in ../tabletop and handed out
+// at /teach, so there is one copy of it (docs/design/website-content.md). The server lists it in static_paths.
+const deck = page("../tabletop/print-and-play.pdf");
+const files = {
+  name: "files",
+  configureServer(server) {
+    server.middlewares.use("/print-and-play.pdf", (_req, res) => {
+      res.setHeader("Content-Type", "application/pdf");
+      res.end(readFileSync(deck));
+    });
+  },
+  generateBundle() {
+    this.emitFile({ type: "asset", fileName: "print-and-play.pdf", source: readFileSync(deck) });
+  },
+};
+
 export default defineConfig({
-  plugins: [brand, captures, addresses],
+  plugins: [brand, captures, addresses, files],
   build: {
     rollupOptions: {
       input: {

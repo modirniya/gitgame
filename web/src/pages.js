@@ -1,7 +1,7 @@
-// The pages beside the landing page and the game (docs/design/website-content.md): the door at /git and, under it,
-// one page per line Git prints in the game, and one per predicament it puts you in. One list, so the build's inputs,
-// the sitemap and the door agree; the test beside this file holds them to it. A page lives at web/<path>/index.html
-// and is served at /<path>.
+// The pages beside the landing page and the game (docs/design/website-content.md): the doors at /git and /teach and,
+// under /git, one page per line Git prints in the game and one per predicament it puts you in. One list, so the
+// build's inputs, the sitemap, the door and the landing page's header agree; the test beside this file holds them to
+// it. A page lives at web/<path>/index.html and is served at /<path>.
 export const pages = [
   { path: "git", title: "What Git said" },
   { path: "git/non-fast-forward", title: "Rejected: non-fast-forward" },
@@ -14,4 +14,5 @@ export const pages = [
   { path: "git/lost-commit", title: "I lost a commit" },
   { path: "git/who-broke-main", title: "Who broke main" },
   { path: "git/undo-on-main", title: "Undo a commit that's on main" },
+  { path: "teach", title: "Teach Git with a game" },
 ];

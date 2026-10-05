@@ -1,0 +1,257 @@
+<!doctype html>
+<!-- The page for teachers (M16d, docs/design/website-content.md): a 45-minute lesson on 60-second days, what each
+     mechanic answers in a classroom, how to run it, and the print-and-play deck, served at /print-and-play.pdf from
+     ../tabletop by the build. The prose describes rules v0.2, so a rules change checks it. %BRAND% and %DOMAIN% come
+     from src/brand.js at build time (docs/branding.md). Licence: CC BY-SA 4.0 (ADR-0010). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>Teach Git with a game · %BRAND%</title>
+    <meta
+      name="description"
+      content="A 45-minute Git lesson for a class: a guided game, a room of four on 60-second days, the replay read together. No accounts, no install, a deck to print."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/teach" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="Teach Git with a game" />
+    <meta
+      property="og:description"
+      content="A 45-minute lesson: a guided game, a room on 60-second days, the replay read together. Nothing to install, no accounts, and a free deck to print."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/teach" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Teach Git with a game",
+        "description": "A 45-minute lesson: a guided game, a room on 60-second days, the replay read together. Nothing to install, no accounts, and a free deck to print.",
+        "url": "https://%DOMAIN%/teach",
+        "image": "https://%DOMAIN%/og.png",
+        "learningResourceType": "lesson plan",
+        "educationalLevel": "beginner",
+        "teaches": "Git: push, pull, fast-forward, merge conflicts, forced pushes, blame",
+        "timeRequired": "PT45M",
+        "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "isPartOf": { "@type": "WebSite", "name": "%BRAND%", "url": "https://%DOMAIN%/" },
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/git">what Git said</a>
+        <a href="/teach" aria-current="page">teach</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1>Teach Git with a game</h1>
+      <p class="lede">
+        Students push before they pull, can't see the layers between their editor and the remote, and are afraid of
+        losing work. In %BRAND% each of those happens to them inside a minute, in Git's own words, with nothing to
+        install and no account to make. Here is a 45-minute lesson, what to say at each step, and a deck to print.
+      </p>
+
+      <section>
+        <h2>What they can say afterwards</h2>
+        <ul>
+          <li>What a fast-forward is, and why a push is rejected without one.</li>
+          <li>
+            What a pull does before a push, and the choice it carries: rebase or merge, and whose lines win a clash.
+          </li>
+          <li>What a forced push erases, and what brings it back.</li>
+          <li>That history is shared: a day closes with everyone's packs, in an order nobody chose.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>The lesson, 45 minutes</h2>
+        <ol class="steps">
+          <li>
+            <h3>15 minutes: the guided game</h3>
+            <p>
+              Everyone opens <code>%DOMAIN%/play</code> on anything with a browser and taps <em>play the bot</em>. The
+              first game is guided: one thing highlighted and one sentence per step, for the first days. Days last 60
+              seconds, and a day ends early once both packs are in, so twelve days take about ten minutes. Then two
+              minutes: who saw <code>! [rejected]</code>, and what did the bot say it was doing?
+            </p>
+          </li>
+          <li>
+            <h3>20 minutes: a room, then the replay</h3>
+            <p>
+              One student opens a room and shares its link; that link is the whole invitation, three to five seats, bots
+              in any left empty, 60-second days. Twelve minutes of play. Then put one game's replay on the screen, day
+              by day, and stop at the first rejection, the first conflict, the first <code>push --force</code>: what did
+              Git say, and why?
+            </p>
+          </li>
+          <li>
+            <h3>10 minutes: the map</h3>
+            <p>
+              What happened in the game, what it is in Git, and where to read more, from the table below. End on the
+              question the game can't answer for them: what would you have done in a real repository?
+            </p>
+          </li>
+        </ol>
+        <p>
+          Homework, if you like: a room on 24-hour days. Seven days, one pack a day, reminders if they ask for them, and
+          a week of thinking about a push before making it.
+        </p>
+      </section>
+
+      <section>
+        <h2>The map</h2>
+        <div class="scroll">
+          <table class="map">
+            <thead>
+              <tr>
+                <th>In the game</th>
+                <th>In Git</th>
+                <th>Read</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Your push was rejected</td>
+                <td>A non-fast-forward: someone's commit reached <code>main</code> first</td>
+                <td><a href="/git/push-rejected">My push was rejected</a></td>
+              </tr>
+              <tr>
+                <td>The pull chose whose lines win</td>
+                <td>A merge conflict, settled by <code>-X ours</code> or <code>-X theirs</code></td>
+                <td><a href="/git/conflict">Merge conflict</a></td>
+              </tr>
+              <tr>
+                <td>A <code>push --force</code> erased a commit</td>
+                <td>A forced update; the reflog brings it back</td>
+                <td><a href="/git/force-pushed-over-me">Someone force-pushed over my commit</a></td>
+              </tr>
+              <tr>
+                <td>CI flipped a bug; someone played <code>blame</code></td>
+                <td><code>git blame</code>, <code>git bisect</code></td>
+                <td><a href="/git/who-broke-main">Who broke main</a></td>
+              </tr>
+              <tr>
+                <td>A <code>revert</code> on a bug</td>
+                <td><code>git revert</code>: a commit that undoes a commit</td>
+                <td><a href="/git/undo-on-main">Undo a commit that's on main</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>Why it works on the things that are hard to teach</h2>
+        <ul class="why-list">
+          <li>
+            <strong>Push before pull.</strong> The most common mistake in a first Git lesson is a pack in this game: a
+            push from behind is rejected in Git's words and the op is spent. The habit of pulling first forms in a game,
+            not in a repository that matters.
+          </li>
+          <li>
+            <strong>The invisible layers.</strong> Working copy, staging, local branch, remote: the hub draws them as
+            zones, and <code>add</code>, <code>commit</code> and <code>push</code> move cards between them. Students see
+            the layer a command works on before they type it anywhere.
+          </li>
+          <li>
+            <strong>Fear of losing work.</strong> The game is where losing it is safe: <code>push --force</code> erases,
+            <code>reflog</code> restores, and every day can be replayed. The lesson on what Git keeps is on the
+            <a href="/git/lost-commit">lost commit</a> page.
+          </li>
+          <li>
+            <strong>Git as a solo tool.</strong> The day closes with everyone's packs, resolved together in a random
+            order. There is no turn to wait for, and the other players are the reason anything goes wrong.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Running it</h2>
+        <ul>
+          <li>
+            <strong>What you need.</strong> A browser per student, a phone is fine, and one screen for the replay.
+            Nothing to install.
+          </li>
+          <li>
+            <strong>Privacy.</strong> Nothing to sign up for. A device gets a made-up handle, like
+            <code>quiet-otter-42</code>, and a cookie. The server keeps the games played with it and, during the beta,
+            that a player came back. No name and no email, unless a student links a GitHub account or asks for reminders
+            by email; both are optional and off until asked for.
+          </li>
+          <li>
+            <strong>Levels.</strong> Someone who has never used Git has the guide; someone who has will find the details
+            right, down to the flags.
+          </li>
+          <li>
+            <strong>A draft.</strong> The rules are v0.2 and the beta is the playtest, so a rule may change between
+            terms. Every game ends with a box for telling us how it went; the
+            <a href="/git">pages about Git's output</a>
+            describe the rules as they are.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>The deck, to print</h2>
+        <p>
+          The game began on paper, and the paper version is free to print: sixteen US Letter pages, nine poker-size
+          cards to a page. Sixty commit cards, twelve of them bugs, the command cards, the incidents, a token sheet and
+          a one-page reference. Three to five players, about 45 minutes, and it has cards the online game doesn't play
+          yet, <code>bisect</code>, <code>cherry-pick</code>, <code>stash</code> among them, which is a lesson in
+          itself.
+        </p>
+        <p class="cta">
+          <a class="button primary" href="/print-and-play.pdf">download the deck (PDF)</a>
+          <a class="button" href="https://github.com/modirniya/gitgame/blob/main/docs/design/base-rules.md"
+            >the rules</a
+          >
+        </p>
+        <ul>
+          <li>Print at actual size, single-sided, no fit-to-page: the cards are 2.5 by 3.5 inches.</li>
+          <li>
+            Card stock, or sleeves with opaque backs. A face-down bug must not be readable through the paper, or the
+            bluff is gone. No card backs are printed, by design: every card in the draw deck shares a blank back.
+          </li>
+          <li>You also need coins or clips to mark pointers, a six-sided die for the Flaky CI incident, and a pen.</li>
+        </ul>
+        <p>
+          The deck and the text of these pages are under
+          <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>: copy it, change it, print it for a
+          class or a paid workshop; keep the licence and say where it came from.
+        </p>
+      </section>
+
+      <section class="again">
+        <h2>Open a room for your class</h2>
+        <p><a class="button primary" href="/play">open a room</a></p>
+      </section>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://creativecommons.org/licenses/by-sa/4.0/">text CC BY-SA 4.0</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

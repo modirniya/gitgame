@@ -86,6 +86,44 @@
   color: var(--muted);
 }
 
+.page .why-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.page .why-list li,
+.page .steps p {
+  color: var(--muted);
+}
+.page .why-list strong,
+.page th {
+  color: var(--ink);
+}
+.scroll {
+  overflow-x: auto;
+}
+.map {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 560px;
+  font-size: 0.95rem;
+}
+.map th,
+.map td {
+  text-align: left;
+  vertical-align: top;
+  padding: 8px 10px;
+  border-top: 1px solid var(--line);
+}
+.map th {
+  border-top: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .captured {
   margin-top: 36px;
   padding-top: 12px;

@@ -38,4 +38,4 @@ Contributions are welcome, including rules proposals — see [CONTRIBUTING.md](C
 
 ## License
 
-Code and documentation: [GNU AGPL-3.0-or-later](LICENSE). The project name, logo, and domain are trademarks-in-use of NeuEra LLC and are not covered by the code license.
+Code and documentation: [GNU AGPL-3.0-or-later](LICENSE). The pages under `/git`, `/teach` and `/teams` on the site, and the print-and-play deck: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) ([ADR-0010](docs/adr/0010-pages-and-deck-under-cc-by-sa.md)). The project name, logo, and domain are trademarks-in-use of NeuEra LLC and are not covered by either.

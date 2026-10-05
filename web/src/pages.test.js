@@ -28,3 +28,8 @@ it("the door at /git links every page under it", () => {
   const door = read("git/index.html");
   for (const { path } of pages) if (path.startsWith("git/")) expect(door).toContain(`href="/${path}"`);
 });
+
+it("the landing page's header links every door", () => {
+  const landing = read("index.html");
+  for (const { path } of pages) if (!path.includes("/")) expect(landing).toContain(`href="/${path}"`);
+});

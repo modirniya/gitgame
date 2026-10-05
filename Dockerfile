@@ -15,6 +15,8 @@ RUN npm ci
 COPY web/ ./
 # the cards read their colors from the deck
 COPY rules/ /build/rules/
+# the page for teachers hands out the print-and-play deck, read from one level up too (M16d)
+COPY tabletop/print-and-play.pdf /build/tabletop/
 RUN npm run build
 
 # ---------- the server ----------

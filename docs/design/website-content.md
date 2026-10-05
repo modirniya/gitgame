@@ -35,7 +35,7 @@ Wave 1 ships before the launch (M13c), so the launch leaves pages behind it; wav
 | I lost a commit | `/git/lost-commit` | card: `reflog` | built |
 | Who broke main | `/git/who-broke-main` | card: `blame`; tabletop: `bisect` | built |
 | Undo a commit that's on main | `/git/undo-on-main` | card: `revert` | built |
-| Teach (the door, one page) | `/teach` | the guided first game, `tabletop/print-and-play.pdf` | planned |
+| Teach (the door, one page) | `/teach` | the guided first game, `tabletop/print-and-play.pdf` | built |
 | Teams (the door, one page) | `/teams` | a room link, 5-minute days | planned |
 
 ### Wave 2
@@ -78,6 +78,7 @@ Known: the captures in the repository are from Git 2.50.1 (Apple Git-155), the G
 - `web/src/pages.js` is the one list: a page's `path` is its address and its file is `web/<path>/index.html`. The build takes its inputs and the sitemap from it; the test beside it checks each page's title, description, canonical address and way into the game, and that the door at `/git` links every page under it.
 - The remote serves `/git` and `/git/<page>` from the built client (`GitGameWeb.ClientController.git/2`): a page's name is letters, digits and dashes, and a name the build didn't write is a plain 404.
 - In development, Vite serves a page at its address without a trailing slash, as the remote does.
+- The print-and-play deck has one copy, `tabletop/print-and-play.pdf`; the build serves it at `/print-and-play.pdf`, and the remote lists it among its static paths.
 - Each page's words describe rules v0.2, so a rules change checks them, as ADR-0009 has it check the landing page.
 
 ## 6. Measuring it
@@ -86,5 +87,6 @@ Nothing is recorded on the pages. Impressions and clicks per page come from Goog
 
 ## 7. Open
 
-- The licence for the pages' prose and the print-and-play deck: CC BY-SA 4.0 is the working choice (2026-10-04), to be stated on `/teach` and in the README's licence section when `/teach` is built. Until then the pages carry no licence line of their own and the repository's AGPL applies.
+- The deck's cover doesn't yet name its licence, CC BY-SA 4.0 ([ADR-0010](../adr/0010-pages-and-deck-under-cc-by-sa.md), stated on every page's footer and in the README): a line in `tabletop/build.py` and a rebuilt PDF.
+- The deck is laid out for US Letter, nine cards a page, without bleed or cut marks for a print shop; a layout to the print-and-play norms (bleed, A4 as well as Letter) is a separate change to `tabletop/build.py`.
 - Whether three links fit the landing page's header on a phone once `/teach` and `/teams` open; if not, "what Git said" moves under the hero.

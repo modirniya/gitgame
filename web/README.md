@@ -34,6 +34,7 @@ npm run build          # the PWA in dist/
 | `stats/`, `src/stats.*`                 | The maintainer's pulse at `/stats` (M13e), behind `STATS_TOKEN`: the pulse line, totals, bars by day, week or month                                       |
 | `public/og.png`                         | The link-preview image, drawn by `scripts/og-image.sh` from `scripts/og-image.html`                                                                       |
 | `git/`, `src/pages.js`, `src/pages.css` | The pages about Git's output under `/git` (M16): the door and one page per line, listed once in `pages.js`, which the build's inputs and the sitemap read |
+| `teach/`                                | The page for teachers at `/teach` (M16d): the lesson, and the print-and-play deck, which the build serves at `/print-and-play.pdf` from `../tabletop`     |
 | `captures/`                             | Git's output as `scripts/git-output.sh` captured it, one file per scenario; a page quotes one with `%CAPTURE:<scenario>%`, never types it                 |
 | `src/main.js`, `src/route.js`           | The entry and the addresses (`/play#/`, `#/g/<id>[/<seat>]`, `#/room/<code>`, `#/r/<id>/<day>`)                                                           |
 | `src/api.js`                            | The remote's JSON API; errors carry the remote's own words                                                                                                |
