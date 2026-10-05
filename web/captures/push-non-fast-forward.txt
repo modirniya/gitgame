@@ -1,0 +1,10 @@
+# git version 2.50.1 (Apple Git-155)
+# push-non-fast-forward: ana pushes a commit built on the old tip after bot's push landed; she fetched, so her clone knows it is behind
+$ git push
+To ../origin.git
+ ! [rejected]        main -> main (non-fast-forward)
+error: failed to push some refs to '../origin.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. If you want to integrate the remote changes,
+hint: use 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.

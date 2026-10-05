@@ -1,0 +1,159 @@
+<!doctype html>
+<!-- One line Git prints in the game, explained (M16, docs/design/website-content.md): what Git checked, what to do
+     now, and why a day of the game did it to you. Every capture placeholder is replaced at build time by the output
+     scripts/git-output.sh captured from a real Git (captures/*.txt), and the version placeholder by that Git's version; the
+     prose around them describes rules v0.2, so a rules change checks it. %BRAND% and %DOMAIN% come from src/brand.js. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>Rejected: non-fast-forward · %BRAND%</title>
+    <meta
+      name="description"
+      content="Why git push says ! [rejected] main -> main (non-fast-forward), the two hints Git prints with it, and the pull that fixes it. Captured from a real Git."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/git/non-fast-forward" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="git push rejected: non-fast-forward, explained" />
+    <meta
+      property="og:description"
+      content="Why Git refused the push, the two hints it prints with it, and the pull that fixes it. Captured from a real Git."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/git/non-fast-forward" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "git push rejected: non-fast-forward, explained",
+        "description": "Why Git refused the push, the two hints it prints with it, and the pull that fixes it. Captured from a real Git.",
+        "url": "https://%DOMAIN%/git/non-fast-forward",
+        "image": "https://%DOMAIN%/og.png",
+        "isPartOf": { "@type": "WebSite", "name": "%BRAND%", "url": "https://%DOMAIN%/" },
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/git">what Git said</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1><code>git push</code> rejected: non-fast-forward</h1>
+      <p class="lede">
+        Someone else's commit reached <code>main</code> before yours, and your commit doesn't have theirs in its
+        history. Git won't move a branch backwards, so the remote refuses. Here is the line, what Git checked, and the
+        pull that fixes it.
+      </p>
+      <pre class="capture">%CAPTURE:push-non-fast-forward%</pre>
+
+      <section>
+        <h2>What Git checked</h2>
+        <p>
+          A push asks the remote to move its <code>main</code> from the tip it has to the commit you're sending. Git
+          moves a branch forward only: the commit you send must have the remote's tip among its ancestors, so that
+          nothing already on <code>main</code> falls off it. A move like that is a fast-forward.
+        </p>
+        <p>
+          Yours isn't one. The remote's tip is bot's commit; your commit was built on the tip before it, so bot's commit
+          is nowhere in your history. Moving <code>main</code> to your commit would make theirs vanish from the branch.
+          The remote refuses, and <code>git push</code> prints the refusal beside the ref it couldn't update,
+          <code>main -&gt; main</code>, with the reason in brackets. The <code>error:</code> line sums it up, and the
+          <code>hint:</code> lines are Git's advice.
+        </p>
+      </section>
+
+      <section>
+        <h2>Two hints for one refusal</h2>
+        <p>
+          Which hint you get depends on whether your clone has heard of the other commit. If you fetched or pulled after
+          it landed, your clone knows <code>origin/main</code> is ahead of what you built on, and Git says your branch
+          is <em>behind its remote counterpart</em>. If you haven't, your clone has never seen that commit, the reason
+          in brackets changes to <code>(fetch first)</code>, and the hint names what usually did it: another repository
+          pushing to the same ref.
+        </p>
+        <pre class="capture">%CAPTURE:push-fetch-first%</pre>
+        <p>
+          Same refusal, same cure. In the game, that other repository is another player's pack, run before yours in the
+          day's random order.
+        </p>
+      </section>
+
+      <section>
+        <h2>What to do now</h2>
+        <p>
+          Pull, then push. A pull fetches the commit you lack and either puts your commit on top of it
+          (<code>--rebase</code>) or joins the two with a merge commit (<code>--no-rebase</code>). With the other commit
+          in your history, the push is a fast-forward:
+        </p>
+        <pre class="capture">%CAPTURE:push-after-pull-rebase%</pre>
+        <p>
+          The push prints the move it made, old tip to new. A plain <code>git pull</code>, with no choice between rebase
+          and merge made yet, stops and asks for one instead:
+        </p>
+        <pre class="capture">%CAPTURE:pull-divergent%</pre>
+        <p>
+          If the two commits changed the same lines, the pull stops on a conflict, and you resolve it before pushing.
+          That line, <code>CONFLICT (content)</code>, gets a page of its own.
+        </p>
+        <p>
+          What not to do on a shared branch: <code>git push --force</code>. The remote would take your commit anyway,
+          and the other one would vanish from <code>main</code>. Git marks that move <code>(forced update)</code>; it,
+          too, gets a page.
+        </p>
+      </section>
+
+      <section>
+        <h2>Why the game does this to you</h2>
+        <p>
+          In %BRAND% nobody takes turns. Everyone writes a pack for the day, and when the day closes the remote runs
+          every pack against the shared <code>main</code> in a random order. If another player's push lands before
+          yours, your push meets exactly this line. That is why a pack pulls before each push, and why the pull is where
+          you choose what happens to your commit if the two clash. Today a rejected push still costs the op you spent on
+          it; whether it should is one of the questions the beta is asking.
+        </p>
+      </section>
+
+      <section class="again">
+        <h2>Play a day where this happens</h2>
+        <p>
+          One tap starts a game against the bot. It pushes every day, so sooner or later it reaches
+          <code>main</code> first.
+        </p>
+        <p><a class="button primary" href="/play">play the bot now</a></p>
+      </section>
+
+      <p class="captured">
+        Output captured from Git %GIT_VERSION% by
+        <a href="https://github.com/modirniya/gitgame/blob/main/scripts/git-output.sh">scripts/git-output.sh</a>, in a
+        scratch repository with two clones, ana's and bot's, and fixed dates, so the hashes are the same on every run.
+        It is captured again at every Git release.
+      </p>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

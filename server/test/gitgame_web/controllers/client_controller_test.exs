@@ -21,6 +21,21 @@ defmodule GitGameWeb.ClientControllerTest do
     end
   end
 
+  test "/git is the door to the pages about Git's output, and /git/<page> is one of them", %{
+    conn: conn
+  } do
+    assert html_response(get(conn, ~p"/git"), 200) =~ "<h1>What Git said</h1>"
+    page = get(conn, "/git/non-fast-forward")
+    assert html_response(page, 200) =~ "non-fast-forward"
+    assert [csp] = get_resp_header(page, "content-security-policy")
+    assert csp =~ "default-src 'self'"
+    assert get_resp_header(page, "cache-control") == ["no-cache"]
+
+    # a page the build didn't write, or a name that isn't one, is a plain 404
+    assert text_response(get(conn, "/git/no-such-page"), 404) =~ "fatal: no page"
+    assert text_response(get(conn, "/git/..%2Findex"), 404) =~ "fatal: no page"
+  end
+
   test "links from before the game moved, whose query the server sees, go on to /play with it", %{
     conn: conn
   } do

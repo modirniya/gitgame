@@ -1,0 +1,89 @@
+/* The pages about Git's output (M16), on the game's stylesheet (styles.css) and the landing page's header, footer
+   and column (landing.css), so a page looks like what it leads to. This file lays out the article: a reading width,
+   a captured transcript as a terminal leaves it, the door's list of lines, and the note naming the Git that spoke. */
+
+.page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.page h1 {
+  font-size: clamp(1.5rem, 4.5vw, 2.1rem);
+  line-height: 1.2;
+  margin: 32px 0 12px;
+}
+.page h2 {
+  font-size: 1.2rem;
+  margin: 36px 0 12px;
+}
+.page h2::before {
+  content: "# ";
+  color: var(--muted);
+}
+.page p,
+.page li {
+  max-width: 68ch;
+}
+.page .lede {
+  font-size: 1.05rem;
+  color: var(--muted);
+}
+.page code {
+  color: var(--ink);
+  background: var(--raised);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+.capture {
+  background: var(--term);
+  color: var(--term-ink);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 16px 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.capture .prompt {
+  font-weight: 700;
+}
+
+.lines-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+.lines-list li {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--raised);
+}
+.lines-list .line {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--reject);
+  white-space: pre-wrap;
+}
+.lines-list a {
+  font-weight: 700;
+}
+.lines-list p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.captured {
+  margin-top: 36px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+}

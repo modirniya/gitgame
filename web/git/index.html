@@ -1,0 +1,84 @@
+<!doctype html>
+<!-- The door to the pages about Git's output (M16, docs/design/website-content.md): one entry per line the game
+     prints, each linking to its page. Every page under /git is listed in src/pages.js, and the test there checks
+     that this door links it. %BRAND% and %DOMAIN% come from src/brand.js at build time (docs/branding.md). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>What Git said · %BRAND%</title>
+    <meta
+      name="description"
+      content="Every line Git prints in a day of %BRAND%, explained: what Git checked, what to do now, and why the game did it to you. Captured from a real Git."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/git" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="What Git said · %BRAND%" />
+    <meta
+      property="og:description"
+      content="Every line Git prints in a day of the game, explained: what Git checked, what to do now, and why the game did it to you."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/git" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/git" aria-current="page">what Git said</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1>What Git said</h1>
+      <p class="lede">
+        Every command in a day of %BRAND% prints what Git prints: <code>! [rejected]</code>,
+        <code>(forced update)</code>, <code>Already up to date.</code> These pages take the lines one at a time: what
+        Git checked, what to do now, and why a day of the game did it to you. Every line on them is captured from a real
+        Git by a script, never typed, and each page names the Git that printed it.
+      </p>
+
+      <section>
+        <h2>When you pushed</h2>
+        <!-- Git's output keeps its own columns -->
+        <!-- prettier-ignore -->
+        <ul class="lines-list">
+          <li>
+            <span class="line"> ! [rejected]        main -&gt; main (non-fast-forward)</span>
+            <a href="/git/non-fast-forward">Rejected: non-fast-forward</a>
+            <p>Someone's commit reached <code>main</code> before yours. Why Git refuses, the two hints it prints, and the pull that fixes it.</p>
+          </li>
+        </ul>
+        <p>
+          Next on these pages: <code>(forced update)</code>, <code>CONFLICT (content)</code>, and the two spellings of
+          nothing to do, <code>Already up to date.</code> and <code>Everything up-to-date</code>.
+        </p>
+      </section>
+
+      <section class="again">
+        <h2>Hear it from Git itself</h2>
+        <p><a class="button primary" href="/play">play the bot now</a></p>
+      </section>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

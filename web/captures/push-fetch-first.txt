@@ -1,0 +1,11 @@
+# git version 2.50.1 (Apple Git-155)
+# push-fetch-first: the same race, but ana never fetched, so her clone has not seen bot's commit at all
+$ git push
+To ../origin.git
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to '../origin.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. This is usually caused by another repository pushing to
+hint: the same ref. If you want to integrate the remote changes, use
+hint: 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
