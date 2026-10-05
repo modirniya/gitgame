@@ -7,6 +7,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Fixed
+- The NeuEra link in every page's footer and structured data, and in the README, went nowhere; it now points to legal.neuera.app.
+
 ## [0.5.0] - 2026-10-05
 
 A page and a panel for people who know nothing about Git, and the deck's cover names its licence.
