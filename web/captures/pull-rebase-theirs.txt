@@ -1,0 +1,20 @@
+# git version 2.50.1 (Apple Git-155)
+# pull-rebase-theirs: the same pull with --rebase -X theirs, which keeps ana's side of the clash
+$ git pull --rebase -X theirs
+From ../origin
+   ab5768d..7a20dd4  main       -> origin/main
+Successfully rebased and updated refs/heads/main.
+$ git log --oneline
+c2b4aa8 api: rename the endpoint
+7a20dd4 api: add the endpoint
+ab5768d api: the first endpoint
+07dec17 readme: the project
+$ git diff origin/main
+diff --git a/api.py b/api.py
+index 48fcc42..4aa2239 100644
+--- a/api.py
++++ b/api.py
+@@ -1,2 +1,2 @@
+ line 2
+-line 3
++line 4

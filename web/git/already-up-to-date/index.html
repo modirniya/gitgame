@@ -1,0 +1,129 @@
+<!doctype html>
+<!-- Two lines Git prints in the game, explained (M16, docs/design/website-content.md): what each checked, the status
+     line between them, and why a day of the game prints them. Every capture placeholder is replaced at build time by
+     the output scripts/git-output.sh captured from a real Git (captures/*.txt), and the version placeholder by that
+     Git's version; the prose describes rules v0.2, so a rules change checks it. %BRAND% and %DOMAIN% come from src/brand.js. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>Nothing to do, two spellings · %BRAND%</title>
+    <meta
+      name="description"
+      content="Why git pull says Already up to date. and git push says Everything up-to-date: what each one checked, and the git status line between them."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/git/already-up-to-date" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="Already up to date. and Everything up-to-date, explained" />
+    <meta
+      property="og:description"
+      content="Why a pull and a push spell nothing-to-do differently, what each one checked, and the status line between them. Captured from a real Git."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/git/already-up-to-date" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Already up to date. and Everything up-to-date, explained",
+        "description": "Why a pull and a push spell nothing-to-do differently, what each one checked, and the status line between them. Captured from a real Git.",
+        "url": "https://%DOMAIN%/git/already-up-to-date",
+        "image": "https://%DOMAIN%/og.png",
+        "isPartOf": { "@type": "WebSite", "name": "%BRAND%", "url": "https://%DOMAIN%/" },
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/git">what Git said</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1><code>Already up to date.</code> and <code>Everything up-to-date</code></h1>
+      <p class="lede">
+        Both mean Git found nothing to do. They are spelled differently because they come from different parts of Git,
+        and they check different things.
+      </p>
+      <pre class="capture">%CAPTURE:pull-already-up-to-date%</pre>
+      <pre class="capture">%CAPTURE:push-everything-up-to-date%</pre>
+
+      <section>
+        <h2>What each one checked</h2>
+        <p>
+          <code>git pull</code> fetches, then asks whether <code>origin/main</code> has a commit your
+          <code>main</code> lacks. If it doesn't, there is nothing to merge or rebase, and the merge machinery says
+          <code>Already up to date.</code>: a sentence, with a full stop.
+        </p>
+        <p>
+          <code>git push</code> asks the opposite: whether the remote's <code>main</code> lacks a commit yours has. If
+          it doesn't, there is nothing to send, and the push machinery says <code>Everything up-to-date</code>: hyphens,
+          no full stop. Git dropped the hyphens from the merge's message years ago and never from the push's. Both are
+          correct output today, so these pages leave them as they are.
+        </p>
+      </section>
+
+      <section>
+        <h2>The line between them</h2>
+        <p>
+          <code>git status</code> doesn't talk to the remote. It compares your <code>main</code> with
+          <code>origin/main</code> as of your last fetch, and counts: ahead by the commits you have and it doesn't,
+          behind by the reverse.
+        </p>
+        <pre class="capture">%CAPTURE:status-ahead%</pre>
+        <p>
+          Ahead means a push has something to send. Behind means a pull has something to bring. Both at once means the
+          branches have diverged, which is where the <a href="/git/forced-update">forced update</a> page leaves bot.
+          Neither, and the two commands above print their nothing-to-do lines:
+        </p>
+        <pre class="capture">%CAPTURE:status-up-to-date%</pre>
+      </section>
+
+      <section>
+        <h2>Why the game does this to you</h2>
+        <p>
+          A day's pack can push with nothing to push, or pull at the tip. The remote prints the same two lines, and
+          charges nothing: an op with nothing to do is free in %BRAND%, so the pull written before every push costs you
+          only on the days it brings something in.
+        </p>
+      </section>
+
+      <section class="again">
+        <h2>Play a day where this happens</h2>
+        <p>One tap starts a game against the bot, and your first pull is written for you.</p>
+        <p><a class="button primary" href="/play">play the bot now</a></p>
+      </section>
+
+      <p class="captured">
+        Output captured from Git %GIT_VERSION% by
+        <a href="https://github.com/modirniya/gitgame/blob/main/scripts/git-output.sh">scripts/git-output.sh</a>, in a
+        scratch repository with two clones, ana's and bot's, and fixed dates, so the hashes are the same on every run.
+        It is captured again at every Git release.
+      </p>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

@@ -4,4 +4,8 @@
 export const pages = [
   { path: "git", title: "What Git said" },
   { path: "git/non-fast-forward", title: "Rejected: non-fast-forward" },
+  { path: "git/forced-update", title: "Forced update" },
+  { path: "git/conflict", title: "Merge conflict" },
+  { path: "git/already-up-to-date", title: "Nothing to do, two spellings" },
+  { path: "git/fast-forward", title: "Fast-forward and rebased" },
 ];

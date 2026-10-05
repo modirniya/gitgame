@@ -1,5 +1,5 @@
 # git version 2.50.1 (Apple Git-155)
-# pull-conflict-rebase: the same pull with --rebase; the rebase stops on the conflict
+# pull-conflict-rebase: the same pull with --rebase; the rebase stops on the conflict, and she resolves it and continues
 $ git pull --rebase
 From ../origin
    ab5768d..7a20dd4  main       -> origin/main
@@ -12,3 +12,24 @@ hint: You can instead skip this commit: run "git rebase --skip".
 hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
 hint: Disable this message with "git config set advice.mergeConflict false"
 Could not apply a97e6d9... # api: rename the endpoint
+$ git status
+interactive rebase in progress; onto 7a20dd4
+Last command done (1 command done):
+   pick a97e6d9 # api: rename the endpoint
+No commands remaining.
+You are currently rebasing branch 'main' on '7a20dd4'.
+  (fix conflicts and then run "git rebase --continue")
+  (use "git rebase --skip" to skip this patch)
+  (use "git rebase --abort" to check out the original branch)
+
+Unmerged paths:
+  (use "git restore --staged <file>..." to unstage)
+  (use "git add <file>..." to mark resolution)
+	both modified:   api.py
+
+no changes added to commit (use "git add" and/or "git commit -a")
+$ git add api.py
+$ git rebase --continue
+[detached HEAD f842f6d] api: rename the endpoint
+ 1 file changed, 1 insertion(+)
+Successfully rebased and updated refs/heads/main.

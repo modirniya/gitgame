@@ -61,10 +61,40 @@
             <a href="/git/non-fast-forward">Rejected: non-fast-forward</a>
             <p>Someone's commit reached <code>main</code> before yours. Why Git refuses, the two hints it prints, and the pull that fixes it.</p>
           </li>
+          <li>
+            <span class="line warn"> + 7a20dd4...864afd7 main -&gt; main (forced update)</span>
+            <a href="/git/forced-update">Forced update</a>
+            <p>The push went through, and that is the problem. What <code>--force</code> erased, what the others see, and what <code>--force-with-lease</code> refuses.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>When you pulled</h2>
+        <!-- prettier-ignore -->
+        <ul class="lines-list">
+          <li>
+            <span class="line">CONFLICT (content): Merge conflict in api.py</span>
+            <a href="/git/conflict">Merge conflict</a>
+            <p>Two commits changed the same lines. The markers Git leaves, resolving by hand under a merge and a rebase, and what <code>-X ours</code> and <code>-X theirs</code> keep.</p>
+          </li>
+          <li>
+            <span class="line ok">Fast-forward
+Successfully rebased and updated refs/heads/main.
+Merge made by the 'ort' strategy.</span>
+            <a href="/git/fast-forward">Fast-forward and rebased</a>
+            <p>The three ways a pull lands, and which one you get.</p>
+          </li>
+          <li>
+            <span class="line ok">Already up to date.
+Everything up-to-date</span>
+            <a href="/git/already-up-to-date">Nothing to do, two spellings</a>
+            <p>Why a pull and a push spell it differently, what each checked, and the <code>git status</code> line between them.</p>
+          </li>
         </ul>
         <p>
-          Next on these pages: <code>(forced update)</code>, <code>CONFLICT (content)</code>, and the two spellings of
-          nothing to do, <code>Already up to date.</code> and <code>Everything up-to-date</code>.
+          Next on these pages, the ways out: someone force-pushed over my commit, my push was rejected, I lost a commit,
+          who broke <code>main</code>, and undoing a commit that is already on it.
         </p>
       </section>
 
