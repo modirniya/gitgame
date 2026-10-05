@@ -1,0 +1,15 @@
+# git version 2.50.1 (Apple Git-155)
+# branch-deleted: ana deletes a branch with a commit only it had, and makes the branch again from the reflog
+$ git branch -D feature
+Deleted branch feature (was 5a5bc93).
+$ git reflog
+ab5768d HEAD@{0}: checkout: moving from feature to main
+5a5bc93 HEAD@{1}: commit: auth: check the token
+ab5768d HEAD@{2}: checkout: moving from main to feature
+ab5768d HEAD@{3}: commit: api: the first endpoint
+07dec17 HEAD@{4}: commit (initial): readme: the project
+$ git branch feature HEAD@{1}
+$ git log --oneline feature
+5a5bc93 auth: check the token
+ab5768d api: the first endpoint
+07dec17 readme: the project

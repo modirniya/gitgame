@@ -1,0 +1,10 @@
+# git version 2.50.1 (Apple Git-155)
+# blame: which commit last touched each line of api.py, and which commit added the word bug
+$ git blame api.py
+ab5768d4 (ana 2026-10-04 12:02:00 +0000 1) line 2
+8498150e (ana 2026-10-04 12:03:00 +0000 2) line 3
+7742196e (ana 2026-10-04 12:04:00 +0000 3) bug
+d345f958 (ana 2026-10-04 12:05:00 +0000 4) line 5
+56d85dcb (ana 2026-10-04 12:06:00 +0000 5) line 6
+$ git log -S bug --oneline
+7742196 api: handle the edge case

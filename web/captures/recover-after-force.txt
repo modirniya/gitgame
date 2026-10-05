@@ -1,0 +1,16 @@
+# git version 2.50.1 (Apple Git-155)
+# recover-after-force: bot, force-pushed over, still has his commit: a rebase onto origin/main puts it back on top, and the push lands
+$ git log --oneline
+7a20dd4 api: add the endpoint
+ab5768d api: the first endpoint
+07dec17 readme: the project
+$ git rebase origin/main
+Successfully rebased and updated refs/heads/main.
+$ git log --oneline
+5b30b2d api: add the endpoint
+864afd7 auth: check the token
+ab5768d api: the first endpoint
+07dec17 readme: the project
+$ git push
+To ../origin.git
+   864afd7..5b30b2d  main -> main

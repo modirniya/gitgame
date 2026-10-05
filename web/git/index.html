@@ -92,10 +92,38 @@ Everything up-to-date</span>
             <p>Why a pull and a push spell it differently, what each checked, and the <code>git status</code> line between them.</p>
           </li>
         </ul>
-        <p>
-          Next on these pages, the ways out: someone force-pushed over my commit, my push was rejected, I lost a commit,
-          who broke <code>main</code>, and undoing a commit that is already on it.
-        </p>
+      </section>
+
+      <section>
+        <h2>The ways out</h2>
+        <!-- prettier-ignore -->
+        <ul class="lines-list">
+          <li>
+            <span class="line warn">Your branch and 'origin/main' have diverged,</span>
+            <a href="/git/force-pushed-over-me">Someone force-pushed over my commit</a>
+            <p>It is still in your clone. The rebase that puts it back, the pull that would drop it, and how the forcer undoes it.</p>
+          </li>
+          <li>
+            <span class="line"> ! [rejected]        main -&gt; main (non-fast-forward)</span>
+            <a href="/git/push-rejected">My push was rejected</a>
+            <p>Two commands, the setting that makes them one, and when a force is right.</p>
+          </li>
+          <li>
+            <span class="line ok">HEAD is now at 5a5bc93 auth: check the token</span>
+            <a href="/git/lost-commit">I lost a commit</a>
+            <p>A reset too far, a deleted branch, a rebase that dropped it: the reflog has all three.</p>
+          </li>
+          <li>
+            <span class="line warn">7742196e73c4f9d00384d5d5b6fd8497d2fff238 is the first bad commit</span>
+            <a href="/git/who-broke-main">Who broke main</a>
+            <p>The line, the word, the first bad commit: <code>blame</code>, <code>log -S</code> and <code>bisect</code>.</p>
+          </li>
+          <li>
+            <span class="line ok">[main 3132ca8] Revert "api: handle the edge case"</span>
+            <a href="/git/undo-on-main">Undo a commit that's on main</a>
+            <p>A new commit that takes it back, and why a reset and a push won't.</p>
+          </li>
+        </ul>
       </section>
 
       <section class="again">

@@ -1,0 +1,5 @@
+# git version 2.50.1 (Apple Git-155)
+# reset-soft: ana undoes her last unpushed commit and keeps its changes staged
+$ git reset --soft HEAD~1
+$ git status --short
+A  auth.js

@@ -1,0 +1,18 @@
+# git version 2.50.1 (Apple Git-155)
+# undo-rebase: a rebase dropped ana's commit; ORIG_HEAD is where she was before it
+$ git log --oneline
+7a20dd4 api: add the endpoint
+ab5768d api: the first endpoint
+07dec17 readme: the project
+$ git reflog
+7a20dd4 HEAD@{0}: pull --rebase -X ours (finish): returning to refs/heads/main
+7a20dd4 HEAD@{1}: pull --rebase -X ours (start): checkout 7a20dd4815012ed0c8bcd4fad2eae46182e82c61
+a97e6d9 HEAD@{2}: commit: api: rename the endpoint
+ab5768d HEAD@{3}: commit: api: the first endpoint
+07dec17 HEAD@{4}: commit (initial): readme: the project
+$ git reset --hard ORIG_HEAD
+HEAD is now at a97e6d9 api: rename the endpoint
+$ git log --oneline
+a97e6d9 api: rename the endpoint
+ab5768d api: the first endpoint
+07dec17 readme: the project
