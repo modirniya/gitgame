@@ -7,6 +7,10 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-04
+
+Pages beside the game: what Git said, line by line, and the ways out of it; a lesson for teachers, with the deck to print; a game for teams.
+
 ### Added
 - Pages about Git's output, under `/git` (M16): the door, and the first page, `! [rejected] main -> main (non-fast-forward)`: what Git checked, the two hints it prints, the pull that fixes it, and why a day of the game does it to you. Every line is captured from a real Git by `scripts/git-output.sh`, never typed, and the page names the Git that printed it. The landing page's header links to the door.
 - Four more pages under `/git`: `(forced update)` and what `--force-with-lease` refuses, `CONFLICT (content)` and resolving it by merge, by rebase and by `-X ours` or `-X theirs`, the two spellings of nothing to do (`Already up to date.` and `Everything up-to-date`), and the three ways a pull lands: `Fast-forward`, `Successfully rebased` and `Merge made`.
@@ -237,7 +241,8 @@ The first version on the hosted service: the beta ADR-0002 makes the playtest, l
 - Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.
 
-[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.3.5...HEAD
+[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/modirniya/gitgame/compare/v0.3.5...v0.4.0
 [0.3.5]: https://github.com/modirniya/gitgame/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/modirniya/gitgame/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/modirniya/gitgame/compare/v0.3.2...v0.3.3
