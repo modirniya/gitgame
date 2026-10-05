@@ -57,6 +57,9 @@ defmodule GitGameWeb.ClientController do
   def teach(conn, _params), do: page(conn, "teach/index.html")
   def teams(conn, _params), do: page(conn, "teams/index.html")
 
+  # the page for people who know nothing about Git, or coding
+  def new_to_git(conn, _params), do: page(conn, "new-to-git/index.html")
+
   defp client_file(file) do
     dir =
       Application.get_env(:gitgame, :client_dir) || Application.app_dir(:gitgame, "priv/static")

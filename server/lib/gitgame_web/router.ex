@@ -70,6 +70,7 @@ defmodule GitGameWeb.Router do
     get "/git/:page", ClientController, :git
     get "/teach", ClientController, :teach
     get "/teams", ClientController, :teams
+    get "/new-to-git", ClientController, :new_to_git
   end
 
   # The maintainer's pulse (M13e): the page and its numbers, both behind the token.

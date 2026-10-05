@@ -16,4 +16,5 @@ export const pages = [
   { path: "git/undo-on-main", title: "Undo a commit that's on main" },
   { path: "teach", title: "Teach Git with a game" },
   { path: "teams", title: "A 15-minute game of Git for your team" },
+  { path: "new-to-git", title: "New to Git? Start here" },
 ];

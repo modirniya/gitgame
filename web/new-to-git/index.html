@@ -1,0 +1,243 @@
+<!doctype html>
+<!-- The page for people who know nothing about Git, or about code (docs/design/website-content.md): what the game is
+     about in plain words, with no programmer's word used before it is explained. The prose describes rules v0.2, so a
+     rules change checks it. %BRAND% and %DOMAIN% come from src/brand.js at build time (docs/branding.md).
+     Licence: CC BY-SA 4.0 (ADR-0010). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>New to Git? Start here · %BRAND%</title>
+    <meta
+      name="description"
+      content="What Git is and what this card game is about, for people who have never written code: the five things that go wrong, and the words for them."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/new-to-git" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="New to Git? Start here" />
+    <meta
+      property="og:description"
+      content="What Git is and what this card game is about, in plain words, for people who have never written a line of code."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/new-to-git" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "New to Git? Start here",
+        "description": "What Git is and what this card game is about, in plain words, for people who have never written a line of code.",
+        "url": "https://%DOMAIN%/new-to-git",
+        "image": "https://%DOMAIN%/og.png",
+        "audience": { "@type": "Audience", "audienceType": "people who have never used Git or written code" },
+        "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "isPartOf": { "@type": "WebSite", "name": "%BRAND%", "url": "https://%DOMAIN%/" },
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/new-to-git" aria-current="page">new to Git?</a>
+        <a href="/git">what Git said</a>
+        <a href="/teach">teach</a>
+        <a href="/teams">teams</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1>New to Git? Start here</h1>
+      <p class="lede">
+        You don't need to know what Git is to play this game, and you don't need to have written a line of code. This is
+        the two-minute version of what the game is about, with none of the programmers' words used until each one has
+        been explained.
+      </p>
+
+      <section>
+        <h2>One thing, built by many hands</h2>
+        <p>
+          Software is written by groups. Ten people might be working on the same program at once, and if they all typed
+          into the same file at the same time they would wreck each other's work within the hour. So each person works
+          on their own copy, and every so often sends their finished pieces to a shared copy that everyone agrees is the
+          real one. Git is the tool that keeps track of all of this: whose piece came in when, what changed, and how to
+          undo it. Almost every programmer in the world uses it, every day.
+        </p>
+        <p>
+          Picture a tower that a group is building together, one brick at a time. Everyone works from a photo of the
+          tower, and when your brick is ready you walk over and put it on top. Most of the day, that is all there is to
+          it. The interesting part is what happens when it isn't.
+        </p>
+      </section>
+
+      <section>
+        <h2>Five things that go wrong, and the words for them</h2>
+        <ul class="why-list">
+          <li>
+            <strong>Your brick doesn't fit.</strong> Someone added a brick while you were working from an old photo, so
+            the top of the tower isn't where you thought. You have to look at the real tower first, then place yours. In
+            the game, your piece is bounced back with Git's own words on it, and you learn to look first. Git's words: a
+            <em>push</em> (placing your brick), a <em>pull</em> (looking at the real tower), and a
+            <em>rejected</em> push.
+          </li>
+          <li>
+            <strong>Two people changed the same spot.</strong> You both reshaped the same brick in different ways, and
+            the tower can't hold both. Someone has to choose: yours, theirs, or a bit of each. In the game, that choice
+            is yours to make before the day ends. Git's word: a <em>conflict</em>.
+          </li>
+          <li>
+            <strong>Someone knocked your brick off.</strong> A player can force their own version of the tower onto
+            everyone, erasing the bricks laid after theirs. It is allowed, it is rude, and it has a cost. In the game it
+            is a card, <code>push --force</code>, and there is another card that puts your bricks back. Git's words: a
+            <em>forced push</em>, and the <em>reflog</em>, the record that makes undoing it possible.
+          </li>
+          <li>
+            <strong>A brick was cracked all along.</strong> Some pieces of work hide a mistake that nobody sees until
+            someone checks. In the game, some cards carry a hidden bug: you can hope nobody looks at yours, or look at
+            someone else's. Git's word for looking at who laid a brick is <em>blame</em>, which is less personal than it
+            sounds.
+          </li>
+          <li>
+            <strong>The tower is done.</strong> When it is tall enough it is inspected: every brick checked, the cracked
+            ones counted, and the builders scored. In the game, someone ships version 1.0, every card is turned face up,
+            and the scoreboard says who won and why. Git's word: a <em>release</em>.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>How a game goes</h2>
+        <p>
+          A game is a handful of days long. A day can be one minute or a whole real day; you choose when you start. Each
+          day, everyone looks at the shared tower, decides on the few things they will do, three give or take, writes
+          them down as a pack, and sends it. When the day ends, all the packs happen at once, in an order nobody chose,
+          which is where the bouncing and the clashes come from. After seven to twelve days the tower is tall enough,
+          and the game ends.
+        </p>
+        <p>
+          You can play against a bot, which says why it does each thing it does, or in a room with up to four friends,
+          from a link. There is nothing to install and nothing to sign up for.
+        </p>
+      </section>
+
+      <section>
+        <h2>Who this is for</h2>
+        <ul>
+          <li>Anyone curious about what the programmers in their life actually do all day.</li>
+          <li>A student before a first programming class, so the words are familiar when they arrive.</li>
+          <li>
+            A designer, a writer or a manager who hears "merge conflict" and "force push" every week and would like to
+            know what the fuss is.
+          </li>
+          <li>Someone who likes a card game with bluffing in it, and doesn't mind learning a thing by accident.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>The words, one line each</h2>
+        <div class="scroll">
+          <table class="map">
+            <thead>
+              <tr>
+                <th>Word</th>
+                <th>What it means</th>
+                <th>In the tower</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Git</td>
+                <td>The tool that keeps track of everyone's pieces</td>
+                <td>The photo album, and the rules for adding bricks</td>
+              </tr>
+              <tr>
+                <td>commit</td>
+                <td>One finished piece of work</td>
+                <td>A brick</td>
+              </tr>
+              <tr>
+                <td>main</td>
+                <td>The shared copy everyone agrees is real</td>
+                <td>The tower</td>
+              </tr>
+              <tr>
+                <td>push</td>
+                <td>Sending your piece to the shared copy</td>
+                <td>Placing your brick on top</td>
+              </tr>
+              <tr>
+                <td>pull</td>
+                <td>Getting the latest shared copy</td>
+                <td>Taking a new photo of the tower</td>
+              </tr>
+              <tr>
+                <td>rejected</td>
+                <td>Your push was refused: the shared copy moved first</td>
+                <td>Your brick doesn't fit the top</td>
+              </tr>
+              <tr>
+                <td>conflict</td>
+                <td>Two pieces changed the same thing</td>
+                <td>Two shapes for one brick</td>
+              </tr>
+              <tr>
+                <td>force push</td>
+                <td>Overwriting the shared copy with yours</td>
+                <td>Knocking bricks off to place yours</td>
+              </tr>
+              <tr>
+                <td>reflog</td>
+                <td>The record that lets you undo that</td>
+                <td>The photos from before</td>
+              </tr>
+              <tr>
+                <td>bug</td>
+                <td>A mistake hidden in a piece</td>
+                <td>A cracked brick, painted over</td>
+              </tr>
+              <tr>
+                <td>blame</td>
+                <td>Finding which piece a line came from</td>
+                <td>Reading who laid a brick</td>
+              </tr>
+              <tr>
+                <td>release</td>
+                <td>Declaring the work done and checking it</td>
+                <td>The inspection</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="again">
+        <h2>Play the first game</h2>
+        <p>It walks you through a day, one sentence at a time, and every word above comes up when it is needed.</p>
+        <p><a class="button primary" href="/play">play the bot now</a></p>
+      </section>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://creativecommons.org/licenses/by-sa/4.0/">text CC BY-SA 4.0</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

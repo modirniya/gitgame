@@ -7,6 +7,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Added
+- A page for people who know nothing about Git, or coding, at `/new-to-git`: what Git is, as a tower built by many hands; the five things that go wrong and Git's words for them; how a game goes; the words, one line each. The landing page gains a highlighted plain-words panel right after the hero that leads to it, and every header a "new to Git?" link, first.
+
 ### Changed
 - The print-and-play deck's cover names its licence, CC BY-SA 4.0 (ADR-0010), and where the deck came from, so a printed copy carries both.
 
