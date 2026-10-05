@@ -37,3 +37,4 @@ Copy [template.md](template.md).
 | [0007](0007-where-the-beta-runs.md) | Where the beta runs | Accepted; its managed Postgres superseded by 0008 |
 | [0008](0008-the-beta-shares-a-postgres.md) | The beta's database lives on an existing Postgres, for now | Accepted |
 | [0009](0009-a-landing-page-and-the-game-at-play.md) | A landing page at gitgame.online, and the game at /play | Accepted |
+| [0010](0010-pages-and-deck-under-cc-by-sa.md) | The site's pages and the print-and-play deck under CC BY-SA 4.0 | Accepted |

@@ -24,7 +24,7 @@ Thanks for looking. This page is short; the details live in `docs/`.
 5. Add a line under *Unreleased* in [CHANGELOG.md](CHANGELOG.md) if the change is user-visible.
 6. Fill in the PR template completely. Empty sections get the PR sent back.
 
-By contributing you agree that your contribution is licensed under the project license, [AGPL-3.0-or-later](LICENSE), and that you have the right to submit it.
+By contributing you agree that your contribution is licensed under the project license, [AGPL-3.0-or-later](LICENSE), and that you have the right to submit it. The text of the site's pages under `web/git`, `web/teach` and `web/teams`, and the card text in `rules/deck.json`, are under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) instead ([ADR-0010](docs/adr/0010-pages-and-deck-under-cc-by-sa.md)); a contribution to those is made under that licence.
 
 ## Conduct
 
