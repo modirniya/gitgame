@@ -9,6 +9,7 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ### Added
 - Pages about Git's output, under `/git` (M16): the door, and the first page, `! [rejected] main -> main (non-fast-forward)`: what Git checked, the two hints it prints, the pull that fixes it, and why a day of the game does it to you. Every line is captured from a real Git by `scripts/git-output.sh`, never typed, and the page names the Git that printed it. The landing page's header links to the door.
+- Four more pages under `/git`: `(forced update)` and what `--force-with-lease` refuses, `CONFLICT (content)` and resolving it by merge, by rebase and by `-X ours` or `-X theirs`, the two spellings of nothing to do (`Already up to date.` and `Everything up-to-date`), and the three ways a pull lands: `Fast-forward`, `Successfully rebased` and `Merge made`.
 
 ## [0.3.5] - 2026-10-04
 

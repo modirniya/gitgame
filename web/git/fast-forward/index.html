@@ -1,0 +1,134 @@
+<!doctype html>
+<!-- Three lines Git prints in the game, explained (M16, docs/design/website-content.md): the three ways a pull lands,
+     and why a day of the game prints each. Every capture placeholder is replaced at build time by the output
+     scripts/git-output.sh captured from a real Git (captures/*.txt), and the version placeholder by that Git's version;
+     the prose describes rules v0.2, so a rules change checks it. %BRAND% and %DOMAIN% come from src/brand.js. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>Fast-forward and rebased · %BRAND%</title>
+    <meta
+      name="description"
+      content="The three ways a git pull lands: Fast-forward when you had nothing new, Successfully rebased with --rebase, and Merge made by the 'ort' strategy with a merge."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/git/fast-forward" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="Fast-forward, rebased, or merged: how a pull lands" />
+    <meta
+      property="og:description"
+      content="The three ways a git pull lands, each in Git's own words, and which one you get. Captured from a real Git."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/git/fast-forward" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Fast-forward, rebased, or merged: how a pull lands",
+        "description": "The three ways a git pull lands, each in Git's own words, and which one you get. Captured from a real Git.",
+        "url": "https://%DOMAIN%/git/fast-forward",
+        "image": "https://%DOMAIN%/og.png",
+        "isPartOf": { "@type": "WebSite", "name": "%BRAND%", "url": "https://%DOMAIN%/" },
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/git">what Git said</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1><code>Fast-forward</code>, rebased, or merged: how a pull lands</h1>
+      <p class="lede">
+        A pull that brings something in lands in one of three ways, and Git names each. Which one you get depends on
+        whether you had commits of your own, and on whether you asked for a rebase.
+      </p>
+
+      <section>
+        <h2>Fast-forward: you had nothing new</h2>
+        <pre class="capture">%CAPTURE:pull-fast-forward%</pre>
+        <p>
+          The fetch reports the remote's move, old tip to new with two dots: the new tip follows from the old. Your
+          <code>main</code> was at the old one with nothing of its own, so Git simply moves it there:
+          <code>Updating</code>, <code>Fast-forward</code>, and the files that changed. No new commit is made, and your
+          history is now exactly the remote's. It is the same move a push needs, seen from the other side (the
+          <a href="/git/non-fast-forward">non-fast-forward</a> page).
+        </p>
+      </section>
+
+      <section>
+        <h2>Rebased: you had commits, and asked for a rebase</h2>
+        <pre class="capture">%CAPTURE:push-after-pull-rebase%</pre>
+        <p>
+          You had a commit the remote didn't. <code>--rebase</code> takes it off, moves <code>main</code> to the
+          remote's tip, and replays your commit on top:
+          <code>Successfully rebased and updated refs/heads/main.</code> Your commit's hash changes, since it has a new
+          parent, and the history stays one straight line. The push after it is a fast-forward for the remote. If the
+          replay hits a line both commits changed, it stops on a <a href="/git/conflict">conflict</a> instead.
+        </p>
+      </section>
+
+      <section>
+        <h2>Merged: you had commits, and didn't ask</h2>
+        <pre class="capture">%CAPTURE:push-after-pull-merge%</pre>
+        <p>
+          Without <code>--rebase</code>, Git keeps both histories and ties them with a merge commit:
+          <code>Merge made by the 'ort' strategy.</code> (<code>ort</code> is the name of Git's merge engine.) Your
+          commit keeps its hash, and the history forks and rejoins. The push sends two commits, yours and the merge.
+          Which of the two to prefer is a team's policy; Git only insists that you choose, the first time the branches
+          diverge, and remembers the choice in <code>pull.rebase</code>.
+        </p>
+      </section>
+
+      <section>
+        <h2>Why the game does this to you</h2>
+        <p>
+          The pack's pull is Git's. With nothing of yours it fast-forwards, even under <code>--rebase</code>, and the
+          day log prints <code>Fast-forward</code>; with commits of yours it rebases or merges as the op says. In
+          %BRAND% a plain pull costs one op and a rebase two, and a plain pull that merges something of yours takes a
+          merge token, one of the game's three penalty tokens. A fast-forward takes none, because Git makes no merge
+          commit.
+        </p>
+      </section>
+
+      <section class="again">
+        <h2>Play a day where this happens</h2>
+        <p>One tap starts a game against the bot, and the hub shows what your pull would do before you send it.</p>
+        <p><a class="button primary" href="/play">play the bot now</a></p>
+      </section>
+
+      <p class="captured">
+        Output captured from Git %GIT_VERSION% by
+        <a href="https://github.com/modirniya/gitgame/blob/main/scripts/git-output.sh">scripts/git-output.sh</a>, in a
+        scratch repository with two clones, ana's and bot's, and fixed dates, so the hashes are the same on every run.
+        It is captured again at every Git release.
+      </p>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

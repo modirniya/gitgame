@@ -1,0 +1,144 @@
+<!doctype html>
+<!-- One line Git prints in the game, explained (M16, docs/design/website-content.md): what Git did, what the others
+     see, and why a day of the game did it to you. Every capture placeholder is replaced at build time by the output
+     scripts/git-output.sh captured from a real Git (captures/*.txt), and the version placeholder by that Git's version;
+     the prose around them describes rules v0.2, so a rules change checks it. %BRAND% and %DOMAIN% come from src/brand.js. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>Forced update · %BRAND%</title>
+    <meta
+      name="description"
+      content="What + 7a20dd4...864afd7 main -> main (forced update) means: what git push --force erased, what the others see, and when --force-with-lease refuses."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/git/forced-update" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="git push --force: forced update, explained" />
+    <meta
+      property="og:description"
+      content="What the forced push erased, what the others see on their next fetch, and when --force-with-lease refuses. Captured from a real Git."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/git/forced-update" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "git push --force: forced update, explained",
+        "description": "What the forced push erased, what the others see on their next fetch, and when --force-with-lease refuses. Captured from a real Git.",
+        "url": "https://%DOMAIN%/git/forced-update",
+        "image": "https://%DOMAIN%/og.png",
+        "isPartOf": { "@type": "WebSite", "name": "%BRAND%", "url": "https://%DOMAIN%/" },
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/git">what Git said</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1><code>git push --force</code>: forced update</h1>
+      <p class="lede">
+        The push went through, and that is the problem. A plus sign where a rejected push shows <code>!</code>, three
+        dots where there were two: <code>main</code> on the remote no longer continues from where it was, and whatever
+        was there is gone from the branch.
+      </p>
+      <pre class="capture">%CAPTURE:push-force%</pre>
+
+      <section>
+        <h2>What Git did</h2>
+        <p>
+          A plain push refuses to move <code>main</code> anywhere but forward (the
+          <a href="/git/non-fast-forward">non-fast-forward</a> page). <code>--force</code> tells the remote to move it
+          to your commit regardless. Git marks the move with a <code>+</code> and prints <code>old...new</code> with
+          three dots: the two tips aren't on one line. Two dots would mean <code>new</code> follows from
+          <code>old</code>; three mean the two only share an ancestor.
+        </p>
+        <p>
+          Everything after that ancestor on the old <code>main</code>, bot's commit here, is no longer reachable from
+          the branch. It isn't deleted: the remote keeps the object for a while, and the clone it was pushed from still
+          has it. But anyone fetching <code>main</code> won't get it, and a build of <code>main</code> won't include it.
+        </p>
+      </section>
+
+      <section>
+        <h2>What the others see</h2>
+        <p>Their next fetch tells them, in the same shape:</p>
+        <pre class="capture">%CAPTURE:fetch-after-force%</pre>
+        <p>
+          The <code>+</code> and the three dots again, this time on <code>origin/main</code>. Their own
+          <code>main</code> still has the commit, so <code>git status</code> says the two have diverged: one commit each
+          that the other lacks. Their way back is a page of its own, someone force-pushed over my commit, next on these
+          pages.
+        </p>
+      </section>
+
+      <section>
+        <h2><code>--force-with-lease</code>: the safer force</h2>
+        <p>
+          A forced push is sometimes right: your own branch, after a rebase, where nobody else has pushed. The risk is
+          erasing a commit you haven't seen. <code>--force-with-lease</code> refuses exactly that: it goes through only
+          if the remote's <code>main</code> is still where your clone last saw it. Here ana hasn't fetched since bot
+          pushed, so her lease is stale. Once she fetches, and can see what she is about to erase, it goes through:
+        </p>
+        <pre class="capture">%CAPTURE:push-force-with-lease%</pre>
+        <p>
+          The second push still erases bot's commit. The lease protects you from erasing what you haven't seen, not from
+          erasing. On a shared branch the other protection is the host's: a branch rule that refuses forced pushes to
+          <code>main</code> altogether.
+        </p>
+      </section>
+
+      <section>
+        <h2>Why the game does this to you</h2>
+        <p>
+          <code>push --force</code> is a card in %BRAND%. Played, it moves <code>main</code> back to your pointer and
+          puts your commits on top; every commit after your pointer is erased and goes back to its owner's local branch,
+          to be pushed again. You take a sin token for it, and the day log prints Git's line. One card answers it: a
+          <code>reflog</code> armed in your pack fires inside the forcer's own pack and puts your erased commits back on
+          top of <code>main</code>.
+        </p>
+      </section>
+
+      <section class="again">
+        <h2>Play a day where this happens</h2>
+        <p>One tap starts a game against the bot. It holds the card too, and says why when it plays it.</p>
+        <p><a class="button primary" href="/play">play the bot now</a></p>
+      </section>
+
+      <p class="captured">
+        Output captured from Git %GIT_VERSION% by
+        <a href="https://github.com/modirniya/gitgame/blob/main/scripts/git-output.sh">scripts/git-output.sh</a>, in a
+        scratch repository with two clones, ana's and bot's, and fixed dates, so the hashes are the same on every run.
+        It is captured again at every Git release.
+      </p>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

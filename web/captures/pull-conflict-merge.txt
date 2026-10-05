@@ -1,8 +1,23 @@
 # git version 2.50.1 (Apple Git-155)
-# pull-conflict-merge: bot and ana changed the same place in api.py; ana's pull merges and stops on the conflict
+# pull-conflict-merge: bot and ana changed the same place in api.py; ana's pull merges, stops on the conflict, and she resolves it by hand
 $ git pull --no-rebase
 From ../origin
    ab5768d..7a20dd4  main       -> origin/main
 Auto-merging api.py
 CONFLICT (content): Merge conflict in api.py
 Automatic merge failed; fix conflicts and then commit the result.
+$ git diff
+diff --cc api.py
+index 4aa2239,48fcc42..0000000
+--- a/api.py
++++ b/api.py
+@@@ -1,2 -1,2 +1,6 @@@
+  line 2
+++<<<<<<< HEAD
+ +line 4
+++=======
++ line 3
+++>>>>>>> 7a20dd4815012ed0c8bcd4fad2eae46182e82c61
+$ git add api.py
+$ git commit --no-edit
+[main e1078fd] Merge branch 'main' of ../origin

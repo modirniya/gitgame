@@ -22,6 +22,7 @@ trap 'rm -rf "$work"' EXIT
 
 # Nothing from this machine leaks in: no user or system config, no colors, no pager, English, and a fixed clock.
 export HOME="$work" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1 GIT_PAGER=cat PAGER=cat TERM=dumb LC_ALL=C
+export GIT_EDITOR=true # a merge or a continued rebase keeps the message Git proposes
 export GIT_CONFIG_COUNT=2
 export GIT_CONFIG_KEY_0=init.defaultBranch GIT_CONFIG_VALUE_0=main
 export GIT_CONFIG_KEY_1=color.ui GIT_CONFIG_VALUE_1=never
@@ -82,14 +83,17 @@ scenario_push_after_pull_rebase() { race; run fetch; show pull --rebase; show pu
 scenario_push_after_pull_merge() { race; run fetch; show pull --no-rebase; show push; }
 scenario_pull_divergent() { race; run fetch; show pull; }
 scenario_push_force() { race; run fetch; show push --force; }
+scenario_push_force_with_lease() { race; show push --force-with-lease; run fetch; show push --force-with-lease; }
 scenario_fetch_after_force() { race; run fetch; run push --force; as bot; show fetch; show status; }
 scenario_push_everything_up_to_date() { fresh; as ana; show push; }
 scenario_pull_already_up_to_date() { fresh; as ana; show pull; }
 scenario_pull_fast_forward() { fresh; as bot; commit api.py "api: add the endpoint"; run push; as ana; show pull; }
 scenario_status_ahead() { fresh; as ana; commit auth.js "auth: check the token"; show status; }
-scenario_pull_conflict_merge() { same_file; show pull --no-rebase; }
-scenario_pull_conflict_rebase() { same_file; show pull --rebase; }
+scenario_status_up_to_date() { fresh; as ana; show status; }
+scenario_pull_conflict_merge() { same_file; show pull --no-rebase; show diff; keep_both; show add api.py; show commit --no-edit; }
+scenario_pull_conflict_rebase() { same_file; show pull --rebase; show status; keep_both; show add api.py; show rebase --continue; }
 scenario_pull_rebase_ours() { same_file; show pull --rebase -X ours; show log --oneline; }
+scenario_pull_rebase_theirs() { same_file; show pull --rebase -X theirs; show log --oneline; show diff origin/main; }
 
 # both touch the same place in api.py: bot's change lands first, ana's is built on the old tip
 same_file() {
@@ -101,6 +105,9 @@ same_file() {
   commit api.py "api: rename the endpoint"
 }
 
+# how a person resolves that conflict by hand: the file with both sides' lines, the markers gone
+keep_both() { printf 'line 2\nline 3\nline 4\n' >api.py; }
+
 descriptions() {
   cat <<'EOF'
 push-non-fast-forward: ana pushes a commit built on the old tip after bot's push landed; she fetched, so her clone knows it is behind
@@ -109,14 +116,17 @@ push-after-pull-rebase: after that rejection, ana pulls with --rebase, which put
 push-after-pull-merge: the same recovery with a merge instead of a rebase
 pull-divergent: a plain pull when the branches have diverged and no choice between rebase and merge is configured
 push-force: ana pushes with --force instead of pulling: bot's commit is erased from origin's main
+push-force-with-lease: the same push with --force-with-lease, refused while ana's clone is stale, taken once she fetched
 fetch-after-force: bot fetches after ana's forced push and sees origin/main moved backwards
 push-everything-up-to-date: ana pushes when origin already has everything she has
 pull-already-up-to-date: ana pulls when origin has nothing she lacks
 pull-fast-forward: ana pulls bot's commit onto a branch where she has nothing new, so main simply moves forward
 status-ahead: ana has a commit origin lacks, and asks git status
-pull-conflict-merge: bot and ana changed the same place in api.py; ana's pull merges and stops on the conflict
-pull-conflict-rebase: the same pull with --rebase; the rebase stops on the conflict
-pull-rebase-ours: the same pull with --rebase -X ours, which keeps the side already on main, as the game's pull does
+status-up-to-date: ana's main and origin's are the same commit, and she asks git status
+pull-conflict-merge: bot and ana changed the same place in api.py; ana's pull merges, stops on the conflict, and she resolves it by hand
+pull-conflict-rebase: the same pull with --rebase; the rebase stops on the conflict, and she resolves it and continues
+pull-rebase-ours: the same pull with --rebase -X ours, which keeps the side already on main and drops ana's
+pull-rebase-theirs: the same pull with --rebase -X theirs, which keeps ana's side of the clash
 EOF
 }
 

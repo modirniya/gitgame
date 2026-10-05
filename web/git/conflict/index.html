@@ -1,0 +1,166 @@
+<!doctype html>
+<!-- One line Git prints in the game, explained (M16, docs/design/website-content.md): what Git checked, what to do
+     now, and why a day of the game did it to you. Every capture placeholder is replaced at build time by the output
+     scripts/git-output.sh captured from a real Git (captures/*.txt), and the version placeholder by that Git's version;
+     the prose around them describes rules v0.2, so a rules change checks it. %BRAND% and %DOMAIN% come from src/brand.js. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>Merge conflict · %BRAND%</title>
+    <meta
+      name="description"
+      content="What CONFLICT (content): Merge conflict in api.py means, the markers Git leaves in the file, and three ways out: resolve by hand, -X ours, or -X theirs."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/git/conflict" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="CONFLICT (content): a merge conflict, explained" />
+    <meta
+      property="og:description"
+      content="The markers Git leaves in the file, resolving by hand under a merge and under a rebase, and what -X ours and -X theirs keep. Captured from a real Git."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/git/conflict" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "CONFLICT (content): a merge conflict, explained",
+        "description": "The markers Git leaves in the file, resolving by hand under a merge and under a rebase, and what -X ours and -X theirs keep. Captured from a real Git.",
+        "url": "https://%DOMAIN%/git/conflict",
+        "image": "https://%DOMAIN%/og.png",
+        "isPartOf": { "@type": "WebSite", "name": "%BRAND%", "url": "https://%DOMAIN%/" },
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/git">what Git said</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1><code>CONFLICT (content)</code>: a merge conflict</h1>
+      <p class="lede">
+        Two commits changed the same lines of the same file, and Git won't guess which is right. The pull stops, leaves
+        both versions in the file, and waits for you.
+      </p>
+      <pre class="capture">%CAPTURE:pull-conflict-merge%</pre>
+
+      <section>
+        <h2>What Git checked</h2>
+        <p>
+          A pull first fetches (<code>main -&gt; origin/main</code>: the remote's <code>main</code> moved), then joins
+          the new commit with yours. <code>Auto-merging api.py</code> says Git tried: it took the version both commits
+          started from, bot's version and yours, and merged them line by line. Where only one side changed a line, that
+          side wins silently. Where both changed the same line there is no rule, so Git reports
+          <code>CONFLICT (content)</code> and the file, and the merge stops:
+          <code>Automatic merge failed; fix conflicts and then commit the result.</code>
+        </p>
+        <p>
+          The file now holds both sides between markers, and <code>git diff</code> shows them: between
+          <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code> and <code>=======</code> your side, between
+          <code>=======</code> and <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> theirs, the commit being merged in. Lines
+          Git could settle on its own sit outside the markers.
+        </p>
+      </section>
+
+      <section>
+        <h2>What to do now</h2>
+        <p>
+          Edit the file until it says what it should, markers gone. <code>git add</code> it, which tells Git the
+          conflict is resolved, and <code>git commit</code> to finish the merge; with no message of your own, Git's
+          (<code>Merge branch 'main' of …</code>) does. The merge commit has two parents, bot's commit and yours, and
+          your <code>main</code> now holds both. To get out instead, <code>git merge --abort</code> puts everything back
+          as it was before the pull.
+        </p>
+      </section>
+
+      <section>
+        <h2>The same conflict under a rebase</h2>
+        <pre class="capture">%CAPTURE:pull-conflict-rebase%</pre>
+        <p>
+          <code>pull --rebase</code> doesn't merge; it takes your commit off and replays it on top of bot's. The replay
+          hits the same clash, prints the same <code>CONFLICT</code> line, and adds
+          <code>error: could not apply …</code>: the commit it was replaying. <code>git status</code> says where you
+          are: rebasing <code>main</code> onto bot's commit, with <code>api.py</code> both modified. Resolve the file,
+          <code>git add</code> it, and <code>git rebase --continue</code>; Git finishes the replay and prints
+          <code>Successfully rebased and updated refs/heads/main.</code> There is no merge commit, only your commit,
+          rewritten on top. <code>git rebase --abort</code> is the way back.
+        </p>
+      </section>
+
+      <section>
+        <h2>Letting one side win: <code>-X ours</code>, <code>-X theirs</code></h2>
+        <p>
+          When one side should simply win, a strategy option settles every clash without stopping:
+          <code>-X ours</code> keeps one side, <code>-X theirs</code> the other, and only for the lines that clashed.
+          Under a merge, ours is your branch. Under a rebase the names swap: the branch you're replaying onto, bot's
+          <code>main</code>, is <em>ours</em>, and the commit being replayed, yours, is <em>theirs</em>. So during
+          <code>pull --rebase</code>, <code>-X ours</code> keeps bot's line and <code>-X theirs</code> keeps yours:
+        </p>
+        <pre class="capture">%CAPTURE:pull-rebase-ours%</pre>
+        <p>
+          With <code>-X ours</code>, bot's version wins the clash and nothing of your commit is left to apply, so Git
+          drops it (<code>patch contents already upstream</code>) and your <code>main</code> is bot's.
+        </p>
+        <pre class="capture">%CAPTURE:pull-rebase-theirs%</pre>
+        <p>
+          With <code>-X theirs</code>, your commit lands on top with your line, and <code>git diff origin/main</code>
+          shows the one line that differs: bot's replaced by yours. Bot's commit is still in the history; its change to
+          that line is not in the file.
+        </p>
+      </section>
+
+      <section>
+        <h2>Why the game does this to you</h2>
+        <p>
+          In %BRAND% a commit is a card, and a conflict is a pull that brings in a commit touching the same file as one
+          of your unpushed commits. Nobody is there to edit a file, so the pull's strategy settles it, declared on the
+          op: keep theirs, and yours is dropped; keep mine, and theirs is overwritten, its author taking a grudge
+          against you; or keep both, which is resolving by hand and costs one more op. The hub shows the choice by what
+          it does and prints the flag Git would use, which swaps under <code>--rebase</code>, as above. The one place
+          the game is coarser than Git: a card is whole, so the losing side loses its commit, where Git loses only the
+          lines that clashed.
+        </p>
+      </section>
+
+      <section class="again">
+        <h2>Play a day where this happens</h2>
+        <p>One tap starts a game against the bot. Five files in the deck, two players: the same file comes up soon.</p>
+        <p><a class="button primary" href="/play">play the bot now</a></p>
+      </section>
+
+      <p class="captured">
+        Output captured from Git %GIT_VERSION% by
+        <a href="https://github.com/modirniya/gitgame/blob/main/scripts/git-output.sh">scripts/git-output.sh</a>, in a
+        scratch repository with two clones, ana's and bot's, and fixed dates, so the hashes are the same on every run.
+        It is captured again at every Git release.
+      </p>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

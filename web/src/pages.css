@@ -72,6 +72,12 @@
   color: var(--reject);
   white-space: pre-wrap;
 }
+.lines-list .line.ok {
+  color: var(--ok);
+}
+.lines-list .line.warn {
+  color: var(--warn);
+}
 .lines-list a {
   font-weight: 700;
 }

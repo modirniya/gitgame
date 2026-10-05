@@ -26,10 +26,10 @@ Wave 1 ships before the launch (M13c), so the launch leaves pages behind it; wav
 |---|---|---|---|
 | What Git said (the door) | `/git` | the transcript | built |
 | Rejected: non-fast-forward | `/git/non-fast-forward` | `! [rejected]        main -> main (non-fast-forward)`, and `(fetch first)` | built |
-| Forced update | `/git/forced-update` | ` + 8e1da02...b0ba026 main -> main (forced update)` | planned |
-| Merge conflict | `/git/conflict` | `CONFLICT (content): Merge conflict in api.py` | planned |
-| Nothing to do, two spellings | `/git/already-up-to-date` | `Already up to date.` and `Everything up-to-date` | planned |
-| Fast-forward and rebased | `/git/fast-forward` | `Fast-forward`, `Successfully rebased and updated refs/heads/main.` | planned |
+| Forced update | `/git/forced-update` | ` + 8e1da02...b0ba026 main -> main (forced update)` | built |
+| Merge conflict | `/git/conflict` | `CONFLICT (content): Merge conflict in api.py` | built |
+| Nothing to do, two spellings | `/git/already-up-to-date` | `Already up to date.` and `Everything up-to-date` | built |
+| Fast-forward and rebased | `/git/fast-forward` | `Fast-forward`, `Successfully rebased and updated refs/heads/main.` | built |
 | Someone force-pushed over my commit | `/git/force-pushed-over-me` | card: `reflog` | planned |
 | My push was rejected | `/git/push-rejected` | the pack's pull before each push | planned |
 | I lost a commit | `/git/lost-commit` | card: `reflog` | planned |
