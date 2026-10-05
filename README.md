@@ -34,7 +34,7 @@ To play it on your machine: the server in [server/](server/README.md), the clien
 
 ## Contributing
 
-Contributions are welcome, including rules proposals — see [CONTRIBUTING.md](CONTRIBUTING.md). This is a small project run by [NeuEra LLC](https://neuera.llc); expect honest, direct review and short feedback loops.
+Contributions are welcome, including rules proposals — see [CONTRIBUTING.md](CONTRIBUTING.md). This is a small project run by [NeuEra LLC](https://legal.neuera.app); expect honest, direct review and short feedback loops.
 
 ## License
 
