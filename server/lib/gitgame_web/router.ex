@@ -64,6 +64,10 @@ defmodule GitGameWeb.Router do
   scope "/", GitGameWeb do
     get "/", ClientController, :landing
     get "/play", ClientController, :play
+
+    # the pages about Git's output (M16): the door, and one page per line; the build decides which exist
+    get "/git", ClientController, :git
+    get "/git/:page", ClientController, :git
   end
 
   # The maintainer's pulse (M13e): the page and its numbers, both behind the token.

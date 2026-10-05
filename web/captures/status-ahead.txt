@@ -1,0 +1,8 @@
+# git version 2.50.1 (Apple Git-155)
+# status-ahead: ana has a commit origin lacks, and asks git status
+$ git status
+On branch main
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
+
+nothing to commit, working tree clean

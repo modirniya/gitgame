@@ -1,0 +1,9 @@
+# git version 2.50.1 (Apple Git-155)
+# push-after-pull-merge: the same recovery with a merge instead of a rebase
+$ git pull --no-rebase
+Merge made by the 'ort' strategy.
+ api.py | 1 +
+ 1 file changed, 1 insertion(+)
+$ git push
+To ../origin.git
+   7a20dd4..31ac6fe  main -> main

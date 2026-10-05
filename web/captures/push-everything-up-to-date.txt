@@ -1,0 +1,4 @@
+# git version 2.50.1 (Apple Git-155)
+# push-everything-up-to-date: ana pushes when origin already has everything she has
+$ git push
+Everything up-to-date

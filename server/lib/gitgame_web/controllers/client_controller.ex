@@ -1,9 +1,9 @@
 defmodule GitGameWeb.ClientController do
   @moduledoc """
   The client's pages, served from the API's own origin so the session cookie works (ADR-0005): the landing page at
-  `/`, the game at `/play` (ADR-0009), and the maintainer's pulse at `/stats` behind its token (M13e). The game routes
-  by the address's hash, so `/play` is its only page; the scripts, styles and icons of all three are static files beside
-  them.
+  `/`, the game at `/play` (ADR-0009), the maintainer's pulse at `/stats` behind its token (M13e), and the pages
+  about Git's output under `/git` (M16). The game routes by the address's hash, so `/play` is its only page; the
+  scripts, styles and icons of every page are static files beside them.
 
   Links from before the game moved to `/play` that carry a query (`/?via=…` from notifications and emails, `/?email=…`,
   `/?github=…`) are sent on to `/play` with it, and the browser keeps their `#/…`. A link with only a hash never
@@ -42,11 +42,26 @@ defmodule GitGameWeb.ClientController do
   # the maintainer's pulse (M13e); the router has already checked the token
   def stats(conn, _params), do: page(conn, "stats/index.html")
 
-  defp page(conn, file) do
+  # The pages about Git's output (M16): `/git` is the door and `/git/<page>` one page, each a file the build wrote
+  # (web/src/pages.js). A page's name is letters, digits and dashes, so the address can't reach outside its directory,
+  # and a name the build didn't write is a plain 404, not the missing-client error below.
+  def git(conn, %{"page" => page}) do
+    if page =~ ~r/^[a-z0-9-]+$/ and File.exists?(client_file("git/#{page}/index.html")),
+      do: page(conn, "git/#{page}/index.html"),
+      else: conn |> put_status(:not_found) |> text("fatal: no page at /git/#{page}")
+  end
+
+  def git(conn, _params), do: page(conn, "git/index.html")
+
+  defp client_file(file) do
     dir =
       Application.get_env(:gitgame, :client_dir) || Application.app_dir(:gitgame, "priv/static")
 
-    page = Path.join(dir, file)
+    Path.join(dir, file)
+  end
+
+  defp page(conn, file) do
+    page = client_file(file)
 
     if File.exists?(page) do
       conn

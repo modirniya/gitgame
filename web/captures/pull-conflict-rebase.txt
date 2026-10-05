@@ -1,0 +1,14 @@
+# git version 2.50.1 (Apple Git-155)
+# pull-conflict-rebase: the same pull with --rebase; the rebase stops on the conflict
+$ git pull --rebase
+From ../origin
+   ab5768d..7a20dd4  main       -> origin/main
+Auto-merging api.py
+CONFLICT (content): Merge conflict in api.py
+error: could not apply a97e6d9... api: rename the endpoint
+hint: Resolve all conflicts manually, mark them as resolved with
+hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+hint: You can instead skip this commit: run "git rebase --skip".
+hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+hint: Disable this message with "git config set advice.mergeConflict false"
+Could not apply a97e6d9... # api: rename the endpoint

@@ -203,6 +203,19 @@ Decided by the session, for the maintainer's review:
 
 Needs a rules change, so written as a Proposed ADR and not built: **`-X theirs` drops your whole commit**, where Git loses only your side of the files that clashed.
 
+### M16 · The pages beside the game
+
+The website is one landing page and the game (ADR-0009). The research in [website-content-research.md](website-content-research.md) found the demand the site can meet without leaving Git: people searching for a line of Git's output, or for a way out of what Git just did to them; teachers; and team leads. [website-content.md](website-content.md) is the plan: three doors (`/git`, `/teach`, `/teams`), content pages before any feature, and every line of Git's output captured from a real Git, never typed. *Decided 2026-10-04.*
+
+- [ ] **M16a · The door and the first line.** `web/src/pages.js` as the one list of pages (the build's inputs and the sitemap read it; its test checks each page, and that the door links them); `scripts/git-output.sh` and `web/captures/`, Git's output captured from a scratch repository with fixed dates; the remote serving `/git` and `/git/<page>`; the door at `/git`; and the first page, `! [rejected] main -> main (non-fast-forward)`. The landing page's header links to the door.
+- [ ] **M16b · The rest of the decoder.** Forced update, the conflict, the two spellings of nothing to do, fast-forward and rebased.
+- [ ] **M16c · The five predicaments.** Force-pushed over me, push rejected, lost commit, who broke main, undo on main.
+- [ ] **M16d · Teach.** The lesson on 60-second days, the print-and-play section with its print specs and licence, and the header link.
+- [ ] **M16e · Teams.** The 15-minute game inside a meeting, the conventions checklist, the header link, and a draft of the engineering write-up for launch week.
+- [ ] **M16f · Captured with Git 2.56.0.** The captures in the repository are from the maintainer's Git 2.50.1; before the launch they are captured again with the pinned version, and every changed line read.
+
+*Done when:* every wave 1 page in website-content.md is built and in the sitemap, each quoting only captured output from the pinned Git, and the landing page's header reaches every door.
+
 ### M13 · Beta launch
 
 Strangers play the beta, and it answers what the playtest would have ([ADR-0002](../adr/0002-beta-before-human-playtest.md)). The milestone is read through M12's report: every number below is one `mix gitgame.beta_report` prints. What is the maintainer's to decide is marked **open**. M13a needs no decision; the rest wait on the ones they name.
