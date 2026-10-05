@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DECK = json.loads((ROOT / "rules" / "deck.json").read_text())
 OUT = ROOT / "tabletop" / "print-and-play.pdf"
 BRAND = DECK["brand"]["name"]
+DOMAIN = DECK["brand"]["domain"]
 
 PAGE_W, PAGE_H = letter
 CARD_W, CARD_H = 2.5 * inch, 3.5 * inch
@@ -206,8 +207,14 @@ def cover_page(c, counts, pages):
     for line in lines:
         y = wrap(c, "•  " + line, 1.1 * inch, y - 4, 6.2 * inch, 10.5)
     y = wrap(c, "Playtesting", 0.9 * inch, y - 16, 6.5 * inch, 14, font="Helvetica-Bold")
-    wrap(c, "The rules live in docs/design/base-rules.md and this deck in rules/deck.json. After a game, write down: what was tense, what was boring, "
-            "where the rules were unclear, and who won and why. That report is the most valuable thing this deck can produce.",
+    y = wrap(c, "The rules live in docs/design/base-rules.md and this deck in rules/deck.json. After a game, write down: what was tense, what was boring, "
+                "where the rules were unclear, and who won and why. That report is the most valuable thing this deck can produce.",
+             1.1 * inch, y - 4, 6.2 * inch, 10.5)
+    # the deck's licence (ADR-0010): on the cover, so a printed copy carries it
+    y = wrap(c, "Licence", 0.9 * inch, y - 16, 6.5 * inch, 14, font="Helvetica-Bold")
+    wrap(c, "These cards and their text are free to copy, change and print, for a class or a paid workshop, under the Creative Commons "
+            "Attribution-ShareAlike 4.0 licence (creativecommons.org/licenses/by-sa/4.0): keep the licence, and say they came from "
+            f"{BRAND}, {DOMAIN}. The game's code is a separate work, under the AGPL-3.0.",
          1.1 * inch, y - 4, 6.2 * inch, 10.5)
     c.showPage()
 

@@ -7,6 +7,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Changed
+- The print-and-play deck's cover names its licence, CC BY-SA 4.0 (ADR-0010), and where the deck came from, so a printed copy carries both.
+
 ## [0.4.0] - 2026-10-04
 
 Pages beside the game: what Git said, line by line, and the ways out of it; a lesson for teachers, with the deck to print; a game for teams.
