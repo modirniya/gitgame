@@ -27,38 +27,38 @@ npm run build          # the PWA in dist/
 
 ## Where things are
 
-| File                                    | What it is                                                                                                                                                |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `play/index.html`                       | The game's page, served at `/play`                                                                                                                        |
-| `index.html`, `src/landing.*`           | The landing page at `/` (ADR-0009): static HTML for search engines and link previews, on the game's stylesheet                                            |
-| `stats/`, `src/stats.*`                 | The maintainer's pulse at `/stats` (M13e), behind `STATS_TOKEN`: the pulse line, totals, bars by day, week or month                                       |
-| `public/og.png`                         | The link-preview image, drawn by `scripts/og-image.sh` from `scripts/og-image.html`                                                                       |
-| `git/`, `src/pages.js`, `src/pages.css` | The pages about Git's output under `/git` (M16): the door and one page per line, listed once in `pages.js`, which the build's inputs and the sitemap read |
-| `teach/`                                | The page for teachers at `/teach` (M16d): the lesson, and the print-and-play deck, which the build serves at `/print-and-play.pdf` from `../tabletop`     |
-| `captures/`                             | Git's output as `scripts/git-output.sh` captured it, one file per scenario; a page quotes one with `%CAPTURE:<scenario>%`, never types it                 |
-| `src/main.js`, `src/route.js`           | The entry and the addresses (`/play#/`, `#/g/<id>[/<seat>]`, `#/room/<code>`, `#/r/<id>/<day>`)                                                           |
-| `src/api.js`                            | The remote's JSON API; errors carry the remote's own words                                                                                                |
-| `src/dom.js`                            | Building DOM without innerHTML, so other players' text is only ever text                                                                                  |
-| `src/brand.js`                          | The name, defined once (`// BRAND`, [branding.md](../docs/branding.md))                                                                                   |
-| `src/cards.js`                          | Cards as the printed deck draws them, colored from `rules/deck.json`: a band, the file, +N, BUG, and a commit's two sides                                 |
-| `src/styles.css`                        | The look (event-screens §4): tokens for both themes, sans prose and monospace Git; `cards.css` and `table.css` beside it                                  |
-| `src/table.js`                          | The Table: `main`, pointers, every seat's public state                                                                                                    |
-| `src/moments.js`                        | The event-to-screen mapper: a day log becomes moments, one per op, and says which get a screen                                                            |
-| `src/copy.js`                           | Every coach line, keyed by moment: the one file a translation replaces (event-screens §6)                                                                 |
-| `src/transcript.js`                     | Moments as a terminal prints them: `ana@main $ git push` and Git's output                                                                                 |
-| `src/pack.js`                           | The pack editor's model: ops in the remote's shapes, a pull before each push, and each op's cost now and at most                                          |
-| `src/messages.js`                       | The commit messages offered for what is staged, so no commit goes out as `-m ""`                                                                          |
-| `src/hub.js`                            | I-Hub: `main`, your branch and hand, the actions (greyed with the reason), and the pack as commands                                                       |
-| `src/screens.js`                        | The consequence screens: one moment at a time, what it moved, the coach line; continue or skip                                                            |
-| `src/catchup.js`                        | What this reader hasn't seen: each closed day's big moments, then today's incident; remembered per device                                                 |
-| `src/replay.js`                         | A replay: any game day by day, each day the view the remote folds from the log to that day's close                                                        |
-| `src/exit.test.js`                      | The Phase 1 exit as a test: a game against the bot through the client's modules, then replayed (needs `GITGAME_REMOTE`)                                   |
-| `src/whoami.js`                         | Who this device is: handle and avatar, "link GitHub", sign out, and the nudge after a finished game                                                       |
-| `src/room.js`                           | A room (M9): who is in, the link to share, the host's bots, day length and start                                                                          |
-| `src/games.js`                          | Your games on the start screen, those waiting on your pack first                                                                                          |
-| `src/guide.js`                          | The guided first game: one sentence and one highlighted thing, counted, on the hub and the days played back, for two days                                 |
-| `src/release.js`                        | The release: CI turning `main` face-up one commit at a time, and the scoreboard, read across; `release.css` beside it                                     |
-| `src/verdict.js`                        | Who won, as the remote decides it, and the scoreboard's "what decided it"                                                                                 |
-| `src/feedback.js`                       | The scoreboard's feedback box: a note of up to 1000 characters for the maintainer, one per game, rewritable                                               |
-| `src/start.js`, `src/game.js`           | I-Start, and a game as one player sees it                                                                                                                 |
-| `public/sw.js`                          | The service worker: the app's files offline, never the game                                                                                               |
+| File                                    | What it is                                                                                                                                                             |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `play/index.html`                       | The game's page, served at `/play`                                                                                                                                     |
+| `index.html`, `src/landing.*`           | The landing page at `/` (ADR-0009): static HTML for search engines and link previews, on the game's stylesheet                                                         |
+| `stats/`, `src/stats.*`                 | The maintainer's pulse at `/stats` (M13e), behind `STATS_TOKEN`: the pulse line, totals, bars by day, week or month                                                    |
+| `public/og.png`                         | The link-preview image, drawn by `scripts/og-image.sh` from `scripts/og-image.html`                                                                                    |
+| `git/`, `src/pages.js`, `src/pages.css` | The pages about Git's output under `/git` (M16): the door and one page per line, listed once in `pages.js`, which the build's inputs and the sitemap read              |
+| `teach/`, `teams/`                      | The pages for teachers at `/teach` (M16d), with the print-and-play deck the build serves at `/print-and-play.pdf` from `../tabletop`, and for teams at `/teams` (M16e) |
+| `captures/`                             | Git's output as `scripts/git-output.sh` captured it, one file per scenario; a page quotes one with `%CAPTURE:<scenario>%`, never types it                              |
+| `src/main.js`, `src/route.js`           | The entry and the addresses (`/play#/`, `#/g/<id>[/<seat>]`, `#/room/<code>`, `#/r/<id>/<day>`)                                                                        |
+| `src/api.js`                            | The remote's JSON API; errors carry the remote's own words                                                                                                             |
+| `src/dom.js`                            | Building DOM without innerHTML, so other players' text is only ever text                                                                                               |
+| `src/brand.js`                          | The name, defined once (`// BRAND`, [branding.md](../docs/branding.md))                                                                                                |
+| `src/cards.js`                          | Cards as the printed deck draws them, colored from `rules/deck.json`: a band, the file, +N, BUG, and a commit's two sides                                              |
+| `src/styles.css`                        | The look (event-screens §4): tokens for both themes, sans prose and monospace Git; `cards.css` and `table.css` beside it                                               |
+| `src/table.js`                          | The Table: `main`, pointers, every seat's public state                                                                                                                 |
+| `src/moments.js`                        | The event-to-screen mapper: a day log becomes moments, one per op, and says which get a screen                                                                         |
+| `src/copy.js`                           | Every coach line, keyed by moment: the one file a translation replaces (event-screens §6)                                                                              |
+| `src/transcript.js`                     | Moments as a terminal prints them: `ana@main $ git push` and Git's output                                                                                              |
+| `src/pack.js`                           | The pack editor's model: ops in the remote's shapes, a pull before each push, and each op's cost now and at most                                                       |
+| `src/messages.js`                       | The commit messages offered for what is staged, so no commit goes out as `-m ""`                                                                                       |
+| `src/hub.js`                            | I-Hub: `main`, your branch and hand, the actions (greyed with the reason), and the pack as commands                                                                    |
+| `src/screens.js`                        | The consequence screens: one moment at a time, what it moved, the coach line; continue or skip                                                                         |
+| `src/catchup.js`                        | What this reader hasn't seen: each closed day's big moments, then today's incident; remembered per device                                                              |
+| `src/replay.js`                         | A replay: any game day by day, each day the view the remote folds from the log to that day's close                                                                     |
+| `src/exit.test.js`                      | The Phase 1 exit as a test: a game against the bot through the client's modules, then replayed (needs `GITGAME_REMOTE`)                                                |
+| `src/whoami.js`                         | Who this device is: handle and avatar, "link GitHub", sign out, and the nudge after a finished game                                                                    |
+| `src/room.js`                           | A room (M9): who is in, the link to share, the host's bots, day length and start                                                                                       |
+| `src/games.js`                          | Your games on the start screen, those waiting on your pack first                                                                                                       |
+| `src/guide.js`                          | The guided first game: one sentence and one highlighted thing, counted, on the hub and the days played back, for two days                                              |
+| `src/release.js`                        | The release: CI turning `main` face-up one commit at a time, and the scoreboard, read across; `release.css` beside it                                                  |
+| `src/verdict.js`                        | Who won, as the remote decides it, and the scoreboard's "what decided it"                                                                                              |
+| `src/feedback.js`                       | The scoreboard's feedback box: a note of up to 1000 characters for the maintainer, one per game, rewritable                                                            |
+| `src/start.js`, `src/game.js`           | I-Start, and a game as one player sees it                                                                                                                              |
+| `public/sw.js`                          | The service worker: the app's files offline, never the game                                                                                                            |

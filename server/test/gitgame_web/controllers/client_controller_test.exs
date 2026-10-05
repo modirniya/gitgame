@@ -26,6 +26,7 @@ defmodule GitGameWeb.ClientControllerTest do
   } do
     assert html_response(get(conn, ~p"/git"), 200) =~ "<h1>What Git said</h1>"
     assert html_response(get(conn, ~p"/teach"), 200) =~ "<h1>Teach Git"
+    assert html_response(get(conn, ~p"/teams"), 200) =~ "<h1>A 15-minute game"
     page = get(conn, "/git/non-fast-forward")
     assert html_response(page, 200) =~ "non-fast-forward"
     assert [csp] = get_resp_header(page, "content-security-policy")

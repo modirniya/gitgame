@@ -1,0 +1,210 @@
+<!doctype html>
+<!-- The page for team leads (M16e, docs/design/website-content.md): a game of Git inside a meeting you already have,
+     in three lengths, what it tends to show, and seven conventions each with its page. The prose describes rules
+     v0.2, so a rules change checks it. %BRAND% and %DOMAIN% come from src/brand.js at build time (docs/branding.md).
+     Licence: CC BY-SA 4.0 (ADR-0010). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>A 15-minute game of Git for your team · %BRAND%</title>
+    <meta
+      name="description"
+      content="One link, five seats, 60-second days, no accounts: a 15-minute game of Git inside a meeting you already have, what it tends to show, and seven conventions."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/teams" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="A 15-minute game of Git for your team" />
+    <meta
+      property="og:description"
+      content="One link in the channel, five seats, no accounts. Fifteen minutes in a meeting, an hour at lunch, or a week between standups; what it tends to show, and seven conventions."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/teams" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "A 15-minute game of Git for your team",
+        "description": "One link in the channel, five seats, no accounts. Fifteen minutes in a meeting, an hour at lunch, or a week between standups; what it tends to show, and seven conventions.",
+        "url": "https://%DOMAIN%/teams",
+        "image": "https://%DOMAIN%/og.png",
+        "totalTime": "PT15M",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Open a room",
+            "text": "One person opens a room, picks the day length and adds bots for any empty seats."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Paste the link",
+            "text": "Whoever opens the room's link takes a seat. No accounts."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Play twelve days",
+            "text": "Everyone writes a pack each day; the day closes when every pack is in."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Read the scoreboard",
+            "text": "Who won, what decided it, and the replay of any day."
+          }
+        ],
+        "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "isPartOf": { "@type": "WebSite", "name": "%BRAND%", "url": "https://%DOMAIN%/" },
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/git">what Git said</a>
+        <a href="/teach">teach</a>
+        <a href="/teams" aria-current="page">teams</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1>A 15-minute game of Git for your team</h1>
+      <p class="lede">
+        Paste one link into the channel. Five seats, no accounts, nothing to install. In a quarter of an hour the team
+        has pushed over each other, been rejected in Git's own words, and read the scoreboard together. Here is how to
+        run it inside a meeting you already have, and what it tends to show.
+      </p>
+
+      <section>
+        <h2>Three lengths</h2>
+        <ol class="steps">
+          <li>
+            <h3>Fifteen minutes, in a meeting</h3>
+            <p>
+              60-second days. Twelve days at most, fewer minutes than that, since a day closes the moment every pack is
+              in. Keep three minutes for the scoreboard.
+            </p>
+          </li>
+          <li>
+            <h3>An hour, at lunch</h3>
+            <p>
+              5-minute days: time to think and to talk between days, which is where the conversation about
+              <code>--force</code> happens on its own.
+            </p>
+          </li>
+          <li>
+            <h3>A week, between standups</h3>
+            <p>
+              24-hour days, one pack a day, seven days. The game for a team across time zones: the day's packs resolve
+              together when the day closes, in a random order, so nobody's morning sends first.
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>The runbook</h2>
+        <ol>
+          <li>
+            One person opens a room at <a href="/play">/play</a>, picks the day length, and adds bots for any seats that
+            will stay empty.
+          </li>
+          <li>
+            Paste the room's link. Whoever opens it takes a seat. There are no accounts: a device gets a made-up handle,
+            and anyone who wants their own name on the scoreboard can link a GitHub account.
+          </li>
+          <li>The host starts the game. Every day, everyone writes a pack: three ops and up to four commands.</li>
+          <li>
+            When someone ships <code>v1.0</code>, CI flips every commit face-up and the scoreboard says who won and what
+            decided it. Any day can be replayed afterwards, which is the part to put on the screen.
+          </li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>Three questions for the three minutes after</h2>
+        <ul class="why-list">
+          <li>
+            <strong>Who pushed without pulling?</strong> In the game it costs an op and prints
+            <code>! [rejected]</code>; in your repository it is the branch that always needs a rebase before it merges.
+            <a href="/git/push-rejected">My push was rejected</a> is the two-command fix.
+          </li>
+          <li>
+            <strong>Who forced, and who had a <code>reflog</code> ready?</strong> A sin token here; on a shared branch,
+            an afternoon nobody enjoys. <a href="/git/force-pushed-over-me">Someone force-pushed over my commit</a> is
+            the way back, including the pull that would quietly lose it.
+          </li>
+          <li>
+            <strong>Who played <code>blame</code>, and what did CI find?</strong> Bugs are hidden on cards until the
+            release flips them, so this is the review conversation: what gets looked at before it ships.
+            <a href="/git/who-broke-main">Who broke main</a> is the honest version of the command's name.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Seven conventions, each with its page</h2>
+        <ol>
+          <li>Pull before you push, and set <code>pull.rebase</code> once (<a href="/git/push-rejected">why</a>).</li>
+          <li>
+            Never force-push a shared branch, and protect <code>main</code>. On a branch of your own, after a rebase,
+            <code>--force-with-lease</code> (<a href="/git/forced-update">why</a>).
+          </li>
+          <li>Undo on <code>main</code> with a revert, never a reset (<a href="/git/undo-on-main">why</a>).</li>
+          <li>
+            Resolve conflicts by hand where both sides matter; <code>-X ours</code> or <code>-X theirs</code> only when
+            one side is known to be right (<a href="/git/conflict">why</a>).
+          </li>
+          <li>
+            Branches live days, not weeks. Small commits, pushed often, so every pull is a fast-forward or close to it.
+          </li>
+          <li>Blame the commit, not the person (<a href="/git/who-broke-main">why</a>).</li>
+          <li>Write the commit message for whoever reads <code>git log</code> a year from now.</li>
+        </ol>
+        <p>
+          The longer versions are on their way: rebase or merge as a team policy, trunk-based development against GitHub
+          Flow and Gitflow, and branch protection.
+        </p>
+      </section>
+
+      <section>
+        <h2>What's under it</h2>
+        <p>
+          Nothing you would have to explain away. The rules are Git's, and every command prints Git's output, captured
+          from a real Git (<a href="/git">what Git said</a>). There are no turns: everyone writes a pack for the day,
+          and the remote resolves the day's packs together when it closes, in a random order, so being first to send
+          wins nothing. No accounts, no ads, open source under the AGPL. A private space for an org, team leaderboards
+          and a workshop mode are on the roadmap; the feedback box at every scoreboard reaches the maintainer.
+        </p>
+      </section>
+
+      <section class="again">
+        <h2>Open a room for your team</h2>
+        <p><a class="button primary" href="/play">open a room</a></p>
+      </section>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://creativecommons.org/licenses/by-sa/4.0/">text CC BY-SA 4.0</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

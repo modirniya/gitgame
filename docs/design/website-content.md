@@ -36,13 +36,13 @@ Wave 1 ships before the launch (M13c), so the launch leaves pages behind it; wav
 | Who broke main | `/git/who-broke-main` | card: `blame`; tabletop: `bisect` | built |
 | Undo a commit that's on main | `/git/undo-on-main` | card: `revert` | built |
 | Teach (the door, one page) | `/teach` | the guided first game, `tabletop/print-and-play.pdf` | built |
-| Teams (the door, one page) | `/teams` | a room link, 5-minute days | planned |
+| Teams (the door, one page) | `/teams` | a room link, 5-minute days | built |
 
 ### Wave 2
 
 | Page | Address | Status |
 |---|---|---|
-| How it works, the engineering write-up | `/notes/how-it-works` | planned, drafted for launch week |
+| How it works, the engineering write-up | `/notes/how-it-works` | drafted in [how-it-works.md](how-it-works.md), for the maintainer to finish; the page follows |
 | Force-push and protected branches | `/teams/force-push` | planned |
 | Rebase or merge | `/teams/rebase-or-merge` | planned |
 | Trunk, GitHub Flow, Gitflow | `/teams/branching` | planned |
@@ -89,4 +89,4 @@ Nothing is recorded on the pages. Impressions and clicks per page come from Goog
 
 - The deck's cover doesn't yet name its licence, CC BY-SA 4.0 ([ADR-0010](../adr/0010-pages-and-deck-under-cc-by-sa.md), stated on every page's footer and in the README): a line in `tabletop/build.py` and a rebuilt PDF.
 - The deck is laid out for US Letter, nine cards a page, without bleed or cut marks for a print shop; a layout to the print-and-play norms (bleed, A4 as well as Letter) is a separate change to `tabletop/build.py`.
-- Whether three links fit the landing page's header on a phone once `/teach` and `/teams` open; if not, "what Git said" moves under the hero.
+- The landing page's header now carries five links and the play button; on a phone they wrap to two rows (checked 2026-10-04 at 375 px). Whether to drop the two in-page anchors ("how it plays", "questions") in favour of the three doors is the maintainer's call.
