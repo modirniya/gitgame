@@ -87,6 +87,5 @@ Nothing is recorded on the pages. Impressions and clicks per page come from Goog
 
 ## 7. Open
 
-- The deck's cover doesn't yet name its licence, CC BY-SA 4.0 ([ADR-0010](../adr/0010-pages-and-deck-under-cc-by-sa.md), stated on every page's footer and in the README): a line in `tabletop/build.py` and a rebuilt PDF.
 - The deck is laid out for US Letter, nine cards a page, without bleed or cut marks for a print shop; a layout to the print-and-play norms (bleed, A4 as well as Letter) is a separate change to `tabletop/build.py`.
 - The landing page's header now carries five links and the play button; on a phone they wrap to two rows (checked 2026-10-04 at 375 px). Whether to drop the two in-page anchors ("how it plays", "questions") in favour of the three doors is the maintainer's call.

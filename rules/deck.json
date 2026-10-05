@@ -1,5 +1,5 @@
 {
-  "brand": { "name": "Git Game", "marker": "BRAND", "note": "Working name; see docs/branding.md before changing." },
+  "brand": { "name": "Git Game", "domain": "gitgame.online", "marker": "BRAND", "note": "Working name; see docs/branding.md before changing." },
   "version": "0.2",
   "notes": [
     "Source of truth for the tabletop deck. docs/design/base-rules.md describes the rules; this file describes the physical cards.",
