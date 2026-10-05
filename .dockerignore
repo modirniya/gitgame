@@ -1,8 +1,10 @@
-# Only what the image builds from: web/, server/, rules/. Everything else stays out, and so do build outputs.
+# Only what the image builds from: web/, server/, rules/, and the deck the web build serves (M16d). Everything else
+# stays out, and so do build outputs.
 *
 !web/
 !server/
 !rules/
+!tabletop/print-and-play.pdf
 **/node_modules
 **/dist
 server/_build
