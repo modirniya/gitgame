@@ -1,0 +1,152 @@
+<!doctype html>
+<!-- A way out of what Git did to you (M16, docs/design/website-content.md): three ways to lose a commit, the reflog's
+     way back from each, and what it can't bring back. Every capture placeholder is replaced at build time by the output
+     scripts/git-output.sh captured from a real Git (captures/*.txt), and the version placeholder by that Git's version;
+     the prose describes rules v0.2, so a rules change checks it. %BRAND% and %DOMAIN% come from src/brand.js. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>I lost a commit · %BRAND%</title>
+    <meta
+      name="description"
+      content="A reset went too far, a branch was deleted, a rebase dropped a commit: the reflog still has it. Three captured recoveries, and what the reflog can't bring back."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/git/lost-commit" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="I lost a commit" />
+    <meta
+      property="og:description"
+      content="A reset too far, a deleted branch, a rebase that dropped it: the reflog has all three. Captured from a real Git."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/git/lost-commit" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "I lost a commit",
+        "description": "A reset too far, a deleted branch, a rebase that dropped it: the reflog has all three. Captured from a real Git.",
+        "url": "https://%DOMAIN%/git/lost-commit",
+        "image": "https://%DOMAIN%/og.png",
+        "isPartOf": { "@type": "WebSite", "name": "%BRAND%", "url": "https://%DOMAIN%/" },
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/git">what Git said</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1>I lost a commit</h1>
+      <p class="lede">
+        A commit you made is almost never gone. Every move of <code>HEAD</code> is written to the reflog, and a commit
+        stays in the repository for weeks after nothing points at it. Three ways to lose one, and the way back from
+        each.
+      </p>
+
+      <section>
+        <h2>A reset went too far</h2>
+        <pre class="capture">%CAPTURE:reset-too-far%</pre>
+        <p>
+          <code>git reflog</code> lists where <code>HEAD</code> has been, newest first: the reset at
+          <code>HEAD@{0}</code>, the commit it took away at <code>HEAD@{1}</code>.
+          <code>git reset --hard HEAD@{1}</code>
+          moves the branch back there. Some shells want the braces quoted.
+        </p>
+      </section>
+
+      <section>
+        <h2>A branch was deleted</h2>
+        <pre class="capture">%CAPTURE:branch-deleted%</pre>
+        <p>
+          <code>git branch -D</code> prints the hash it deleted, which is one way back:
+          <code>git branch feature</code> and that hash. The reflog is the other: the commit sits at
+          <code>HEAD@{1}</code>, under the checkout that left the branch, and <code>git branch feature HEAD@{1}</code>
+          makes the branch again, pointing at it.
+        </p>
+      </section>
+
+      <section>
+        <h2>A rebase dropped it</h2>
+        <pre class="capture">%CAPTURE:undo-rebase%</pre>
+        <p>
+          A rebase that settles every clash in the other side's favour (the <a href="/git/conflict">conflict</a> page's
+          <code>-X ours</code>) can leave your commit with nothing to apply, and drop it. The reflog shows the rebase's
+          start and finish, and Git keeps the branch's tip from before any rebase, merge or reset in
+          <code>ORIG_HEAD</code>, so <code>git reset --hard ORIG_HEAD</code> is the whole undo. A
+          <a href="/git/force-pushed-over-me">pull after a forced push</a> can drop a commit the same way.
+        </p>
+      </section>
+
+      <section>
+        <h2>Undo the last commit, keep the work</h2>
+        <pre class="capture">%CAPTURE:reset-soft%</pre>
+        <p>
+          The most asked Git question has the smallest answer. <code>--soft</code> moves the branch back one commit and
+          leaves everything that commit had, staged and ready to commit again. <code>--hard</code> throws the changes
+          away as well, which is the first case above.
+        </p>
+      </section>
+
+      <section>
+        <h2>What the reflog can't bring back</h2>
+        <p>
+          The reflog is per clone: it records your <code>HEAD</code>, not the remote's, so it has nothing on a commit
+          that only ever existed on someone else's machine. It holds commits, not uncommitted work: changes that were
+          never committed are gone after <code>git reset --hard</code>. And its entries expire, after 90 days, or 30 for
+          a commit nothing reaches any more.
+        </p>
+      </section>
+
+      <section>
+        <h2>Why the game does this to you</h2>
+        <p>
+          In %BRAND% nothing is lost either: every pack ever sent is in the game's log, and any game can be replayed day
+          by day from it. On the table, the <code>reflog</code> card is the one you play after a
+          <code>push --force</code> erased your commits: armed in your pack, it fires inside the forcer's pack and puts
+          them back on top of <code>main</code>.
+        </p>
+      </section>
+
+      <section class="again">
+        <h2>Play a day where this happens</h2>
+        <p>One tap starts a game against the bot, and every day of it can be replayed afterwards.</p>
+        <p><a class="button primary" href="/play">play the bot now</a></p>
+      </section>
+
+      <p class="captured">
+        Output captured from Git %GIT_VERSION% by
+        <a href="https://github.com/modirniya/gitgame/blob/main/scripts/git-output.sh">scripts/git-output.sh</a>, in a
+        scratch repository with two clones, ana's and bot's, and fixed dates, so the hashes are the same on every run.
+        It is captured again at every Git release.
+      </p>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

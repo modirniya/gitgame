@@ -1,0 +1,24 @@
+# git version 2.50.1 (Apple Git-155)
+# bisect: a script says whether a commit has the bug, and bisect finds the first commit that does
+$ git bisect start HEAD HEAD~4
+Bisecting: 1 revision left to test after this (roughly 1 step)
+[7742196e73c4f9d00384d5d5b6fd8497d2fff238] api: handle the edge case
+$ git bisect run ./check.sh
+running './check.sh'
+Bisecting: 0 revisions left to test after this (roughly 0 steps)
+[8498150ec9ca1a65dbaa1d2658471bd99d3c9008] api: add the endpoint
+running './check.sh'
+7742196e73c4f9d00384d5d5b6fd8497d2fff238 is the first bad commit
+commit 7742196e73c4f9d00384d5d5b6fd8497d2fff238
+Author: ana <ana@example.com>
+Date:   Sun Oct 4 12:04:00 2026 +0000
+
+    api: handle the edge case
+
+ api.py | 1 +
+ 1 file changed, 1 insertion(+)
+bisect found first bad commit
+$ git bisect reset
+Previous HEAD position was 8498150 api: add the endpoint
+Switched to branch 'main'
+Your branch is up to date with 'origin/main'.

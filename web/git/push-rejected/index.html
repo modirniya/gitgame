@@ -1,0 +1,138 @@
+<!doctype html>
+<!-- A way out of what Git did to you (M16, docs/design/website-content.md): the fix, the setting that makes it one
+     command, when a force is right, and why the game does it to you. Every capture placeholder is replaced at build
+     time by the output scripts/git-output.sh captured from a real Git (captures/*.txt), and the version placeholder by
+     that Git's version; the prose describes rules v0.2, so a rules change checks it. %BRAND% and %DOMAIN% come from src/brand.js. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>My push was rejected · %BRAND%</title>
+    <meta
+      name="description"
+      content="git push was rejected as non-fast-forward: the two commands that fix it, the setting that makes it one, when a force is right, and when it never is."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/git/push-rejected" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="My push was rejected" />
+    <meta
+      property="og:description"
+      content="The two commands that fix a rejected push, the setting that makes it one, when a force is right, and when it never is. Captured from a real Git."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/git/push-rejected" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "My push was rejected",
+        "description": "The two commands that fix a rejected push, the setting that makes it one, when a force is right, and when it never is. Captured from a real Git.",
+        "url": "https://%DOMAIN%/git/push-rejected",
+        "image": "https://%DOMAIN%/og.png",
+        "isPartOf": { "@type": "WebSite", "name": "%BRAND%", "url": "https://%DOMAIN%/" },
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/git">what Git said</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1>My push was rejected</h1>
+      <p class="lede">
+        Someone's push landed before yours. The fix is two commands; the rest of this page is about choosing them once,
+        and about the one command that isn't the fix.
+      </p>
+      <pre class="capture">%CAPTURE:push-non-fast-forward%</pre>
+
+      <section>
+        <h2>The fix</h2>
+        <p>Pull with a rebase, then push again:</p>
+        <pre class="capture">%CAPTURE:push-after-pull-rebase%</pre>
+        <p>
+          Your commit is replayed on top of theirs and the push goes through. If the two touched the same lines, the
+          pull stops on a <a href="/git/conflict">conflict</a> first; resolve it and continue. What the rejection itself
+          means, and the second form it takes, <code>(fetch first)</code>, is on the
+          <a href="/git/non-fast-forward">non-fast-forward</a> page.
+        </p>
+      </section>
+
+      <section>
+        <h2>Choose once</h2>
+        <p>
+          A plain <code>git pull</code> on diverged branches asks you to choose between a rebase and a merge, and
+          refuses to guess. Set it once, and the plain pull does what you chose:
+        </p>
+        <pre class="capture">%CAPTURE:pull-configured-rebase%</pre>
+        <p>
+          <code>pull.rebase true</code> keeps the history one straight line, which most teams prefer on a shared branch.
+          <code>pull.rebase false</code> merges instead, keeping both histories and adding a merge commit (the
+          <a href="/git/fast-forward">three ways a pull lands</a>). <code>git config --global</code> makes either the
+          default for every repository on the machine.
+        </p>
+      </section>
+
+      <section>
+        <h2>When a force is right, and when it never is</h2>
+        <p>
+          <code>git push --force</code> makes the rejection go away by erasing their commit, which is why it is never
+          the fix on a shared branch. It is right on a branch that is yours alone, after a rebase or an amend rewrote
+          its history, and then as <code>--force-with-lease</code>, which refuses if anyone pushed since you last
+          fetched. Both are on the <a href="/git/forced-update">forced update</a> page.
+        </p>
+      </section>
+
+      <section>
+        <h2>Why the game does this to you</h2>
+        <p>
+          A rejected push in %BRAND% is a pack whose push ran after someone else's in the day's random order. The pack
+          pulls before each push for exactly this reason: the pull is the fix, written in advance, and the op it costs
+          is the price of being behind. The pull is also where the choice is made, keep theirs, keep mine or keep both,
+          before the day closes and with nobody there to answer a prompt.
+        </p>
+      </section>
+
+      <section class="again">
+        <h2>Play a day where this happens</h2>
+        <p>
+          One tap starts a game against the bot. It pushes every day, so sooner or later it reaches
+          <code>main</code> first.
+        </p>
+        <p><a class="button primary" href="/play">play the bot now</a></p>
+      </section>
+
+      <p class="captured">
+        Output captured from Git %GIT_VERSION% by
+        <a href="https://github.com/modirniya/gitgame/blob/main/scripts/git-output.sh">scripts/git-output.sh</a>, in a
+        scratch repository with two clones, ana's and bot's, and fixed dates, so the hashes are the same on every run.
+        It is captured again at every Git release.
+      </p>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

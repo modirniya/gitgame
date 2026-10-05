@@ -1,0 +1,148 @@
+<!doctype html>
+<!-- A way out of what Git did to you (M16, docs/design/website-content.md): what you see, how to put the commit back,
+     the pull that would drop it, and why the game does it to you. Every capture placeholder is replaced at build time by
+     the output scripts/git-output.sh captured from a real Git (captures/*.txt), and the version placeholder by that
+     Git's version; the prose describes rules v0.2, so a rules change checks it. %BRAND% and %DOMAIN% come from src/brand.js. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>Someone force-pushed over my commit · %BRAND%</title>
+    <meta
+      name="description"
+      content="Your commit is gone from main after a git push --force. The rebase that puts it back, the pull that would drop it, and how the forcer undoes it."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/git/force-pushed-over-me" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="Someone force-pushed over my commit" />
+    <meta
+      property="og:description"
+      content="Where the commit still is, the rebase that puts it back, the pull --rebase that would quietly drop it, and how the forcer undoes the push. Captured from a real Git."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/git/force-pushed-over-me" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Someone force-pushed over my commit",
+        "description": "Where the commit still is, the rebase that puts it back, the pull --rebase that would quietly drop it, and how the forcer undoes the push. Captured from a real Git.",
+        "url": "https://%DOMAIN%/git/force-pushed-over-me",
+        "image": "https://%DOMAIN%/og.png",
+        "isPartOf": { "@type": "WebSite", "name": "%BRAND%", "url": "https://%DOMAIN%/" },
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/git">what Git said</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1>Someone force-pushed over my commit</h1>
+      <p class="lede">
+        Someone pushed with <code>--force</code>, and <code>main</code> no longer has your commit. Your clone still
+        does, which is all you need. Here is how it looks, how to put it back, and the one command that would quietly
+        lose it.
+      </p>
+      <pre class="capture">%CAPTURE:fetch-after-force%</pre>
+
+      <section>
+        <h2>Put it back on top</h2>
+        <p>
+          <code>git status</code> says the branches have diverged, one commit each: theirs on <code>origin/main</code>,
+          yours on your <code>main</code>, and <code>git log</code> shows yours at the top. Rebase your branch onto what
+          <code>origin/main</code> is now: Git takes your commit off, moves <code>main</code> to their tip, and replays
+          yours on top. The push after it is a fast-forward.
+        </p>
+        <pre class="capture">%CAPTURE:recover-after-force%</pre>
+        <p>
+          Both commits are on <code>main</code> again, yours with a new hash, since it has a new parent. If the two
+          touched the same lines, the replay stops on a <a href="/git/conflict">conflict</a> first. What the forced push
+          itself did is on the <a href="/git/forced-update">forced update</a> page.
+        </p>
+      </section>
+
+      <section>
+        <h2>The pull that would drop it</h2>
+        <p>
+          <code>git pull --rebase</code> looks like the same move, and here it isn't. A pull works out which commits are
+          yours from the history of <code>origin/main</code> as your clone has seen it, the fork point. A commit that
+          was once on <code>origin/main</code> counts as upstream's, and since it is no longer there, the rebase drops
+          it, and says nothing:
+        </p>
+        <pre class="capture">%CAPTURE:pull-rebase-drops%</pre>
+        <p>
+          <code>Successfully rebased</code>, and the commit is gone from the log. <code>ORIG_HEAD</code> still points to
+          where the branch was before the rebase, so <code>git reset --hard ORIG_HEAD</code> is the way back, and then
+          the rebase above, with <code>origin/main</code> named on the command line, which turns the fork-point rule
+          off.
+        </p>
+      </section>
+
+      <section>
+        <h2>If it isn't on your machine</h2>
+        <p>
+          Then it is on the forcer's. Their remote-tracking branch keeps a reflog of its own, and
+          <code>origin/main@{1}</code> is where <code>main</code> was before their push. Pushing that back is one
+          command, with a lease so it can't erase anything newer:
+        </p>
+        <pre class="capture">%CAPTURE:undo-force-push%</pre>
+        <p>
+          That restores <code>main</code> to before the force, your commit included; the forcer's own commit is now the
+          one off <code>main</code>, and a rebase and a push, as above, puts it back properly. Hosts keep an erased
+          commit for a while too, and show forced pushes in a branch's activity, so its hash can still be found there.
+        </p>
+      </section>
+
+      <section>
+        <h2>Why the game does this to you</h2>
+        <p>
+          In %BRAND% a <code>push --force</code> erases every commit after the forcer's pointer, and the erased commits
+          go back to their owners' local branches: the same place Git leaves them. Next day a pull puts you back at the
+          tip and your push lands on top, which is the rebase above. A <code>reflog</code> armed in your pack does it at
+          once: it fires inside the forcer's pack and puts your erased commits back on top of <code>main</code> before
+          the day is over.
+        </p>
+      </section>
+
+      <section class="again">
+        <h2>Play a day where this happens</h2>
+        <p>One tap starts a game against the bot, which holds the <code>push --force</code> card too.</p>
+        <p><a class="button primary" href="/play">play the bot now</a></p>
+      </section>
+
+      <p class="captured">
+        Output captured from Git %GIT_VERSION% by
+        <a href="https://github.com/modirniya/gitgame/blob/main/scripts/git-output.sh">scripts/git-output.sh</a>, in a
+        scratch repository with two clones, ana's and bot's, and fixed dates, so the hashes are the same on every run.
+        It is captured again at every Git release.
+      </p>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+# git version 2.50.1 (Apple Git-155)
+# revert: ana undoes a commit that is already on main with a new commit, and pushes that
+$ git revert --no-edit HEAD
+[main 3132ca8] Revert "api: handle the edge case"
+ Date: Sun Oct 4 12:03:00 2026 +0000
+ 1 file changed, 1 deletion(-)
+$ git log --oneline
+3132ca8 Revert "api: handle the edge case"
+bc13ce9 api: handle the edge case
+ab5768d api: the first endpoint
+07dec17 readme: the project
+$ git push
+To ../origin.git
+   bc13ce9..3132ca8  main -> main

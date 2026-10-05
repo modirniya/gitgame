@@ -108,6 +108,39 @@ same_file() {
 # how a person resolves that conflict by hand: the file with both sides' lines, the markers gone
 keep_both() { printf 'line 2\nline 3\nline 4\n' >api.py; }
 
+# The ways out (M16c): what a person does after Git did one of the above to them.
+scenario_recover_after_force() { race; run fetch; run push --force; as bot; run fetch; show log --oneline; show rebase origin/main; show log --oneline; show push; }
+scenario_pull_rebase_drops() { race; run fetch; run push --force; as bot; run fetch; show pull --rebase; show log --oneline; show reset --hard ORIG_HEAD; show rebase origin/main; show log --oneline; }
+scenario_undo_force_push() { race; run fetch; run push --force; show reflog show origin/main; show push --force-with-lease origin 'origin/main@{1}:main'; }
+scenario_pull_configured_rebase() { race; run fetch; show config pull.rebase true; show pull; show push; }
+scenario_reset_too_far() { fresh; as ana; commit auth.js "auth: check the token"; show reset --hard HEAD~1; show log --oneline; show reflog; show reset --hard 'HEAD@{1}'; show log --oneline; }
+scenario_reset_soft() { fresh; as ana; commit auth.js "auth: check the token"; show reset --soft HEAD~1; show status --short; }
+scenario_branch_deleted() { fresh; as ana; run switch -c feature; commit auth.js "auth: check the token"; run switch main; show branch -D feature; show reflog; show branch feature 'HEAD@{1}'; show log --oneline feature; }
+scenario_undo_rebase() { same_file; run pull --rebase -X ours; show log --oneline; show reflog; show reset --hard ORIG_HEAD; show log --oneline; }
+scenario_blame() { buggy_history; show blame api.py; show log -S bug --oneline; }
+scenario_bisect() { buggy_history; printf '#!/bin/sh\n! grep -q bug api.py\n' >check.sh; chmod +x check.sh; show bisect start HEAD HEAD~4; show bisect run ./check.sh; show bisect reset; }
+scenario_revert() { fresh; as ana; bug_commit; run push; show revert --no-edit HEAD; show log --oneline; show push; }
+scenario_reset_and_push() { fresh; as ana; bug_commit; run push; show reset --hard HEAD~1; show push; show push --force; }
+
+# a commit that adds a line reading "bug" to api.py, the one blame, bisect and revert are after
+bug_commit() {
+  tick
+  printf 'bug\n' >>api.py
+  run add api.py
+  run commit -q -m "api: handle the edge case"
+}
+
+# four commits on api.py, pushed; the second of them is the bug
+buggy_history() {
+  fresh
+  as ana
+  commit api.py "api: add the endpoint"
+  bug_commit
+  commit api.py "api: rename the endpoint"
+  commit api.py "api: add logging"
+  run push
+}
+
 descriptions() {
   cat <<'EOF'
 push-non-fast-forward: ana pushes a commit built on the old tip after bot's push landed; she fetched, so her clone knows it is behind
@@ -127,6 +160,18 @@ pull-conflict-merge: bot and ana changed the same place in api.py; ana's pull me
 pull-conflict-rebase: the same pull with --rebase; the rebase stops on the conflict, and she resolves it and continues
 pull-rebase-ours: the same pull with --rebase -X ours, which keeps the side already on main and drops ana's
 pull-rebase-theirs: the same pull with --rebase -X theirs, which keeps ana's side of the clash
+recover-after-force: bot, force-pushed over, still has his commit: a rebase onto origin/main puts it back on top, and the push lands
+pull-rebase-drops: the same with pull --rebase instead: it takes bot's commit for one that was upstream and drops it; ORIG_HEAD is the way back
+undo-force-push: ana, who forced, finds the tip she erased in origin/main's reflog and pushes it back
+pull-configured-rebase: ana sets pull.rebase once, and a plain pull rebases from then on
+reset-too-far: ana resets away a commit she meant to keep, finds it in the reflog, and resets back to it
+reset-soft: ana undoes her last unpushed commit and keeps its changes staged
+branch-deleted: ana deletes a branch with a commit only it had, and makes the branch again from the reflog
+undo-rebase: a rebase dropped ana's commit; ORIG_HEAD is where she was before it
+blame: which commit last touched each line of api.py, and which commit added the word bug
+bisect: a script says whether a commit has the bug, and bisect finds the first commit that does
+revert: ana undoes a commit that is already on main with a new commit, and pushes that
+reset-and-push: the same undone with a reset: the push is rejected, since main would move backwards, and --force erases
 EOF
 }
 

@@ -1,0 +1,9 @@
+# git version 2.50.1 (Apple Git-155)
+# undo-force-push: ana, who forced, finds the tip she erased in origin/main's reflog and pushes it back
+$ git reflog show origin/main
+864afd7 refs/remotes/origin/main@{0}: update by push
+7a20dd4 refs/remotes/origin/main@{1}: fetch: fast-forward
+ab5768d refs/remotes/origin/main@{2}: update by push
+$ git push --force-with-lease origin origin/main@{1}:main
+To ../origin.git
+ + 864afd7...7a20dd4 origin/main@{1} -> main (forced update)

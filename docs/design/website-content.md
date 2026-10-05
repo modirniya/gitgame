@@ -30,11 +30,11 @@ Wave 1 ships before the launch (M13c), so the launch leaves pages behind it; wav
 | Merge conflict | `/git/conflict` | `CONFLICT (content): Merge conflict in api.py` | built |
 | Nothing to do, two spellings | `/git/already-up-to-date` | `Already up to date.` and `Everything up-to-date` | built |
 | Fast-forward and rebased | `/git/fast-forward` | `Fast-forward`, `Successfully rebased and updated refs/heads/main.` | built |
-| Someone force-pushed over my commit | `/git/force-pushed-over-me` | card: `reflog` | planned |
-| My push was rejected | `/git/push-rejected` | the pack's pull before each push | planned |
-| I lost a commit | `/git/lost-commit` | card: `reflog` | planned |
-| Who broke main | `/git/who-broke-main` | card: `blame`; tabletop: `bisect` | planned |
-| Undo a commit that's on main | `/git/undo-on-main` | card: `revert` | planned |
+| Someone force-pushed over my commit | `/git/force-pushed-over-me` | card: `reflog` | built |
+| My push was rejected | `/git/push-rejected` | the pack's pull before each push | built |
+| I lost a commit | `/git/lost-commit` | card: `reflog` | built |
+| Who broke main | `/git/who-broke-main` | card: `blame`; tabletop: `bisect` | built |
+| Undo a commit that's on main | `/git/undo-on-main` | card: `revert` | built |
 | Teach (the door, one page) | `/teach` | the guided first game, `tabletop/print-and-play.pdf` | planned |
 | Teams (the door, one page) | `/teams` | a room link, 5-minute days | planned |
 

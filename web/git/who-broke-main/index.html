@@ -1,0 +1,139 @@
+<!doctype html>
+<!-- A way out of what Git did to you (M16, docs/design/website-content.md): the line, the word and the first bad
+     commit, and why the game does it to you. Every capture placeholder is replaced at build time by the output
+     scripts/git-output.sh captured from a real Git (captures/*.txt), and the version placeholder by that Git's version;
+     the prose describes rules v0.2, so a rules change checks it. %BRAND% and %DOMAIN% come from src/brand.js. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>Who broke main · %BRAND%</title>
+    <meta
+      name="description"
+      content="git blame says which commit last touched a line, git log -S which commit added a word, and git bisect finds the first bad commit with a script. Captured."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/git/who-broke-main" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="Who broke main: blame, log -S and bisect" />
+    <meta
+      property="og:description"
+      content="Which commit last touched the line, which commit added the word, and which commit first made the test fail. Captured from a real Git."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/git/who-broke-main" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Who broke main: blame, log -S and bisect",
+        "description": "Which commit last touched the line, which commit added the word, and which commit first made the test fail. Captured from a real Git.",
+        "url": "https://%DOMAIN%/git/who-broke-main",
+        "image": "https://%DOMAIN%/og.png",
+        "isPartOf": { "@type": "WebSite", "name": "%BRAND%", "url": "https://%DOMAIN%/" },
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/git">what Git said</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1>Who broke <code>main</code></h1>
+      <p class="lede">
+        Something on <code>main</code> is wrong and you want the commit that did it, not the person. Git has three
+        answers, each costing a little more: which commit last touched the line, which commit added the word, and which
+        commit first made a test fail.
+      </p>
+
+      <section>
+        <h2>The line: <code>git blame</code></h2>
+        <pre class="capture">%CAPTURE:blame%</pre>
+        <p>
+          Each line of the file with the commit that last changed it, its author and the date. The line that reads
+          <code>bug</code> came from <code>api: handle the edge case</code>. Blame knows only the last touch: a reformat
+          makes the formatter the author of every line, which <code>-w</code> (ignore whitespace) and
+          <code>--ignore-rev</code> (ignore that commit) work around. <code>git log -S bug</code> goes further back:
+          every commit that added or removed the word, wherever in the file it was.
+        </p>
+      </section>
+
+      <section>
+        <h2>The commit: <code>git bisect</code></h2>
+        <p>
+          When you know <code>main</code> was good a while ago and is bad now, bisect does the search: it checks out the
+          commit halfway between, you say good or bad, and it halves again. With a script that exits 0 for good and
+          anything else for bad, <code>git bisect run</code> does the saying. Here the script is two lines, and the bug
+          is a line in a file:
+        </p>
+        <pre class="capture">
+#!/bin/sh
+! grep -q bug api.py</pre>
+        <pre class="capture">%CAPTURE:bisect%</pre>
+        <p>
+          Four commits, two steps, and the first bad commit with its full record. <code>git bisect reset</code> returns
+          to where you started. The usual script runs the test suite or the build; anything that can tell good from bad
+          will do, and the search is the same for forty commits as for four, a few steps more.
+        </p>
+      </section>
+
+      <section>
+        <h2>The name</h2>
+        <p>
+          The command is called blame and the practice around it is called blameless, and both are right. The commit is
+          the fact; the person is not the finding. A post-mortem that stops at a name learns nothing about why the line
+          looked right to everyone who read it.
+        </p>
+      </section>
+
+      <section>
+        <h2>Why the game does this to you</h2>
+        <p>
+          In %BRAND% a bug is printed on a card, and only its holder sees it, so a commit on <code>main</code> may hide
+          one until the release flips every commit face-up. <code>blame</code> is a card: play it on a face-down commit
+          on <code>main</code>, and if it holds a bug its author takes <code>-3 blame</code> now, with the commit left
+          face-up. <code>bisect</code> is in the tabletop deck, pointed at a range of <code>main</code>: its owner must
+          say which half holds a bug. It isn't played online yet.
+        </p>
+      </section>
+
+      <section class="again">
+        <h2>Play a day where this happens</h2>
+        <p>One tap starts a game against the bot, whose commits hide bugs as yours do.</p>
+        <p><a class="button primary" href="/play">play the bot now</a></p>
+      </section>
+
+      <p class="captured">
+        Output captured from Git %GIT_VERSION% by
+        <a href="https://github.com/modirniya/gitgame/blob/main/scripts/git-output.sh">scripts/git-output.sh</a>, in a
+        scratch repository with two clones, ana's and bot's, and fixed dates, so the hashes are the same on every run.
+        It is captured again at every Git release.
+      </p>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

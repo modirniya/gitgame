@@ -1,0 +1,15 @@
+# git version 2.50.1 (Apple Git-155)
+# reset-and-push: the same undone with a reset: the push is rejected, since main would move backwards, and --force erases
+$ git reset --hard HEAD~1
+HEAD is now at ab5768d api: the first endpoint
+$ git push
+To ../origin.git
+ ! [rejected]        main -> main (non-fast-forward)
+error: failed to push some refs to '../origin.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. If you want to integrate the remote changes,
+hint: use 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+$ git push --force
+To ../origin.git
+ + bc13ce9...ab5768d main -> main (forced update)

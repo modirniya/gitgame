@@ -1,0 +1,128 @@
+<!doctype html>
+<!-- A way out of what Git did to you (M16, docs/design/website-content.md): a commit that undoes a commit, why a reset
+     and a push won't, and why the game does it to you. Every capture placeholder is replaced at build time by the
+     output scripts/git-output.sh captured from a real Git (captures/*.txt), and the version placeholder by that Git's
+     version; the prose describes rules v0.2, so a rules change checks it. %BRAND% and %DOMAIN% come from src/brand.js. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>Undo a commit that's on main · %BRAND%</title>
+    <meta
+      name="description"
+      content="A commit is on the shared main and shouldn't be. git revert undoes it with a new commit; a reset and push is rejected, and --force erases it for everyone."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/git/undo-on-main" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="%BRAND%" />
+    <meta property="og:title" content="Undo a commit that's on main" />
+    <meta
+      property="og:description"
+      content="git revert undoes a pushed commit with a new one; a reset and a push is rejected, and --force erases it for everyone. Captured from a real Git."
+    />
+    <meta property="og:url" content="https://%DOMAIN%/git/undo-on-main" />
+    <meta property="og:image" content="https://%DOMAIN%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="%BRAND%: a terminal with git push rejected, and cards from the deck" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Undo a commit that's on main",
+        "description": "git revert undoes a pushed commit with a new one; a reset and a push is rejected, and --force erases it for everyone. Captured from a real Git.",
+        "url": "https://%DOMAIN%/git/undo-on-main",
+        "image": "https://%DOMAIN%/og.png",
+        "isPartOf": { "@type": "WebSite", "name": "%BRAND%", "url": "https://%DOMAIN%/" },
+        "author": { "@type": "Organization", "name": "NeuEra LLC", "url": "https://neuera.llc" }
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/git">what Git said</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1>Undo a commit that's on <code>main</code></h1>
+      <p class="lede">
+        The commit is pushed, so other clones may have it already. The undo has to be something they can pull: a new
+        commit that takes the change back.
+      </p>
+
+      <section>
+        <h2>Revert: a commit that undoes a commit</h2>
+        <pre class="capture">%CAPTURE:revert%</pre>
+        <p>
+          <code>git revert HEAD</code> makes a new commit with the inverse change, named after the one it undoes, and
+          leaves the history as it was. The push is a fast-forward, and everyone's next pull brings the fix. To revert a
+          merge commit, add <code>-m 1</code>: which of its parents counts as the line you are staying on.
+        </p>
+      </section>
+
+      <section>
+        <h2>Why not a reset</h2>
+        <pre class="capture">%CAPTURE:reset-and-push%</pre>
+        <p>
+          <code>git reset --hard HEAD~1</code> takes the commit off your <code>main</code>, but the remote's
+          <code>main</code> still has it, and a push that would move <code>main</code> backwards is
+          <a href="/git/non-fast-forward">rejected</a>. <code>--force</code> makes the remote take it, and now the
+          commit is erased from <code>main</code> for everyone, with every other clone diverged: the
+          <a href="/git/forced-update">forced update</a> page's situation. On a branch nobody else has pulled, that is
+          fine. On <code>main</code>, revert.
+        </p>
+      </section>
+
+      <section>
+        <h2>Not pushed yet</h2>
+        <p>
+          If the commit never left your clone there is nobody to tell. <code>git reset --soft HEAD~1</code> takes it
+          back and keeps its changes staged (on the <a href="/git/lost-commit">lost commit</a> page), and
+          <code>git commit --amend</code> rewrites it in place.
+        </p>
+      </section>
+
+      <section>
+        <h2>Why the game does this to you</h2>
+        <p>
+          In %BRAND% the <code>revert</code> card does what Git's does: put on a face-up bug on <code>main</code>, it no
+          longer counts as a bug at the release, and the commit stays where it is. The only card that takes a commit off
+          <code>main</code> is <code>push --force</code>, with its sin token, which is Git's lesson in a card.
+        </p>
+      </section>
+
+      <section class="again">
+        <h2>Play a day where this happens</h2>
+        <p>One tap starts a game against the bot. Twelve bugs in sixty cards; one of them will be yours.</p>
+        <p><a class="button primary" href="/play">play the bot now</a></p>
+      </section>
+
+      <p class="captured">
+        Output captured from Git %GIT_VERSION% by
+        <a href="https://github.com/modirniya/gitgame/blob/main/scripts/git-output.sh">scripts/git-output.sh</a>, in a
+        scratch repository with two clones, ana's and bot's, and fixed dates, so the hashes are the same on every run.
+        It is captured again at every Git release.
+      </p>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame">source (AGPL-3.0)</a>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://neuera.llc">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>
