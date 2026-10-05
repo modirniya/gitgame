@@ -53,8 +53,9 @@ defmodule GitGameWeb.ClientController do
 
   def git(conn, _params), do: page(conn, "git/index.html")
 
-  # the page for teachers (M16d)
+  # the pages for teachers (M16d) and for teams (M16e)
   def teach(conn, _params), do: page(conn, "teach/index.html")
+  def teams(conn, _params), do: page(conn, "teams/index.html")
 
   defp client_file(file) do
     dir =

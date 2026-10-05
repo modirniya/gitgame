@@ -18,6 +18,7 @@ Every document in `docs/` starts with a status line like the one above. The stat
 | [design/round-resolution.md](design/round-resolution.md) | Days, packs, and the remote: how the online game resolves without turns. |
 | [design/event-screens.md](design/event-screens.md) | The game as events and screens: the spec a phone client is built from. |
 | [design/phase-1-plan.md](design/phase-1-plan.md) | The build plan from rules v0.2 to the beta: milestones, what each must show before it counts as done, and open items. |
+| [design/how-it-works.md](design/how-it-works.md) | The engineering write-up for launch week, a draft: no turns, a log of inputs, a pure resolver, one seed, Git's words captured. |
 | [design/website-content.md](design/website-content.md) | The pages beside the game: three doors, the page list and its waves, and Git's output captured, never typed. |
 | [design/website-content-research.md](design/website-content-research.md) | What the website could add to get more impressions while staying on Git: the evidence, a prioritized shortlist, and what not to build. Research as of 2026-10-04. |
 | [../rules/deck.json](../rules/deck.json) · [../tabletop/](../tabletop/README.md) | The physical deck as data, and the print-and-play built from it. |
