@@ -7,6 +7,10 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-10-13
+
+The Git trademark notice, on every page, the game and the deck.
+
 ### Added
 - The Git trademark notice Software Freedom Conservancy asks for, as fine print: "Git® is a trademark of Software Freedom Conservancy. Used with permission." It ends every page's footer (the build adds it, so a new page has it too), the game's start screen, the print-and-play deck's cover and the app's install description, with the Conservancy's name linked to sfconservancy.org.
 - TRADEMARKS.md, our record of the permission to use the name and what it asks of us; the README links it and says the project stays non-commercial, free and copyleft under the AGPL-3.0.
@@ -262,7 +266,8 @@ The first version on the hosted service: the beta ADR-0002 makes the playtest, l
 - Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.
 
-[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/modirniya/gitgame/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/modirniya/gitgame/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/modirniya/gitgame/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/modirniya/gitgame/compare/v0.3.5...v0.4.0
