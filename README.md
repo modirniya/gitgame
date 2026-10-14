@@ -2,7 +2,7 @@
 
 > **Two notices, read them first.**
 >
-> **The name is not final.** "Git Game" and gitgame.online are the working name and domain. There is a small chance the project will need a different name. Every use of the name follows [docs/branding.md](docs/branding.md), so it can be found and changed in one pass.
+> **The name is used with permission.** "Git Game" and gitgame.online are the name and domain. Software Freedom Conservancy, which holds the Git trademark, has given permission to use the name, and either side may end it on notice ([TRADEMARKS.md](TRADEMARKS.md)), so there is a small chance the project will need a different name. Every use of the name follows [docs/branding.md](docs/branding.md), so it can be found and changed in one pass.
 >
 > **This project is built with AI.** A substantial part of the design, documentation, and code is produced with Anthropic's Claude and reviewed by humans who are accountable for it. What that means in practice, and how AI-written work is marked, is in [AI_DISCLOSURE.md](AI_DISCLOSURE.md).
 
@@ -38,4 +38,8 @@ Contributions are welcome, including rules proposals — see [CONTRIBUTING.md](C
 
 ## License
 
-Code and documentation: [GNU AGPL-3.0-or-later](LICENSE). The pages under `/git`, `/teach` and `/teams` on the site, and the print-and-play deck: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) ([ADR-0010](docs/adr/0010-pages-and-deck-under-cc-by-sa.md)). The project name, logo, and domain are trademarks-in-use of NeuEra LLC and are not covered by either.
+Git Game is non-commercial, and it stays free and copyleft under the AGPL-3.0.
+
+Code and documentation: [GNU AGPL-3.0-or-later](LICENSE). The pages under `/git`, `/teach` and `/teams` on the site, and the print-and-play deck: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) ([ADR-0010](docs/adr/0010-pages-and-deck-under-cc-by-sa.md)). The logo and domain are NeuEra LLC's and are not covered by either; the name is used under the permission recorded in [TRADEMARKS.md](TRADEMARKS.md).
+
+Git® is a trademark of [Software Freedom Conservancy](https://sfconservancy.org). Used with permission.
