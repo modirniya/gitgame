@@ -2,7 +2,7 @@
 // room to invite someone (M9). Under "more", a game set up by hand: you take the first seat, as the player this device
 // is signed in as (ADR-0005), anyone else at the device can take a seat too (hotseat), and the remote plays the bots.
 import { el } from "./dom.js";
-import { name } from "./brand.js";
+import { name, trademark } from "./brand.js";
 import { whoami } from "./whoami.js";
 import { gamesList } from "./games.js";
 import { emailSettings } from "./email.js";
@@ -107,6 +107,13 @@ export function startScreen({ remote, go, me, failure = null, notice = "", signO
     yours,
     me && emailSettings(remote),
     el("details", { class: "more" }, el("summary", {}, "more: set up a game by hand"), form()),
+    el(
+      "p",
+      { class: "trademark start-foot" },
+      trademark.before,
+      el("a", { href: trademark.href }, trademark.owner),
+      trademark.after,
+    ),
   );
 
   function form() {

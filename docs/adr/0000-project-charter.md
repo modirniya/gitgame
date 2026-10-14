@@ -127,6 +127,6 @@ Measured in **games completed**, never sign-ups.
 
 ## 7. Open items
 
-- [ ] SFC trademark response (sent 2026-09-29; nudge after ~4 weeks). Not blocking.
+- [x] SFC trademark response (sent 2026-09-29): permission granted, with a notice to show ([TRADEMARKS.md](../../TRADEMARKS.md)).
 - [ ] Playtest questions 1–3 → spec v1.0.
 - [ ] Rename per branding.md only if SFC declines.

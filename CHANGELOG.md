@@ -7,6 +7,10 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Added
+- The Git trademark notice Software Freedom Conservancy asks for, as fine print: "Git® is a trademark of Software Freedom Conservancy. Used with permission." It ends every page's footer (the build adds it, so a new page has it too), the game's start screen, the print-and-play deck's cover and the app's install description, with the Conservancy's name linked to sfconservancy.org.
+- TRADEMARKS.md, our record of the permission to use the name and what it asks of us; the README links it and says the project stays non-commercial, free and copyleft under the AGPL-3.0.
+
 ## [0.5.1] - 2026-10-05
 
 The NeuEra link goes somewhere again.

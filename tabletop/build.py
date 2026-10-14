@@ -216,6 +216,14 @@ def cover_page(c, counts, pages):
             "Attribution-ShareAlike 4.0 licence (creativecommons.org/licenses/by-sa/4.0): keep the licence, and say they came from "
             f"{BRAND}, {DOMAIN}. The game's code is a separate work, under the AGPL-3.0.",
          1.1 * inch, y - 4, 6.2 * inch, 10.5)
+    # the Git trademark notice, word for word (TRADEMARKS.md): fine print at the foot of the cover, so a printed copy
+    # carries it, with the link Software Freedom Conservancy asked for
+    notice = "Git\u00ae is a trademark of Software Freedom Conservancy. Used with permission."
+    c.setFont("Helvetica", 8)
+    c.setFillColor(MUTED)
+    c.drawString(0.9 * inch, 0.7 * inch, notice)
+    left = 0.9 * inch + c.stringWidth("Git\u00ae is a trademark of ", "Helvetica", 8)
+    c.linkURL("https://sfconservancy.org", (left, 0.7 * inch - 2, left + c.stringWidth("Software Freedom Conservancy", "Helvetica", 8), 0.7 * inch + 8))
     c.showPage()
 
 

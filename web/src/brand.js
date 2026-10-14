@@ -4,3 +4,13 @@
 // BRAND
 export const name = "Git Game";
 export const domain = "gitgame.online";
+
+// The Git trademark notice, word for word as Software Freedom Conservancy asked for it (TRADEMARKS.md): every page's
+// footer and the game's start screen carry it, its owner linked. Never reworded.
+export const trademark = {
+  before: "Git® is a trademark of ",
+  owner: "Software Freedom Conservancy",
+  href: "https://sfconservancy.org",
+  after: ". Used with permission.",
+};
+export const trademarkText = trademark.before + trademark.owner + trademark.after;
