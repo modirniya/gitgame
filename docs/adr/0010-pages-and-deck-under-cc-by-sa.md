@@ -1,6 +1,6 @@
 # ADR-0010: The site's pages and the print-and-play deck under CC BY-SA 4.0
 
-*Status: Accepted · Date: 2026-10-04*
+*Status: Accepted; its rationale amended by [ADR-0011](0011-non-commercial-permanently.md) (non-commercial, permanently) · Date: 2026-10-04*
 
 ## Context
 
@@ -14,15 +14,15 @@ The prose of the site's pages under `/git`, `/teach` and `/teams`, and the print
 
 - **CC BY 4.0** — more permissive: a closed derivative of the deck could be sold. ShareAlike keeps derived decks and lessons open, which is what the AGPL does for the code.
 - **Leave everything under the AGPL** — a software licence on a lesson plan confuses teachers and fails the resource lists, and its source obligations don't map onto printed cards.
-- **CC BY-NC-SA 4.0** — forbids commercial use, which would stop a trainer from using the deck in a paid workshop. That is a use the project wants (charter decision 19, Orgs/Teams).
+- **CC BY-NC-SA 4.0** — forbids commercial use, which would stop a trainer from using the deck in a paid workshop. ~~That is a use the project wants (charter decision 19, Orgs/Teams).~~ The project sells nothing, and doesn't take that right away from anyone else ([ADR-0011](0011-non-commercial-permanently.md)).
 
 ## Consequences
 
 - Every page under the three doors names the licence in its footer, and the README's licence section names both licences. The deck's cover is rebuilt to name it (a follow-up: `tabletop/build.py`, then the PDF).
 - Contributions to the pages and to the card text are made under CC BY-SA 4.0; `CONTRIBUTING.md` says so.
-- Selling printed copies stays possible, for the project and for anyone else, which the physical box (charter decision 19c) relies on; the box's own art, when it exists, is not covered by this decision, as charter decision 18 keeps box art separate.
+- ~~Selling printed copies stays possible, for the project and for anyone else, which the physical box (charter decision 19c) relies on; the box's own art, when it exists, is not covered by this decision, as charter decision 18 keeps box art separate.~~ Anyone may sell printed copies under the licence; the project sells none ([ADR-0011](0011-non-commercial-permanently.md)).
 - A rename ([branding.md](../branding.md)) doesn't change the licence; attribution names the project by its canonical name at the time.
 
 ## Supersedes / superseded by
 
-None.
+None. Its rationale is amended by [ADR-0011](0011-non-commercial-permanently.md).

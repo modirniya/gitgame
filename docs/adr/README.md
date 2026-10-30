@@ -15,7 +15,7 @@ If you are unsure, write one. They're short.
 ## Rules
 
 - Numbered sequentially, four digits: `NNNN-short-title.md`.
-- **Never deleted, never edited after acceptance** except to change the status line. A reversal is a *new* ADR that supersedes the old one, and the old one's status points forward.
+- **Never deleted, never edited after acceptance** except to change the status line, and to strike through (`~~…~~`) a line a later ADR replaces, with a link to it, so nobody reads a reversed decision as current. A reversal is a *new* ADR that supersedes the old one, and the old one's status points forward.
 - Status is one of: Proposed, Accepted, Superseded by ADR-NNNN, Rejected.
 - Written before the code, reviewed in the same PR as the code, or in its own PR if the discussion is the point.
 
@@ -37,4 +37,5 @@ Copy [template.md](template.md).
 | [0007](0007-where-the-beta-runs.md) | Where the beta runs | Accepted; its managed Postgres superseded by 0008 |
 | [0008](0008-the-beta-shares-a-postgres.md) | The beta's database lives on an existing Postgres, for now | Accepted |
 | [0009](0009-a-landing-page-and-the-game-at-play.md) | A landing page at gitgame.online, and the game at /play | Accepted |
-| [0010](0010-pages-and-deck-under-cc-by-sa.md) | The site's pages and the print-and-play deck under CC BY-SA 4.0 | Accepted |
+| [0010](0010-pages-and-deck-under-cc-by-sa.md) | The site's pages and the print-and-play deck under CC BY-SA 4.0 | Accepted; its rationale amended by 0011 |
+| [0011](0011-non-commercial-permanently.md) | Git Game is non-commercial, permanently | Accepted |
