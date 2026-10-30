@@ -69,6 +69,8 @@ it("keeps a log of every day in the Table, newest first", async () => {
     "day 2",
     "day 1",
   ]);
+  // and ends in the source of this version, the privacy policy and the terms: a link from every screen of a game
+  expect(screen.node.querySelector(".table-panel .legal-foot a").textContent).toMatch(/^source of v/);
   screen.leave();
   localStorage.clear();
 });

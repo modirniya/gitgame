@@ -7,6 +7,13 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Added
+- Every page's footer and every screen of the game (the start screen, a room, a game's Table, a replay) link the source of the version running, the tag it was deployed from, as the AGPL asks of a network service; `/api/health` says the version and its source too. The deploy refuses a tag that isn't the release's version.
+- A privacy policy at `/privacy` and terms of use at `/terms`, linked from every footer and every screen of the game. They describe what the game keeps today: a made-up handle, the games, push reminders if asked for, feedback, daily visits, and an hour's count of players made per IP address, in memory.
+
+### Changed
+- [ADR-0011](docs/adr/0011-non-commercial-permanently.md): Git Game is non-commercial, permanently; nothing is sold, now or later. It amends the charter's decision 19, priorities, Phases 4–5 and success measures, and ADR-0010's rationale. `/teams` says features for teams will be free.
+
 ## [0.5.2] - 2026-10-13
 
 The Git trademark notice, on every page, the game and the deck.

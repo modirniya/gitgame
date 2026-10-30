@@ -25,6 +25,16 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v7
+      # Every page and /api/health link the source of the version running as the tag v<version> (web/src/source.js,
+      # the AGPL's offer), so a tag that isn't the release commit's version would link the wrong source.
+      - name: The tag is the version the release commit sets
+        run: |
+          web=$(node -p 'require("./web/package.json").version')
+          server=$(sed -n 's/^ *version: "\(.*\)",$/\1/p' server/mix.exs)
+          if [ "$GITHUB_REF_NAME" != "v$web" ] || [ "$GITHUB_REF_NAME" != "v$server" ]; then
+            echo "::error::tag $GITHUB_REF_NAME, but web/package.json says $web and server/mix.exs says $server"
+            exit 1
+          fi
       - uses: superfly/flyctl-actions/setup-flyctl@1.6
       - name: Deploy the tagged version
         env:

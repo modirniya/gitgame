@@ -16,6 +16,7 @@ import { catchup, recall, remember } from "./catchup.js";
 import { offerReminders, remindButton } from "./remind.js";
 import { scoreboard } from "./release.js";
 import { feedbackBox } from "./feedback.js";
+import { legalFoot } from "./source.js";
 import { guideLayer, guideOnStep, guideStep, highlight, isGuided, setGuided } from "./guide.js";
 
 const fresh = () => ({ ops: [], selected: [], picking: null });
@@ -223,6 +224,7 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
             transcript(moments(d.log, { you }).moments, you, { label: `day ${d.day}` }),
           ]),
         ),
+      legalFoot(),
     );
   }
 
@@ -283,6 +285,7 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
           { class: "body" },
           el("p", { class: "error", role: "alert" }, e.message),
           el("a", { href: "#/" }, "new game"),
+          legalFoot(),
         ),
       ),
     );

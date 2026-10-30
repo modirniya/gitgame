@@ -70,4 +70,14 @@ describe("the Git trademark notice", () => {
     expect(notice.querySelector("a").getAttribute("href")).toBe("https://sfconservancy.org");
     expect(notice.querySelector("a").textContent).toBe("Software Freedom Conservancy");
   });
+
+  it("follows the source of this version, the privacy policy and the terms", () => {
+    const remote = { listGames: async () => [], emailSettings: () => new Promise(() => {}) };
+    const foot = startScreen({ remote, go: () => {}, me: null }).querySelector(".legal-foot");
+    expect([...foot.querySelectorAll("a")].map((a) => a.textContent)).toEqual([
+      expect.stringMatching(/^source of v\d+\.\d+\.\d+ \(AGPL-3\.0\)$/),
+      "privacy",
+      "terms",
+    ]);
+  });
 });

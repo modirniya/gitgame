@@ -7,6 +7,7 @@ import { whoami } from "./whoami.js";
 import { gamesList } from "./games.js";
 import { emailSettings } from "./email.js";
 import { setGuided } from "./guide.js";
+import { legalFoot } from "./source.js";
 
 const LENGTHS = [
   ["live", "live · 60s days"],
@@ -107,9 +108,10 @@ export function startScreen({ remote, go, me, failure = null, notice = "", signO
     yours,
     me && emailSettings(remote),
     el("details", { class: "more" }, el("summary", {}, "more: set up a game by hand"), form()),
+    legalFoot(),
     el(
       "p",
-      { class: "trademark start-foot" },
+      { class: "trademark" },
       trademark.before,
       el("a", { href: trademark.href }, trademark.owner),
       trademark.after,
