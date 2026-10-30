@@ -1,0 +1,188 @@
+<!doctype html>
+<!-- The privacy policy: what the game at %DOMAIN% holds about the people who play it, why, for how long, and how to
+     have it deleted. It describes only what runs in production. GitHub sign-in and reminders by email are built
+     (ADR-0005, ADR-0006) but switched off there; switching either on changes this page first. A change to what the
+     server stores (server/priv/repo/migrations) checks this page. Its history is this file's in Git.
+     %BRAND% and %DOMAIN% come from src/brand.js at build time (docs/branding.md). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14161a" />
+    <title>Privacy policy · %BRAND%</title>
+    <meta
+      name="description"
+      content="What the game at gitgame.online keeps about its players: a made-up handle, the games, push reminders if asked for. Why, for how long, and how to delete it."
+    />
+    <link rel="canonical" href="https://%DOMAIN%/privacy" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing.css" />
+    <link rel="stylesheet" href="/src/pages.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <a class="brand" href="/">$ %BRAND%</a>
+      <nav aria-label="the site">
+        <a href="/new-to-git">new to Git?</a>
+        <a href="/git">what Git said</a>
+        <a href="/teach">teach</a>
+        <a href="/teams">teams</a>
+        <a class="button primary" href="/play">play</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1>Privacy policy</h1>
+      <p class="lede">
+        Effective 30 October 2026. %BRAND% is a free, non-commercial card game at %DOMAIN%, run by NeuEra Apps LLC
+        ("we"). You play without an account, a name or an email address. This page lists everything the game keeps about
+        you, why, and for how long, and it describes the game as it runs today, not as it might one day.
+      </p>
+
+      <section>
+        <h2>What the game keeps</h2>
+        <ul>
+          <li>
+            <strong>A player and its handle.</strong> The first time a device opens the game it becomes a player: an id
+            and a handle the game makes up (like <code>quiet-otter-42</code>), with the time it was made. The handle is
+            what the other players at your table see. There is no name, email or password.
+          </li>
+          <li>
+            <strong>A session.</strong> Your browser holds one cookie, which keeps the device signed in as its player.
+            The server keeps a hash of it, never the cookie itself, and when it expires: a year after you last played.
+            Signing out ends it. The cookie is the only one the game sets, and it is needed for the game to work.
+          </li>
+          <li>
+            <strong>Your games.</strong> Each game is a record of everything played in it: the seats (handles, and any
+            names you typed for people playing at your device), which player holds which seat, every pack and op, the
+            commit messages you wrote, and when each happened. Rooms keep their invite code, their host and who joined,
+            and when. This record is the game: it is how a game is shown, resumed a week later and replayed.
+          </li>
+          <li>
+            <strong>Reminders, if you ask for them.</strong> If you tap "remind me" and your browser allows
+            notifications, the game keeps the address your browser's push service gave it (an endpoint at Google,
+            Mozilla or Apple, depending on the browser) and the two keys that go with it. A reminder carries no message:
+            it only wakes the game. The game also records each reminder it sent: to which player, about which game and
+            day, and when, so it never sends the same one twice.
+          </li>
+          <li>
+            <strong>Feedback you write.</strong> When a game ends, the scoreboard has a box for telling us how it went.
+            What you write is kept with your player and the game, and read by the maintainer.
+          </li>
+          <li>
+            <strong>Visits.</strong> The game notes, once a day, that a player opened it, and whether they came from a
+            reminder; and that a replay was opened. These are how the beta tells whether people come back (ADR-0002),
+            counted by the maintainer, never shown to anyone else.
+          </li>
+          <li>
+            <strong>Your IP address, for an hour, in memory.</strong> To stop a script making a million players, the
+            server counts how many players each IP address makes in an hour. The count lives in the server's memory, is
+            never written to the database or the logs, and is gone within the hour, or sooner if the server restarts.
+          </li>
+          <li>
+            <strong>On your device.</strong> The game remembers, in your browser's local storage, which days of a game
+            you have already watched and whether your first game is guided. That never leaves the device.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>What it doesn't</h2>
+        <p>
+          No analytics, no advertising, no tracking pixels, and no scripts from anyone else: the pages load only from
+          %DOMAIN%. No name, email address, age, location, contacts or payment details. There is nothing to buy, so
+          there is no billing record. We don't sell or rent anything about you, and we don't share it with anyone for
+          their own use.
+        </p>
+        <p>
+          Two features are built but switched off on %DOMAIN%, so the game holds nothing for them:
+          <strong>linking a GitHub account</strong> (which would keep your GitHub id, login and avatar address, never
+          your email or a token) and <strong>reminders by email</strong> (which would keep the address you give). If
+          either is switched on, this page will say so, and what it keeps, before it is.
+        </p>
+      </section>
+
+      <section>
+        <h2>Who can see what</h2>
+        <p>
+          The players at your table see your handle and everything you play, including your commit messages. Anyone with
+          a game's link can watch it and replay it as the table saw it, and anyone with a room's link sees who has
+          joined it. A hidden card stays hidden from everyone but you. Nobody but the maintainer sees feedback, visits
+          or reminders.
+        </p>
+      </section>
+
+      <section>
+        <h2>Who else is involved</h2>
+        <ul>
+          <li>
+            <strong>Fly.io</strong> hosts the game and its database, in the United States. As with any host, their
+            network sees each request's IP address, and their logs follow their own policy. The game's own logs record
+            what was asked for (like <code>GET /api/games/…</code>), not who asked.
+          </li>
+          <li>
+            <strong>Your browser's push service</strong> (Google, Mozilla or Apple), only if you turned on reminders. It
+            delivers an empty push to your browser and learns nothing from us beyond that one was sent.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>How long it is kept</h2>
+        <p>
+          A session expires a year after you last played, and can no longer sign anyone in. A reminder subscription goes
+          when your browser's push service says it is no longer there: block notifications for %DOMAIN% and the next
+          reminder is refused, and the subscription deleted. The rate-limit count goes within the hour. Everything else
+          (players, games, rooms, feedback, visits and the record of reminders sent) is kept for as long as the game
+          runs, because a game is a record that the other players at the table share and can replay, or until you ask us
+          to delete it.
+        </p>
+      </section>
+
+      <section>
+        <h2>Asking for it, or deleting it</h2>
+        <p>
+          Write to <a href="mailto:hello@neuera.app">hello@neuera.app</a> with your handle, which the game's start
+          screen shows. We will send you what the game holds about your player, or delete it: the player, its sessions,
+          reminders, feedback and visits. In games other people played with you, your seat stays so their game still
+          adds up, under a handle that no longer leads to anything; we will remove a commit message you ask about. We
+          may ask you to confirm from the device you play on that the handle is yours, and we answer within 30 days.
+        </p>
+        <p>
+          Wherever you live, you can ask for this, and you can complain to your data protection authority if we don't
+          answer. Where the law asks for a basis: we keep what the game needs to run and to stay safe from abuse because
+          a game can't be played without it (our legitimate interest, and yours in playing), and reminders because you
+          asked for them (your consent, which blocking notifications withdraws).
+        </p>
+      </section>
+
+      <section>
+        <h2>Children</h2>
+        <p>
+          %BRAND% is meant for people aged 13 and over, and asks nobody's age, because it collects nothing that says who
+          you are. If you think a child wrote something personal in a commit message or in feedback, write to us and we
+          will delete it.
+        </p>
+      </section>
+
+      <section>
+        <h2>Changes</h2>
+        <p>
+          When what the game keeps changes, this page changes first, with a new date at the top. Every earlier version
+          is in the
+          <a href="https://github.com/modirniya/gitgame/commits/main/web/privacy/index.html">history of this page</a>,
+          beside the code it describes, which is open source. The <a href="/terms">terms</a> say what you and we agree
+          to.
+        </p>
+        <p>NeuEra Apps LLC · <a href="mailto:hello@neuera.app">hello@neuera.app</a> · <a href="/play">play</a></p>
+      </section>
+    </main>
+
+    <footer class="site-foot">
+      <span>%BRAND%</span>
+      <a href="https://github.com/modirniya/gitgame/releases">releases</a>
+      <a href="https://legal.neuera.app">NeuEra LLC</a>
+    </footer>
+  </body>
+</html>

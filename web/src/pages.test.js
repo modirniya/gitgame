@@ -17,6 +17,11 @@ describe.each(pages)("the page at /$path", ({ path, title }) => {
     expect(html).toContain('href="/play"');
   });
 
+  // the build adds the source of this version, the privacy policy and the terms to it (vite.config.js)
+  it("has a footer for the build to fill", () => {
+    expect(html).toContain('<footer class="site-foot">');
+  });
+
   it("quotes only what scripts/git-output.sh captured, and names the Git that printed it", () => {
     const quoted = [...html.matchAll(/%CAPTURE:([a-z0-9-]+)%/g)].map((m) => m[1]);
     for (const scenario of quoted) expect(read(`captures/${scenario}.txt`)).toMatch(/^# git version /);
@@ -31,5 +36,6 @@ it("the door at /git links every page under it", () => {
 
 it("the landing page's header links every door", () => {
   const landing = read("index.html");
-  for (const { path } of pages) if (!path.includes("/")) expect(landing).toContain(`href="/${path}"`);
+  for (const { path, legal } of pages) if (!path.includes("/") && !legal) expect(landing).toContain(`href="/${path}"`);
+  expect(landing).toContain('<footer class="site-foot">');
 });
