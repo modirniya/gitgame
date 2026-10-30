@@ -34,12 +34,12 @@ To play it on your machine: the server in [server/](server/README.md), the clien
 
 ## Contributing
 
-Contributions are welcome, including rules proposals — see [CONTRIBUTING.md](CONTRIBUTING.md). This is a small project run by [NeuEra LLC](https://legal.neuera.app); expect honest, direct review and short feedback loops.
+Contributions are welcome, including rules proposals — see [CONTRIBUTING.md](CONTRIBUTING.md). This is a small project run by [NeuEra Apps LLC](https://legal.neuera.app); expect honest, direct review and short feedback loops.
 
 ## License
 
 Git Game is non-commercial, and it stays free and copyleft under the AGPL-3.0.
 
-Code and documentation: [GNU AGPL-3.0-or-later](LICENSE). The pages under `/git`, `/teach` and `/teams` on the site, and the print-and-play deck: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) ([ADR-0010](docs/adr/0010-pages-and-deck-under-cc-by-sa.md)). The logo and domain are NeuEra LLC's and are not covered by either; the name is used under the permission recorded in [TRADEMARKS.md](TRADEMARKS.md).
+Code and documentation: [GNU AGPL-3.0-or-later](LICENSE). The pages under `/git`, `/teach` and `/teams` on the site, and the print-and-play deck: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) ([ADR-0010](docs/adr/0010-pages-and-deck-under-cc-by-sa.md)). The logo and domain are NeuEra Apps LLC's and are not covered by either; the name is used under the permission recorded in [TRADEMARKS.md](TRADEMARKS.md).
 
 Git® is a trademark of [Software Freedom Conservancy](https://sfconservancy.org). Used with permission.

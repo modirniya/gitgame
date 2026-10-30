@@ -7,6 +7,9 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+### Fixed
+- The project's legal entity is named correctly, NeuEra Apps LLC, in every footer, the pages' structured data, the README, TRADEMARKS.md, the charter and the branding guide. The Git trademark notice's wording is unchanged.
+
 ## [0.5.3] - 2026-10-30
 
 The source of the running version on every page and screen, a privacy policy and terms, and non-commercial for good.

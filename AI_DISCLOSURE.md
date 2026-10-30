@@ -10,7 +10,7 @@ This project is built with substantial help from AI. We would rather say so plai
 
 ## Who is accountable
 
-NeuEra LLC and its maintainers. A human has read every line that lands on `main` and is responsible for it as if they had typed it. "The AI wrote it" is never an explanation for a bug, a license problem, or a rude comment.
+NeuEra Apps LLC and its maintainers. A human has read every line that lands on `main` and is responsible for it as if they had typed it. "The AI wrote it" is never an explanation for a bug, a license problem, or a rude comment.
 
 ## How AI-written work is marked
 

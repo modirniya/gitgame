@@ -1,6 +1,6 @@
 # Trademarks
 
-*Status: Current · Last verified: 2026-10-13*
+*Status: Current · Last verified: 2026-10-30*
 
 Our own record of the permission this project uses the Git trademark under, and what we agreed to in return.
 
@@ -8,7 +8,7 @@ Our own record of the permission this project uses the Git trademark under, and 
 
 Git® is a trademark of [Software Freedom Conservancy](https://sfconservancy.org). Used with permission.
 
-Software Freedom Conservancy holds the Git trademark for the Git project. Its general counsel granted [NeuEra LLC](https://legal.neuera.app), which runs this project, permission to use the name "Git Game" for it.
+Software Freedom Conservancy holds the Git trademark for the Git project. Its general counsel granted [NeuEra Apps LLC](https://legal.neuera.app), which runs this project, permission to use the name "Git Game" for it.
 
 ### What the permission is
 
