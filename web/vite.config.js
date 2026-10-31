@@ -5,8 +5,9 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
-import { name, domain } from "./src/brand.js";
+import { name, domain, trademark, trademarkText } from "./src/brand.js";
 import { pages } from "./src/pages.js";
+import { footLinks } from "./src/source.js";
 
 const api = { "/api": { target: "http://localhost:4000", changeOrigin: true } };
 const page = (path) => fileURLToPath(new URL(path, import.meta.url));
@@ -17,7 +18,7 @@ const manifest = () =>
   JSON.stringify({
     name,
     short_name: name,
-    description: `A card game about Git · ${domain}`,
+    description: `A card game about Git · ${domain} · ${trademarkText}`,
     // the game, not the landing page; `id` keeps the identity installs had when the game was at /
     id: "/",
     start_url: "/play",
@@ -27,9 +28,16 @@ const manifest = () =>
     icons: [{ src: "icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" }],
   });
 
+// Every page's footer ends in the source of the version running (the AGPL's offer), the privacy policy and the terms
+// (src/source.js), then the Git trademark notice (TRADEMARKS.md), all added here so a new page has them without asking.
+const notice = `<p class="trademark">${trademark.before}<a href="${trademark.href}">${trademark.owner}</a>${trademark.after}</p>`;
+const links = footLinks.map(({ href, text }) => `<a href="${href}">${text}</a>`).join("\n      ");
+const withFooter = (html) =>
+  html.replace(/(<footer class="site-foot">[\s\S]*?)(\n?\s*<\/footer>)/, `$1\n      ${links}\n      ${notice}$2`);
+
 const brand = {
   name: "brand",
-  transformIndexHtml: (html) => html.replaceAll("%BRAND%", name).replaceAll("%DOMAIN%", domain),
+  transformIndexHtml: (html) => withFooter(html.replaceAll("%BRAND%", name).replaceAll("%DOMAIN%", domain)),
   configureServer(server) {
     server.middlewares.use("/manifest.webmanifest", (_req, res) => {
       res.setHeader("Content-Type", "application/manifest+json");

@@ -61,3 +61,23 @@ describe("play the bot now", () => {
     expect(isGuided("g2")).toBe(false);
   });
 });
+
+describe("the Git trademark notice", () => {
+  it("is on the start screen word for word, its owner linked", () => {
+    const remote = { listGames: async () => [], emailSettings: () => new Promise(() => {}) };
+    const notice = startScreen({ remote, go: () => {}, me: null }).querySelector(".trademark");
+    expect(notice.textContent).toBe("Git® is a trademark of Software Freedom Conservancy. Used with permission.");
+    expect(notice.querySelector("a").getAttribute("href")).toBe("https://sfconservancy.org");
+    expect(notice.querySelector("a").textContent).toBe("Software Freedom Conservancy");
+  });
+
+  it("follows the source of this version, the privacy policy and the terms", () => {
+    const remote = { listGames: async () => [], emailSettings: () => new Promise(() => {}) };
+    const foot = startScreen({ remote, go: () => {}, me: null }).querySelector(".legal-foot");
+    expect([...foot.querySelectorAll("a")].map((a) => a.textContent)).toEqual([
+      expect.stringMatching(/^source of v\d+\.\d+\.\d+ \(AGPL-3\.0\)$/),
+      "privacy",
+      "terms",
+    ]);
+  });
+});

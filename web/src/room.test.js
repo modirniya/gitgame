@@ -42,6 +42,7 @@ describe("a room", () => {
     const start = screen.node.querySelector("form button");
     expect(start.disabled).toBe(true);
     expect(start.textContent).toBe("waiting for a second seat");
+    expect(screen.node.querySelector(".legal-foot a").textContent).toMatch(/^source of v/);
   });
 
   it("lets its host add a bot, then start", async () => {

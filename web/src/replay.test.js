@@ -32,6 +32,7 @@ it("replays a day from the remote's fold of the log, with that day's log as a te
   expect(asked).toEqual([["g1", 1]]);
   expect(screen.node.querySelector(".replay-nav span").textContent).toBe("after day 1 of 2");
   expect(screen.node.querySelector(".transcript").textContent).toContain("bot@main $ git push");
+  expect(screen.node.querySelector(".legal-foot a").getAttribute("href")).toMatch(/\/tree\/v\d/);
 
   const [back, forward] = screen.node.querySelectorAll(".replay-nav button");
   back.click();

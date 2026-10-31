@@ -1,5 +1,6 @@
 // The pages beside the landing page and the game (docs/design/website-content.md): the doors at /git, /teach and
-// /teams and, under /git, one page per line Git prints in the game and one per predicament it puts you in. One list,
+// /teams and, under /git, one page per line Git prints in the game and one per predicament it puts you in; and the
+// privacy policy and the terms, which every footer links (`legal`) rather than the landing page's header. One list,
 // so the build's inputs, the sitemap, the door and the landing page's header agree; the test beside this file holds
 // them to it. A page lives at web/<path>/index.html and is served at /<path>.
 export const pages = [
@@ -16,4 +17,7 @@ export const pages = [
   { path: "git/undo-on-main", title: "Undo a commit that's on main" },
   { path: "teach", title: "Teach Git with a game" },
   { path: "teams", title: "A 15-minute game of Git for your team" },
+  { path: "new-to-git", title: "New to Git? Start here" },
+  { path: "privacy", title: "Privacy policy", legal: true },
+  { path: "terms", title: "Terms of use", legal: true },
 ];

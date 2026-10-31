@@ -1,6 +1,6 @@
 # ADR-0000: Project charter
 
-*Status: Accepted; §5 Phase 0 amended by [ADR-0002](0002-beta-before-human-playtest.md); decision 11 superseded by [ADR-0003](0003-batch-packs-at-the-deadline.md); decisions 15 and 17 amended by [ADR-0005](0005-sign-in-written-fresh.md) (sign-in without Firebase or RPS); decisions 16 and 17 amended by [ADR-0006](0006-notifications-web-push-and-email.md) (Web Push and email, no FCM) · Date: 2026-09-29 · NeuEra LLC*
+*Status: Accepted; §5 Phase 0 amended by [ADR-0002](0002-beta-before-human-playtest.md); decision 11 superseded by [ADR-0003](0003-batch-packs-at-the-deadline.md); decisions 15 and 17 amended by [ADR-0005](0005-sign-in-written-fresh.md) (sign-in without Firebase or RPS); decisions 16 and 17 amended by [ADR-0006](0006-notifications-web-push-and-email.md) (Web Push and email, no FCM); decision 19, §3, §4 priority 5, §5 Phases 4–5 and §6 amended by [ADR-0011](0011-non-commercial-permanently.md) (non-commercial, permanently) · Date: 2026-09-29 · NeuEra Apps LLC*
 
 This document is the single point of reference for what Git Game is, what we have decided, what we deliberately walked away from, and in what order we will build it. Changes to anything under "Locked" require a new ADR that supersedes the relevant line.
 
@@ -13,7 +13,7 @@ This document is the single point of reference for what Git Game is, what we hav
 - **Audience:** developers, primarily on desktop, primarily in teams.
 - **Format:** a game is a sequence of *days*. Each day every player sends one *pack* of ops; the *remote* processes packs in arrival order. A day is 24 hours, 5 minutes, or 60 seconds — same rules, different clock. A week-long game and a live game are the same game.
 - **Where:** gitgame.online (web, PWA). Rules documents: [base-rules.md](../design/base-rules.md) and [round-resolution.md](../design/round-resolution.md).
-- **Who:** published by NeuEra LLC. Open source. Built with AI, disclosed in [AI_DISCLOSURE.md](../../AI_DISCLOSURE.md).
+- **Who:** published by NeuEra Apps LLC. Open source. Built with AI, disclosed in [AI_DISCLOSURE.md](../../AI_DISCLOSURE.md).
 
 ---
 
@@ -44,8 +44,8 @@ This document is the single point of reference for what Git Game is, what we hav
 
 ### Business
 18. **Open source, AGPL, public from the first commit.** Anyone may run it; anyone hosting a modified version must publish changes. Brand, domain, and box art are separate from the code license.
-19. **Revenue plan, in order:** (a) the hosted service is where people play; (b) **Orgs/Teams** — private org, team leaderboards, Slack bot, workshop mode, priced per seat; (c) the **physical box** via print-and-play → Kickstarter. A tip jar exists because it costs nothing; it is not a plan.
-20. **Name:** "Git Game" and gitgame.online are the working name and domain; NeuEra LLC owns the domain. Permission was requested from Software Freedom Conservancy on 2026-09-29 and we proceed assuming it will be granted. **The name is not final**: there is a small chance of a rename, so every use of it follows [branding.md](../branding.md) and can be changed in one pass. Fallback if a rename is forced: a title from Git vocabulary (*Merge Conflict* or *Force Push*) with "a card game about Git" as the descriptive tagline the trademark policy allows.
+19. ~~Revenue plan, in order: (a) the hosted service is where people play; (b) Orgs/Teams — private org, team leaderboards, Slack bot, workshop mode, priced per seat; (c) the physical box via print-and-play → Kickstarter. A tip jar exists because it costs nothing; it is not a plan.~~ **Non-commercial, permanently** ([ADR-0011](0011-non-commercial-permanently.md)): the hosted service is where people play, free; features for teams are free features; the print-and-play deck is the physical game. Nothing is sold, now or later.
+20. **Name:** "Git Game" and gitgame.online are the working name and domain; NeuEra Apps LLC owns the domain. Permission was requested from Software Freedom Conservancy on 2026-09-29 and we proceed assuming it will be granted. **The name is not final**: there is a small chance of a rename, so every use of it follows [branding.md](../branding.md) and can be changed in one pass. Fallback if a rename is forced: a title from Git vocabulary (*Merge Conflict* or *Force Push*) with "a card game about Git" as the descriptive tagline the trademark policy allows.
 21. **Transparent about AI.** The project is built with substantial AI assistance and says so at the repository root, in the PR template, and in commit trailers ([AI_DISCLOSURE.md](../../AI_DISCLOSURE.md)).
 
 ---
@@ -63,7 +63,7 @@ This document is the single point of reference for what Git Game is, what we hav
 | 3–5 players, 45 minutes, as the online default | 2-player viable, short sessions | Matching 5 is an order of magnitude harder than 2; Mafia's 5-player minimum is part of the 0-tables story. |
 | Flutter client (RPS) | Web / Vite | Wrong tool for a terminal UI aimed at desktop developers. |
 | LiveKit voice | Nothing | Async games don't talk. |
-| Closed source, or open source funded by donations | AGPL + hosted service + Teams + box | Secrecy protects nothing here; donations from a new dev audience are a rounding error. |
+| Closed source, or open source funded by donations | ~~AGPL + hosted service + Teams + box~~ AGPL, hosted for free, nothing sold ([ADR-0011](0011-non-commercial-permanently.md)) | Secrecy protects nothing here; the game is meant to be played, not monetised. |
 | Prototype after the idea is "locked" | Playtest the rules first | The platform is mostly known; whether the rules are fun is the actual unknown. |
 
 ---
@@ -76,7 +76,7 @@ When two things conflict, the higher one wins.
 2. **Playable right now.** Nobody waits for a lobby. Bots, private links, a game in five seconds.
 3. **Git-accurate.** Credibility with the audience is the moat. A wrong flag costs more than a missing feature.
 4. **Teams are the growth loop.** A link pasted into a team's Slack is how this spreads; design private rooms with "org" in mind so Teams is a flag, not a rewrite.
-5. **Revenue.** Never at the expense of 1–4.
+5. ~~Revenue. Never at the expense of 1–4.~~ Removed: nothing is sold ([ADR-0011](0011-non-commercial-permanently.md)).
 
 ---
 
@@ -98,11 +98,11 @@ GitHub login, private rooms by link, 24h and 60s days, notifications, terminal U
 Bots, quick-match pairing, reliability tiers, digest emails, Slack/Discord webhooks.
 *Exit:* a new player's first game starts in under a minute at any hour.
 
-### Phase 4 — Orgs / Teams (first revenue)
-Private orgs, team leaderboards, workshop mode, Slack bot, per-seat pricing.
+### Phase 4 — Teams
+Private spaces for a team, team leaderboards, workshop mode, Slack bot, all free ([ADR-0011](0011-non-commercial-permanently.md); ~~per-seat pricing, first revenue~~).
 
-### Phase 5 — The box
-Print-and-play PDF of the tabletop rules → Kickstarter.
+### Phase 5 — The deck
+Print-and-play PDF of the tabletop rules, free to download and print ([ADR-0011](0011-non-commercial-permanently.md); ~~→ Kickstarter~~).
 
 Scheduled game nights are not on this roadmap. They get a phase when concurrency data earns one.
 
@@ -121,12 +121,12 @@ Measured in **games completed**, never sign-ups.
 
 - Phase 2: strangers finish games; ≥ 50% of started games reach a release.
 - Phase 3: day-7 return rate of players who completed one game.
-- Phase 4: team invites per completed game (the growth loop), and first paying org.
+- Phase 4: team invites per completed game (the growth loop). ~~And first paying org.~~ ([ADR-0011](0011-non-commercial-permanently.md))
 
 ---
 
 ## 7. Open items
 
-- [ ] SFC trademark response (sent 2026-09-29; nudge after ~4 weeks). Not blocking.
+- [x] SFC trademark response (sent 2026-09-29): permission granted, with a notice to show ([TRADEMARKS.md](../../TRADEMARKS.md)).
 - [ ] Playtest questions 1–3 → spec v1.0.
 - [ ] Rename per branding.md only if SFC declines.

@@ -7,6 +7,49 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+## [0.5.4] - 2026-10-30
+
+The legal entity named correctly, NeuEra Apps LLC.
+
+### Fixed
+- The project's legal entity is named correctly, NeuEra Apps LLC, in every footer, the pages' structured data, the README, TRADEMARKS.md, the charter and the branding guide. The Git trademark notice's wording is unchanged.
+
+## [0.5.3] - 2026-10-30
+
+The source of the running version on every page and screen, a privacy policy and terms, and non-commercial for good.
+
+### Added
+- Every page's footer and every screen of the game (the start screen, a room, a game's Table, a replay) link the source of the version running, the tag it was deployed from, as the AGPL asks of a network service; `/api/health` says the version and its source too. The deploy refuses a tag that isn't the release's version.
+- A privacy policy at `/privacy` and terms of use at `/terms`, linked from every footer and every screen of the game. They describe what the game keeps today: a made-up handle, the games, push reminders if asked for, feedback, daily visits, and an hour's count of players made per IP address, in memory.
+
+### Changed
+- [ADR-0011](docs/adr/0011-non-commercial-permanently.md): Git Game is non-commercial, permanently; nothing is sold, now or later. It amends the charter's decision 19, priorities, Phases 4–5 and success measures, and ADR-0010's rationale. `/teams` says features for teams will be free.
+
+## [0.5.2] - 2026-10-13
+
+The Git trademark notice, on every page, the game and the deck.
+
+### Added
+- The Git trademark notice Software Freedom Conservancy asks for, as fine print: "Git® is a trademark of Software Freedom Conservancy. Used with permission." It ends every page's footer (the build adds it, so a new page has it too), the game's start screen, the print-and-play deck's cover and the app's install description, with the Conservancy's name linked to sfconservancy.org.
+- TRADEMARKS.md, our record of the permission to use the name and what it asks of us; the README links it and says the project stays non-commercial, free and copyleft under the AGPL-3.0.
+
+## [0.5.1] - 2026-10-05
+
+The NeuEra link goes somewhere again.
+
+### Fixed
+- The NeuEra link in every page's footer and structured data, and in the README, went nowhere; it now points to legal.neuera.app.
+
+## [0.5.0] - 2026-10-05
+
+A page and a panel for people who know nothing about Git, and the deck's cover names its licence.
+
+### Added
+- A page for people who know nothing about Git, or coding, at `/new-to-git`: what Git is, as a tower built by many hands; the five things that go wrong and Git's words for them; how a game goes; the words, one line each. The landing page gains a highlighted plain-words panel right after the hero that leads to it, and every header a "new to Git?" link, first.
+
+### Changed
+- The print-and-play deck's cover names its licence, CC BY-SA 4.0 (ADR-0010), and where the deck came from, so a printed copy carries both.
+
 ## [0.4.0] - 2026-10-04
 
 Pages beside the game: what Git said, line by line, and the ways out of it; a lesson for teachers, with the deck to print; a game for teams.
@@ -241,7 +284,12 @@ The first version on the hosted service: the beta ADR-0002 makes the playtest, l
 - Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.
 
-[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.5.4...HEAD
+[0.5.4]: https://github.com/modirniya/gitgame/compare/v0.5.3...v0.5.4
+[0.5.3]: https://github.com/modirniya/gitgame/compare/v0.5.2...v0.5.3
+[0.5.2]: https://github.com/modirniya/gitgame/compare/v0.5.1...v0.5.2
+[0.5.1]: https://github.com/modirniya/gitgame/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/modirniya/gitgame/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/modirniya/gitgame/compare/v0.3.5...v0.4.0
 [0.3.5]: https://github.com/modirniya/gitgame/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/modirniya/gitgame/compare/v0.3.3...v0.3.4

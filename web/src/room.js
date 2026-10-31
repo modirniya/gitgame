@@ -2,6 +2,7 @@
 // sets the bots and the day length and starts the game, and the room's stream brings everyone to the game when it
 // does. Like a game, the room is fetched again whenever the remote says it changed (charter decision 9).
 import { el, mount } from "./dom.js";
+import { legalFoot } from "./source.js";
 
 const LENGTHS = { live: "live · 60s days", lunch: "lunch · 5m days", correspondence: "correspondence · 24h days" };
 
@@ -26,7 +27,8 @@ export function roomScreen({ remote, go, code }) {
   function refetch() {
     remote.fetchRoom(code).then(show, (e) => {
       error = e.message;
-      alive && mount(node, el("p", { class: "error", role: "alert" }, error), el("a", { href: "#/" }, "home"));
+      alive &&
+        mount(node, el("p", { class: "error", role: "alert" }, error), el("a", { href: "#/" }, "home"), legalFoot());
     });
   }
 
@@ -77,6 +79,7 @@ export function roomScreen({ remote, go, code }) {
         el("p", { class: "muted" }, `# waiting for ${room.host} to start`),
       el("p", { class: "error", role: "alert" }, error),
       el("p", {}, el("a", { href: "#/" }, "home")),
+      legalFoot(),
     );
   }
 

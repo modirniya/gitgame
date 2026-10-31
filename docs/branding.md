@@ -1,8 +1,8 @@
 # Branding: the name is not final
 
-*Status: Current · Last verified: 2026-09-29*
+*Status: Current · Last verified: 2026-10-13*
 
-The working name is **Git Game** and the domain is **gitgame.online**. NeuEra LLC owns the domain. Permission to use the name was requested from the Git trademark holder (Software Freedom Conservancy) on 2026-09-29; we proceed on the assumption that it will be fine, but there is a small chance the project will need a different name. This document makes that a one-afternoon change instead of a month-long one.
+The working name is **Git Game** and the domain is **gitgame.online**. NeuEra Apps LLC owns the domain. Permission to use the name was requested from the Git trademark holder (Software Freedom Conservancy) on 2026-09-29 and granted; either side may end it on notice, and it comes with a notice we must show ([TRADEMARKS.md](../TRADEMARKS.md)), so there is still a small chance the project will need a different name. This document makes that a one-afternoon change instead of a month-long one.
 
 ## 1. Canonical spellings
 
@@ -47,3 +47,4 @@ scripts/brand-audit.sh
 ## History
 
 - 2026-09-29 — Working name "Git Game" adopted; trademark permission requested.
+- 2026-10-13 — Trademark permission granted by Software Freedom Conservancy; the notice it asks for is on the site, the game and the deck ([TRADEMARKS.md](../TRADEMARKS.md)).

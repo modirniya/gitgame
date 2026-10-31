@@ -1,9 +1,9 @@
 defmodule GitGameWeb.ClientController do
   @moduledoc """
   The client's pages, served from the API's own origin so the session cookie works (ADR-0005): the landing page at
-  `/`, the game at `/play` (ADR-0009), the maintainer's pulse at `/stats` behind its token (M13e), and the pages
-  about Git's output under `/git` (M16). The game routes by the address's hash, so `/play` is its only page; the
-  scripts, styles and icons of every page are static files beside them.
+  `/`, the game at `/play` (ADR-0009), the maintainer's pulse at `/stats` behind its token (M13e), the pages about
+  Git's output under `/git` (M16), and the privacy policy and the terms. The game routes by the address's hash, so
+  `/play` is its only page; the scripts, styles and icons of every page are static files beside them.
 
   Links from before the game moved to `/play` that carry a query (`/?via=…` from notifications and emails, `/?email=…`,
   `/?github=…`) are sent on to `/play` with it, and the browser keeps their `#/…`. A link with only a hash never
@@ -56,6 +56,13 @@ defmodule GitGameWeb.ClientController do
   # the pages for teachers (M16d) and for teams (M16e)
   def teach(conn, _params), do: page(conn, "teach/index.html")
   def teams(conn, _params), do: page(conn, "teams/index.html")
+
+  # the page for people who know nothing about Git, or coding
+  def new_to_git(conn, _params), do: page(conn, "new-to-git/index.html")
+
+  # the privacy policy and the terms, which every page's footer links
+  def privacy(conn, _params), do: page(conn, "privacy/index.html")
+  def terms(conn, _params), do: page(conn, "terms/index.html")
 
   defp client_file(file) do
     dir =

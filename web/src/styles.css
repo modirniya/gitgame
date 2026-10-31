@@ -127,6 +127,16 @@ a {
 .lede {
   color: var(--muted);
 }
+/* the Git trademark notice (TRADEMARKS.md): fine print, not a banner */
+.trademark {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.trademark a {
+  color: inherit;
+}
 .error {
   color: var(--reject);
   min-height: 1.45em;
@@ -394,6 +404,15 @@ button.link {
 }
 details.more {
   margin-top: 16px;
+}
+/* the source of this version, the privacy policy and the terms (source.js): fine print, like the notice under it */
+.legal-foot {
+  margin: 32px 0 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.legal-foot a {
+  color: inherit;
 }
 details.more summary {
   cursor: pointer;

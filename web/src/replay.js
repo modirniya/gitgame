@@ -6,6 +6,7 @@ import { el, mount } from "./dom.js";
 import { table } from "./table.js";
 import { moments } from "./moments.js";
 import { transcript } from "./transcript.js";
+import { legalFoot } from "./source.js";
 
 export function replayScreen({ remote, go, id, day }) {
   const node = el("section", { class: "screen replay" });
@@ -33,11 +34,17 @@ export function replayScreen({ remote, go, id, day }) {
       day > 0 && transcript(ms, you, { label: `day ${day}` }),
       view.released && day === last && el("p", {}, `v1.0 shipped on day ${view.released.day}.`),
       el("p", {}, el("a", { href: "#/" }, "new game")),
+      legalFoot(),
     );
   }
 
   function fail(e) {
-    mount(node, el("p", { class: "error", role: "alert" }, e.message), el("a", { href: "#/" }, "new game"));
+    mount(
+      node,
+      el("p", { class: "error", role: "alert" }, e.message),
+      el("a", { href: "#/" }, "new game"),
+      legalFoot(),
+    );
   }
 
   // ← and → step through the days

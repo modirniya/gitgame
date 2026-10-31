@@ -84,6 +84,34 @@
   gap: 10px;
 }
 
+/* the plain-words panel: the one block on the page with the accent on it, and without the terminal's "# " */
+.plain .panel {
+  padding: 20px;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  background: var(--raised);
+}
+.plain .eyebrow {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.plain h2 {
+  margin-top: 0;
+}
+.plain h2::before {
+  content: none;
+}
+.plain p {
+  color: var(--muted);
+  max-width: 68ch;
+}
+.plain .cta {
+  margin-bottom: 0;
+}
+
 .steps {
   list-style: none;
   padding: 0;

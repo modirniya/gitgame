@@ -12,7 +12,7 @@ What gitgame.online has beyond the landing page ([ADR-0009](../adr/0009-a-landin
 | `/teach` | a teacher | a lesson on 60-second days, and the print-and-play deck |
 | `/teams` | a team lead | a 15-minute game inside a meeting you already have, and the team's Git conventions |
 
-`/teach` and `/teams` start as single pages and split only when a second page exists. Each address reads as the page in a search result (`/git/non-fast-forward`), and `/teams` is where the charter's Orgs/Teams tier (decision 19) walks in later, so it is a flag, not a rewrite. The landing page's header links to each door as it opens. The game at `/play` stays out of search results; every door and page is in the sitemap.
+A fourth page, `/new-to-git`, is for the reader none of the doors expected: someone who knows nothing about Git, or about code. It explains the game in plain words with no programmer's word used before it is explained, and the landing page carries a highlighted panel after the hero that leads to it (decided 2026-10-05). `/teach` and `/teams` start as single pages and split only when a second page exists. Each address reads as the page in a search result (`/git/non-fast-forward`), and `/teams` is where free features for teams walk in later (charter decision 19, as [ADR-0011](../adr/0011-non-commercial-permanently.md) amends it: nothing is sold), so they are a flag, not a rewrite. The landing page's header links to each door as it opens. The game at `/play` stays out of search results; every door and page is in the sitemap.
 
 Decided against: one hub at `/learn` with everything beneath it. Simpler to keep, but a teacher landing there meets error messages first, and the addresses would say "learn" rather than what the page is for.
 
@@ -37,6 +37,7 @@ Wave 1 ships before the launch (M13c), so the launch leaves pages behind it; wav
 | Undo a commit that's on main | `/git/undo-on-main` | card: `revert` | built |
 | Teach (the door, one page) | `/teach` | the guided first game, `tabletop/print-and-play.pdf` | built |
 | Teams (the door, one page) | `/teams` | a room link, 5-minute days | built |
+| New to Git? Start here | `/new-to-git` | the guided first game | built |
 
 ### Wave 2
 
@@ -87,6 +88,5 @@ Nothing is recorded on the pages. Impressions and clicks per page come from Goog
 
 ## 7. Open
 
-- The deck's cover doesn't yet name its licence, CC BY-SA 4.0 ([ADR-0010](../adr/0010-pages-and-deck-under-cc-by-sa.md), stated on every page's footer and in the README): a line in `tabletop/build.py` and a rebuilt PDF.
 - The deck is laid out for US Letter, nine cards a page, without bleed or cut marks for a print shop; a layout to the print-and-play norms (bleed, A4 as well as Letter) is a separate change to `tabletop/build.py`.
 - The landing page's header now carries five links and the play button; on a phone they wrap to two rows (checked 2026-10-04 at 375 px). Whether to drop the two in-page anchors ("how it plays", "questions") in favour of the three doors is the maintainer's call.
