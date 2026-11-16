@@ -1,6 +1,6 @@
 # Git Game design system: MASTER
 
-_Status: Direction chosen (Studio), element review done, awaiting approval to roll out · 2026-11-16_
+_Status: Approved and rolled out (Studio) · 2026-11-16_
 
 The source of truth for the redesign. A page-specific file under `pages/` would override this one; none exist yet.
 It was made with the vendored UI/UX Pro Max skill (`.claude/skills/ui-ux-pro-max/`), but the skill's colour, font and
@@ -320,9 +320,33 @@ Out of scope unless asked: the link-preview image (`web/public/og.png`), the pri
 
 ---
 
-## 9. Open questions for you
+## 9. Decisions (approved 2026-11-16)
 
-1. **Copy changes**: sentence case for headings and setting titles; the two settings-row descriptions; the copy
-   button's "copied" confirmation.
-2. **Web fonts**: keep the system stacks (proposed), or self-host a pair (about 60–90 kB, no third party).
-3. **Theme switch**: keep following the OS (today), or add a light/dark switch on the start screen.
+1. **Copy changes**: approved. Headings and setting titles in sentence case ("Your games", "Day 1 closed", "Room …",
+   "The table", "Pulse"); the two settings-row descriptions; the copy button's "copied".
+2. **Web fonts**: the system stacks, as proposed.
+3. **Theme switch**: none for now; the site follows the OS, as before. `data-theme="dark"` still forces dark.
+
+---
+
+## 10. Rollout record
+
+| Phase                | Commit      | What changed                                                                                  |
+| -------------------- | ----------- | --------------------------------------------------------------------------------------------- |
+| 1. Tokens            | `499a8de`   | Studio colours, state tokens, scales, the terminal's own colours, theme-color per OS theme    |
+| 2. Shared components | `6c2a944`   | Type, buttons, fields, settings rows, chips, cards, transcript, site header and menu          |
+| 3. Site pages        | `e45dee4`   | Landing, /git, /teach, /teams, /new-to-git, legal pages                                       |
+| 4. App entry         | `f8f5e06`   | Start, your games, reminders, busy buttons, room waiting state and copy button                |
+| 5. The game          | `62abc12`   | Status bar, strip, branch, actions, pack, table, playback, receipt, scoreboard, replay, guide |
+| 6. Stats             | `5077987`   | Tiles, segmented switch, charts                                                               |
+| 7. Verification      | this commit | `contrast/scan-site.js` at 375, 768, 1024 and 1440 px in dark and light                       |
+
+Where the implementation refined the spec:
+
+- **The laptop hand** no longer fans closer than 88 px a card: it takes another row instead, so no label is ever
+  turned on its side (`hub.js` `fanLayout`; its tests now state that rule).
+- **Band words** show from a 90 px card up (the phone hand's 79 px cards show the colour alone), and a file name too
+  long for its card breaks only before its extension (`cards.js` puts a `<wbr>` there).
+- **The screen body** no longer lets a flex child shrink, which had been squeezing transcripts once type grew.
+- The header's menu closes on Escape and outside taps via `src/menu.js`, bundled into every site page by a `pre`
+  transform in `vite.config.js`.
