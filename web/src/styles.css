@@ -148,7 +148,7 @@ body {
   margin: 0;
   background: var(--ground);
   color: var(--ink);
-  font: 16px/1.45 var(--sans);
+  font: 16px/1.5 var(--sans);
   /* `--force` must read as two hyphens, as it does in a real terminal */
   font-variant-ligatures: none;
   -webkit-text-size-adjust: 100%;
@@ -161,16 +161,34 @@ body {
   padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
 }
 
+/* Headings are sans (Studio); the $ prompt is kept for where Git speaks: a command as a screen's title (h1.cmd). */
 h1,
-h2 {
-  font: 700 1rem/1.25 var(--mono);
+h2,
+h3 {
+  font-family: var(--sans);
+  font-weight: 700;
+  letter-spacing: -0.015em;
   margin: 0 0 8px;
   overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 h1 {
-  font-size: 1.5rem;
+  font-size: var(--t-h1);
+  line-height: 1.15;
 }
-h1::before {
+h2 {
+  font-size: var(--t-h2);
+  line-height: 1.25;
+}
+h3 {
+  font-size: var(--t-h3);
+  line-height: 1.3;
+}
+h1.cmd {
+  font-family: var(--mono);
+  letter-spacing: -0.01em;
+}
+h1.cmd::before {
   content: "$ ";
   color: var(--accent);
 }
@@ -181,6 +199,11 @@ code {
 
 a {
   color: var(--link);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration-thickness: 2px;
 }
 .muted,
 .lede {
@@ -201,15 +224,36 @@ a {
   min-height: 1.45em;
   white-space: pre-wrap;
 }
+.icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
-/* ---------- forms ---------- */
+/* ---------- forms: 48 px fields with a 3:1 edge, the label above, the ring on focus ---------- */
 
 form {
   display: grid;
   gap: 6px;
 }
 label {
-  color: var(--muted);
+  color: var(--ink);
+  font-size: var(--t-small);
+  font-weight: 500;
   margin-top: 8px;
 }
 input,
@@ -217,63 +261,170 @@ select,
 textarea {
   font: inherit;
   color: inherit;
-  min-height: 44px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--paper);
-  padding: 0 12px;
-}
-button {
   min-height: 48px;
-  padding: 10px 16px;
-  font: 600 1rem/1.2 var(--sans);
-  color: var(--ink);
+  border-radius: var(--r-md);
+  border: 1px solid var(--field-line);
   background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  padding: 0 16px;
+  transition:
+    border-color var(--dur-1) var(--ease),
+    box-shadow var(--dur-1) var(--ease);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent);
+}
+input[aria-invalid="true"] {
+  border: 2px solid var(--reject);
+  padding: 0 15px;
+}
+input:disabled,
+select:disabled,
+textarea:disabled {
+  border-style: dashed;
+  background: transparent;
+  color: var(--muted);
+}
+select {
+  appearance: none;
+  padding-right: 44px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 22px) 50%,
+    calc(100% - 16px) 50%;
+  background-size:
+    6px 6px,
+    6px 6px;
+  background-repeat: no-repeat;
+}
+input[type="checkbox"] {
+  appearance: none;
+  flex: none;
+  display: inline-grid;
+  place-content: center;
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 2px solid var(--field-line);
+  border-radius: 6px;
+  background: var(--paper);
   cursor: pointer;
-  touch-action: manipulation;
 }
-button:disabled {
-  opacity: 0.42;
-  cursor: default;
+input[type="checkbox"]::after {
+  content: "";
+  width: 10px;
+  height: 6px;
+  border-left: 2.5px solid var(--on-accent);
+  border-bottom: 2.5px solid var(--on-accent);
+  transform: translateY(-1px) rotate(-45deg) scale(0);
+  transition: transform var(--dur-1) var(--ease);
 }
-button.primary {
+input[type="checkbox"]:checked {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--on-accent);
-  font-weight: 700;
 }
-:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
+input[type="checkbox"]:checked::after {
+  transform: translateY(-1px) rotate(-45deg) scale(1);
 }
-/* a link that leads somewhere as a button would: the game's button, for an <a> */
+
+/* ---------- buttons: pills, a fill on hover, a press that never moves the layout, disabled dashed (not faded),
+   busy with a spinner ---------- */
+
+button,
 a.button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   min-height: 48px;
-  padding: 0 16px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--paper);
+  padding: 10px 20px;
+  font: 600 1rem/1.2 var(--sans);
   color: var(--ink);
-  font-weight: 600;
+  text-align: center;
   text-decoration: none;
+  text-wrap: balance;
+  background: var(--paper);
+  border: 1px solid var(--field-line);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background-color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease),
+    transform var(--dur-1) var(--ease);
 }
+button.small,
+a.button.small {
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: var(--t-small);
+}
+button.primary,
 a.button.primary {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--on-accent);
   font-weight: 700;
 }
-@media (hover: hover) {
-  button:hover:not([disabled]):not(.card) {
-    border-color: var(--muted);
+button:active:not(:disabled):not(.card),
+a.button:active {
+  transform: scale(0.97);
+}
+button.primary:active:not(:disabled),
+a.button.primary:active {
+  background: var(--accent-press);
+  border-color: var(--accent-press);
+}
+button:disabled:not(.card) {
+  cursor: not-allowed;
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--field-line);
+  color: var(--muted);
+}
+button[aria-busy="true"] {
+  cursor: progress;
+}
+button[aria-busy="true"]::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
-  button.primary:hover:not([disabled]) {
-    filter: brightness(1.1);
+}
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  button:hover:not(:disabled):not(.card):not(.primary),
+  a.button:hover:not(.primary) {
+    background: var(--paper-hover);
+  }
+  button.primary:hover:not(:disabled),
+  a.button.primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
   }
 }
 
@@ -284,23 +435,25 @@ a.button.primary {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     transition: none !important;
     animation: none !important;
   }
 }
 
-/* ---------- the transcript ---------- */
+/* ---------- the transcript: a terminal, dark in either theme ---------- */
 
 .transcript {
   font-family: var(--mono);
   margin: 0 0 16px;
-  padding: 10px 12px;
-  border-radius: 6px;
+  padding: 12px 16px;
+  border-radius: var(--r-md);
   background: var(--term);
   color: var(--term-ink);
-  font-size: 0.8rem;
-  line-height: 1.5;
+  font-size: var(--t-small);
+  line-height: 1.6;
   overflow-x: auto;
 }
 .transcript .lines {
@@ -335,11 +488,10 @@ a.button.primary {
 
 .moment .transcript {
   margin: 0;
-  font-size: 0.85rem;
 }
 h1.cmd {
   margin: 0;
-  font-size: 1.375rem;
+  font-size: 1.5rem;
 }
 .moment.ok h1.cmd {
   color: var(--ok);
@@ -358,8 +510,8 @@ h1.cmd {
 }
 .said {
   margin: 0;
-  font-size: 1.125rem;
-  line-height: 1.45;
+  font-size: var(--t-lede);
+  line-height: 1.5;
 }
 .then {
   margin: 0;
@@ -368,6 +520,7 @@ h1.cmd {
 .then.warn {
   color: var(--warn);
 }
+/* a moment's tone is an edge as well as a color */
 .moment.reject .transcript {
   box-shadow: inset 4px 0 0 var(--term-reject);
 }
@@ -378,33 +531,35 @@ h1.cmd {
   box-shadow: inset 4px 0 0 var(--term-warn);
 }
 .progress {
-  font: 500 0.8rem var(--mono);
+  font: 500 var(--t-caption) var(--sans);
+  font-variant-numeric: tabular-nums;
 }
 .incident-card {
-  width: min(280px, 100%);
+  width: min(300px, 100%);
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--r);
   background: var(--paper);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-2);
 }
 .incident-card .band {
   display: block;
-  padding: 0 14px;
+  padding: 0 16px;
   background: var(--incident-fill);
   color: var(--on-band);
-  font: 700 11px/28px var(--sans);
-  letter-spacing: 0.12em;
+  font: 700 var(--t-caption) / 30px var(--sans);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .incident-card h2 {
   margin: 0;
-  padding: 18px 16px 6px;
-  font: 700 1.5rem/1.2 var(--sans);
+  padding: 16px 16px 4px;
+  font-size: 1.375rem;
+  line-height: 1.2;
 }
 .incident-card p {
   margin: 0;
-  padding: 0 16px 20px;
+  padding: 0 16px 16px;
   color: var(--muted);
 }
 .drawn {
@@ -413,15 +568,29 @@ h1.cmd {
   justify-content: center;
 }
 
+/* ---------- a label: small caps over a group (main, your branch, staged) ---------- */
+
+.k {
+  font: 600 var(--t-caption) / 1.4 var(--sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 /* ---------- the replay ---------- */
 
 .replay-nav {
   display: grid;
-  grid-template-columns: 56px 1fr 56px;
+  grid-template-columns: 48px 1fr 48px;
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
   text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.replay-nav button {
+  padding: 0;
 }
 
 /* ---------- who you are ---------- */
@@ -430,28 +599,45 @@ h1.cmd {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 10px;
+  gap: 0 10px;
   margin-bottom: 16px;
-  font-size: 0.85rem;
+  font-size: var(--t-small);
 }
 .whoami .handle {
+  font-family: var(--mono);
   font-weight: 700;
+}
+.whoami a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .avatar {
   border-radius: 50%;
 }
+/* a button that reads as a link: quiet, underlined, still a 44 px target */
 button.link {
-  min-height: 32px;
-  padding: 0;
+  min-height: 44px;
+  padding: 0 4px;
   border: none;
   background: none;
-  color: var(--accent);
+  color: var(--link);
+  font-weight: 500;
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+@media (hover: hover) {
+  button.link:hover:not(:disabled) {
+    background: none;
+    text-decoration-thickness: 2px;
+  }
 }
 .nudge {
-  padding: 10px 12px;
-  border-left: 3px solid var(--warn);
-  background: var(--raised);
+  padding: 12px 16px;
+  border: 1px solid var(--warn);
+  border-radius: var(--r-md);
+  background: var(--warn-soft);
 }
 
 /* ---------- start and rooms ---------- */
@@ -461,8 +647,66 @@ button.link {
   gap: 8px;
   margin: 16px 0 8px;
 }
-details.more {
-  margin-top: 16px;
+/* a settings row: a surface you can see is a control, with a chevron that turns */
+details.more,
+details.email {
+  margin-top: 12px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+}
+details.more > summary,
+details.email > summary {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 12px;
+  min-height: 64px;
+  padding: 12px 16px;
+  border-radius: var(--r);
+  color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+}
+details.more > summary::-webkit-details-marker,
+details.email > summary::-webkit-details-marker {
+  display: none;
+}
+details.more > summary::after,
+details.email > summary::after {
+  content: "";
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform var(--dur-2) var(--ease);
+}
+details[open].more > summary::after,
+details[open].email > summary::after {
+  transform: translateY(2px) rotate(225deg);
+}
+details.more > summary .desc,
+details.email > summary .desc {
+  grid-column: 1;
+  font-size: var(--t-small);
+  font-weight: 400;
+  color: var(--muted);
+}
+@media (hover: hover) {
+  details.more > summary:hover,
+  details.email > summary:hover {
+    background: var(--paper-hover);
+  }
+}
+details.more > :not(summary),
+details.email > :not(summary) {
+  margin: 0 16px 16px;
 }
 /* the source of this version, the privacy policy and the terms (source.js): fine print, like the notice under it */
 .legal-foot {
@@ -473,81 +717,126 @@ details.more {
 .legal-foot a {
   color: inherit;
 }
-details.more summary {
-  cursor: pointer;
-  color: var(--muted);
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-}
 .share code {
   overflow-wrap: anywhere;
-  color: var(--accent);
+  color: var(--link);
 }
 
-/* ---------- your games ---------- */
+/* ---------- your games: a row is the link, its state told by a dot, a color and the words ---------- */
 
+.your-games h2 {
+  font-size: var(--t-h3);
+  margin: 24px 0 8px;
+}
 .your-games ul {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 .your-games li {
+  position: relative;
   display: grid;
-  padding: 8px 10px;
-  border-left: 3px solid var(--line);
-  background: var(--raised);
-  border-radius: 4px;
+  gap: 2px;
+  min-height: 64px;
+  align-content: center;
+  padding: 12px 40px 12px 36px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
 }
-.your-games li.due {
-  border-left-color: var(--warn);
+.your-games li::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--field-line);
 }
-.your-games li.done {
-  border-left-style: dotted;
+.your-games li::after {
+  content: "";
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+}
+.your-games li.due::before {
+  background: var(--warn);
+  box-shadow: 0 0 0 4px var(--warn-soft);
+}
+.your-games li.done::before {
+  background: transparent;
+  border: 2px solid var(--field-line);
+}
+/* the whole row is the link */
+.your-games li a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+.your-games li a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.your-games li:hover {
+  background: var(--paper-hover);
 }
 .your-games .status {
-  font-size: 0.8rem;
+  font-size: var(--t-small);
   color: var(--muted);
 }
 .your-games li.due .status {
   color: var(--warn);
+  font-weight: 600;
 }
 
 .email form {
-  margin-top: 8px;
+  margin-top: 0;
 }
 label.check {
   display: flex;
-  gap: 8px;
-  align-items: center;
+  gap: 12px;
+  align-items: flex-start;
+  min-height: 44px;
+  padding: 8px 0;
+  margin: 0;
   color: var(--ink);
+  font-size: var(--t-body);
+  font-weight: 400;
+  cursor: pointer;
 }
 label.check input {
-  min-height: auto;
+  margin-top: 1px;
 }
 .action .will {
-  font-size: 0.65rem;
-  color: var(--accent);
+  font-size: var(--t-caption);
+  color: var(--link);
 }
-
-/* the bot thinking out loud (event-screens §5) */
 
 /* ---------- the guided first game ---------- */
 
 .guide {
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: var(--ok-soft);
-  border: 2px solid var(--ok);
-}
-.guide {
   display: grid;
   gap: 4px;
+  padding: 12px 16px;
+  border-radius: var(--r);
+  background: var(--ok-soft);
+  border: 1px solid var(--ok);
 }
 .guide-step {
-  font: 700 11px var(--mono);
+  font: 600 var(--t-caption) / 1.4 var(--sans);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ok);
@@ -557,12 +846,8 @@ label.check input {
 }
 .guide button.link {
   justify-self: start;
-  min-height: 36px;
   padding: 0;
-  border: 0;
-  background: none;
-  color: var(--accent);
-  text-decoration: underline;
+  color: var(--link);
 }
 .guide-target {
   outline: 3px solid var(--accent);
@@ -582,8 +867,10 @@ label.check input {
   gap: 6px;
 }
 .feedback textarea {
-  padding: 10px 12px;
+  min-height: 112px;
+  padding: 12px 16px;
   resize: vertical;
+  line-height: 1.5;
 }
 .feedback-send {
   display: flex;
@@ -593,5 +880,6 @@ label.check input {
 }
 .feedback .count {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: var(--t-small);
+  font-variant-numeric: tabular-nums;
 }

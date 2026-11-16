@@ -78,27 +78,23 @@ ol.strip > li {
   min-height: 18px;
   max-width: 100%;
 }
+/* a pointer: a tinted pill naming whose it is, 12 px, cut short (its slot's label has it whole) */
 .chip {
   max-width: 100%;
-  padding: 0 6px;
-  border-radius: 9px;
-  background: var(--other);
-  color: var(--ground);
-  font: 700 10px/17px var(--mono);
+  padding: 0 8px;
+  border-radius: var(--r-pill);
+  background: var(--other-soft);
+  color: var(--other);
+  font: 600 var(--t-caption) / 20px var(--sans);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .chip.you {
-  background: var(--you);
+  background: var(--you-soft);
+  color: var(--you);
 }
 
-.k {
-  font: 600 11px var(--mono);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
 .incident-line {
   margin: 0 0 12px;
   font-size: 0.875rem;

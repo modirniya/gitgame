@@ -195,24 +195,27 @@ describe("the hub", () => {
   });
 });
 
-it("fans the hand in one row while every card keeps a finger's width, and in two rows past that", () => {
-  // the hub's column on a laptop, 454 px: nine cards fit in one row, ten need two
-  expect(fanLayout(9, 454)).toEqual({ rows: 1, perRow: 9, overlap: 52 });
+it("fans the hand in as many rows as let every card show its label whole", () => {
+  // the hub's column on a laptop, 454 px: five cards a row, each overlapping the one before by 7 px
+  expect(fanLayout(5, 454)).toEqual({ rows: 1, perRow: 5, overlap: 7 });
+  expect(fanLayout(9, 454)).toEqual({ rows: 2, perRow: 5, overlap: 7 });
   expect(fanLayout(10, 454)).toEqual({ rows: 2, perRow: 5, overlap: 7 });
   expect(fanLayout(10, 454).overlap).toBeLessThanOrEqual(96 - 44);
   // few cards don't overlap at all
   expect(fanLayout(3, 454).overlap).toBe(0);
 });
 
-it("prints fanned cards like a playing card's corner only where a centred label would run under the next card", () => {
-  const fan = (n) => {
-    const cards = Array.from({ length: n }, (_, i) => ({ id: `h${i}`, kind: "commit", file: "README.md", lines: 2 }));
-    return render(view({ you: { ...view().you, hand: cards } })).node.querySelector(".hand-fan").className;
-  };
-  // jsdom's 1024 × 768 is a laptop, its hub 428 px wide: seven cards show 55 px of each, five show 83
-  expect(fan(7)).toBe("hand-fan fanned");
-  expect(fan(5)).toBe("hand-fan fanned");
-  expect(fan(4)).toBe("hand-fan");
+it("never turns a card's label on its side: every fanned card shows at least 88 px of itself", () => {
+  for (const width of [428, 454, 528])
+    for (let n = 1; n <= 14; n++) {
+      const { perRow, overlap } = fanLayout(n, width);
+      if (perRow > 1) expect(96 - overlap).toBeGreaterThanOrEqual(88);
+    }
+  // jsdom's 1024 × 768 is a laptop, its hub 428 px wide: seven cards lie in two rows of four
+  const cards = Array.from({ length: 7 }, (_, i) => ({ id: `h${i}`, kind: "commit", file: "README.md", lines: 2 }));
+  const node = render(view({ you: { ...view().you, hand: cards } })).node;
+  expect(node.querySelectorAll(".hand-fan")).toHaveLength(2);
+  expect(node.querySelector(".fanned")).toBeNull();
 });
 
 it("lays a phone's hand in as many columns as keep the longest file name on one line", () => {
@@ -227,7 +230,7 @@ it("fans the hand on a laptop and lays it in a grid on a phone", () => {
   const seven = Array.from({ length: 7 }, (_, i) => ({ id: `h${i}`, kind: "commit", file: "README.md", lines: 2 }));
   const hand = () => render(view({ you: { ...view().you, hand: seven } })).node.querySelector(".hand-rows");
   // jsdom's 1024 × 768 is a laptop: the hub's column beside the Table
-  expect(hand().querySelector(".hand-fan").className).toBe("hand-fan fanned");
+  expect(hand().querySelector(".hand-fan").className).toBe("hand-fan");
   const width = globalThis.innerWidth;
   globalThis.innerWidth = 390;
   try {

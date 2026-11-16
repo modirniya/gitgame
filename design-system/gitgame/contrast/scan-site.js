@@ -86,6 +86,7 @@ function inspect() {
     if (!text || !shown(el) || el.closest("svg, script, style, .visually-hidden, [aria-hidden=true]")) continue;
     const cs = getComputedStyle(el);
     const size = parseFloat(cs.fontSize);
+    if (size === 0) continue; // folded away on purpose (a card's band word where it won't fit)
     if (size < 11.5) found.push(`text ${size.toFixed(1)}px "${text.slice(0, 32)}"`);
     if (el.closest(":disabled, [aria-disabled=true]")) continue; // WCAG 1.4.3 exempts inactive controls
     const bg = behind(el);
