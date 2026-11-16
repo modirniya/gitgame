@@ -114,7 +114,7 @@ export function statsPage(data, { period = "day", onPeriod = () => {}, now = Dat
   return el(
     "div",
     { class: "page" },
-    el("h1", {}, "pulse"),
+    el("h1", {}, "Pulse"),
     el(
       "p",
       { class: "pulse" },

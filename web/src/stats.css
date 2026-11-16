@@ -27,26 +27,40 @@
 .chart {
   background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px 12px;
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  padding: 12px 16px;
 }
 .totals dt {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: var(--t-caption);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 .totals dd {
   margin: 0;
-  font: 700 1.6rem/1.2 var(--mono);
+  font: 700 1.75rem/1.2 var(--sans);
   font-variant-numeric: tabular-nums;
 }
+/* the period: one segmented switch, the picked segment raised */
 .periods {
-  display: flex;
-  gap: 8px;
+  display: inline-flex;
+  justify-self: start;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--r-pill);
+  background: var(--ground-2);
+}
+.periods button {
+  min-width: 76px;
+  border-color: transparent;
+  background: transparent;
 }
 .periods button[aria-pressed="true"] {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--ground);
+  background: var(--paper);
+  border-color: var(--field-line);
+  box-shadow: var(--shadow);
 }
 .charts {
   display: grid;
@@ -65,10 +79,10 @@
 }
 .chart h2 {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--t-h3);
 }
 .chart .total {
-  font: 700 1.1rem/1 var(--mono);
+  font: 700 1.25rem/1 var(--sans);
   font-variant-numeric: tabular-nums;
 }
 .chart svg {
@@ -86,7 +100,8 @@
   display: flex;
   justify-content: space-between;
   color: var(--muted);
-  font: 0.75rem/1.2 var(--mono);
+  font: var(--t-caption) / 1.2 var(--sans);
+  font-variant-numeric: tabular-nums;
 }
 .note {
   margin: 0;
