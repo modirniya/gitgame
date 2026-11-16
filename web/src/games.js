@@ -27,7 +27,7 @@ export function gamesList(games) {
   return el(
     "section",
     { class: "your-games", "aria-label": "your games" },
-    el("h2", {}, "your games"),
+    el("h2", {}, "Your games"),
     el(
       "ul",
       {},

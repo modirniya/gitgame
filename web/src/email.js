@@ -32,7 +32,7 @@ export function emailSettings(remote) {
       : form();
 
     node.replaceChildren(
-      el("summary", {}, "reminders by email"),
+      el("summary", {}, el("span", {}, "Reminders by email"), el("span", { class: "desc" }, "when your pack is due")),
       ...[body].flat(),
       el("p", { class: "error", role: "alert" }, error),
     );
