@@ -124,41 +124,37 @@
 }
 
 .landing section {
-  padding: 40px 0 8px;
+  padding: 48px 0 8px;
 }
 .landing h1 {
-  font-size: clamp(1.6rem, 5vw, 2.4rem);
-  line-height: 1.2;
-  margin: 24px 0 16px;
+  font-size: var(--t-display);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 32px 0 16px;
 }
 .landing h2 {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   margin-bottom: 16px;
 }
-.landing h2::before {
-  content: "# ";
-  color: var(--muted);
-}
 .landing h3 {
-  font-size: 1rem;
+  font-size: var(--t-h3);
   margin: 0 0 6px;
-  color: var(--accent);
 }
 .landing .lede {
-  font-size: 1.05rem;
+  font-size: var(--t-lede);
   max-width: 62ch;
 }
 .landing code {
   color: var(--ink);
-  background: var(--raised);
-  border-radius: 4px;
-  padding: 0 4px;
+  background: var(--ground-2);
+  border-radius: 6px;
+  padding: 0.05em 0.35em;
 }
 
 .cta {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   margin: 24px 0;
 }
 
@@ -169,7 +165,6 @@
 }
 .look .transcript {
   margin: 0;
-  font-size: 0.85rem;
 }
 .look .hand {
   display: flex;
@@ -177,28 +172,26 @@
   gap: 10px;
 }
 
-/* the plain-words panel: the one block on the page with the accent on it, and without the terminal's "# " */
+/* the plain-words panel: the one block on the page with the accent on it */
 .plain .panel {
-  padding: 20px;
-  border: 2px solid var(--accent);
-  border-radius: 12px;
-  background: var(--raised);
+  padding: 24px;
+  border: 1px solid var(--accent);
+  border-radius: var(--r);
+  background: var(--accent-soft);
 }
 .plain .eyebrow {
   margin: 0 0 6px;
-  font-size: 0.8rem;
-  letter-spacing: 0.04em;
+  font-size: var(--t-caption);
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--ink);
 }
 .plain h2 {
   margin-top: 0;
 }
-.plain h2::before {
-  content: none;
-}
 .plain p {
-  color: var(--muted);
+  color: var(--ink);
   max-width: 68ch;
 }
 .plain .cta {
@@ -210,13 +203,14 @@
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 16px;
+  gap: 12px;
 }
 .steps li {
-  padding: 16px;
+  padding: 20px;
   border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--raised);
+  border-radius: var(--r);
+  background: var(--paper);
+  box-shadow: var(--shadow);
 }
 .steps p,
 .why li,
@@ -230,27 +224,53 @@
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 .why strong {
   color: var(--ink);
 }
 
+/* the questions: 56 px rows, a plus that turns into a cross */
 #faq details {
+  border-bottom: 1px solid var(--line);
+}
+#faq details:first-of-type {
   border-top: 1px solid var(--line);
-  padding: 12px 0;
 }
 #faq summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 0;
+  font-weight: 600;
   cursor: pointer;
-  font-weight: 700;
+}
+#faq summary::-webkit-details-marker {
+  display: none;
+}
+#faq summary::after {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 14px;
+  background:
+    linear-gradient(var(--muted), var(--muted)) center / 14px 2px no-repeat,
+    linear-gradient(var(--muted), var(--muted)) center / 2px 14px no-repeat;
+  transition: transform var(--dur-2) var(--ease);
+}
+#faq details[open] summary::after {
+  transform: rotate(45deg);
 }
 #faq details p {
-  margin-top: 8px;
+  padding-bottom: 16px;
 }
 
 .again {
   text-align: center;
-  padding-bottom: 40px;
+  padding-bottom: 48px;
 }
 
 .site-foot {
