@@ -1,0 +1,1178 @@
+<!doctype html>
+<!-- Git Game theme directions (design-system/gitgame/MASTER.md, §4 alternatives). Static: nothing loads from the
+     network. Each direction is drawn twice, dark and light, from one token set per mode (contrast/themes.json); every
+     panel checks its own 48 colour pairs live and says how many pass. The words are the game's own. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Git Game theme directions</title>
+    <style>
+      :root {
+        --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+        --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        color-scheme: light dark;
+        --page: #f3efe7;
+        --page-ink: #1b2228;
+        --page-muted: #525f6a;
+        --page-line: #d6cfc2;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --page: #14181c;
+          --page-ink: #e7ecef;
+          --page-muted: #a7b3bc;
+          --page-line: #343e47;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--page);
+        color: var(--page-ink);
+        font: 16px/1.5 var(--sans);
+        font-variant-ligatures: none;
+      }
+      .doc {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 16px 64px;
+      }
+      .doc > h1 {
+        font: 700 1.75rem/1.2 var(--mono);
+        margin: 0 0 8px;
+      }
+      .doc > p {
+        max-width: 72ch;
+        color: var(--page-muted);
+      }
+      .jump {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 16px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+      .jump a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 14px;
+        border: 1px solid var(--page-line);
+        border-radius: 999px;
+        color: var(--page-ink);
+        text-decoration: none;
+        font-size: 0.875rem;
+      }
+      .direction {
+        margin-top: 48px;
+        padding-top: 24px;
+        border-top: 1px solid var(--page-line);
+      }
+      .direction > h2 {
+        font: 700 1.25rem/1.3 var(--mono);
+        margin: 0 0 4px;
+      }
+      .direction > .pitch {
+        margin: 0 0 8px;
+        max-width: 72ch;
+      }
+      .direction > ul {
+        margin: 0 0 16px;
+        padding-left: 20px;
+        max-width: 80ch;
+        color: var(--page-muted);
+        font-size: 0.9375rem;
+      }
+      .pair {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 16px;
+      }
+
+      /* ================= a panel: one theme in one mode ================= */
+      .panel {
+        --head: var(--mono);
+        --body: var(--sans);
+        background: var(--ground);
+        color: var(--ink);
+        font-family: var(--body);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .panel .mode {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 6px 12px;
+        background: var(--ground-2);
+        border-bottom: var(--bw) solid var(--line);
+        font: 700 12px/1.6 var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .panel .mode .pass {
+        letter-spacing: 0;
+        text-transform: none;
+        color: var(--ok);
+      }
+      .panel .mode .pass.fail {
+        color: var(--reject);
+      }
+      .panel a {
+        color: var(--link);
+      }
+      .panel :focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 52px;
+        padding: 6px 12px;
+        border-bottom: var(--bw) solid var(--line);
+      }
+      .head .brand {
+        margin-right: auto;
+        font: 700 0.9375rem/1 var(--head);
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .prompt .head .brand::before,
+      .prompt h3.t::before {
+        content: "$ ";
+        color: var(--accent-glyph, var(--accent));
+      }
+      .body {
+        display: grid;
+        gap: 12px;
+        padding: 16px 12px;
+      }
+      h3.t {
+        margin: 0;
+        font: 700 1.375rem/1.2 var(--head);
+        text-wrap: balance;
+      }
+      .panel:not(.prompt) h3.t {
+        letter-spacing: -0.01em;
+      }
+      .lede {
+        margin: 0;
+        color: var(--muted);
+      }
+      .lede code,
+      .said code {
+        font-family: var(--mono);
+        font-size: 0.9em;
+        padding: 0 0.25em;
+        border-radius: 4px;
+        background: var(--ground-2);
+        color: var(--ink);
+      }
+      .btns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 0 12px;
+        font: 600 0.9375rem/1.2 var(--body);
+        color: var(--ink);
+        background: var(--paper);
+        border: var(--bw) solid var(--field-line);
+        border-radius: var(--r-ctl);
+        cursor: pointer;
+      }
+      .btn.small {
+        min-height: 40px;
+        font-size: 0.875rem;
+      }
+      .btn.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--on-accent);
+        font-weight: 700;
+      }
+      .btn:disabled {
+        background: transparent;
+        border-style: dashed;
+        color: var(--muted);
+        cursor: default;
+      }
+      .transcript {
+        margin: 0;
+        padding: 10px 12px;
+        border-radius: min(var(--r), 8px);
+        background: var(--term);
+        color: var(--term-ink);
+        border: var(--term-border, 0) solid var(--line);
+        font: 400 13px/1.55 var(--mono);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      .transcript .who {
+        color: var(--term-other);
+      }
+      .transcript .mine .who {
+        color: var(--term-you);
+      }
+      .transcript .ok {
+        color: var(--term-ok);
+      }
+      .transcript .reject {
+        color: var(--term-reject);
+      }
+      .transcript .warn {
+        color: var(--term-warn);
+      }
+      .transcript .note {
+        color: var(--term-muted);
+      }
+      .hand {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .card {
+        position: relative;
+        display: grid;
+        grid-template-rows: 20px 1fr;
+        aspect-ratio: 1 / 1.4;
+        background: var(--paper);
+        color: var(--ink);
+        border: var(--bw) solid var(--card-edge, var(--line));
+        border-radius: min(var(--r), 10px);
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        text-align: center;
+        font: 600 13px/1.2 var(--mono);
+      }
+      .card .band {
+        background: var(--band);
+      }
+      .card.command .band {
+        background: var(--cmd);
+      }
+      .card .face {
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        gap: 2px;
+        min-width: 0;
+        padding: 2px;
+      }
+      .card .file {
+        letter-spacing: -0.02em;
+        white-space: nowrap;
+        max-width: 100%;
+        overflow: hidden;
+      }
+      .card .big {
+        font: 700 1.6rem/1 var(--sans);
+      }
+      .card .bug {
+        position: absolute;
+        right: 3px;
+        top: 1px;
+        padding: 0 5px;
+        border-radius: 4px;
+        background: var(--bug-fill);
+        color: var(--on-band);
+        font: 800 12px/18px var(--sans);
+      }
+      .card.command .face {
+        align-content: start;
+        padding-top: 10px;
+      }
+      .guide {
+        display: grid;
+        gap: 2px;
+        padding: 10px 12px;
+        background: var(--ok-soft);
+        border: 2px solid var(--ok);
+        border-radius: var(--r);
+      }
+      .guide .k {
+        font: 700 12px/1.4 var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ok);
+      }
+      .guide p {
+        margin: 0;
+      }
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .action {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 2px 6px;
+        min-height: 60px;
+        padding: 8px 10px;
+        text-align: left;
+        font: inherit;
+        color: var(--ink);
+        background: var(--paper);
+        border: var(--bw) solid var(--field-line);
+        border-radius: min(var(--r-ctl), 12px);
+      }
+      .action .cmd {
+        font: 700 0.9375rem/1.3 var(--mono);
+      }
+      .action .cost,
+      .action .why {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .action .cost {
+        font-family: var(--mono);
+        line-height: 1.6;
+      }
+      .action .why {
+        grid-column: 1 / -1;
+        line-height: 1.35;
+      }
+      .action:disabled {
+        background: transparent;
+        border-style: dashed;
+      }
+      .action:disabled .cmd {
+        color: var(--muted);
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 0 10px;
+        border: 1px solid currentColor;
+        border-radius: 999px;
+        font: 700 12px/1 var(--mono);
+      }
+      .chip.you {
+        color: var(--you);
+        background: var(--you-soft);
+      }
+      .chip.reject {
+        color: var(--reject);
+        background: var(--reject-soft);
+      }
+      .chip.warn {
+        color: var(--warn);
+        background: var(--warn-soft);
+      }
+      .chip.other {
+        color: var(--other);
+        background: var(--other-soft);
+      }
+      .incident {
+        overflow: hidden;
+        background: var(--paper);
+        border: var(--bw) solid var(--card-edge, var(--line));
+        border-radius: var(--r);
+        box-shadow: var(--card-shadow);
+      }
+      .incident .band {
+        display: block;
+        padding: 0 12px;
+        background: var(--incident-fill);
+        color: var(--on-band);
+        font: 700 12px/26px var(--sans);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .incident b {
+        display: block;
+        padding: 10px 12px 2px;
+        font: 700 1.125rem/1.2 var(--body);
+      }
+      .incident p {
+        margin: 0;
+        padding: 0 12px 12px;
+        color: var(--muted);
+        font-size: 0.9375rem;
+      }
+      .score {
+        width: 100%;
+        border-collapse: collapse;
+        font: 400 13px/1 var(--mono);
+      }
+      .score td,
+      .score th {
+        height: 32px;
+        padding: 0 6px;
+        text-align: right;
+        border-bottom: 1px solid var(--line);
+      }
+      .score td:first-child,
+      .score th:first-child {
+        text-align: left;
+        color: var(--muted);
+      }
+      .score th {
+        color: var(--other);
+      }
+      .score th.me {
+        color: var(--you);
+      }
+      .score .total td {
+        border-top: 2px solid var(--ink);
+        border-bottom: 0;
+        color: var(--ink);
+        font-weight: 700;
+      }
+      .hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+
+      /* ================= the themes, generated from contrast/themes.json ================= */
+      .panel.t-terminal.m-dark {
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --incident-fill: #eaaa42;
+        --on-cmd: #ffffff;
+        --term-ink: #d8d5ce;
+        --term-muted: #8d929b;
+        --term-ok: #52c98f;
+        --term-reject: #ff7a67;
+        --term-warn: #eaaa42;
+        --term-you: #ff6ac1;
+        --term-other: #a3acbd;
+        --ground: #14181c;
+        --ground-2: #1c2227;
+        --paper: #252c33;
+        --ink: #e7ecef;
+        --muted: #a7b3bc;
+        --line: #343e47;
+        --field-line: #7d8a95;
+        --accent: #3ec1b3;
+        --on-accent: #0b1a18;
+        --link: #3ec1b3;
+        --you: #ff6ac1;
+        --you-soft: #3a1d31;
+        --other: #a3acbd;
+        --other-soft: #262d38;
+        --ok: #52c98f;
+        --ok-soft: #16301f;
+        --reject: #ff7a67;
+        --reject-soft: #3b1f1a;
+        --warn: #eaaa42;
+        --warn-soft: #34290f;
+        --cmd: #3c4955;
+        --term: #0d0f12;
+        --r: 14px;
+        --r-ctl: 10px;
+        --bw: 1px;
+        --head: var(--mono);
+        --body: var(--sans);
+        --card-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
+        color-scheme: dark;
+      }
+      .panel.t-terminal.m-light {
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --incident-fill: #eaaa42;
+        --on-cmd: #ffffff;
+        --term-ink: #d8d5ce;
+        --term-muted: #8d929b;
+        --term-ok: #52c98f;
+        --term-reject: #ff7a67;
+        --term-warn: #eaaa42;
+        --term-you: #ff6ac1;
+        --term-other: #a3acbd;
+        --ground: #f3efe7;
+        --ground-2: #e9e3d7;
+        --paper: #ffffff;
+        --ink: #1b2228;
+        --muted: #525f6a;
+        --line: #d6cfc2;
+        --field-line: #837a6c;
+        --accent: #13756b;
+        --on-accent: #ffffff;
+        --link: #106a61;
+        --you: #b01f70;
+        --you-soft: #f8dcec;
+        --other: #596173;
+        --other-soft: #e3e6ee;
+        --ok: #1b7449;
+        --ok-soft: #dcf1e5;
+        --reject: #b52f1d;
+        --reject-soft: #fbe2dd;
+        --warn: #865600;
+        --warn-soft: #faedd2;
+        --cmd: #2f3a44;
+        --term: #0d0f12;
+        --r: 14px;
+        --r-ctl: 10px;
+        --bw: 1px;
+        --head: var(--mono);
+        --body: var(--sans);
+        --card-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
+        color-scheme: light;
+      }
+      .panel.t-violet.m-dark {
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --incident-fill: #eaaa42;
+        --on-cmd: #ffffff;
+        --term-ink: #d8d5ce;
+        --term-muted: #8d929b;
+        --term-ok: #52c98f;
+        --term-reject: #ff7a67;
+        --term-warn: #eaaa42;
+        --term-you: #ff6ac1;
+        --term-other: #a3acbd;
+        --ground: #121220;
+        --ground-2: #1a1a2c;
+        --paper: #222238;
+        --ink: #ecebf7;
+        --muted: #aeacc8;
+        --line: #33334d;
+        --field-line: #8380a6;
+        --accent: #b39dfb;
+        --on-accent: #170f33;
+        --link: #c2b0fc;
+        --you: #ff7ac8;
+        --you-soft: #3d1a36;
+        --other: #a9b4c9;
+        --other-soft: #262a3d;
+        --ok: #5fd39b;
+        --ok-soft: #15302a;
+        --reject: #ff8170;
+        --reject-soft: #3d1f22;
+        --warn: #efb24f;
+        --warn-soft: #362a14;
+        --cmd: #40405c;
+        --term: #0b0b14;
+        --r: 16px;
+        --r-ctl: 12px;
+        --bw: 1px;
+        --head: var(--mono);
+        --body: var(--sans);
+        --card-shadow: 0 2px 10px rgb(20 10 60 / 0.35);
+        color-scheme: dark;
+        --accent-glyph: #3ec1b3;
+      }
+      .panel.t-violet.m-light {
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --incident-fill: #eaaa42;
+        --on-cmd: #ffffff;
+        --term-ink: #d8d5ce;
+        --term-muted: #8d929b;
+        --term-ok: #52c98f;
+        --term-reject: #ff7a67;
+        --term-warn: #eaaa42;
+        --term-you: #ff6ac1;
+        --term-other: #a3acbd;
+        --ground: #f4f2fb;
+        --ground-2: #e9e5f6;
+        --paper: #ffffff;
+        --ink: #1d1a2e;
+        --muted: #57536f;
+        --line: #d9d4ec;
+        --field-line: #7f79a0;
+        --accent: #5b3cc4;
+        --on-accent: #ffffff;
+        --link: #5234b8;
+        --you: #b01f70;
+        --you-soft: #f8dcec;
+        --other: #575f73;
+        --other-soft: #e5e6f0;
+        --ok: #1b7449;
+        --ok-soft: #dcf1e5;
+        --reject: #b52f1d;
+        --reject-soft: #fbe2dd;
+        --warn: #865600;
+        --warn-soft: #faedd2;
+        --cmd: #34304d;
+        --term: #100e1a;
+        --r: 16px;
+        --r-ctl: 12px;
+        --bw: 1px;
+        --head: var(--mono);
+        --body: var(--sans);
+        --card-shadow: 0 2px 10px rgb(20 10 60 / 0.35);
+        color-scheme: light;
+        --accent-glyph: #13756b;
+      }
+      .panel.t-tabletop.m-dark {
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --incident-fill: #eaaa42;
+        --on-cmd: #ffffff;
+        --term-ink: #d8d5ce;
+        --term-muted: #8d929b;
+        --term-ok: #52c98f;
+        --term-reject: #ff7a67;
+        --term-warn: #eaaa42;
+        --term-you: #ff6ac1;
+        --term-other: #a3acbd;
+        --ground: #0f2622;
+        --ground-2: #14302b;
+        --paper: #1b3b35;
+        --ink: #f1ede2;
+        --muted: #b9c6bf;
+        --line: #2f544c;
+        --field-line: #88a69d;
+        --accent: #f1ede2;
+        --on-accent: #0f2622;
+        --link: #9fe6dc;
+        --you: #ff8ccd;
+        --you-soft: #45213a;
+        --other: #bcc6d6;
+        --other-soft: #24403a;
+        --ok: #6fdba6;
+        --ok-soft: #143a2a;
+        --reject: #ff8a78;
+        --reject-soft: #46241f;
+        --warn: #f2b856;
+        --warn-soft: #3d3216;
+        --cmd: #2d4a44;
+        --term: #0a1714;
+        --r: 6px;
+        --r-ctl: 6px;
+        --bw: 2px;
+        --head: var(--mono);
+        --body: var(--sans);
+        --card-shadow: 3px 3px 0 var(--ink);
+        color-scheme: dark;
+        --card-edge: var(--ink);
+      }
+      .panel.t-tabletop.m-light {
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --incident-fill: #eaaa42;
+        --on-cmd: #ffffff;
+        --term-ink: #d8d5ce;
+        --term-muted: #8d929b;
+        --term-ok: #52c98f;
+        --term-reject: #ff7a67;
+        --term-warn: #eaaa42;
+        --term-you: #ff6ac1;
+        --term-other: #a3acbd;
+        --ground: #f3ead6;
+        --ground-2: #eadfc6;
+        --paper: #fffcf4;
+        --ink: #22201b;
+        --muted: #5a5345;
+        --line: #cfc2a4;
+        --field-line: #22201b;
+        --accent: #22201b;
+        --on-accent: #fffcf4;
+        --link: #0d665d;
+        --you: #ad1e6d;
+        --you-soft: #f6dbe7;
+        --other: #555c6b;
+        --other-soft: #e6e1d6;
+        --ok: #1a6f46;
+        --ok-soft: #dcefdc;
+        --reject: #ad2d1b;
+        --reject-soft: #f8dfd5;
+        --warn: #7f5200;
+        --warn-soft: #f5e6c4;
+        --cmd: #22201b;
+        --term: #1a1813;
+        --r: 6px;
+        --r-ctl: 6px;
+        --bw: 2px;
+        --head: var(--mono);
+        --body: var(--sans);
+        --card-shadow: 3px 3px 0 var(--ink);
+        color-scheme: light;
+        --card-edge: var(--ink);
+      }
+      .panel.t-phosphor.m-dark {
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --incident-fill: #eaaa42;
+        --on-cmd: #ffffff;
+        --term-ink: #eafffb;
+        --term-muted: #9fb7b2;
+        --term-ok: #6cf0a8;
+        --term-reject: #ff8f7f;
+        --term-warn: #ffc35c;
+        --term-you: #ff8ad0;
+        --term-other: #c4ccda;
+        --ground: #000000;
+        --ground-2: #0a0f0e;
+        --paper: #0d1412;
+        --ink: #eafffb;
+        --muted: #b5ccc7;
+        --line: #2f4a45;
+        --field-line: #9fbdb7;
+        --accent: #4ff0da;
+        --on-accent: #00110f;
+        --link: #4ff0da;
+        --you: #ff8ad0;
+        --you-soft: #2d0d20;
+        --other: #c4ccda;
+        --other-soft: #161c22;
+        --ok: #6cf0a8;
+        --ok-soft: #06261a;
+        --reject: #ff8f7f;
+        --reject-soft: #2e0d09;
+        --warn: #ffc35c;
+        --warn-soft: #2b1f05;
+        --cmd: #22312e;
+        --term: #000000;
+        --r: 0px;
+        --r-ctl: 0px;
+        --bw: 1px;
+        --head: var(--mono);
+        --body: var(--mono);
+        --card-shadow: none;
+        color-scheme: dark;
+        --term-border: 1px;
+      }
+      .panel.t-phosphor.m-light {
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --incident-fill: #eaaa42;
+        --on-cmd: #ffffff;
+        --term-ink: #eafffb;
+        --term-muted: #9fb7b2;
+        --term-ok: #6cf0a8;
+        --term-reject: #ff8f7f;
+        --term-warn: #ffc35c;
+        --term-you: #ff8ad0;
+        --term-other: #c4ccda;
+        --ground: #ffffff;
+        --ground-2: #f2f2f2;
+        --paper: #ffffff;
+        --ink: #000000;
+        --muted: #3b3b3b;
+        --line: #bdbdbd;
+        --field-line: #000000;
+        --accent: #00574f;
+        --on-accent: #ffffff;
+        --link: #00574f;
+        --you: #8f0f57;
+        --you-soft: #fbe3ef;
+        --other: #3e4554;
+        --other-soft: #eceef2;
+        --ok: #0a5a34;
+        --ok-soft: #e2f3e8;
+        --reject: #8f1f10;
+        --reject-soft: #fbe6e1;
+        --warn: #614000;
+        --warn-soft: #fbefd6;
+        --cmd: #000000;
+        --term: #000000;
+        --r: 0px;
+        --r-ctl: 0px;
+        --bw: 1px;
+        --head: var(--mono);
+        --body: var(--mono);
+        --card-shadow: none;
+        color-scheme: light;
+      }
+      .panel.t-studio.m-dark {
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --incident-fill: #eaaa42;
+        --on-cmd: #ffffff;
+        --term-ink: #d8d5ce;
+        --term-muted: #8d929b;
+        --term-ok: #52c98f;
+        --term-reject: #ff7a67;
+        --term-warn: #eaaa42;
+        --term-you: #ff6ac1;
+        --term-other: #a3acbd;
+        --ground: #151a22;
+        --ground-2: #1b222c;
+        --paper: #232b37;
+        --ink: #eef2f7;
+        --muted: #a9b4c4;
+        --line: #323c4b;
+        --field-line: #8492a6;
+        --accent: #5cd6c8;
+        --on-accent: #06201d;
+        --link: #6fdcd0;
+        --you: #ff7cc8;
+        --you-soft: #3b1d33;
+        --other: #a8b3c6;
+        --other-soft: #28303d;
+        --ok: #5fd39b;
+        --ok-soft: #163126;
+        --reject: #ff8473;
+        --reject-soft: #3d2220;
+        --warn: #efb24f;
+        --warn-soft: #372b14;
+        --cmd: #3a4657;
+        --term: #0e1218;
+        --r: 20px;
+        --r-ctl: 999px;
+        --bw: 1px;
+        --head: var(--sans);
+        --body: var(--sans);
+        --card-shadow: 0 6px 18px rgb(0 0 0 / 0.18);
+        color-scheme: dark;
+      }
+      .panel.t-studio.m-light {
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --incident-fill: #eaaa42;
+        --on-cmd: #ffffff;
+        --term-ink: #d8d5ce;
+        --term-muted: #8d929b;
+        --term-ok: #52c98f;
+        --term-reject: #ff7a67;
+        --term-warn: #eaaa42;
+        --term-you: #ff6ac1;
+        --term-other: #a3acbd;
+        --ground: #f3f6f9;
+        --ground-2: #e8edf2;
+        --paper: #ffffff;
+        --ink: #18202b;
+        --muted: #4f5b6b;
+        --line: #d5dde6;
+        --field-line: #7b8796;
+        --accent: #0f7168;
+        --on-accent: #ffffff;
+        --link: #0d665e;
+        --you: #b01f70;
+        --you-soft: #f8dcec;
+        --other: #566073;
+        --other-soft: #e4e8ef;
+        --ok: #1b7449;
+        --ok-soft: #dcf1e5;
+        --reject: #b52f1d;
+        --reject-soft: #fbe2dd;
+        --warn: #865600;
+        --warn-soft: #faedd2;
+        --cmd: #2c3644;
+        --term: #0e1218;
+        --r: 20px;
+        --r-ctl: 999px;
+        --bw: 1px;
+        --head: var(--sans);
+        --body: var(--sans);
+        --card-shadow: 0 6px 18px rgb(0 0 0 / 0.18);
+        color-scheme: light;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="doc">
+      <h1>$ Git Game: theme directions</h1>
+      <p>
+        Five directions. Each is drawn in dark and light, and each panel checks its own 48 colour pairs (WCAG AA, the
+        same set as MASTER.md §4) and shows how many pass. All five keep the deck's file colours, the semantic colours'
+        meanings (red is a rejection or a bug, green is accepted, amber is a warning, pink is you), and an always-dark
+        terminal. Palette and shape are independent, so you can mix them, e.g. the Terminal palette with Tabletop's
+        outlined cards.
+      </p>
+      <ul class="jump">
+        <li><a href="#terminal">Terminal (the proposal)</a></li>
+        <li><a href="#violet">Commit violet</a></li>
+        <li><a href="#tabletop">Tabletop</a></li>
+        <li><a href="#phosphor">Phosphor / Printout</a></li>
+        <li><a href="#studio">Studio</a></li>
+      </ul>
+      <section class="direction" id="terminal">
+        <h2>Terminal (the proposal)</h2>
+        <p class="pitch">Today&#x27;s look, fixed: near-black and warm paper, logo teal, mono headings.</p>
+        <ul>
+          <li>
+            Accent: logo teal #3EC1B3 (dark), #13756B (light). Ground: today&#x27;s near-black and warm paper, nudged
+            for contrast.
+          </li>
+          <li>
+            Shape: 14 px surfaces, 10 px controls, 1 px lines, flat. Type: mono headings with $ and #, sans prose.
+          </li>
+          <li>Trade-off: the safest choice, and the least new.</li>
+        </ul>
+        <div class="pair">
+          <div class="panel t-terminal m-dark prompt" data-mode="dark"></div>
+          <div class="panel t-terminal m-light prompt" data-mode="light"></div>
+        </div>
+      </section>
+      <section class="direction" id="violet">
+        <h2>Commit violet</h2>
+        <p class="pitch">
+          The logo&#x27;s other colour leads: the violet commit dot becomes the accent, on an ink-blue night.
+        </p>
+        <ul>
+          <li>
+            Accent: the logo&#x27;s commit violet, #B39DFB at night and #5B3CC4 by day. The ground is an ink blue, not
+            grey.
+          </li>
+          <li>Shape: a little rounder (16 / 12 px), with a soft violet glow under the cards.</li>
+          <li>
+            Trade-off: violet is also the api.py card colour, so a primary button can rhyme with that card. Teal stays
+            in the logo and the $ prompt.
+          </li>
+        </ul>
+        <div class="pair">
+          <div class="panel t-violet m-dark prompt" data-mode="dark"></div>
+          <div class="panel t-violet m-light prompt" data-mode="light"></div>
+        </div>
+      </section>
+      <section class="direction" id="tabletop">
+        <h2>Tabletop</h2>
+        <p class="pitch">
+          The print-and-play deck on a table: cream card stock and ink outlines by day, green felt by night.
+        </p>
+        <ul>
+          <li>
+            Accent: ink itself. The primary button is black on cream by day and cream on felt by night; teal becomes the
+            link colour.
+          </li>
+          <li>
+            Shape: 6 px corners, 2 px ink outlines and a hard 3 px offset shadow on cards, like card stock on a table.
+            It echoes the print-and-play deck.
+          </li>
+          <li>
+            Trade-off: heavier lines add visual weight to the busy hub, and the dark felt is the furthest from
+            today&#x27;s look.
+          </li>
+        </ul>
+        <div class="pair">
+          <div class="panel t-tabletop m-dark prompt" data-mode="dark"></div>
+          <div class="panel t-tabletop m-light prompt" data-mode="light"></div>
+        </div>
+      </section>
+      <section class="direction" id="phosphor">
+        <h2>Phosphor / Printout</h2>
+        <p class="pitch">
+          All terminal, no chrome: true black and a brighter teal at night, a plain printout by day. Mono everywhere and
+          square corners. It could double as a high-contrast mode.
+        </p>
+        <ul>
+          <li>Accent: a brighter teal #4FF0DA on true black; a deep teal #00574F on white paper.</li>
+          <li>Shape: square corners, no shadows, 1 px lines. Type: mono for everything, prose included.</li>
+          <li>All of its own text is 7:1 or more (AAA); only the deck&#x27;s fixed band colours sit at 6.2–8.8:1.</li>
+          <li>
+            Trade-off: mono prose is slower to read on long pages (/privacy, /teach), so it may suit an optional
+            high-contrast mode better than the default.
+          </li>
+        </ul>
+        <div class="pair">
+          <div class="panel t-phosphor m-dark prompt" data-mode="dark"></div>
+          <div class="panel t-phosphor m-light prompt" data-mode="light"></div>
+        </div>
+      </section>
+      <section class="direction" id="studio">
+        <h2>Studio</h2>
+        <p class="pitch">
+          Friendlier for people new to Git and for classrooms: cool slate, rounder shapes, sans headings, and the $
+          prompt kept only where Git speaks.
+        </p>
+        <ul>
+          <li>Accent: a softer teal #5CD6C8 at night, #0F7168 by day, on cool slate instead of warm paper.</li>
+          <li>
+            Shape: 20 px surfaces and pill buttons. Type: sans headings without the $ and # prompts; mono only where Git
+            speaks.
+          </li>
+          <li>
+            Trade-off: friendlier for /new-to-git and classrooms, but it gives up the terminal headings that make Git
+            Game recognisable.
+          </li>
+        </ul>
+        <div class="pair">
+          <div class="panel t-studio m-dark" data-mode="dark"></div>
+          <div class="panel t-studio m-light" data-mode="light"></div>
+        </div>
+      </section>
+    </div>
+
+    <template id="sample">
+      <div class="mode"><span class="label"></span><span class="pass"></span></div>
+      <header class="head">
+        <a class="brand" href="#">Git Game</a>
+        <button class="btn small" type="button">menu</button>
+        <button class="btn small primary" type="button">play</button>
+      </header>
+      <div class="body">
+        <h3 class="t">A multiplayer card game whose rules are Git.</h3>
+        <p class="lede">
+          Ship commits to a shared <code>main</code>. Pull before you push, blame the bugs you can't see, and survive
+          <code>git push --force</code>.
+        </p>
+        <div class="btns">
+          <button class="btn primary" type="button">play the bot now</button>
+          <button class="btn" type="button">invite someone</button>
+        </div>
+        <!-- prettier-ignore -->
+        <div class="transcript"><span class="mine"><span class="who">ana@main</span> $ git push</span>
+<span class="ok">   3f2c1d9..8e1da02  main -&gt; main</span>
+<span class="who">bot@main</span> $ git push
+<span class="reject"> ! [rejected]        main -&gt; main (non-fast-forward)</span>
+<span class="who">bot@main</span> $ git push --force
+<span class="warn"> + 8e1da02...b0ba026 main -&gt; main (forced update)</span>
+<span class="note"># restored 8e1da02: back on top of main</span></div>
+        <div class="incident">
+          <span class="band">incident</span><b>Coffee Machine Fixed</b>
+          <p>Nothing special. Morale is high.</p>
+        </div>
+        <div class="guide">
+          <span class="k">guide · 1 of 10</span>
+          <p>Pick a card from your hand: lines of code, in one file. One without a BUG tag is a safe start.</p>
+          <a href="#">skip the guide</a>
+        </div>
+        <div class="hand" aria-label="your hand">
+          <span class="card" style="--band: #f2755c"
+            ><span class="band"></span
+            ><span class="face"><span class="file">styles.css</span><span class="big">+3</span></span
+            ><span class="bug">BUG</span></span
+          >
+          <span class="card" style="--band: #a88bfa"
+            ><span class="band"></span
+            ><span class="face"><span class="file">api.py</span><span class="big">+1</span></span></span
+          >
+          <span class="card" style="--band: #4c9be8"
+            ><span class="band"></span
+            ><span class="face"><span class="file">Dockerfile</span><span class="big">+3</span></span></span
+          >
+          <span class="card command"
+            ><span class="band"></span><span class="face"><span class="file">reflog</span></span></span
+          >
+        </div>
+        <div class="actions">
+          <button class="action" type="button" disabled>
+            <span class="cmd">git add</span><span class="cost">1 op</span
+            ><span class="why">select cards in your hand</span>
+          </button>
+          <button class="action" type="button">
+            <span class="cmd">git pull</span><span class="cost">0–1 ops</span
+            ><span class="why">at the tip: free unless main moves</span>
+          </button>
+        </div>
+        <div class="chips">
+          <span class="chip you">you +8</span><span class="chip reject">bot −1</span
+          ><span class="chip warn">your pack is due</span><span class="chip other">bot ±0</span>
+        </div>
+        <table class="score">
+          <thead>
+            <tr>
+              <th><span class="hidden">score</span></th>
+              <th class="me">you</th>
+              <th>bot</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>lines on main</td>
+              <td>47</td>
+              <td>17</td>
+            </tr>
+            <tr>
+              <td>merge tokens</td>
+              <td>−2</td>
+              <td>−3</td>
+            </tr>
+            <tr class="total">
+              <td>total</td>
+              <td>44</td>
+              <td>13</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="btns">
+          <button class="btn" type="button">replay it</button>
+          <button class="btn primary" type="button">new game</button>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      // Fill every panel from the template, then check its colour pairs from its own computed tokens.
+      const PAIRS = [
+        ["ink", "ground", 4.5],
+        ["ink", "ground-2", 4.5],
+        ["ink", "paper", 4.5],
+        ["muted", "ground", 4.5],
+        ["muted", "ground-2", 4.5],
+        ["muted", "paper", 4.5],
+        ["link", "ground", 4.5],
+        ["link", "paper", 4.5],
+        ["link", "ok-soft", 4.5],
+        ["link", "warn-soft", 4.5],
+        ["on-accent", "accent", 4.5],
+        ["accent", "ground", 3],
+        ["accent", "paper", 3],
+        ["you", "ground", 4.5],
+        ["you", "paper", 4.5],
+        ["you", "you-soft", 4.5],
+        ["other", "ground", 4.5],
+        ["other", "paper", 4.5],
+        ["ok", "ground", 4.5],
+        ["ok", "paper", 4.5],
+        ["ok", "ok-soft", 4.5],
+        ["ink", "ok-soft", 4.5],
+        ["reject", "ground", 4.5],
+        ["reject", "paper", 4.5],
+        ["reject", "reject-soft", 4.5],
+        ["warn", "ground", 4.5],
+        ["warn", "paper", 4.5],
+        ["warn", "warn-soft", 4.5],
+        ["ink", "warn-soft", 4.5],
+        ["on-band", "#3EC1B3", 4.5],
+        ["on-band", "#A88BFA", 4.5],
+        ["on-band", "#F2755C", 4.5],
+        ["on-band", "#4C9BE8", 4.5],
+        ["on-band", "#E9A83B", 4.5],
+        ["on-band", "incident-fill", 4.5],
+        ["on-band", "bug-fill", 4.5],
+        ["on-cmd", "cmd", 4.5],
+        ["term-ink", "term", 4.5],
+        ["term-muted", "term", 4.5],
+        ["term-ok", "term", 4.5],
+        ["term-reject", "term", 4.5],
+        ["term-warn", "term", 4.5],
+        ["term-you", "term", 4.5],
+        ["term-other", "term", 4.5],
+        ["#3ec1b3", "term", 4.5],
+        ["field-line", "ground", 3],
+        ["field-line", "paper", 3],
+        ["accent", "ground", 3],
+      ];
+      const sample = document.getElementById("sample");
+      const lum = ([r, g, b]) =>
+        [r, g, b]
+          .map((v) => ((v /= 255), v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
+          .reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
+      const probe = document.createElement("i");
+      document.body.append(probe);
+      const rgb = (c) => ((probe.style.color = c), getComputedStyle(probe).color.match(/\d+/g).slice(0, 3).map(Number));
+      for (const panel of document.querySelectorAll(".panel")) {
+        panel.append(sample.content.cloneNode(true));
+        panel.querySelector(".label").textContent = panel.dataset.mode;
+        const css = getComputedStyle(panel);
+        const v = (t) => (t.startsWith("#") ? t : css.getPropertyValue(`--${t}`).trim());
+        let pass = 0;
+        for (const [fg, bg, need] of PAIRS) {
+          const [a, b] = [lum(rgb(v(fg))), lum(rgb(v(bg)))].sort((x, y) => y - x);
+          if ((a + 0.05) / (b + 0.05) >= need) pass++;
+        }
+        const out = panel.querySelector(".pass");
+        out.textContent = `${pass}/${PAIRS.length} pairs pass AA`;
+        out.classList.toggle("fail", pass < PAIRS.length);
+      }
+      probe.remove();
+    </script>
+  </body>
+</html>
