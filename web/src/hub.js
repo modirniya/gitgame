@@ -14,20 +14,21 @@ import { incidentText } from "./copy.js";
 // A hand card is 96 px wide; a fanned one shows at least this much of itself, a finger's width.
 const CARD = 96;
 const TAP = 44;
-// A card's longest label (`git bisect`), centred, is clear of the next card while the card shows this much of itself;
-// fanned closer, each card is printed like a playing card's corner instead.
+// A card's longest label (`git bisect`), centred, is clear of the next card while the card shows this much of itself.
+// Labels never turn on their side (design-system/gitgame/MASTER.md): a hand that would fan closer takes more rows.
 const LABEL = 88;
 // A card in the phone's grid is at least this wide, so the deck's longest file name fits on one line.
 const CELL = 76;
 const GAP = 8;
 
 /**
- * How the hand fans on a screen `width` wide: the cards in each row, and how much each overlaps the one before. One
- * row if every card keeps TAP pixels to tap, otherwise two.
+ * How the hand fans on a screen `width` wide: the cards in each row, and how much each overlaps the one before. As many
+ * rows as let every card show LABEL pixels of itself (more than the TAP it needs to be tapped), so each reads whole.
  */
 export function fanLayout(n, width) {
   const step = (count) => (count > 1 ? Math.min(CARD + 8, (width - CARD) / (count - 1)) : CARD + 8);
-  const rows = n > 1 && step(n) < TAP ? 2 : 1;
+  const fits = Math.max(1, Math.floor((width - CARD) / LABEL) + 1);
+  const rows = Math.ceil(n / fits);
   const perRow = Math.ceil(n / rows);
   return { rows, perRow, overlap: Math.max(0, CARD - Math.floor(step(perRow))) };
 }
@@ -62,11 +63,10 @@ function hand(cards) {
   const { perRow, overlap } = fanLayout(cards.length, width);
   const rows = [];
   for (let i = 0; i < cards.length; i += perRow) rows.push(cards.slice(i, i + perRow));
-  const kind = CARD - overlap < LABEL ? "hand-fan fanned" : "hand-fan";
   return el(
     "div",
     { class: "hand-rows", "aria-label": "your hand" },
-    rows.map((row) => el("div", { class: kind, style: `--overlap: ${overlap}px` }, row)),
+    rows.map((row) => el("div", { class: "hand-fan", style: `--overlap: ${overlap}px` }, row)),
   );
 }
 

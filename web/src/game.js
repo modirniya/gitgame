@@ -209,7 +209,7 @@ export function gameScreen({ remote, go, id, seat, me = null }) {
       el(
         "div",
         { class: "sheet-head" },
-        el("h2", {}, "the table"),
+        el("h2", {}, "The table"),
         el("button", { class: "close", onclick: close }, "close"),
       ),
       table(view),

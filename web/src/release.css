@@ -42,7 +42,7 @@
   margin: 4px 0 0;
   padding: 4px 12px;
   border: 2px solid currentColor;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   font: 800 1rem var(--mono);
   letter-spacing: 0.06em;
   transform: rotate(-4deg);
@@ -71,7 +71,8 @@
 }
 .winner {
   margin: 0;
-  font: 700 1.75rem/1.2 var(--sans);
+  font: 700 var(--t-h1) / 1.15 var(--sans);
+  letter-spacing: -0.015em;
   overflow-wrap: anywhere;
 }
 .winner.you {
@@ -87,17 +88,19 @@ table.scores {
   width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
-  font: 0.9rem var(--mono);
+  font: var(--t-small) var(--sans);
   font-variant-numeric: tabular-nums;
 }
 .scores th,
 .scores td {
-  padding: 6px;
+  height: 40px;
+  padding: 0 8px;
   text-align: right;
   border-bottom: 1px solid var(--line);
   overflow-wrap: anywhere;
 }
 .scores thead th {
+  font-family: var(--mono);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -120,6 +123,7 @@ table.scores {
 .scores tfoot th[scope="row"],
 .scores tfoot td {
   font-weight: 700;
+  font-size: var(--t-body);
   color: var(--ink);
 }
 .scores tfoot > tr > * {

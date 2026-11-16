@@ -12,6 +12,12 @@ export const commandName = (id) => commands[id]?.name ?? id;
 export const commandText = (id) => commands[id]?.text ?? "";
 export const fileColor = (file) => colors[file] ?? "var(--faint)";
 
+// A file's name as it may wrap on a narrow card: before its extension (`styles` / `.css`), never anywhere else.
+const fileName = (file) => {
+  const dot = file.lastIndexOf(".");
+  return dot > 0 ? [file.slice(0, dot), el("wbr"), file.slice(dot)] : file;
+};
+
 // A command's name as it may wrap on a narrow card: at its spaces, never inside a flag (`push --force`, not `push --`).
 const words = (name) =>
   name.split(" ").flatMap((w, i) => [i > 0 && " ", w.startsWith("-") ? el("span", { class: "flag" }, w) : w]);
@@ -42,7 +48,12 @@ export function card(c, { size = "lg", selected = false, used = false, onclick }
     tag,
     { ...props, style: `--band: ${fileColor(c.file)}` },
     el("span", { class: "band" }, "commit"),
-    el("span", { class: "face" }, el("span", { class: "file" }, c.file), el("span", { class: "big" }, `+${c.lines}`)),
+    el(
+      "span",
+      { class: "face" },
+      el("span", { class: "file" }, fileName(c.file)),
+      el("span", { class: "big" }, `+${c.lines}`),
+    ),
     c.bug && el("span", { class: "bug" }, "BUG"),
   );
 }
@@ -96,7 +107,7 @@ export function commit(c, { size = "md", tip = false, onclick, pickable = false,
         el(
           "span",
           { class: "face" },
-          el("span", { class: "file" }, c.revert_of ?? files.join(" ")),
+          el("span", { class: "file" }, c.revert_of ?? files.flatMap((f, i) => [i > 0 && " ", fileName(f)])),
           el("span", { class: "big" }, c.revert_of ? "↺" : `+${c.lines}`),
         ),
         up && live && el("span", { class: "bug" }, "BUG"),

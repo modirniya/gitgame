@@ -1,0 +1,3573 @@
+<!doctype html>
+<!-- Git Game design system, Studio direction (design-system/gitgame/MASTER.md). Static: nothing loads from the network.
+     Part 1 draws the four screen families; part 2 is every element the client uses, in each of its states. The words
+     and numbers are the game's own (web/src/copy.js, the screens, the pages, rules/deck.json, web/captures), except
+     where a panel is marked "new copy". The theme follows the OS; the buttons at the top force one. The tokens come
+     from contrast/studio.json. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Git Game design system</title>
+    <style>
+      /* ================= tokens: generated from contrast/studio.json ================= */
+      :root {
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --incident-fill: #eaaa42;
+        --on-cmd: #ffffff;
+        --term-ink: #d8d5ce;
+        --term-muted: #8d929b;
+        --term-ok: #52c98f;
+        --term-reject: #ff7a67;
+        --term-warn: #eaaa42;
+        --term-you: #ff6ac1;
+        --term-other: #a3acbd;
+        --ground: #151a22;
+        --ground-2: #1b222c;
+        --paper: #232b37;
+        --ink: #eef2f7;
+        --muted: #a9b4c4;
+        --line: #323c4b;
+        --field-line: #8492a6;
+        --accent: #5cd6c8;
+        --on-accent: #06201d;
+        --link: #6fdcd0;
+        --you: #ff7cc8;
+        --you-soft: #3b1d33;
+        --other: #a8b3c6;
+        --other-soft: #28303d;
+        --ok: #5fd39b;
+        --ok-soft: #163126;
+        --reject: #ff8473;
+        --reject-soft: #3d2220;
+        --warn: #efb24f;
+        --warn-soft: #372b14;
+        --cmd: #3a4657;
+        --term: #0e1218;
+        --accent-hover: #7fe1d6;
+        --accent-press: #49c4b6;
+        --paper-hover: #2b3442;
+        --accent-soft: #123735;
+        --ground-raised: #1b222c;
+        --back-1: #4a5661;
+        --back-2: #404c56;
+        color-scheme: dark;
+      }
+      @media (prefers-color-scheme: light) {
+        :root:not([data-theme="dark"]) {
+          --on-band: #11161a;
+          --bug-fill: #ff7a67;
+          --incident-fill: #eaaa42;
+          --on-cmd: #ffffff;
+          --term-ink: #d8d5ce;
+          --term-muted: #8d929b;
+          --term-ok: #52c98f;
+          --term-reject: #ff7a67;
+          --term-warn: #eaaa42;
+          --term-you: #ff6ac1;
+          --term-other: #a3acbd;
+          --ground: #f3f6f9;
+          --ground-2: #e8edf2;
+          --paper: #ffffff;
+          --ink: #18202b;
+          --muted: #4f5b6b;
+          --line: #d5dde6;
+          --field-line: #7b8796;
+          --accent: #0f7168;
+          --on-accent: #ffffff;
+          --link: #0d665e;
+          --you: #b01f70;
+          --you-soft: #f8dcec;
+          --other: #566073;
+          --other-soft: #e4e8ef;
+          --ok: #1b7449;
+          --ok-soft: #dcf1e5;
+          --reject: #b52f1d;
+          --reject-soft: #fbe2dd;
+          --warn: #865600;
+          --warn-soft: #faedd2;
+          --cmd: #2c3644;
+          --term: #0e1218;
+          --accent-hover: #0c5f57;
+          --accent-press: #0a5049;
+          --paper-hover: #eef3f7;
+          --accent-soft: #dcf2ef;
+          --ground-raised: #ffffff;
+          --back-1: #6b7a86;
+          --back-2: #5c6b77;
+          color-scheme: light;
+        }
+      }
+      :root[data-theme="light"] {
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --incident-fill: #eaaa42;
+        --on-cmd: #ffffff;
+        --term-ink: #d8d5ce;
+        --term-muted: #8d929b;
+        --term-ok: #52c98f;
+        --term-reject: #ff7a67;
+        --term-warn: #eaaa42;
+        --term-you: #ff6ac1;
+        --term-other: #a3acbd;
+        --ground: #f3f6f9;
+        --ground-2: #e8edf2;
+        --paper: #ffffff;
+        --ink: #18202b;
+        --muted: #4f5b6b;
+        --line: #d5dde6;
+        --field-line: #7b8796;
+        --accent: #0f7168;
+        --on-accent: #ffffff;
+        --link: #0d665e;
+        --you: #b01f70;
+        --you-soft: #f8dcec;
+        --other: #566073;
+        --other-soft: #e4e8ef;
+        --ok: #1b7449;
+        --ok-soft: #dcf1e5;
+        --reject: #b52f1d;
+        --reject-soft: #fbe2dd;
+        --warn: #865600;
+        --warn-soft: #faedd2;
+        --cmd: #2c3644;
+        --term: #0e1218;
+        --accent-hover: #0c5f57;
+        --accent-press: #0a5049;
+        --paper-hover: #eef3f7;
+        --accent-soft: #dcf2ef;
+        --ground-raised: #ffffff;
+        --back-1: #6b7a86;
+        --back-2: #5c6b77;
+        color-scheme: light;
+      }
+      :root {
+        --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+        --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        --t-caption: 0.75rem;
+        --t-small: 0.875rem;
+        --t-body: 1rem;
+        --t-lede: 1.125rem;
+        --t-h3: 1.0625rem;
+        --t-h2: 1.25rem;
+        --t-h1: clamp(1.625rem, 1.3rem + 1.2vw, 2rem);
+        --t-display: clamp(2rem, 1.2rem + 3vw, 2.75rem);
+        --s-1: 4px;
+        --s-2: 8px;
+        --s-3: 12px;
+        --s-4: 16px;
+        --s-5: 24px;
+        --s-6: 32px;
+        --s-7: 48px;
+        --s-8: 64px;
+        --r-sm: 8px;
+        --r-md: 12px;
+        --r-lg: 20px;
+        --r-pill: 999px;
+        --icon: 20px;
+        --dur-1: 120ms;
+        --dur-2: 200ms;
+        --dur-3: 400ms;
+        --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+        --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+        --shadow-1: 0 1px 2px rgb(16 24 40 / 0.06), 0 2px 8px rgb(16 24 40 / 0.06);
+        --shadow-2: 0 6px 18px rgb(16 24 40 / 0.12);
+      }
+      :root[data-theme="dark"],
+      :root:not([data-theme="light"]) {
+        --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+        --shadow-2: 0 8px 24px rgb(0 0 0 / 0.45);
+      }
+      @media (prefers-color-scheme: light) {
+        :root:not([data-theme="dark"]) {
+          --shadow-1: 0 1px 2px rgb(16 24 40 / 0.06), 0 2px 8px rgb(16 24 40 / 0.06);
+          --shadow-2: 0 6px 18px rgb(16 24 40 / 0.12);
+        }
+      }
+
+      /* ================= base ================= */
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--ground);
+        color: var(--ink);
+        font: 400 var(--t-body) / 1.5 var(--sans);
+        font-variant-ligatures: none;
+        -webkit-text-size-adjust: 100%;
+      }
+      a {
+        color: var(--link);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+        border-radius: 4px;
+      }
+      a:hover,
+      a.is-hover {
+        text-decoration-thickness: 2px;
+      }
+      :focus-visible,
+      .is-focus {
+        outline: 3px solid var(--accent);
+        outline-offset: 2px;
+      }
+      code,
+      .mono {
+        font-family: var(--mono);
+      }
+      p code,
+      li code {
+        font-size: 0.9em;
+        padding: 0.05em 0.35em;
+        border-radius: 6px;
+        background: var(--ground-2);
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: var(--sans);
+        font-weight: 700;
+        letter-spacing: -0.015em;
+        margin: 0 0 var(--s-2);
+        text-wrap: balance;
+        overflow-wrap: anywhere;
+      }
+      h1 {
+        font-size: var(--t-h1);
+        line-height: 1.15;
+      }
+      h2 {
+        font-size: var(--t-h2);
+        line-height: 1.25;
+      }
+      h3 {
+        font-size: var(--t-h3);
+        line-height: 1.3;
+      }
+      p {
+        margin: 0 0 var(--s-3);
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .lede {
+        font-size: var(--t-lede);
+        color: var(--muted);
+        max-width: 64ch;
+      }
+      .label {
+        font: 600 var(--t-caption) / 1.4 var(--sans);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .num {
+        font-variant-numeric: tabular-nums;
+      }
+      .icon {
+        width: var(--icon);
+        height: var(--icon);
+        flex: none;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+
+      /* ================= the preview's own frame ================= */
+      .doc {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: var(--s-5) var(--s-4) var(--s-8);
+      }
+      .doc-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--s-3);
+        margin-bottom: var(--s-3);
+      }
+      .doc-head h1 {
+        margin: 0;
+      }
+      .part {
+        margin-top: var(--s-7);
+      }
+      .part > h2 {
+        font-size: 1.5rem;
+      }
+      .family {
+        margin-top: var(--s-6);
+        padding-top: var(--s-5);
+        border-top: 1px solid var(--line);
+      }
+      .family > p {
+        max-width: 72ch;
+      }
+      .frames {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--s-5);
+        align-items: flex-start;
+        margin-top: var(--s-4);
+      }
+      .frame {
+        flex: 1 1 340px;
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg);
+        background: var(--ground);
+        overflow: hidden;
+        container-type: inline-size;
+        box-shadow: var(--shadow-1);
+      }
+      .frame.phone {
+        flex: 0 1 375px;
+        max-width: 375px;
+      }
+      .frame > .label {
+        display: block;
+        padding: var(--s-2) var(--s-4);
+        border-bottom: 1px solid var(--line);
+        background: var(--ground-2);
+      }
+      .frame-body {
+        padding: var(--s-4);
+      }
+      .stack {
+        display: grid;
+        gap: var(--s-2);
+      }
+      .row > a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--s-2);
+      }
+
+      /* ================= 1 · brand, site header, footer ================= */
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--s-2);
+        min-height: 44px;
+        color: var(--ink);
+        font: 700 var(--t-body) / 1 var(--sans);
+        letter-spacing: -0.01em;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .brand svg {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+      }
+      .site-head {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: var(--s-2);
+        min-height: 60px;
+        padding: var(--s-2) var(--s-4);
+        border-bottom: 1px solid var(--line);
+        background: var(--ground);
+      }
+      .site-head .brand {
+        margin-right: auto;
+      }
+      /* under 300 px of header the wordmark goes and the logo stays, still named "Git Game" for screen readers */
+      @container (max-width: 300px) {
+        .site-head .brand .word {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          overflow: hidden;
+          clip-path: inset(50%);
+        }
+      }
+      .site-head .links {
+        display: none;
+        gap: var(--s-1);
+      }
+      .site-head .links a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 var(--s-3);
+        border-radius: var(--r-pill);
+        color: var(--ink);
+        text-decoration: none;
+        font: 500 var(--t-small) / 1 var(--sans);
+      }
+      .site-head .links a:hover,
+      .site-head .links a.is-hover {
+        background: var(--paper-hover);
+      }
+      .site-head .links a[aria-current="page"] {
+        background: var(--accent-soft);
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .menu > summary {
+        list-style: none;
+      }
+      .menu > summary::-webkit-details-marker {
+        display: none;
+      }
+      .menu[open] > summary .icon {
+        transform: rotate(180deg);
+      }
+      .menu nav {
+        position: absolute;
+        left: var(--s-2);
+        right: var(--s-2);
+        top: calc(100% + 4px);
+        z-index: 3;
+        display: grid;
+        padding: var(--s-2);
+        background: var(--ground-raised);
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg);
+        box-shadow: var(--shadow-2);
+      }
+      .menu nav a {
+        display: flex;
+        align-items: center;
+        min-height: 48px;
+        padding: 0 var(--s-3);
+        border-radius: var(--r-md);
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .menu nav a:hover {
+        background: var(--paper-hover);
+      }
+      .menu nav a[aria-current="page"] {
+        background: var(--accent-soft);
+        font-weight: 600;
+      }
+      @container (min-width: 640px) {
+        .site-head .links {
+          display: flex;
+        }
+        .site-head .menu {
+          display: none;
+        }
+      }
+      .site-foot {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--s-1) var(--s-4);
+        padding: var(--s-4);
+        border-top: 1px solid var(--line);
+        font-size: var(--t-caption);
+        color: var(--muted);
+      }
+      .site-foot a {
+        color: inherit;
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+      }
+      .site-foot .trademark {
+        flex-basis: 100%;
+        margin: 0;
+      }
+
+      /* ================= 2 · buttons ================= */
+      .btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--s-2);
+        min-height: 48px;
+        padding: 0 var(--s-5);
+        font: 600 var(--t-body) / 1.2 var(--sans);
+        color: var(--ink);
+        background: var(--paper);
+        border: 1px solid var(--field-line);
+        border-radius: var(--r-pill);
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+          background-color var(--dur-1) var(--ease),
+          border-color var(--dur-1) var(--ease),
+          transform var(--dur-1) var(--ease);
+      }
+      .btn.small {
+        min-height: 44px;
+        padding: 0 var(--s-4);
+        font-size: var(--t-small);
+      }
+      .btn.block {
+        width: 100%;
+      }
+      .btn.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--on-accent);
+        font-weight: 700;
+      }
+      .btn.quiet {
+        background: transparent;
+        border-color: transparent;
+        color: var(--link);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        padding: 0 var(--s-3);
+      }
+      .btn.icon-only {
+        flex: none;
+        width: 48px;
+        padding: 0;
+      }
+      @media (hover: hover) {
+        .btn:hover:not(:disabled):not([aria-busy="true"]) {
+          background: var(--paper-hover);
+        }
+        .btn.primary:hover:not(:disabled):not([aria-busy="true"]) {
+          background: var(--accent-hover);
+          border-color: var(--accent-hover);
+        }
+        .btn.quiet:hover:not(:disabled) {
+          background: var(--paper-hover);
+        }
+      }
+      .btn.is-hover {
+        background: var(--paper-hover);
+      }
+      .btn.primary.is-hover {
+        background: var(--accent-hover);
+        border-color: var(--accent-hover);
+      }
+      .btn:active:not(:disabled),
+      .btn.is-pressed {
+        transform: scale(0.97);
+      }
+      .btn.primary:active:not(:disabled),
+      .btn.primary.is-pressed {
+        background: var(--accent-press);
+        border-color: var(--accent-press);
+      }
+      .btn:disabled,
+      .btn[aria-disabled="true"] {
+        cursor: not-allowed;
+        background: transparent;
+        border: 1px dashed var(--field-line);
+        color: var(--muted);
+      }
+      .btn[aria-busy="true"] {
+        cursor: progress;
+      }
+      .btn[aria-busy="true"]::before {
+        content: "";
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ================= 3 · forms ================= */
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+      .field > label {
+        font: 500 var(--t-small) / 1.4 var(--sans);
+        color: var(--ink);
+      }
+      .field .help {
+        font-size: var(--t-small);
+        color: var(--muted);
+      }
+      .field .err {
+        display: flex;
+        gap: 6px;
+        align-items: flex-start;
+        font: 500 var(--t-small) / 1.4 var(--sans);
+        color: var(--reject);
+      }
+      .field .err .icon {
+        width: 16px;
+        height: 16px;
+        margin-top: 2px;
+      }
+      .input,
+      .select,
+      .textarea {
+        width: 100%;
+        font: inherit;
+        color: var(--ink);
+        min-height: 48px;
+        padding: 0 var(--s-4);
+        border: 1px solid var(--field-line);
+        border-radius: var(--r-md);
+        background: var(--paper);
+        transition:
+          border-color var(--dur-1) var(--ease),
+          box-shadow var(--dur-1) var(--ease);
+      }
+      .input::placeholder,
+      .textarea::placeholder {
+        color: var(--muted);
+        opacity: 1;
+      }
+      .input:hover,
+      .select:hover,
+      .textarea:hover,
+      .input.is-hover {
+        background: var(--paper-hover);
+      }
+      .input:focus-visible,
+      .select:focus-visible,
+      .textarea:focus-visible,
+      .input.is-focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent);
+      }
+      .input[aria-invalid="true"] {
+        border-color: var(--reject);
+        border-width: 2px;
+        padding: 0 calc(var(--s-4) - 1px);
+      }
+      .input:disabled {
+        border-style: dashed;
+        background: transparent;
+        color: var(--muted);
+      }
+      .select {
+        appearance: none;
+        padding-right: 44px;
+        background-image:
+          linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+          linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+        background-position:
+          calc(100% - 22px) 50%,
+          calc(100% - 16px) 50%;
+        background-size:
+          6px 6px,
+          6px 6px;
+        background-repeat: no-repeat;
+      }
+      .textarea {
+        min-height: 112px;
+        padding: var(--s-3) var(--s-4);
+        resize: vertical;
+        line-height: 1.5;
+      }
+      .check {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--s-3);
+        min-height: 44px;
+        padding: var(--s-2) 0;
+        cursor: pointer;
+      }
+      .check input {
+        appearance: none;
+        flex: none;
+        width: 22px;
+        height: 22px;
+        margin: 1px 0 0;
+        border: 2px solid var(--field-line);
+        border-radius: 6px;
+        background: var(--paper);
+        display: grid;
+        place-content: center;
+        cursor: pointer;
+      }
+      .check input::after {
+        content: "";
+        width: 10px;
+        height: 6px;
+        border-left: 2.5px solid var(--on-accent);
+        border-bottom: 2.5px solid var(--on-accent);
+        transform: translateY(-1px) rotate(-45deg) scale(0);
+        transition: transform var(--dur-1) var(--ease);
+      }
+      .check input:checked {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      .check input:checked::after {
+        transform: translateY(-1px) rotate(-45deg) scale(1);
+      }
+      .counter-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--s-3);
+      }
+
+      /* ================= 4 · rows, disclosure, list ================= */
+      .surface {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg);
+        box-shadow: var(--shadow-1);
+      }
+      details.setting {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg);
+        box-shadow: var(--shadow-1);
+      }
+      details.setting > summary {
+        list-style: none;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 2px var(--s-3);
+        min-height: 64px;
+        padding: var(--s-3) var(--s-4);
+        border-radius: var(--r-lg);
+        cursor: pointer;
+      }
+      details.setting > summary::-webkit-details-marker {
+        display: none;
+      }
+      details.setting > summary:hover,
+      details.setting > summary.is-hover {
+        background: var(--paper-hover);
+      }
+      details.setting > summary .title {
+        font-weight: 600;
+      }
+      details.setting > summary .desc {
+        grid-column: 1;
+        font-size: var(--t-small);
+        color: var(--muted);
+      }
+      details.setting > summary .icon {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        color: var(--muted);
+        transition: transform var(--dur-2) var(--ease);
+      }
+      details.setting[open] > summary .icon {
+        transform: rotate(180deg);
+      }
+      details.setting > .body {
+        display: grid;
+        gap: var(--s-3);
+        padding: var(--s-1) var(--s-4) var(--s-4);
+      }
+      .faq details {
+        border-bottom: 1px solid var(--line);
+      }
+      .faq summary {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--s-3);
+        min-height: 56px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .faq summary::-webkit-details-marker {
+        display: none;
+      }
+      .faq summary .icon {
+        color: var(--muted);
+        transition: transform var(--dur-2) var(--ease);
+      }
+      .faq details[open] summary .icon {
+        transform: rotate(45deg);
+      }
+      .faq details p {
+        color: var(--muted);
+        padding-bottom: var(--s-3);
+      }
+      .games {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: var(--s-2);
+      }
+      .games a {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 2px var(--s-3);
+        min-height: 64px;
+        padding: var(--s-3) var(--s-4);
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg);
+        box-shadow: var(--shadow-1);
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .games a:hover,
+      .games a.is-hover {
+        background: var(--paper-hover);
+      }
+      .games .dot {
+        grid-row: 1 / span 2;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--field-line);
+      }
+      .games .due .dot {
+        background: var(--warn);
+        box-shadow: 0 0 0 4px var(--warn-soft);
+      }
+      .games .done .dot {
+        background: transparent;
+        border: 2px solid var(--field-line);
+      }
+      .games .name {
+        font-weight: 600;
+      }
+      .games .status {
+        grid-column: 2;
+        font-size: var(--t-small);
+        color: var(--muted);
+      }
+      .games .due .status {
+        color: var(--warn);
+        font-weight: 600;
+      }
+      .games .icon {
+        grid-column: 3;
+        grid-row: 1 / span 2;
+        color: var(--muted);
+      }
+
+      /* ================= 5 · messages, chips, callouts ================= */
+      .msg {
+        display: flex;
+        gap: var(--s-2);
+        align-items: flex-start;
+        margin: 0;
+        padding: var(--s-3) var(--s-4);
+        border-radius: var(--r-md);
+        font-size: var(--t-small);
+      }
+      .msg .icon {
+        width: 18px;
+        height: 18px;
+        margin-top: 1px;
+      }
+      .msg.note {
+        background: var(--ground-2);
+        color: var(--ink);
+      }
+      .msg.note .mono {
+        color: var(--muted);
+      }
+      .msg.error {
+        background: var(--reject-soft);
+        color: var(--ink);
+      }
+      .msg.error .icon {
+        color: var(--reject);
+      }
+      .msg.ok {
+        background: var(--ok-soft);
+        color: var(--ink);
+      }
+      .msg.ok .icon {
+        color: var(--ok);
+      }
+      .pending {
+        display: flex;
+        align-items: center;
+        gap: var(--s-2);
+        margin: 0;
+        font-size: var(--t-small);
+        color: var(--muted);
+      }
+      .pending::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--warn);
+        animation: breathe 1.6s var(--ease) infinite;
+      }
+      @keyframes breathe {
+        50% {
+          opacity: 0.35;
+        }
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        min-height: 26px;
+        padding: 0 10px;
+        border-radius: var(--r-pill);
+        font: 600 var(--t-caption) / 1 var(--sans);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+      .chip.you {
+        color: var(--you);
+        background: var(--you-soft);
+      }
+      .chip.other {
+        color: var(--other);
+        background: var(--other-soft);
+      }
+      .chip.ok {
+        color: var(--ok);
+        background: var(--ok-soft);
+      }
+      .chip.warn {
+        color: var(--warn);
+        background: var(--warn-soft);
+      }
+      .chip.reject {
+        color: var(--reject);
+        background: var(--reject-soft);
+      }
+      .callout {
+        display: grid;
+        gap: var(--s-1);
+        padding: var(--s-3) var(--s-4);
+        border-radius: var(--r-lg);
+      }
+      .callout p {
+        margin: 0;
+      }
+      .callout.guide {
+        background: var(--ok-soft);
+        border: 1px solid var(--ok);
+      }
+      .callout.guide .label {
+        color: var(--ok);
+      }
+      .callout.guide .steps {
+        display: flex;
+        gap: 3px;
+        margin: 2px 0 4px;
+      }
+      .callout.guide .steps i {
+        flex: 1;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--ok);
+        opacity: 0.3;
+      }
+      .callout.guide .steps i.on {
+        opacity: 1;
+      }
+      .callout.guide a {
+        justify-self: start;
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+      }
+      .callout.nudge {
+        background: var(--warn-soft);
+        border: 1px solid var(--warn);
+      }
+      .incident {
+        width: min(300px, 100%);
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg);
+        background: var(--paper);
+        box-shadow: var(--shadow-2);
+      }
+      .incident .band {
+        display: block;
+        padding: 0 var(--s-4);
+        background: var(--incident-fill);
+        color: var(--on-band);
+        font: 700 var(--t-caption) / 30px var(--sans);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .incident h3 {
+        font-size: 1.375rem;
+        padding: var(--s-4) var(--s-4) var(--s-1);
+        margin: 0;
+      }
+      .incident p {
+        padding: 0 var(--s-4) var(--s-4);
+        margin: 0;
+        color: var(--muted);
+      }
+
+      /* ================= 6 · playing cards ================= */
+      .hand {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--s-2);
+      }
+      .card {
+        --w: 64px;
+        position: relative;
+        flex: none;
+        display: grid;
+        grid-template-rows: 20px 1fr;
+        width: var(--w);
+        aspect-ratio: 1 / 1.4;
+        padding: 0;
+        font: 600 13px/1.2 var(--mono);
+        text-align: center;
+        color: var(--ink);
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        box-shadow: var(--shadow-1);
+        overflow: hidden;
+        cursor: default;
+        transition:
+          transform var(--dur-2) var(--ease),
+          box-shadow var(--dur-2) var(--ease);
+      }
+      .card.sm {
+        --w: 48px;
+        border-radius: 8px;
+        grid-template-rows: 14px 1fr;
+        font-size: 12px;
+      }
+      .card.lg {
+        --w: 96px;
+        grid-template-rows: 24px 1fr;
+        border-radius: 12px;
+      }
+      button.card {
+        cursor: pointer;
+      }
+      @media (hover: hover) {
+        button.card:hover:not(:disabled) {
+          transform: translateY(-3px);
+          box-shadow: var(--shadow-2);
+        }
+      }
+      button.card.is-hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-2);
+      }
+      .card[aria-pressed="true"] {
+        transform: translateY(-8px);
+        border-color: var(--accent);
+        box-shadow:
+          0 0 0 3px var(--accent),
+          var(--shadow-2);
+      }
+      .card[aria-pressed="true"]::after {
+        content: "";
+        position: absolute;
+        left: 3px;
+        top: 1px;
+        width: 18px;
+        height: 18px;
+        box-shadow: 0 0 0 2px var(--paper);
+        border-radius: 50%;
+        background: var(--accent)
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E")
+          center / 13px no-repeat;
+      }
+      .card .band {
+        display: block;
+        background: var(--band, var(--cmd));
+        color: var(--on-band);
+        font: 700 0 / 24px var(--sans);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-align: left;
+        padding: 0 8px;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .card.lg .band {
+        font-size: var(--t-caption);
+      }
+      .card.command .band {
+        --band: var(--cmd);
+        color: var(--on-cmd);
+      }
+      .card .face {
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        gap: 2px;
+        padding: 4px 2px;
+        min-width: 0;
+      }
+      .card .file {
+        letter-spacing: -0.02em;
+        max-width: 100%;
+        line-height: 1.15;
+        overflow-wrap: normal;
+        word-break: keep-all;
+        hyphens: none;
+      }
+      .card .big {
+        font: 700 1.5rem/1 var(--sans);
+        font-variant-numeric: tabular-nums;
+      }
+      .card.lg .big {
+        font-size: 2rem;
+      }
+      .card.sm .face {
+        font-size: 0;
+      }
+      .card.sm .big {
+        font-size: 1rem;
+      }
+      .card.command .face {
+        align-content: start;
+        padding-top: 12px;
+      }
+      .card .bug {
+        position: absolute;
+        right: 3px;
+        top: 1px;
+        padding: 0 5px;
+        border-radius: 5px;
+        background: var(--bug-fill);
+        color: var(--on-band);
+        font: 800 var(--t-caption) / 18px var(--sans);
+        letter-spacing: 0.04em;
+      }
+      .card.sm .bug {
+        top: 0;
+        right: 2px;
+        line-height: 14px;
+        font-size: 0;
+        width: 14px;
+        height: 14px;
+        padding: 0;
+        border-radius: 50%;
+        border: 2px solid var(--on-band);
+      }
+      .card.lg .bug {
+        top: 30px;
+        left: 6px;
+        right: auto;
+      }
+      .card.back {
+        background: repeating-linear-gradient(135deg, var(--back-1) 0 6px, var(--back-2) 6px 12px);
+        border-color: var(--back-2);
+      }
+      .card.back .band {
+        --band: var(--cmd);
+      }
+      .card.root .face {
+        font: 500 var(--t-caption) / 1.3 var(--sans);
+        color: var(--muted);
+      }
+      .hand.four {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        padding-top: 8px;
+      }
+      .hand.four .card {
+        width: 100%;
+      }
+
+      /* ================= 7 · the table: strip, piles, seats ================= */
+      .strip {
+        min-width: 0;
+        padding: var(--s-3);
+        background: var(--ground-2);
+        border-radius: var(--r-lg);
+      }
+      .strip .head {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: var(--s-2);
+      }
+      .strip .slots {
+        display: flex;
+        gap: var(--s-3);
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding: 2px 2px 4px;
+      }
+      .slot {
+        display: grid;
+        justify-items: center;
+        align-content: start;
+        gap: 4px;
+        min-width: 72px;
+        scroll-snap-align: end;
+        font: 500 var(--t-caption) / 1.3 var(--sans);
+        color: var(--muted);
+        text-align: center;
+      }
+      .slot .tip {
+        font-weight: 700;
+        color: var(--ink);
+        background: var(--paper);
+        border: 1px solid var(--field-line);
+        border-radius: var(--r-pill);
+        padding: 2px 8px;
+      }
+      .slot .tip.none {
+        visibility: hidden;
+      }
+      .slot .who .mono {
+        color: var(--ink);
+      }
+      .slot.waiting .card {
+        opacity: 1;
+        border: 2px dashed var(--accent);
+        background: var(--accent-soft);
+        box-shadow: none;
+      }
+      .slot .chips {
+        display: flex;
+        gap: 4px;
+      }
+      .branch {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--s-2);
+      }
+      .branch .where {
+        justify-self: end;
+        font: 600 var(--t-caption) / 1.4 var(--sans);
+        color: var(--ok);
+      }
+      .pile {
+        display: grid;
+        align-content: start;
+        gap: 6px;
+        min-height: 92px;
+        padding: var(--s-2) var(--s-3);
+        border: 1px dashed var(--field-line);
+        border-radius: var(--r-md);
+      }
+      .pile .empty {
+        font-size: var(--t-small);
+        color: var(--muted);
+      }
+      .pile.filled {
+        border-style: solid;
+        background: var(--paper);
+      }
+      .seat {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 2px var(--s-3);
+        padding: var(--s-3) var(--s-4);
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--other);
+        border-radius: var(--r-md);
+      }
+      .seat.mine {
+        border-left-color: var(--you);
+      }
+      .seat .name {
+        font: 600 var(--t-body) / 1.3 var(--mono);
+        color: var(--other);
+      }
+      .seat.mine .name {
+        color: var(--you);
+      }
+      .seat .score {
+        font: 700 var(--t-lede) / 1.3 var(--sans);
+        font-variant-numeric: tabular-nums;
+      }
+      .seat .facts {
+        grid-column: 1 / -1;
+        font-size: var(--t-small);
+        color: var(--muted);
+      }
+      .seat .state {
+        grid-column: 1 / -1;
+        justify-self: start;
+      }
+      .sheet {
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg) var(--r-lg) 0 0;
+        background: var(--ground-raised);
+        box-shadow: var(--shadow-2);
+        overflow: hidden;
+      }
+      .sheet .grab {
+        width: 40px;
+        height: 4px;
+        margin: 8px auto 0;
+        border-radius: 2px;
+        background: var(--field-line);
+      }
+      .sheet header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4);
+      }
+      .sheet header h3 {
+        margin: 0;
+      }
+      .sheet .body {
+        display: grid;
+        gap: var(--s-2);
+        padding: 0 var(--s-4) var(--s-4);
+      }
+
+      /* ================= 8 · the hub ================= */
+      /* on the narrowest phones (320 px) the scores and "table" wrap to a second line rather than squeeze */
+      .statusbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--s-1) var(--s-3);
+        min-height: 56px;
+        padding: 6px var(--s-2) 6px var(--s-4);
+        border-bottom: 1px solid var(--line);
+        background: var(--ground);
+        font: 500 var(--t-small) / 1 var(--sans);
+        font-variant-numeric: tabular-nums;
+        color: var(--muted);
+      }
+      .statusbar > span {
+        white-space: nowrap;
+      }
+      @container (max-width: 380px) {
+        .statusbar {
+          column-gap: var(--s-2);
+          padding-left: var(--s-3);
+          font-size: 13px;
+        }
+      }
+      .statusbar b {
+        color: var(--ink);
+        font-weight: 700;
+      }
+      .statusbar .ops {
+        display: inline-flex;
+        gap: 4px;
+      }
+      .statusbar .ops i {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--you);
+      }
+      .statusbar .ops i.spent {
+        background: transparent;
+        box-shadow: inset 0 0 0 2px var(--field-line);
+      }
+      .statusbar .score {
+        margin-left: auto;
+      }
+      .statusbar .score .me {
+        color: var(--you);
+        font-weight: 700;
+      }
+      .progress {
+        height: 3px;
+        background: var(--line);
+      }
+      .progress i {
+        display: block;
+        height: 100%;
+        width: var(--p);
+        background: var(--accent);
+        border-radius: 0 2px 2px 0;
+        transition: width var(--dur-3) var(--ease);
+      }
+      .game-body {
+        display: grid;
+        gap: var(--s-4);
+        padding: var(--s-4);
+      }
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--s-2);
+      }
+      .action {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-content: start;
+        gap: 2px var(--s-2);
+        min-height: 72px;
+        padding: var(--s-3);
+        text-align: left;
+        font: inherit;
+        color: var(--ink);
+        background: var(--paper);
+        border: 1px solid var(--field-line);
+        border-radius: var(--r-md);
+        box-shadow: var(--shadow-1);
+        cursor: pointer;
+        transition:
+          background-color var(--dur-1) var(--ease),
+          transform var(--dur-1) var(--ease);
+      }
+      .action .cmd {
+        font: 700 var(--t-body) / 1.3 var(--mono);
+      }
+      .action .cost {
+        font: 600 var(--t-caption) / 1.7 var(--sans);
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+      .action .why {
+        grid-column: 1 / -1;
+        font-size: var(--t-caption);
+        line-height: 1.4;
+        color: var(--muted);
+      }
+      .action .will {
+        grid-column: 1 / -1;
+        font: 600 var(--t-caption) / 1.4 var(--mono);
+        color: var(--link);
+      }
+      @media (hover: hover) {
+        .action:hover:not(:disabled) {
+          background: var(--paper-hover);
+        }
+      }
+      .action.is-hover {
+        background: var(--paper-hover);
+      }
+      .action:active:not(:disabled),
+      .action.is-pressed {
+        transform: scale(0.98);
+      }
+      .action:disabled {
+        background: transparent;
+        border-style: dashed;
+        box-shadow: none;
+        cursor: not-allowed;
+      }
+      .action:disabled .cmd {
+        color: var(--muted);
+      }
+      .actionbar {
+        display: grid;
+        grid-template-columns: 1fr 1fr 2fr;
+        gap: var(--s-2);
+        padding: var(--s-3) var(--s-4) max(var(--s-4), env(safe-area-inset-bottom));
+        border-top: 1px solid var(--line);
+        background: var(--ground);
+      }
+      .actionbar .btn {
+        padding: 0 var(--s-3);
+      }
+
+      /* ================= 9 · moments, transcript, receipt, score ================= */
+      .transcript {
+        margin: 0;
+        padding: var(--s-3) var(--s-4);
+        border-radius: var(--r-md);
+        background: var(--term);
+        color: var(--term-ink);
+        font: 400 var(--t-small) / 1.6 var(--mono);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      .transcript .who {
+        color: var(--term-other);
+      }
+      .transcript .mine .who {
+        color: var(--term-you);
+      }
+      .transcript .ok {
+        color: var(--term-ok);
+      }
+      .transcript .reject {
+        color: var(--term-reject);
+      }
+      .transcript .warn {
+        color: var(--term-warn);
+      }
+      .transcript .note {
+        color: var(--term-muted);
+      }
+      .transcript .sigil {
+        color: #5cd6c8;
+      }
+      .transcript.tone-ok {
+        box-shadow: inset 4px 0 0 var(--term-ok);
+      }
+      .transcript.tone-reject {
+        box-shadow: inset 4px 0 0 var(--term-reject);
+      }
+      .moment-cmd {
+        margin: 0;
+        font: 700 1.5rem/1.2 var(--mono);
+        letter-spacing: -0.01em;
+      }
+      .moment-cmd::before {
+        content: "$ ";
+        color: var(--accent);
+      }
+      .moment-cmd.ok {
+        color: var(--ok);
+      }
+      .moment-cmd.reject {
+        color: var(--reject);
+      }
+      .said {
+        margin: 0;
+        font-size: var(--t-lede);
+        line-height: 1.5;
+      }
+      .bot-line {
+        display: flex;
+        align-items: center;
+        gap: var(--s-2);
+      }
+      .avatar {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--other-soft);
+        color: var(--other);
+        font: 700 var(--t-small) / 1 var(--sans);
+        border: 2px solid var(--other);
+      }
+      .op-dots {
+        display: inline-flex;
+        gap: 4px;
+      }
+      .op-dots i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--field-line);
+      }
+      .op-dots i.on {
+        background: var(--other);
+      }
+      .bubble {
+        position: relative;
+        margin: 0 0 0 var(--s-6);
+        padding: var(--s-3) var(--s-4);
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg);
+        border-top-left-radius: 6px;
+        box-shadow: var(--shadow-1);
+      }
+      .receipt {
+        list-style: none;
+        margin: 0;
+        padding: var(--s-2) var(--s-4);
+      }
+      .receipt li {
+        display: grid;
+        grid-template-columns: 24px 1fr;
+        align-items: start;
+        padding: var(--s-2) 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .receipt li:last-child {
+        border-bottom: 0;
+      }
+      .receipt .op {
+        font: 500 var(--t-small) / 1.45 var(--mono);
+        overflow-wrap: anywhere;
+      }
+      .receipt .what {
+        grid-column: 2;
+        font-size: var(--t-small);
+        color: var(--muted);
+      }
+      .receipt .mark {
+        color: var(--muted);
+      }
+      .receipt .mark .icon {
+        width: 16px;
+        height: 16px;
+        margin-top: 2px;
+      }
+      .receipt .mark.ok {
+        color: var(--ok);
+      }
+      .receipt .mark.warn {
+        color: var(--warn);
+      }
+      table.score {
+        width: 100%;
+        border-collapse: collapse;
+        font: 400 var(--t-small) / 1 var(--sans);
+        font-variant-numeric: tabular-nums;
+      }
+      table.score th,
+      table.score td {
+        height: 40px;
+        padding: 0 var(--s-2);
+        border-bottom: 1px solid var(--line);
+        text-align: right;
+      }
+      table.score th:first-child,
+      table.score td:first-child {
+        text-align: left;
+        color: var(--muted);
+      }
+      table.score thead th {
+        font-weight: 700;
+        color: var(--other);
+      }
+      table.score thead th.me {
+        color: var(--you);
+      }
+      table.score tr.total td {
+        border-top: 2px solid var(--ink);
+        border-bottom: 0;
+        font-weight: 700;
+        color: var(--ink);
+        font-size: var(--t-body);
+      }
+      .verdict {
+        margin: 0;
+        font: 700 var(--t-h1) / 1.15 var(--sans);
+        color: var(--you);
+      }
+      .replay-nav {
+        display: grid;
+        grid-template-columns: 48px 1fr 48px;
+        align-items: center;
+        gap: var(--s-2);
+        text-align: center;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* ================= 10 · stats ================= */
+      .segmented {
+        display: inline-flex;
+        padding: 4px;
+        gap: 4px;
+        border-radius: var(--r-pill);
+        background: var(--ground-2);
+      }
+      .segmented button {
+        min-height: 40px;
+        min-width: 72px;
+        padding: 0 var(--s-4);
+        border: 0;
+        border-radius: var(--r-pill);
+        background: transparent;
+        color: var(--ink);
+        font: 600 var(--t-small) / 1 var(--sans);
+        cursor: pointer;
+      }
+      .segmented button[aria-pressed="true"] {
+        background: var(--paper);
+        box-shadow: var(--shadow-1);
+        color: var(--ink);
+        outline: 1px solid var(--field-line);
+      }
+      .stat {
+        display: grid;
+        gap: var(--s-2);
+        padding: var(--s-4);
+      }
+      .stat .big {
+        font: 700 1.75rem/1 var(--sans);
+        font-variant-numeric: tabular-nums;
+      }
+      .bars {
+        display: grid;
+        grid-template-columns: repeat(30, 1fr);
+        align-items: end;
+        gap: 2px;
+        height: 72px;
+        border-bottom: 1px solid var(--field-line);
+      }
+      .bars i {
+        display: block;
+        background: var(--accent);
+        border-radius: 2px 2px 0 0;
+        min-height: 0;
+      }
+      .axis {
+        display: flex;
+        justify-content: space-between;
+        font-size: var(--t-caption);
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--s-2);
+      }
+      .kpis .surface {
+        padding: var(--s-3);
+      }
+      .kpis .big {
+        font: 700 1.5rem/1.1 var(--sans);
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* ================= part 2: the elements sheet ================= */
+      .elements {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+        gap: var(--s-4);
+        margin-top: var(--s-4);
+      }
+      .el,
+      .el .states,
+      .el .state {
+        min-width: 0;
+      }
+      .el {
+        display: grid;
+        align-content: start;
+        gap: var(--s-3);
+        padding: var(--s-4);
+        background: var(--ground);
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg);
+        container-type: inline-size;
+      }
+      .el > h3 {
+        display: flex;
+        align-items: baseline;
+        gap: var(--s-2);
+        margin: 0;
+      }
+      .el > h3 .n {
+        font: 600 var(--t-caption) / 1 var(--sans);
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+      .el .states {
+        display: grid;
+        gap: var(--s-3);
+      }
+      .el .state {
+        display: grid;
+        gap: 6px;
+      }
+      .el .state > .label {
+        font-size: 11.5px;
+      }
+      .el .notes {
+        margin: 0;
+        padding: var(--s-3) 0 0 18px;
+        border-top: 1px solid var(--line);
+        font-size: var(--t-small);
+        color: var(--muted);
+      }
+      .el .notes li + li {
+        margin-top: 2px;
+      }
+      .newcopy {
+        justify-self: start;
+        font: 600 var(--t-caption) / 1 var(--sans);
+        color: var(--warn);
+        background: var(--warn-soft);
+        border-radius: var(--r-pill);
+        padding: 4px 8px;
+      }
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: var(--s-2);
+        margin-top: var(--s-4);
+      }
+      .swatch {
+        display: grid;
+        grid-template-rows: 48px auto;
+        border: 1px solid var(--line);
+        border-radius: var(--r-md);
+        overflow: hidden;
+        background: var(--paper);
+      }
+      .swatch .sample {
+        display: flex;
+        align-items: center;
+        padding: 0 var(--s-3);
+        font: 600 var(--t-small) / 1 var(--sans);
+      }
+      .swatch .meta {
+        padding: 6px var(--s-3);
+        font: 400 var(--t-caption) / 1.4 var(--mono);
+        color: var(--muted);
+      }
+      .swatch .meta b {
+        color: var(--ink);
+      }
+
+      @media (min-width: 900px) {
+        .doc {
+          padding: var(--s-6) var(--s-5) var(--s-8);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition: none !important;
+          animation: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- one icon family: 24-unit grid, 2 px round strokes, drawn at 20 px -->
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" /></symbol>
+      <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></symbol>
+      <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" /></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" /></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24">
+        <rect x="9" y="9" width="11" height="11" rx="2" />
+        <path d="M5 15V6a2 2 0 0 1 2-2h8" />
+      </symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v5M12 16.5v.01" />
+      </symbol>
+      <symbol id="i-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2" /></symbol>
+      <symbol id="i-bang" viewBox="0 0 24 24"><path d="M12 5v9M12 18.5v.01" /></symbol>
+      <!-- the logo, web/public/icon.svg, unchanged -->
+      <symbol id="logo" viewBox="0 0 64 64">
+        <rect width="64" height="64" rx="12" fill="#14161a" stroke="none" />
+        <path d="M20 14v36M20 26c0 8 24 4 24 16" stroke="#3EC1B3" stroke-width="5" fill="none" stroke-linecap="round" />
+        <circle cx="20" cy="14" r="6" fill="#3EC1B3" stroke="none" />
+        <circle cx="20" cy="50" r="6" fill="#3EC1B3" stroke="none" />
+        <circle cx="44" cy="42" r="6" fill="#A88BFA" stroke="none" />
+      </symbol>
+    </svg>
+
+    <div class="doc">
+      <header class="doc-head">
+        <a class="brand" href="#"
+          ><svg aria-hidden="true"><use href="#logo" /></svg> Git Game design system</a
+        >
+        <div class="row" role="group" aria-label="theme">
+          <button class="btn small" type="button" data-set="">follow the OS</button>
+          <button class="btn small" type="button" data-set="dark">dark</button>
+          <button class="btn small" type="button" data-set="light">light</button>
+        </div>
+      </header>
+      <p class="lede">
+        Studio: cool slate, rounder shapes, pill buttons and sans headings, with monospace and the
+        <code>$</code> prompt kept for where Git speaks. Part 1 is the four screen families. Part 2 is every element the
+        game uses, in each of its states.
+      </p>
+
+      <!-- ===================================================================== PART 1 -->
+      <section class="part" aria-labelledby="p1">
+        <h2 id="p1">Part 1 · The screens</h2>
+
+        <!-- A -->
+        <div class="family">
+          <span class="label">Family A · site pages</span>
+          <h3>Landing, /git, /teach, /teams, /new-to-git, legal</h3>
+          <div class="frames">
+            <div class="frame phone">
+              <span class="label">phone · landing</span>
+              <header class="site-head">
+                <a class="brand" href="#"
+                  ><svg aria-hidden="true"><use href="#logo" /></svg><span class="word">Git Game</span></a
+                >
+                <details class="menu">
+                  <summary class="btn small">
+                    menu <svg class="icon" aria-hidden="true"><use href="#i-down" /></svg>
+                  </summary>
+                  <nav aria-label="site">
+                    <a href="#">new to Git?</a><a href="#">how it plays</a><a href="#">questions</a
+                    ><a href="#">what Git said</a><a href="#">teach</a><a href="#">teams</a>
+                  </nav>
+                </details>
+                <a class="btn small primary" href="#">play</a>
+              </header>
+              <div class="frame-body stack" style="gap: var(--s-4)">
+                <h1 style="font-size: var(--t-display); margin: var(--s-2) 0 0">
+                  A multiplayer card game whose rules are Git.
+                </h1>
+                <p class="lede" style="margin: 0">
+                  Ship commits to a shared <code>main</code>. Pull before you push, blame the bugs you can't see, and
+                  survive <code>git push --force</code>. Free, in your browser, with nothing to sign up for.
+                </p>
+                <div class="stack">
+                  <a class="btn primary block" href="#">play the bot now</a>
+                  <a class="btn block" href="#">or open a room for friends</a>
+                </div>
+                <!-- prettier-ignore -->
+                <div class="transcript"><span class="mine"><span class="who">ana@main</span> $ git pull --rebase -X ours</span>
+<span class="ok">Successfully rebased and updated refs/heads/main.</span>
+<span class="who">bot@main</span> $ git push
+<span class="reject"> ! [rejected]        main -&gt; main (non-fast-forward)</span>
+<span class="who">bot@main</span> $ git push --force
+<span class="warn"> + 8e1da02...b0ba026 main -&gt; main (forced update)</span>
+<span class="mine"><span class="who">ana@main</span> $ git reflog</span>
+<span class="note"># restored 8e1da02: back on top of main</span></div>
+                <div class="hand" aria-label="a hand of cards">
+                  <span class="card lg" style="--band: #3ec1b3"
+                    ><span class="band">commit</span
+                    ><span class="face"
+                      ><span class="file">auth<wbr />.js</span><span class="big">+5</span></span
+                    ></span
+                  >
+                  <span class="card lg" style="--band: #a88bfa"
+                    ><span class="band">commit</span
+                    ><span class="face"
+                      ><span class="file">api<wbr />.py</span><span class="big">+6</span></span
+                    ><span class="bug">BUG</span></span
+                  >
+                  <span class="card lg" style="--band: #f2755c"
+                    ><span class="band">commit</span
+                    ><span class="face"
+                      ><span class="file">styles<wbr />.css</span><span class="big">+3</span></span
+                    ></span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="frame">
+              <span class="label">desktop · a page under /git</span>
+              <header class="site-head">
+                <a class="brand" href="#"
+                  ><svg aria-hidden="true"><use href="#logo" /></svg><span class="word">Git Game</span></a
+                >
+                <nav class="links" aria-label="site">
+                  <a href="#">new to Git?</a><a href="#" aria-current="page">what Git said</a><a href="#">teach</a
+                  ><a href="#">teams</a>
+                </nav>
+                <details class="menu">
+                  <summary class="btn small">
+                    menu <svg class="icon" aria-hidden="true"><use href="#i-down" /></svg>
+                  </summary>
+                  <nav aria-label="site, folded">
+                    <a href="#">new to Git?</a><a href="#" aria-current="page">what Git said</a><a href="#">teach</a
+                    ><a href="#">teams</a>
+                  </nav>
+                </details>
+                <a class="btn small primary" href="#">play</a>
+              </header>
+              <div class="frame-body" style="max-width: 68ch">
+                <h1><code>git push</code> rejected: non-fast-forward</h1>
+                <p class="lede">
+                  Someone else's commit reached <code>main</code> before yours, and your commit doesn't have theirs in
+                  its history. Git won't move a branch backwards, so the remote refuses. Here is the line, what Git
+                  checked, and the pull that fixes it.
+                </p>
+                <!-- web/captures/push-non-fast-forward.txt -->
+                <!-- prettier-ignore -->
+                <div class="transcript" style="margin-bottom: var(--s-4)"><span class="sigil">$</span> git push
+To ../origin.git
+<span class="reject"> ! [rejected]        main -&gt; main (non-fast-forward)</span>
+error: failed to push some refs to '../origin.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. If you want to integrate the remote changes,
+hint: use 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.</div>
+                <h2>What Git checked</h2>
+                <p>
+                  A push asks the remote to move its <code>main</code> from the tip it has to the commit you're sending.
+                  Git moves a branch forward only: the commit you send must have the remote's tip among its ancestors,
+                  so that nothing already on <code>main</code> falls off it. A move like that is a fast-forward.
+                </p>
+              </div>
+              <footer class="site-foot">
+                <span>Git Game</span><a href="#">releases</a><a href="#">NeuEra Apps LLC</a
+                ><a href="#">source of v0.5.4 (AGPL-3.0)</a><a href="#">privacy</a><a href="#">terms</a>
+                <p class="trademark">
+                  Git® is a trademark of <a href="#">Software Freedom Conservancy</a>. Used with permission.
+                </p>
+              </footer>
+            </div>
+          </div>
+        </div>
+
+        <!-- B -->
+        <div class="family">
+          <span class="label">Family B · app entry</span>
+          <h3>Start and room</h3>
+          <div class="frames">
+            <div class="frame phone">
+              <span class="label">phone · /play</span>
+              <div class="frame-body stack" style="gap: var(--s-4)">
+                <div class="row" style="font-size: var(--t-small)">
+                  <b class="mono">calm-crane-13</b><span class="muted" aria-hidden="true">·</span
+                  ><a href="#">link GitHub</a>
+                </div>
+                <div>
+                  <h1 style="margin-bottom: var(--s-1)">Git Game</h1>
+                  <p class="muted" style="margin: 0">
+                    A card game about Git. Ship commits to main; survive push --force.
+                  </p>
+                </div>
+                <div class="stack">
+                  <button class="btn primary block" type="button">play the bot now</button>
+                  <button class="btn block" type="button">invite someone</button>
+                </div>
+                <div class="stack">
+                  <h2 style="font-size: var(--t-h3); margin: var(--s-2) 0 0">Your games</h2>
+                  <ul class="games">
+                    <li class="due">
+                      <a href="#"
+                        ><span class="dot"></span><span class="name">vs bot</span
+                        ><span class="status">day 3/12 · your pack is due</span
+                        ><svg class="icon" aria-hidden="true"><use href="#i-right" /></svg
+                      ></a>
+                    </li>
+                    <li class="done">
+                      <a href="#"
+                        ><span class="dot"></span><span class="name">vs bot</span
+                        ><span class="status">v1.0 shipped · you lost, 26</span
+                        ><svg class="icon" aria-hidden="true"><use href="#i-right" /></svg
+                      ></a>
+                    </li>
+                  </ul>
+                </div>
+                <details class="setting">
+                  <summary>
+                    <span class="title">Reminders by email</span><span class="desc">when your pack is due</span
+                    ><svg class="icon" aria-hidden="true"><use href="#i-down" /></svg>
+                  </summary>
+                </details>
+                <details class="setting" open>
+                  <summary>
+                    <span class="title">More: set up a game by hand</span
+                    ><span class="desc">bots, people at this device, day length</span
+                    ><svg class="icon" aria-hidden="true"><use href="#i-down" /></svg>
+                  </summary>
+                  <div class="body">
+                    <div class="field">
+                      <label for="b-bots">bots</label>
+                      <select class="select" id="b-bots">
+                        <option>1</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="b-others">others at this device (hotseat), comma-separated</label>
+                      <input
+                        class="input"
+                        id="b-others"
+                        aria-invalid="true"
+                        aria-describedby="b-err"
+                        value="ana, ana"
+                      />
+                      <span class="err" id="b-err"
+                        ><svg class="icon" aria-hidden="true"><use href="#i-alert" /></svg
+                        ><span class="mono">fatal: every seat needs its own name</span></span
+                      >
+                    </div>
+                    <div class="field">
+                      <label for="b-len">day length</label>
+                      <select class="select" id="b-len">
+                        <option>live · 60s days</option>
+                      </select>
+                    </div>
+                    <button class="btn primary block" type="button"><span class="mono">git init</span></button>
+                  </div>
+                </details>
+                <p class="muted" style="font-size: var(--t-caption); margin: 0">
+                  <a href="#" style="color: inherit">source of v0.5.4 (AGPL-3.0)</a> ·
+                  <a href="#" style="color: inherit">privacy</a> · <a href="#" style="color: inherit">terms</a>
+                </p>
+              </div>
+            </div>
+
+            <div class="frame phone">
+              <span class="label">phone · a room, waiting</span>
+              <div class="frame-body stack" style="gap: var(--s-4)">
+                <h1 style="margin: 0">Room <span class="mono">zckyrqgc</span></h1>
+                <div class="field">
+                  <label for="r-link">Send this link to whoever you're playing:</label>
+                  <div class="row" style="flex-wrap: nowrap">
+                    <input class="input mono" id="r-link" readonly value="http://localhost:5173/play#/room/zckyrqgc" />
+                    <button class="btn icon-only" type="button" aria-label="copy">
+                      <svg class="icon" aria-hidden="true"><use href="#i-copy" /></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="seat mine"><span class="name">calm-crane-13</span><span class="chip other">host</span></div>
+                <p class="muted" style="margin: 0">1 of 5 seats · live · 60s days</p>
+                <div class="field">
+                  <label for="r-bots">bots</label>
+                  <select class="select" id="r-bots">
+                    <option>0</option>
+                  </select>
+                </div>
+                <div class="stack">
+                  <p class="pending" role="status">waiting for a second seat</p>
+                  <button class="btn primary block" type="button" disabled>start the game</button>
+                </div>
+                <a href="#" style="justify-self: start; display: inline-flex; align-items: center; min-height: 44px"
+                  >home</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- C -->
+        <div class="family">
+          <span class="label">Family C · the game</span>
+          <h3>Hub, the day playing back, the receipt and the release</h3>
+          <div class="frames">
+            <div class="frame phone">
+              <span class="label">phone · hub, day 1, a card picked</span>
+              <div class="statusbar">
+                <span>day <b>1</b>/12</span><span>main <b>0</b>/10</span>
+                <span class="ops" role="img" aria-label="3 of 3 ops left"><i></i><i></i><i></i></span>
+                <span class="score"><span class="me">you 0</span> · bot 0</span>
+                <button class="btn small" type="button">table</button>
+              </div>
+              <div class="game-body">
+                <div class="callout guide">
+                  <span class="label">guide · 1 of 10</span>
+                  <span class="steps" aria-hidden="true"
+                    ><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
+                  ></span>
+                  <p>Pick a card from your hand: lines of code, in one file. One without a BUG tag is a safe start.</p>
+                  <a href="#">skip the guide</a>
+                </div>
+                <div class="strip">
+                  <div class="head"><span class="label">main</span><span class="label num">0/10 commits</span></div>
+                  <div class="slots">
+                    <div class="slot">
+                      <span class="tip">tip</span>
+                      <span class="card root"><span class="band"></span><span class="face">initial commit</span></span>
+                      <span class="chips"><span class="chip you">you</span><span class="chip other">bot</span></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="branch">
+                  <span class="label">your branch</span><span class="where">at the tip</span>
+                  <div class="pile"><span class="label">staged</span><span class="empty">empty</span></div>
+                  <div class="pile"><span class="label">to push</span><span class="empty">empty</span></div>
+                </div>
+                <div class="hand four" aria-label="your hand">
+                  <button class="card" type="button" aria-pressed="false" style="--band: #f2755c">
+                    <span class="band">commit</span
+                    ><span class="face"
+                      ><span class="file">styles<wbr />.css</span><span class="big">+3</span></span
+                    ><span class="bug">BUG</span>
+                  </button>
+                  <button class="card" type="button" aria-pressed="true" style="--band: #a88bfa">
+                    <span class="band">commit</span
+                    ><span class="face"
+                      ><span class="file">api<wbr />.py</span><span class="big">+1</span></span
+                    >
+                  </button>
+                  <button class="card" type="button" aria-pressed="false" style="--band: #e9a83b">
+                    <span class="band">commit</span
+                    ><span class="face"
+                      ><span class="file">README<wbr />.md</span><span class="big">+8</span></span
+                    >
+                  </button>
+                  <button class="card" type="button" aria-pressed="false" style="--band: #4c9be8">
+                    <span class="band">commit</span
+                    ><span class="face"><span class="file">Dockerfile</span><span class="big">+3</span></span>
+                  </button>
+                </div>
+                <div class="actions">
+                  <button class="action" type="button">
+                    <span class="cmd">git add</span><span class="cost">1 op</span
+                    ><span class="will">git add api.py</span>
+                  </button>
+                  <button class="action" type="button" disabled>
+                    <span class="cmd">git commit</span><span class="cost">1 op</span
+                    ><span class="why">nothing added to commit</span>
+                  </button>
+                  <button class="action" type="button">
+                    <span class="cmd">git push</span><span class="cost">free</span
+                    ><span class="why">nothing to push yet</span>
+                  </button>
+                  <button class="action" type="button">
+                    <span class="cmd">git pull</span><span class="cost">0–1 ops</span
+                    ><span class="why">at the tip: free unless main moves</span>
+                  </button>
+                </div>
+              </div>
+              <div class="actionbar">
+                <button class="btn" type="button">hint</button>
+                <button class="btn" type="button" disabled>undo</button>
+                <button class="btn primary" type="button">send pack</button>
+              </div>
+            </div>
+
+            <div class="frame phone">
+              <span class="label">phone · the day plays back, a rejection</span>
+              <div class="statusbar">
+                <span>day <b>2</b>/12</span><span>main <b>2</b>/10</span>
+                <span class="score"><span class="me">you 8</span> · bot −1</span>
+                <button class="btn small" type="button">table</button>
+              </div>
+              <div class="progress" aria-hidden="true"><i style="--p: 60%"></i></div>
+              <div class="game-body">
+                <span class="label">day 2 · your pack</span>
+                <p class="moment-cmd reject">git push</p>
+                <!-- prettier-ignore -->
+                <div class="transcript tone-reject"><span class="reject"> ! [rejected]        main -&gt; main (non-fast-forward)</span></div>
+                <div class="strip">
+                  <div class="head"><span class="label">main</span><span class="label num">2/10 commits</span></div>
+                  <div class="slots">
+                    <div class="slot">
+                      <span class="tip none">tip</span>
+                      <span class="card back"><span class="band"></span><span class="face"></span></span>
+                      <span class="who"><span class="mono">styles.css</span> +8</span>
+                      <span class="chips"><span class="chip you">you</span></span>
+                    </div>
+                    <div class="slot">
+                      <span class="tip">tip</span>
+                      <span class="card back"><span class="band"></span><span class="face"></span></span>
+                      <span class="who"><span class="mono">auth.js</span> +12</span>
+                      <span class="chips"><span class="chip other">bot</span></span>
+                    </div>
+                    <div class="slot waiting">
+                      <span class="tip none">tip</span>
+                      <span class="card"
+                        ><span class="band" style="--band: transparent"></span><span class="face"></span
+                      ></span>
+                      <span class="who">your push</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="said">
+                  Someone pushed before you, so main moved on. Put a pull before your push: it's free when nothing
+                  moved.
+                </p>
+              </div>
+              <div class="actionbar" style="grid-template-columns: 1fr 1fr">
+                <button class="btn" type="button">skip to the day's end</button>
+                <button class="btn primary" type="button">continue</button>
+              </div>
+            </div>
+
+            <div class="frame phone">
+              <span class="label">phone · the bot's step</span>
+              <div class="statusbar">
+                <span>day <b>2</b>/12</span><span>main <b>2</b>/10</span>
+                <span class="score"><span class="me">you 8</span> · bot −1</span>
+                <button class="btn small" type="button">table</button>
+              </div>
+              <div class="progress" aria-hidden="true"><i style="--p: 25%"></i></div>
+              <div class="game-body">
+                <span class="label">day 2 · bot's pack</span>
+                <div class="bot-line">
+                  <span class="avatar" aria-hidden="true">bot</span>
+                  <span class="op-dots" aria-hidden="true"><i class="on"></i><i></i></span>
+                  <span class="muted" style="font-size: var(--t-small)">op 1 of 2</span>
+                </div>
+                <p class="moment-cmd">git push</p>
+                <!-- prettier-ignore -->
+                <div class="transcript tone-ok"><span class="ok">   baa9c75..482cd17  main -&gt; main</span></div>
+                <p class="bubble">It had 1 commit ready, so it shipped: the tip is its now.</p>
+                <p class="said">bot pushed, so the tip moved. Unless you pull first, your next push is rejected.</p>
+              </div>
+              <div class="actionbar" style="grid-template-columns: 1fr 1fr">
+                <button class="btn" type="button">skip to the day's end</button>
+                <button class="btn primary" type="button">continue</button>
+              </div>
+            </div>
+
+            <div class="frame phone">
+              <span class="label">phone · receipt, then release</span>
+              <div class="game-body">
+                <h1 style="margin: 0">Day 1 closed</h1>
+                <span class="label">the remote ran yours first, then bot's</span>
+                <ol class="receipt surface">
+                  <li>
+                    <span class="mark"
+                      ><svg class="icon" aria-hidden="true"><use href="#i-dot" /></svg></span
+                    ><span class="op">git add styles.css</span><span class="what">staged</span>
+                  </li>
+                  <li>
+                    <span class="mark"
+                      ><svg class="icon" aria-hidden="true"><use href="#i-dot" /></svg></span
+                    ><span class="op">git commit -m "style(ui): align the card grid"</span
+                    ><span class="what">baa9c75 on your branch</span>
+                  </li>
+                  <li>
+                    <span class="mark"
+                      ><svg class="icon" aria-hidden="true"><use href="#i-dot" /></svg></span
+                    ><span class="op">git pull</span><span class="what">already up to date</span>
+                  </li>
+                  <li>
+                    <span class="mark ok"
+                      ><svg class="icon" aria-label="landed"><use href="#i-check" /></svg></span
+                    ><span class="op">git push</span><span class="what">baa9c75 on main</span>
+                  </li>
+                </ol>
+                <div class="row"><span class="chip you">you +8</span><span class="chip reject">bot −1</span></div>
+                <p class="said" style="font-size: var(--t-body)">
+                  You are at the tip: tomorrow, a push lands unless someone else's lands first.
+                </p>
+                <hr style="border: 0; border-top: 1px solid var(--line); width: 100%; margin: var(--s-2) 0" />
+                <h1 style="margin: 0">The release shipped.</h1>
+                <p class="verdict">You win.</p>
+                <table class="score">
+                  <thead>
+                    <tr>
+                      <th scope="col"><span class="visually-hidden">score</span></th>
+                      <th scope="col" class="me">you</th>
+                      <th scope="col">bot</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>lines on main</td>
+                      <td>47</td>
+                      <td>17</td>
+                    </tr>
+                    <tr>
+                      <td>fixes</td>
+                      <td>0</td>
+                      <td>0</td>
+                    </tr>
+                    <tr>
+                      <td>blame</td>
+                      <td>0</td>
+                      <td>0</td>
+                    </tr>
+                    <tr>
+                      <td>merge tokens</td>
+                      <td>−2</td>
+                      <td>−3</td>
+                    </tr>
+                    <tr>
+                      <td>grudges</td>
+                      <td>−1</td>
+                      <td>0</td>
+                    </tr>
+                    <tr>
+                      <td>sins</td>
+                      <td>0</td>
+                      <td>−1</td>
+                    </tr>
+                    <tr class="total">
+                      <td>total</td>
+                      <td>44</td>
+                      <td>13</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p style="margin: 0">
+                  What decided it: sleepy-puffin-38 won by 31, most of it in lines shipped (+30 over bot).
+                </p>
+                <div class="field">
+                  <label for="c-fb">how was it? a note for the maintainer</label>
+                  <textarea
+                    class="textarea"
+                    id="c-fb"
+                    placeholder="what broke, what confused you, what was fun"
+                  ></textarea>
+                  <div class="counter-row">
+                    <span class="muted num" style="font-size: var(--t-small)">0/1000</span>
+                    <button class="btn small" type="button" disabled>send</button>
+                  </div>
+                </div>
+              </div>
+              <div class="actionbar" style="grid-template-columns: 1fr 1fr">
+                <button class="btn" type="button">replay it</button>
+                <button class="btn primary" type="button">new game</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- D -->
+        <div class="family">
+          <span class="label">Family D · maintainer</span>
+          <h3>The pulse at /stats</h3>
+          <div class="frames">
+            <div class="frame phone">
+              <span class="label">phone · /stats</span>
+              <div class="frame-body stack" style="gap: var(--s-4)">
+                <h1 style="margin: 0">Pulse</h1>
+                <p class="muted" style="margin: 0">
+                  last pack <b style="color: var(--ink)">never</b> · last game <b style="color: var(--ink)">never</b> ·
+                  <b style="color: var(--ink)">0</b> games in progress
+                </p>
+                <div class="kpis">
+                  <div class="surface">
+                    <span class="label">players</span>
+                    <div class="big">4</div>
+                  </div>
+                  <div class="surface">
+                    <span class="label">games</span>
+                    <div class="big">0</div>
+                  </div>
+                  <div class="surface">
+                    <span class="label">packs by people</span>
+                    <div class="big">0</div>
+                  </div>
+                </div>
+                <div class="segmented" role="group" aria-label="period">
+                  <button type="button" aria-pressed="true">day</button
+                  ><button type="button" aria-pressed="false">week</button
+                  ><button type="button" aria-pressed="false">month</button>
+                </div>
+                <div class="surface stat">
+                  <div class="row" style="justify-content: space-between">
+                    <h3 style="margin: 0">New players</h3>
+                    <span class="muted" style="font-size: var(--t-small)"
+                      ><b style="color: var(--ink)">4</b> in the last 30 days</span
+                    >
+                  </div>
+                  <div class="bars" role="img" aria-label="4 new players, all on Nov 16">
+                    <i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i
+                    ><i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i
+                    ><i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i
+                    ><i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i
+                    ><i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i
+                    ><i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i
+                    ><i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i><i style="height: 0"></i
+                    ><i style="height: 0"></i><i style="height: 100%"></i>
+                  </div>
+                  <div class="axis"><span>Oct 18</span><span>most 4</span><span>Nov 16</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== PART 2 -->
+      <section class="part" aria-labelledby="p2">
+        <h2 id="p2">Part 2 · Every element, in every state</h2>
+        <p class="lede">
+          Each element is reviewed against MASTER.md §7: 4.5:1 text and 3:1 edges in both themes, a 44 px target, a
+          visible focus ring, pressed feedback within 120 ms without moving the layout, a disabled state that doesn't
+          rely on opacity, 12 px minimum text, and no clipped or rotated labels.
+        </p>
+        <div class="elements">
+          <article class="el">
+            <h3><span class="n">01</span>Brand</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">default · focus</span>
+                <div class="row">
+                  <a class="brand" href="#"
+                    ><svg aria-hidden="true"><use href="#logo" /></svg><span class="word">Git Game</span></a
+                  ><a class="brand is-focus" href="#"
+                    ><svg aria-hidden="true"><use href="#logo" /></svg><span class="word">Git Game</span></a
+                  >
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                The logo is <code>web/public/icon.svg</code> as drawn, at 28 px, never recoloured. Its dark tile reads
+                on both grounds.
+              </li>
+              <li>The wordmark is sans 700. The <code>$</code> moves off the brand: Studio keeps it for Git.</li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">02</span>Site header</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">wide: links, current page, hover</span>
+                <div class="frame" style="box-shadow: none">
+                  <header class="site-head" style="border: 0">
+                    <nav class="links" aria-label="example" style="display: flex; flex-wrap: wrap">
+                      <a href="#" aria-current="page">what Git said</a><a href="#" class="is-hover">teach</a
+                      ><a href="#">teams</a>
+                    </nav>
+                  </header>
+                </div>
+              </div>
+              <div class="state">
+                <span class="label">narrow: menu open</span>
+                <div style="position: relative; height: 196px">
+                  <div class="frame" style="box-shadow: none; overflow: visible">
+                    <header class="site-head" style="border: 0; border-radius: var(--r-lg)">
+                      <a class="brand" href="#"
+                        ><svg aria-hidden="true"><use href="#logo" /></svg><span class="word">Git Game</span></a
+                      >
+                      <details class="menu" open>
+                        <summary class="btn small">
+                          menu <svg class="icon" aria-hidden="true"><use href="#i-down" /></svg>
+                        </summary>
+                        <nav aria-label="example, folded">
+                          <a href="#">new to Git?</a><a href="#" aria-current="page">what Git said</a
+                          ><a href="#">teach</a>
+                        </nav>
+                      </details>
+                      <a class="btn small primary" href="#">play</a>
+                    </header>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                One 60 px row at every width. The links fold into "menu" when the header is narrower than 640 px, so
+                "play" never wraps onto its own line.
+              </li>
+              <li>
+                The current page is a soft accent pill (<code>aria-current="page"</code>). Hover is a fill, never just a
+                colour change.
+              </li>
+              <li>
+                The menu is a <code>&lt;details&gt;</code>: it works without script. New: Escape and a click outside
+                close it (one small script).
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">03</span>Button</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">primary: default · hover · focus · pressed</span>
+                <div class="row">
+                  <button class="btn primary" type="button">play</button
+                  ><button class="btn primary is-hover" type="button">play</button
+                  ><button class="btn primary is-focus" type="button">play</button
+                  ><button class="btn primary is-pressed" type="button">play</button>
+                </div>
+              </div>
+              <div class="state">
+                <span class="label">secondary: default · hover · focus · pressed</span>
+                <div class="row">
+                  <button class="btn" type="button">hint</button><button class="btn is-hover" type="button">hint</button
+                  ><button class="btn is-focus" type="button">hint</button
+                  ><button class="btn is-pressed" type="button">hint</button>
+                </div>
+              </div>
+              <div class="state">
+                <span class="label">disabled · busy · quiet · small</span>
+                <div class="row">
+                  <button class="btn primary" type="button" disabled>send pack</button
+                  ><button class="btn primary" type="button" aria-busy="true">play the bot now</button
+                  ><button class="btn quiet" type="button">skip the guide</button
+                  ><button class="btn small" type="button">table</button>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>Pills, 48 px high (44 px small), with 8 px between targets. Labels stay lowercase, like commands.</li>
+              <li>
+                Hover changes the fill (4.5:1 kept). Pressed scales to 0.97 in 120 ms, which is a transform, so the
+                layout doesn't move.
+              </li>
+              <li>
+                Disabled is dashed and muted, not faded, and keeps its label readable. Busy keeps its label, adds a
+                spinner and <code>aria-busy</code>, and stops a second tap (replaces today's disable-every-button).
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">04</span>Text link</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">default · hover · focus · on a tinted surface</span>
+                <div class="row">
+                  <a href="#">what Git said</a><a href="#" class="is-hover">what Git said</a
+                  ><a href="#" class="is-focus">what Git said</a
+                  ><span class="callout guide" style="padding: 4px 12px"><a href="#">skip the guide</a></span>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>Always underlined in prose (colour alone isn't enough); hover thickens the underline.</li>
+              <li>Standalone links (home, skip the guide) get a 44 px tall hit area.</li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">05</span>Settings row</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">closed · hover · focus</span>
+                <details class="setting">
+                  <summary>
+                    <span class="title">Reminders by email</span><span class="desc">when your pack is due</span
+                    ><svg class="icon" aria-hidden="true"><use href="#i-down" /></svg>
+                  </summary>
+                </details>
+                <details class="setting">
+                  <summary class="is-hover">
+                    <span class="title">Reminders by email</span><span class="desc">when your pack is due</span
+                    ><svg class="icon" aria-hidden="true"><use href="#i-down" /></svg>
+                  </summary>
+                </details>
+                <details class="setting">
+                  <summary class="is-focus">
+                    <span class="title">Reminders by email</span><span class="desc">when your pack is due</span
+                    ><svg class="icon" aria-hidden="true"><use href="#i-down" /></svg>
+                  </summary>
+                </details>
+              </div>
+              <div class="state">
+                <span class="label">open, with the email form</span>
+                <details class="setting" open>
+                  <summary>
+                    <span class="title">Reminders by email</span><span class="desc">when your pack is due</span
+                    ><svg class="icon" aria-hidden="true"><use href="#i-down" /></svg>
+                  </summary>
+                  <div class="body">
+                    <div class="field">
+                      <label for="e-addr">an address for "your pack is due"</label
+                      ><input class="input" id="e-addr" type="email" placeholder="you@example.com" />
+                    </div>
+                    <label class="check"
+                      ><input type="checkbox" /> one digest a day instead of one email per game</label
+                    >
+                    <button class="btn" type="button">send me a confirmation link</button>
+                  </div>
+                </details>
+              </div>
+            </div>
+            <span class="newcopy">new copy: the one-line descriptions, and sentence case on the titles</span>
+            <ul class="notes">
+              <li>
+                A surface with a title, a one-line description and a chevron that turns over 200 ms. The whole row is
+                the 64 px target.
+              </li>
+              <li>It opens in place, so nothing jumps; the form inside uses fields 06–08.</li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">06</span>Text field</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">empty · hover · focus</span>
+                <input class="input" aria-label="example" placeholder="you@example.com" />
+                <input class="input is-hover" aria-label="example" placeholder="you@example.com" />
+                <input class="input is-focus" aria-label="example" value="ana@example.com" />
+              </div>
+              <div class="state">
+                <span class="label">error · read-only with action · disabled</span>
+                <div class="field">
+                  <label for="f-err">others at this device (hotseat), comma-separated</label
+                  ><input
+                    class="input"
+                    id="f-err"
+                    aria-invalid="true"
+                    aria-describedby="f-err-m"
+                    value="ana, ana"
+                  /><span class="err" id="f-err-m"
+                    ><svg class="icon" aria-hidden="true"><use href="#i-alert" /></svg
+                    ><span class="mono">fatal: every seat needs its own name</span></span
+                  >
+                </div>
+                <div class="row" style="flex-wrap: nowrap">
+                  <input
+                    class="input mono"
+                    aria-label="room link"
+                    readonly
+                    value="http://localhost:5173/play#/room/zckyrqgc"
+                  /><button class="btn icon-only" type="button" aria-label="copied">
+                    <svg class="icon" aria-hidden="true" style="color: var(--ok)"><use href="#i-check" /></svg>
+                  </button>
+                </div>
+                <input class="input" aria-label="example" disabled value="ana" />
+              </div>
+            </div>
+            <span class="newcopy"
+              >new: the copy button confirms with a check for 2 s ("copied", for screen readers)</span
+            >
+            <ul class="notes">
+              <li>
+                48 px, a 12 px radius and a 3:1 border. The label is always visible above the field, never a
+                placeholder.
+              </li>
+              <li>
+                Focus is a 3 px accent ring. An error gets a 2 px red border plus the message under the field, linked
+                with <code>aria-describedby</code>. Git's own words stay in mono.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">07</span>Select</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">default · focus</span>
+                <select class="select" aria-label="day length">
+                  <option>live · 60s days</option>
+                  <option>lunch · 5m days</option>
+                  <option>correspondence · 24h days</option>
+                </select>
+                <select class="select is-focus" aria-label="bots">
+                  <option>1</option>
+                </select>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                The native select (best on phones), restyled to match the field, with a drawn chevron and 44 px of right
+                padding so long options never run under it.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">08</span>Checkbox</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">off · on · focus</span>
+                <label class="check"><input type="checkbox" /> one digest a day instead of one email per game</label>
+                <label class="check"
+                  ><input type="checkbox" checked /> one digest a day instead of one email per game</label
+                >
+                <label class="check"
+                  ><input type="checkbox" class="is-focus" /> one digest a day instead of one email per game</label
+                >
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                A 22 px box with a 3:1 border, inside a 44 px row; the whole label toggles it. Checked is an accent fill
+                with the check drawn in <code>--on-accent</code>.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">09</span>Feedback box</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">empty: send disabled</span>
+                <div class="field">
+                  <label for="fb1">how was it? a note for the maintainer</label
+                  ><textarea
+                    class="textarea"
+                    id="fb1"
+                    placeholder="what broke, what confused you, what was fun"
+                  ></textarea>
+                  <div class="counter-row">
+                    <span class="muted num" style="font-size: var(--t-small)">0/1000</span
+                    ><button class="btn small" type="button" disabled>send</button>
+                  </div>
+                </div>
+              </div>
+              <div class="state">
+                <span class="label">written · sent</span>
+                <div class="field">
+                  <label for="fb2">how was it? a note for the maintainer</label
+                  ><textarea class="textarea is-focus" id="fb2">
+The pull before the push finally clicked on day 3.</textarea>
+                  <div class="counter-row">
+                    <span class="muted num" style="font-size: var(--t-small)">51/1000</span
+                    ><button class="btn small primary" type="button">send</button>
+                  </div>
+                </div>
+                <p class="msg note" role="status">
+                  <span class="mono"># thanks: your note is in, and the maintainer reads every one</span>
+                </p>
+              </div>
+            </div>
+            <span class="newcopy">the example note is illustrative</span>
+            <ul class="notes">
+              <li>
+                The counter is tabular, so it doesn't jitter as you type. "send" becomes primary only once there is
+                something to send.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">10</span>Your games</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">your pack is due · waiting · finished · hover</span>
+                <ul class="games">
+                  <li class="due">
+                    <a href="#"
+                      ><span class="dot"></span><span class="name">vs bot</span
+                      ><span class="status">day 3/12 · your pack is due</span
+                      ><svg class="icon" aria-hidden="true"><use href="#i-right" /></svg
+                    ></a>
+                  </li>
+                  <li>
+                    <a href="#"
+                      ><span class="dot"></span><span class="name">vs bot</span
+                      ><span class="status">day 3/12 · waiting for the others</span
+                      ><svg class="icon" aria-hidden="true"><use href="#i-right" /></svg
+                    ></a>
+                  </li>
+                  <li class="done">
+                    <a href="#"
+                      ><span class="dot"></span><span class="name">vs bot</span
+                      ><span class="status">v1.0 shipped · you won, 44</span
+                      ><svg class="icon" aria-hidden="true"><use href="#i-right" /></svg
+                    ></a>
+                  </li>
+                  <li>
+                    <a href="#" class="is-hover"
+                      ><span class="dot"></span><span class="name">vs bot</span
+                      ><span class="status">day 3/12 · waiting for the others</span
+                      ><svg class="icon" aria-hidden="true"><use href="#i-right" /></svg
+                    ></a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                The whole row is the link (64 px). The state is told three ways: the dot, the colour, and the words. A
+                due game has an amber dot with a halo and amber, bold status text.
+              </li>
+              <li>Finished games keep full contrast (today they are at 70% opacity).</li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">11</span>Messages</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">note · error · waiting</span>
+                <p class="msg note" role="status">
+                  <span class="mono"># your address is confirmed: reminders will come by email</span>
+                </p>
+                <p class="msg error" role="alert">
+                  <svg class="icon" aria-hidden="true"><use href="#i-alert" /></svg>That link has expired or was already
+                  used. Set your address again for a new one.
+                </p>
+                <p class="pending" role="status">waiting for a second seat</p>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                A note written as a terminal comment stays mono and muted. Errors get an icon and a tinted panel, not
+                just red text.
+              </li>
+              <li>
+                "Waiting" is a status line with a softly pulsing dot (it holds still under reduced motion), above the
+                button it is waiting to enable.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">12</span>Chips</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">you · others · ok · warning · rejected</span>
+                <div class="row">
+                  <span class="chip you">you +8</span><span class="chip other">bot ±0</span
+                  ><span class="chip ok">at the tip</span><span class="chip warn">your pack is due</span
+                  ><span class="chip reject">bot −1</span><span class="chip you">you</span
+                  ><span class="chip other">bot</span>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                26 px pills, 12 px semibold, tinted fills; every pair is 4.5:1. Numbers are tabular, and the minus is a
+                true minus (−).
+              </li>
+              <li>Chips are labels, never buttons, so they don't need the 44 px target.</li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">13</span>Guide and nudge</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">guide, step 6 of 10</span>
+                <div class="callout guide">
+                  <span class="label">guide · 6 of 10</span
+                  ><span class="steps" aria-hidden="true"
+                    ><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i
+                    ><i class="on"></i><i></i><i></i><i></i><i></i
+                  ></span>
+                  <p>
+                    Your push landed: the remote ran your pack first today. Your commit is on main, face-down. Now watch
+                    the bot.
+                  </p>
+                  <a href="#">skip the guide</a>
+                </div>
+              </div>
+              <div class="state">
+                <span class="label">nudge</span>
+                <div class="callout nudge">
+                  <p>
+                    You are 1 behind: a push would be rejected. The pull your pack writes before it costs an op today.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                The guide gets a segmented progress bar for its ten steps, so "6 of 10" can also be seen at a glance.
+              </li>
+              <li>Tinted panels with a 1 px edge: lighter than today's 2 px border, but still clearly set apart.</li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">14</span>Incident</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">the day's incident</span>
+                <div class="incident">
+                  <span class="band">incident</span>
+                  <h3>Stack Overflow Is Down</h3>
+                  <p>No command cards today.</p>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                The band is a fixed amber with a dark label (8.95:1) in both themes. Today it is white on amber, at
+                2.03:1.
+              </li>
+              <li>It is the one raised object on its screen (<code>--shadow-2</code>).</li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">15</span>Playing card</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">kinds, at lg: commit · BUG · command · face-down</span>
+                <div class="hand">
+                  <span class="card lg" style="--band: #4c9be8"
+                    ><span class="band">commit</span
+                    ><span class="face"><span class="file">Dockerfile</span><span class="big">+7</span></span></span
+                  >
+                  <span class="card lg" style="--band: #e9a83b"
+                    ><span class="band">commit</span
+                    ><span class="face"
+                      ><span class="file">README<wbr />.md</span><span class="big">+2</span></span
+                    ><span class="bug">BUG</span></span
+                  >
+                  <span class="card lg command"
+                    ><span class="band">command</span
+                    ><span class="face"><span class="file">push --force</span></span></span
+                  >
+                  <span class="card lg back"><span class="band"></span><span class="face"></span></span>
+                </div>
+              </div>
+              <div class="state">
+                <span class="label">in the hand: default · hover · picked · focus</span>
+                <div class="hand four">
+                  <button class="card" type="button" aria-pressed="false" style="--band: #3ec1b3">
+                    <span class="band">commit</span
+                    ><span class="face"
+                      ><span class="file">auth<wbr />.js</span><span class="big">+5</span></span
+                    >
+                  </button>
+                  <button class="card is-hover" type="button" aria-pressed="false" style="--band: #3ec1b3">
+                    <span class="band">commit</span
+                    ><span class="face"
+                      ><span class="file">auth<wbr />.js</span><span class="big">+5</span></span
+                    >
+                  </button>
+                  <button class="card" type="button" aria-pressed="true" style="--band: #3ec1b3">
+                    <span class="band">commit</span
+                    ><span class="face"
+                      ><span class="file">auth<wbr />.js</span><span class="big">+5</span></span
+                    >
+                  </button>
+                  <button class="card is-focus" type="button" aria-pressed="false" style="--band: #3ec1b3">
+                    <span class="band">commit</span
+                    ><span class="face"
+                      ><span class="file">auth<wbr />.js</span><span class="big">+5</span></span
+                    >
+                  </button>
+                </div>
+              </div>
+              <div class="state">
+                <span class="label">sizes: sm (strip) · md (hand) · lg (moments)</span>
+                <div class="hand" style="align-items: end">
+                  <span class="card sm" style="--band: #f2755c"
+                    ><span class="band"></span><span class="face"><span class="big">+3</span></span
+                    ><span class="bug" aria-label="bug">BUG</span></span
+                  >
+                  <span class="card" style="--band: #f2755c"
+                    ><span class="band"></span
+                    ><span class="face"
+                      ><span class="file">styles<wbr />.css</span><span class="big">+3</span></span
+                    ><span class="bug">BUG</span></span
+                  >
+                  <span class="card lg" style="--band: #f2755c"
+                    ><span class="band">commit</span
+                    ><span class="face"
+                      ><span class="file">styles<wbr />.css</span><span class="big">+3</span></span
+                    ><span class="bug">BUG</span></span
+                  >
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                As printed: deck colour band, file in mono, big +N. Every label is dark on the band. The band word shows
+                only on lg cards; the sm card shows BUG as a ringed dot (named "bug" for screen readers).
+              </li>
+              <li>
+                Picked is unmistakable: lifted 8 px, a 3 px accent ring, a check badge on the band's left end (BUG keeps
+                the right) and <code>aria-pressed</code>. Hover lifts 3 px. Neither moves the layout.
+              </li>
+              <li>
+                On phones the hand is four across (about 80 px each). Labels are never rotated and never break inside a
+                name.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">16</span>The main strip</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">root · face-down commits · tip · your push waiting</span>
+                <div class="strip">
+                  <div class="head"><span class="label">main</span><span class="label num">2/10 commits</span></div>
+                  <div class="slots">
+                    <div class="slot">
+                      <span class="tip none">tip</span
+                      ><span class="card root"><span class="band"></span><span class="face">initial commit</span></span>
+                    </div>
+                    <div class="slot">
+                      <span class="tip none">tip</span
+                      ><span class="card back"><span class="band"></span><span class="face"></span></span
+                      ><span class="who"><span class="mono">styles.css</span> +8</span
+                      ><span class="chips"><span class="chip you">you</span></span>
+                    </div>
+                    <div class="slot">
+                      <span class="tip">tip</span
+                      ><span class="card back"><span class="band"></span><span class="face"></span></span
+                      ><span class="who"><span class="mono">auth.js</span> +12</span
+                      ><span class="chips"><span class="chip other">bot</span></span>
+                    </div>
+                    <div class="slot waiting">
+                      <span class="tip none">tip</span
+                      ><span class="card"
+                        ><span class="band" style="--band: transparent"></span><span class="face"></span></span
+                      ><span class="who">your push</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                Slot labels (file, +N) are 12 px minimum (today 8–9 px). The tip is an outlined pill, not a red word,
+                because red means rejected.
+              </li>
+              <li>
+                Your waiting push is a dashed accent slot past the tip. Only the strip scrolls sideways, with snap.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">17</span>Your branch</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">empty · staged</span>
+                <div class="branch">
+                  <span class="label">your branch</span><span class="where">at the tip</span>
+                  <div class="pile"><span class="label">staged</span><span class="empty">empty</span></div>
+                  <div class="pile filled">
+                    <span class="label">staged</span
+                    ><span class="card sm" style="--band: #a88bfa"
+                      ><span class="band"></span><span class="face"><span class="big">+1</span></span></span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                An empty pile is dashed, and its "empty" text is muted at 4.5:1 (today it is <code>--faint</code>, at
+                2.2–2.6:1). A filled pile turns solid.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">18</span>Action tile</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">ready, with what it will write · hover · pressed</span>
+                <div class="actions">
+                  <button class="action" type="button">
+                    <span class="cmd">git add</span><span class="cost">1 op</span
+                    ><span class="will">git add api.py</span>
+                  </button>
+                  <button class="action is-hover" type="button">
+                    <span class="cmd">git pull</span><span class="cost">0–1 ops</span
+                    ><span class="why">at the tip: free unless main moves</span>
+                  </button>
+                  <button class="action is-pressed" type="button">
+                    <span class="cmd">git push</span><span class="cost">free</span
+                    ><span class="why">nothing to push yet</span>
+                  </button>
+                  <button class="action is-focus" type="button">
+                    <span class="cmd">git pull</span><span class="cost">0–1 ops</span
+                    ><span class="why">at the tip: free unless main moves</span>
+                  </button>
+                </div>
+              </div>
+              <div class="state">
+                <span class="label">disabled, with its reason</span>
+                <div class="actions">
+                  <button class="action" type="button" disabled>
+                    <span class="cmd">git commit</span><span class="cost">1 op</span
+                    ><span class="why">nothing added to commit</span>
+                  </button>
+                  <button class="action" type="button" disabled>
+                    <span class="cmd">git add</span><span class="cost">1 op</span
+                    ><span class="why">select cards in your hand</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                The command is mono, because Git speaks there; the cost and the reason are sans. What it will write
+                (<code>.will</code>) goes from 10.4 px to 12 px.
+              </li>
+              <li>
+                A disabled tile is dashed, with its reason at full 4.5:1 (today it is 42% opacity), so "why not" is
+                always readable.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">19</span>Status bar and progress</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">3 ops left · 1 spent · playing back</span>
+                <div class="frame" style="box-shadow: none">
+                  <div class="statusbar">
+                    <span>day <b>1</b>/12</span><span>main <b>0</b>/10</span
+                    ><span class="ops" role="img" aria-label="3 of 3 ops left"><i></i><i></i><i></i></span
+                    ><span class="score"><span class="me">you 0</span> · bot 0</span
+                    ><button class="btn small" type="button">table</button>
+                  </div>
+                  <div class="statusbar">
+                    <span>day <b>4</b>/12</span><span>main <b>5</b>/10</span
+                    ><span class="ops" role="img" aria-label="2 of 3 ops left"><i></i><i></i><i class="spent"></i></span
+                    ><span class="score"><span class="me">you 21</span> · bot 9</span
+                    ><button class="btn small" type="button">table</button>
+                  </div>
+                  <div class="progress" aria-hidden="true"><i style="--p: 40%"></i></div>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>Sans with tabular numbers, 14 px (today it is 12 px mono). The scores never shift as they change.</li>
+              <li>
+                A spent op is a hollow ring, not a missing dot, so the total stays visible. The ops have an accessible
+                name ("2 of 3 ops left").
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">20</span>Action bar</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">hub · playback · end of game</span>
+                <div class="frame" style="box-shadow: none">
+                  <div class="actionbar">
+                    <button class="btn" type="button">hint</button
+                    ><button class="btn" type="button" disabled>undo</button
+                    ><button class="btn primary" type="button">send pack</button>
+                  </div>
+                  <div class="actionbar" style="grid-template-columns: 1fr 1fr">
+                    <button class="btn" type="button">skip to the day's end</button
+                    ><button class="btn primary" type="button">continue</button>
+                  </div>
+                  <div class="actionbar" style="grid-template-columns: 1fr 1fr">
+                    <button class="btn" type="button">replay it</button
+                    ><button class="btn primary" type="button">new game</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                Sticky at the thumb, above the safe area. The primary action is always on the right and always the
+                widest. Enter answers it, as the spec says.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">21</span>Transcript</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">output · landed · rejected · comment</span>
+                <!-- prettier-ignore -->
+                <div class="transcript"><span class="mine"><span class="who">calm-crane-13@main</span> $ git push</span>
+<span class="ok">   94da114..baa9c75  main -&gt; main</span>
+<span class="who">bot@main</span> $ git push
+<span class="reject"> ! [rejected]        main -&gt; main (non-fast-forward)</span>
+<span class="note"># it pulls first, in case someone pushes before it</span></div>
+                <!-- prettier-ignore -->
+                <div class="transcript tone-reject"><span class="reject"> ! [rejected]        main -&gt; main (non-fast-forward)</span></div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                Always dark, with its own <code>--term-*</code> colours, so it passes in both themes. 14 px mono,
+                <code>pre-wrap</code>, never a sideways scroll.
+              </li>
+              <li>A moment's tone is a 4 px edge on the left, so the tone isn't shown by text colour alone.</li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">22</span>Moment</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">your op, landed · rejected</span>
+                <p class="moment-cmd ok">git push</p>
+                <p class="moment-cmd reject">git push</p>
+                <p class="said">Your commit is on main, face-down. Nobody knows yet whether it holds a bug.</p>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                The command is the headline (24 px mono, with the <code>$</code>), coloured by its outcome; the coach
+                line is 18 px sans.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">23</span>The bot's step</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">avatar · op dots · bubble</span>
+                <div class="bot-line">
+                  <span class="avatar" aria-hidden="true">bot</span
+                  ><span class="op-dots" aria-hidden="true"><i class="on"></i><i class="on"></i></span
+                  ><span class="muted" style="font-size: var(--t-small)">op 2 of 2</span>
+                </div>
+                <p class="bubble">
+                  It built a commit of 2 cards: face-down on its branch, where nobody can see it until it pushes.
+                </p>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                The bubble's tail is its squared top-left corner, which points to the avatar. The op count is written
+                out as well as shown as dots.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">24</span>Receipt</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">ran · landed · lost</span>
+                <ol class="receipt surface">
+                  <li>
+                    <span class="mark"
+                      ><svg class="icon" aria-hidden="true"><use href="#i-dot" /></svg></span
+                    ><span class="op">git add auth.js styles.css</span><span class="what">staged</span>
+                  </li>
+                  <li>
+                    <span class="mark warn"
+                      ><svg class="icon" aria-label="warning"><use href="#i-bang" /></svg></span
+                    ><span class="op">git pull -X theirs</span
+                    ><span class="what">keep theirs: your a915196 is gone</span>
+                  </li>
+                  <li>
+                    <span class="mark ok"
+                      ><svg class="icon" aria-label="landed"><use href="#i-check" /></svg></span
+                    ><span class="op">git push</span><span class="what">baa9c75 on main</span>
+                  </li>
+                </ol>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                Each op's mark is an icon from one family, with a name for screen readers (today it is a "!" or "✓"
+                glyph). Ops are mono; what they did is sans and muted.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">25</span>Scoreboard</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">rows · total · verdict</span>
+                <p class="verdict">You win.</p>
+                <table class="score">
+                  <thead>
+                    <tr>
+                      <th scope="col"><span class="visually-hidden">score</span></th>
+                      <th scope="col" class="me">you</th>
+                      <th scope="col">bot</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>lines on main</td>
+                      <td>47</td>
+                      <td>17</td>
+                    </tr>
+                    <tr>
+                      <td>merge tokens</td>
+                      <td>−2</td>
+                      <td>−3</td>
+                    </tr>
+                    <tr class="total">
+                      <td>total</td>
+                      <td>44</td>
+                      <td>13</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                A real table (<code>scope</code> on the headers), 40 px rows, tabular numbers, and a ruled total. Your
+                column is pink in both the header and the verdict.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">26</span>Replay navigation</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">first day · middle</span>
+                <div class="replay-nav">
+                  <button class="btn icon-only" type="button" aria-label="previous day" disabled>
+                    <svg class="icon" aria-hidden="true"><use href="#i-left" /></svg></button
+                  ><span>after day 0 of 9</span
+                  ><button class="btn icon-only" type="button" aria-label="next day">
+                    <svg class="icon" aria-hidden="true"><use href="#i-right" /></svg>
+                  </button>
+                </div>
+                <div class="replay-nav">
+                  <button class="btn icon-only" type="button" aria-label="previous day">
+                    <svg class="icon" aria-hidden="true"><use href="#i-left" /></svg></button
+                  ><span>after day 2 of 9</span
+                  ><button class="btn icon-only is-focus" type="button" aria-label="next day">
+                    <svg class="icon" aria-hidden="true"><use href="#i-right" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                Round 48 px icon buttons with names ("previous day", "next day"); at either end the button is disabled,
+                not hidden, so nothing shifts. The ← and → keys step, as today.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">27</span>Table sheet and seats</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">the sheet, with a seat writing and one sent</span>
+                <div class="sheet">
+                  <div class="grab" aria-hidden="true"></div>
+                  <header>
+                    <h3>The table</h3>
+                    <button class="btn icon-only" type="button" aria-label="close">
+                      <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+                    </button>
+                  </header>
+                  <div class="body">
+                    <div class="seat mine">
+                      <span class="name">jolly-koala-45</span><span class="score">0</span
+                      ><span class="facts">7 in hand · at the tip</span
+                      ><span class="state"><span class="chip warn">writing…</span></span>
+                    </div>
+                    <div class="seat">
+                      <span class="name">bot</span><span class="score">11</span
+                      ><span class="facts">8 in hand · 1 to push · at the tip</span
+                      ><span class="state"><span class="chip ok">pack sent</span></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                A sheet with a grab handle and a named close button; Escape closes it, as today. New: focus stays inside
+                it while it is open. On wide screens it becomes the side panel.
+              </li>
+              <li>
+                A seat's colour edge says whose it is; "writing…" and "pack sent" become chips with words, not colour
+                alone.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">28</span>Questions (landing)</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">closed · open</span>
+                <div class="faq">
+                  <details>
+                    <summary>
+                      Do I need to know Git? <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>
+                    </summary>
+                    <p>…</p>
+                  </details>
+                  <details open>
+                    <summary>
+                      Is it free? <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>
+                    </summary>
+                    <p>Yes: no account, no ads, nothing to buy.</p>
+                  </details>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>56 px rows with a plus that turns into an ×. The browser's default triangle goes.</li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">29</span>Period switch (stats)</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">day selected · focus on week</span>
+                <div class="segmented" role="group" aria-label="period">
+                  <button type="button" aria-pressed="true">day</button
+                  ><button type="button" aria-pressed="false" class="is-focus">week</button
+                  ><button type="button" aria-pressed="false">month</button>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                One segmented control (today it is three separate buttons). The selected segment is raised on paper and
+                exposed with <code>aria-pressed</code>. Segments are 72 × 40 px inside a 48 px track.
+              </li>
+            </ul>
+          </article>
+
+          <article class="el">
+            <h3><span class="n">30</span>Who you are</h3>
+            <div class="states">
+              <div class="state">
+                <span class="label">anonymous · linked</span>
+                <div class="row" style="font-size: var(--t-small)">
+                  <b class="mono">calm-crane-13</b><span class="muted" aria-hidden="true">·</span
+                  ><a href="#">link GitHub</a>
+                </div>
+                <div class="row" style="font-size: var(--t-small)">
+                  <span class="avatar" style="width: 28px; height: 28px; font-size: 11px" aria-hidden="true"></span
+                  ><b class="mono">calm-crane-13</b><span class="muted" aria-hidden="true">·</span
+                  ><button class="btn quiet small" type="button">sign out</button>
+                </div>
+              </div>
+            </div>
+            <ul class="notes">
+              <li>
+                The handle is mono (it is an identifier). The GitHub avatar is a 28 px circle. "sign out" is a quiet
+                button with a 44 px target, instead of a 32 px underlined one.
+              </li>
+            </ul>
+          </article>
+        </div>
+        <h3 style="margin-top: var(--s-6)">Colour pairs, checked live in this theme</h3>
+        <div class="swatches" id="swatches"></div>
+      </section>
+    </div>
+
+    <script>
+      // Theme forcing, and the swatches with their live contrast. Also: the menus and the card picks work.
+      const root = document.documentElement;
+      for (const b of document.querySelectorAll("[data-set]"))
+        b.addEventListener("click", () => {
+          if (b.dataset.set) root.dataset.theme = b.dataset.set;
+          else delete root.dataset.theme;
+          drawSwatches();
+        });
+      for (const c of document.querySelectorAll(".hand.four button.card"))
+        c.addEventListener("click", () =>
+          c.setAttribute("aria-pressed", String(c.getAttribute("aria-pressed") !== "true")),
+        );
+
+      const probe = document.createElement("i");
+      document.body.append(probe);
+      const rgb = (c) => ((probe.style.color = c), getComputedStyle(probe).color.match(/\d+/g).slice(0, 3).map(Number));
+      const lum = ([r, g, b]) =>
+        [r, g, b]
+          .map((v) => ((v /= 255), v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
+          .reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
+      const ratio = (a, b) => {
+        const [x, y] = [lum(rgb(a)), lum(rgb(b))].sort((p, q) => q - p);
+        return (x + 0.05) / (y + 0.05);
+      };
+      const SW = [
+        ["ink", "ground"],
+        ["muted", "ground"],
+        ["link", "ground"],
+        ["on-accent", "accent"],
+        ["on-accent", "accent-hover"],
+        ["on-accent", "accent-press"],
+        ["ink", "paper-hover"],
+        ["ink", "accent-soft"],
+        ["you", "you-soft"],
+        ["other", "other-soft"],
+        ["ok", "ok-soft"],
+        ["warn", "warn-soft"],
+        ["reject", "reject-soft"],
+        ["on-band", "bug-fill"],
+        ["on-band", "incident-fill"],
+        ["term-muted", "term"],
+        ["field-line", "paper", 3],
+        ["accent", "paper", 3],
+      ];
+      function drawSwatches() {
+        const css = getComputedStyle(root);
+        const v = (t) => css.getPropertyValue(`--${t}`).trim();
+        document.getElementById("swatches").replaceChildren(
+          ...SW.map(([fg, bg, need = 4.5]) => {
+            const r = ratio(v(fg), v(bg));
+            const el = document.createElement("div");
+            el.className = "swatch";
+            const sample =
+              need === 3
+                ? `background:${v(bg)};color:var(--ink);box-shadow:inset 0 0 0 3px ${v(fg)}`
+                : `background:${v(bg)};color:${v(fg)}`;
+            el.innerHTML = `<span class="sample" style="${sample}">${need === 3 ? "edge" : "Aa"} ${fg}</span>
+              <span class="meta"><b>${r.toFixed(2)}:1</b> ${r >= need ? "AA" : "FAIL"}<br>on --${bg}</span>`;
+            return el;
+          }),
+        );
+      }
+      drawSwatches();
+    </script>
+  </body>
+</html>

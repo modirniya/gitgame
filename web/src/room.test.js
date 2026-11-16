@@ -41,7 +41,8 @@ describe("a room", () => {
     expect(screen.node.querySelector(".share code").textContent).toBe(roomLink("k7m2x9qa"));
     const start = screen.node.querySelector("form button");
     expect(start.disabled).toBe(true);
-    expect(start.textContent).toBe("waiting for a second seat");
+    expect(start.textContent).toBe("start the game");
+    expect(screen.node.querySelector("form [role=status]").textContent).toBe("waiting for a second seat");
     expect(screen.node.querySelector(".legal-foot a").textContent).toMatch(/^source of v/);
   });
 

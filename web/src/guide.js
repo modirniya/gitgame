@@ -123,6 +123,12 @@ export function guideLayer(step, { done }) {
     "aside",
     { class: "guide", role: "status" },
     el("span", { class: "guide-step" }, `guide · ${step.n} of ${step.of}`),
+    // the same count at a glance: one segment a step, those reached filled
+    el(
+      "span",
+      { class: "guide-bar", "aria-hidden": "true" },
+      Array.from({ length: step.of }, (_, i) => el("i", { class: i < step.n ? "on" : null })),
+    ),
     el("p", {}, step.text),
     el("button", { class: "link", onclick: done }, step.id === "done" ? "got it" : "skip the guide"),
   );

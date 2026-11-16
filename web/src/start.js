@@ -51,22 +51,27 @@ export function startScreen({ remote, go, me, failure = null, notice = "", signO
   // A player's first game is guided (M14d): nothing else they've played to learn from yet. The remote deals it so that
   // their first push lands (M15h).
   const quick = () =>
-    busy(async () => {
+    busy(play, async () => {
       const first = (await remote.listGames().catch(() => [null])).length === 0;
       const view = await remote.createGame({ bots: ["bot"], dayLength: "lunch", guided: first });
       if (first) setGuided(view.id, true);
       go(`/g/${view.id}`);
     });
-  const invite = () => busy(() => remote.openRoom().then((room) => go(`/room/${room.code}`)));
+  const invite = () => busy(room, () => remote.openRoom().then((r) => go(`/room/${r.code}`)));
 
-  async function busy(f) {
+  // the button pressed says it is working (a spinner, aria-busy); the others wait until it is done
+  async function busy(pressed, f) {
+    if (pressed.hasAttribute("aria-busy")) return; // a second tap while the first is on its way
     error.textContent = "";
-    for (const b of [play, room, button]) b.disabled = true;
+    for (const b of [play, room, button]) b.disabled = b !== pressed;
+    pressed.setAttribute("aria-busy", "true");
     try {
       await f();
     } catch (e) {
       error.textContent = e.message;
       for (const b of [play, room, button]) b.disabled = !me;
+    } finally {
+      pressed.removeAttribute("aria-busy");
     }
   }
 
@@ -107,7 +112,17 @@ export function startScreen({ remote, go, me, failure = null, notice = "", signO
     error,
     yours,
     me && emailSettings(remote),
-    el("details", { class: "more" }, el("summary", {}, "more: set up a game by hand"), form()),
+    el(
+      "details",
+      { class: "more" },
+      el(
+        "summary",
+        {},
+        el("span", {}, "More: set up a game by hand"),
+        el("span", { class: "desc" }, "bots, people at this device, day length"),
+      ),
+      form(),
+    ),
     legalFoot(),
     el(
       "p",

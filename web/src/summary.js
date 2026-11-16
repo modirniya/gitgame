@@ -4,8 +4,14 @@
 import { el } from "./dom.js";
 import { asOf, strip } from "./table.js";
 import { RECEIPT, SUMMARY } from "./copy.js";
+import { icon } from "./icons.js";
 
-const mark = { ok: "✓", reject: "✗", warn: "!" };
+// each op's mark, from the one icon family, named for a screen reader; a plain op's dot is only decoration
+const MARKS = { ok: ["check", "done"], reject: ["close", "failed"], warn: ["bang", "warning"] };
+const mark = (tone) => {
+  const [name, label] = MARKS[tone] ?? ["dot"];
+  return el("span", { class: "mark" }, icon(name, { label }));
+};
 
 /** `step` is a summary step from playback.js; `last` says whether a screen follows it. */
 export function summaryScreen(step, { view, you, next, last }) {
@@ -19,7 +25,7 @@ export function summaryScreen(step, { view, you, next, last }) {
     el(
       "div",
       { class: "body" },
-      el("h1", {}, `day ${step.day} closed`),
+      el("h1", {}, `Day ${step.day} closed`),
       step.order.length > 1 &&
         el("p", { class: "order k" }, SUMMARY.order(step.order.map((id) => (id === you ? "yours" : `${id}'s`)))),
       el(
@@ -30,12 +36,12 @@ export function summaryScreen(step, { view, you, next, last }) {
               el(
                 "li",
                 { class: m.tone ?? "" },
-                el("span", { class: "mark" }, mark[m.tone] ?? "·"),
+                mark(m.tone),
                 el("span", { class: "cmd" }, m.command),
                 el("span", { class: "did" }, RECEIPT[m.kind]?.(m) ?? m.notes?.[0] ?? m.output[0] ?? ""),
               ),
             )
-          : el("li", { class: "warn" }, el("span", { class: "mark" }, "!"), SUMMARY.empty),
+          : el("li", { class: "warn" }, mark("warn"), SUMMARY.empty),
       ),
       el(
         "p",

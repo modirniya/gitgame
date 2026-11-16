@@ -9,74 +9,133 @@
 @import "./playback.css";
 @import "./release.css";
 
+/* The tokens (design-system/gitgame/MASTER.md §4–6, the Studio direction). Every text and edge pair is checked in both
+   themes by design-system/gitgame/contrast (136 pairs, AA). The deck's colors, the BUG and INCIDENT fills, the label
+   on them and the terminal are printed objects: the same in both themes. */
 :root {
-  --ground: #14181c;
-  --ground-2: #1c2227;
-  --paper: #252c33;
+  --ground: #151a22;
+  --ground-2: #1b222c;
+  /* menus and sheets lifted over the ground */
+  --ground-raised: #1b222c;
+  --paper: #232b37;
+  --paper-hover: #2b3442;
   --raised: var(--paper);
-  --ink: #e7ecef;
-  --muted: #a0adb7;
+  --ink: #eef2f7;
+  --muted: #a9b4c4;
+  /* not for text: hatches and a band with no file */
   --faint: #5e6b75;
-  --line: #343e47;
-  /* Buttons, links and the prompt. The cards' file colors (rules/deck.json) are teal, violet, coral, blue and amber,
-     so the players' own colors sit outside that family: an api.py card must never read as the other player's. */
-  --accent: #3ec1b3;
-  --you: #ff6ac1;
-  --you-soft: #3a1d31;
-  --other: #9aa3b5;
-  --other-soft: #262d38;
-  --ok: #52c98f;
-  --ok-soft: #16301f;
-  --reject: #ff6f5b;
-  --reject-soft: #3b1f1a;
-  --warn: #eaaa42;
-  --warn-soft: #34290f;
-  --cmd: #3c4955;
+  /* decorative dividers; an edge someone must find (a field, a button) is --field-line, 3:1 */
+  --line: #323c4b;
+  --field-line: #8492a6;
+  /* Buttons, the focus ring and the prompt: the logo's teal. The cards' file colors (rules/deck.json) are teal, violet,
+     coral, blue and amber, so the players' own colors sit outside that family: an api.py card must never read as the
+     other player's. */
+  --accent: #5cd6c8;
+  --accent-hover: #7fe1d6;
+  --accent-press: #49c4b6;
+  --accent-soft: #123735;
+  --on-accent: #06201d;
+  --link: #6fdcd0;
+  --you: #ff7cc8;
+  --you-soft: #3b1d33;
+  --other: #a8b3c6;
+  --other-soft: #28303d;
+  --ok: #5fd39b;
+  --ok-soft: #163126;
+  --reject: #ff8473;
+  --reject-soft: #3d2220;
+  --warn: #efb24f;
+  --warn-soft: #372b14;
+  --cmd: #3a4657;
+  --on-cmd: #ffffff;
+  --on-band: #11161a;
+  --bug-fill: #ff7a67;
+  --incident-fill: #eaaa42;
   /* the hatch on the back of a face-down commit */
   --back-1: #4a5661;
   --back-2: #404c56;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.5);
-  /* the transcript is a terminal: dark in either theme */
-  --term: #0d0f12;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-2: 0 8px 24px rgb(0 0 0 / 0.45);
+  /* the transcript is a terminal: dark in either theme, with its own colors for what Git says */
+  --term: #0e1218;
   --term-ink: #d8d5ce;
-  --term-muted: #7d828c;
+  --term-muted: #8d929b;
   --term-field: #1a1d22;
+  --term-ok: #52c98f;
+  --term-reject: #ff7a67;
+  --term-warn: #eaaa42;
+  --term-you: #ff6ac1;
+  --term-other: #a3acbd;
   --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* type: nothing anyone must read is under 12 px */
+  --t-caption: 0.75rem;
+  --t-small: 0.875rem;
+  --t-body: 1rem;
+  --t-lede: 1.125rem;
+  --t-h3: 1.0625rem;
+  --t-h2: 1.25rem;
+  --t-h1: clamp(1.625rem, 1.3rem + 1.2vw, 2rem);
+  --t-display: clamp(2rem, 1.2rem + 3vw, 2.75rem);
+  /* spacing, on 4 px */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
   /* a card's width at each size; the hand's is the one the fan counts with (hub.js) */
   --card-xl: 132px;
   --card-lg: 96px;
   --card-md: 64px;
   --card-sm: 44px;
-  --r: 14px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r: 20px;
+  --r-pill: 999px;
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 400ms;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
   color-scheme: dark;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
-    --ground: #eee9df;
-    --ground-2: #e4ddd0;
+    --ground: #f3f6f9;
+    --ground-2: #e8edf2;
+    --ground-raised: #ffffff;
     --paper: #ffffff;
-    --ink: #1b2228;
-    --muted: #5b6975;
+    --paper-hover: #eef3f7;
+    --ink: #18202b;
+    --muted: #4f5b6b;
     --faint: #a7b1ba;
-    --line: #d3cbbd;
-    --accent: #1d8c80;
-    --you: #c4267f;
+    --line: #d5dde6;
+    --field-line: #7b8796;
+    --accent: #0f7168;
+    --accent-hover: #0c5f57;
+    --accent-press: #0a5049;
+    --accent-soft: #dcf2ef;
+    --on-accent: #ffffff;
+    --link: #0d665e;
+    --you: #b01f70;
     --you-soft: #f8dcec;
-    --other: #6b7385;
-    --other-soft: #e3e6ee;
-    --ok: #23865a;
+    --other: #566073;
+    --other-soft: #e4e8ef;
+    --ok: #1b7449;
     --ok-soft: #dcf1e5;
-    --reject: #cf3d29;
+    --reject: #b52f1d;
     --reject-soft: #fbe2dd;
-    --warn: #a86f0c;
+    --warn: #865600;
     --warn-soft: #faedd2;
-    --cmd: #2f3a44;
+    --cmd: #2c3644;
     --back-1: #6b7a86;
     --back-2: #5c6b77;
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.14), 0 2px 8px rgb(0 0 0 / 0.06);
+    --shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 2px 8px rgb(16 24 40 / 0.06);
+    --shadow-2: 0 6px 18px rgb(16 24 40 / 0.12);
     color-scheme: light;
   }
 }
@@ -89,7 +148,7 @@ body {
   margin: 0;
   background: var(--ground);
   color: var(--ink);
-  font: 16px/1.45 var(--sans);
+  font: 16px/1.5 var(--sans);
   /* `--force` must read as two hyphens, as it does in a real terminal */
   font-variant-ligatures: none;
   -webkit-text-size-adjust: 100%;
@@ -102,16 +161,34 @@ body {
   padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
 }
 
+/* Headings are sans (Studio); the $ prompt is kept for where Git speaks: a command as a screen's title (h1.cmd). */
 h1,
-h2 {
-  font: 700 1rem/1.25 var(--mono);
+h2,
+h3 {
+  font-family: var(--sans);
+  font-weight: 700;
+  letter-spacing: -0.015em;
   margin: 0 0 8px;
   overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 h1 {
-  font-size: 1.5rem;
+  font-size: var(--t-h1);
+  line-height: 1.15;
 }
-h1::before {
+h2 {
+  font-size: var(--t-h2);
+  line-height: 1.25;
+}
+h3 {
+  font-size: var(--t-h3);
+  line-height: 1.3;
+}
+h1.cmd {
+  font-family: var(--mono);
+  letter-spacing: -0.01em;
+}
+h1.cmd::before {
   content: "$ ";
   color: var(--accent);
 }
@@ -121,7 +198,12 @@ code {
 }
 
 a {
-  color: var(--accent);
+  color: var(--link);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration-thickness: 2px;
 }
 .muted,
 .lede {
@@ -142,15 +224,36 @@ a {
   min-height: 1.45em;
   white-space: pre-wrap;
 }
+.icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
-/* ---------- forms ---------- */
+/* ---------- forms: 48 px fields with a 3:1 edge, the label above, the ring on focus ---------- */
 
 form {
   display: grid;
   gap: 6px;
 }
 label {
-  color: var(--muted);
+  color: var(--ink);
+  font-size: var(--t-small);
+  font-weight: 500;
   margin-top: 8px;
 }
 input,
@@ -158,63 +261,170 @@ select,
 textarea {
   font: inherit;
   color: inherit;
-  min-height: 44px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--paper);
-  padding: 0 12px;
-}
-button {
   min-height: 48px;
-  padding: 10px 16px;
-  font: 600 1rem/1.2 var(--sans);
-  color: var(--ink);
+  border-radius: var(--r-md);
+  border: 1px solid var(--field-line);
   background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  padding: 0 16px;
+  transition:
+    border-color var(--dur-1) var(--ease),
+    box-shadow var(--dur-1) var(--ease);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent);
+}
+input[aria-invalid="true"] {
+  border: 2px solid var(--reject);
+  padding: 0 15px;
+}
+input:disabled,
+select:disabled,
+textarea:disabled {
+  border-style: dashed;
+  background: transparent;
+  color: var(--muted);
+}
+select {
+  appearance: none;
+  padding-right: 44px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 22px) 50%,
+    calc(100% - 16px) 50%;
+  background-size:
+    6px 6px,
+    6px 6px;
+  background-repeat: no-repeat;
+}
+input[type="checkbox"] {
+  appearance: none;
+  flex: none;
+  display: inline-grid;
+  place-content: center;
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 2px solid var(--field-line);
+  border-radius: 6px;
+  background: var(--paper);
   cursor: pointer;
-  touch-action: manipulation;
 }
-button:disabled {
-  opacity: 0.42;
-  cursor: default;
+input[type="checkbox"]::after {
+  content: "";
+  width: 10px;
+  height: 6px;
+  border-left: 2.5px solid var(--on-accent);
+  border-bottom: 2.5px solid var(--on-accent);
+  transform: translateY(-1px) rotate(-45deg) scale(0);
+  transition: transform var(--dur-1) var(--ease);
 }
-button.primary {
+input[type="checkbox"]:checked {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--ground);
+}
+input[type="checkbox"]:checked::after {
+  transform: translateY(-1px) rotate(-45deg) scale(1);
+}
+
+/* ---------- buttons: pills, a fill on hover, a press that never moves the layout, disabled dashed (not faded),
+   busy with a spinner ---------- */
+
+button,
+a.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 10px 20px;
+  font: 600 1rem/1.2 var(--sans);
+  color: var(--ink);
+  text-align: center;
+  text-decoration: none;
+  text-wrap: balance;
+  background: var(--paper);
+  border: 1px solid var(--field-line);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background-color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease),
+    transform var(--dur-1) var(--ease);
+}
+button.small,
+a.button.small {
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: var(--t-small);
+}
+button.primary,
+a.button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
   font-weight: 700;
+}
+button:active:not(:disabled):not(.card),
+a.button:active {
+  transform: scale(0.97);
+}
+button.primary:active:not(:disabled),
+a.button.primary:active {
+  background: var(--accent-press);
+  border-color: var(--accent-press);
+}
+button:disabled:not(.card) {
+  cursor: not-allowed;
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--field-line);
+  color: var(--muted);
+}
+button[aria-busy="true"] {
+  cursor: progress;
+}
+button[aria-busy="true"]::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 :focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
-/* a link that leads somewhere as a button would: the game's button, for an <a> */
-a.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 48px;
-  padding: 0 16px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--paper);
-  color: var(--ink);
-  font-weight: 600;
-  text-decoration: none;
-}
-a.button.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--ground);
-  font-weight: 700;
-}
 @media (hover: hover) {
-  button:hover:not([disabled]):not(.card) {
-    border-color: var(--muted);
+  button:hover:not(:disabled):not(.card):not(.primary),
+  a.button:hover:not(.primary) {
+    background: var(--paper-hover);
   }
-  button.primary:hover:not([disabled]) {
-    filter: brightness(1.1);
+  button.primary:hover:not(:disabled),
+  a.button.primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
   }
 }
 
@@ -225,33 +435,35 @@ a.button.primary {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     transition: none !important;
     animation: none !important;
   }
 }
 
-/* ---------- the transcript ---------- */
+/* ---------- the transcript: a terminal, dark in either theme ---------- */
 
 .transcript {
   font-family: var(--mono);
   margin: 0 0 16px;
-  padding: 10px 12px;
-  border-radius: 6px;
+  padding: 12px 16px;
+  border-radius: var(--r-md);
   background: var(--term);
   color: var(--term-ink);
-  font-size: 0.8rem;
-  line-height: 1.5;
+  font-size: var(--t-small);
+  line-height: 1.6;
   overflow-x: auto;
 }
 .transcript .lines {
   margin-bottom: 6px;
 }
 .transcript .who {
-  color: var(--other);
+  color: var(--term-other);
 }
 .transcript .mine .who {
-  color: var(--you);
+  color: var(--term-you);
 }
 /* Git's alignment survives, and a long line wraps on a phone instead of hiding behind a sideways scroll */
 .transcript .out,
@@ -263,24 +475,23 @@ a.button.primary {
   color: var(--term-muted);
 }
 .transcript .ok .out {
-  color: var(--ok);
+  color: var(--term-ok);
 }
 .transcript .reject .out {
-  color: var(--reject);
+  color: var(--term-reject);
 }
 .transcript .warn .out {
-  color: var(--warn);
+  color: var(--term-warn);
 }
 
 /* ---------- moments and the handoff (the release is in release.css) ---------- */
 
 .moment .transcript {
   margin: 0;
-  font-size: 0.85rem;
 }
 h1.cmd {
   margin: 0;
-  font-size: 1.375rem;
+  font-size: 1.5rem;
 }
 .moment.ok h1.cmd {
   color: var(--ok);
@@ -299,8 +510,8 @@ h1.cmd {
 }
 .said {
   margin: 0;
-  font-size: 1.125rem;
-  line-height: 1.45;
+  font-size: var(--t-lede);
+  line-height: 1.5;
 }
 .then {
   margin: 0;
@@ -309,43 +520,46 @@ h1.cmd {
 .then.warn {
   color: var(--warn);
 }
+/* a moment's tone is an edge as well as a color */
 .moment.reject .transcript {
-  box-shadow: inset 3px 0 0 var(--reject);
+  box-shadow: inset 4px 0 0 var(--term-reject);
 }
 .moment.ok .transcript {
-  box-shadow: inset 3px 0 0 var(--ok);
+  box-shadow: inset 4px 0 0 var(--term-ok);
 }
 .moment.warn .transcript {
-  box-shadow: inset 3px 0 0 var(--warn);
+  box-shadow: inset 4px 0 0 var(--term-warn);
 }
 .progress {
-  font: 500 0.8rem var(--mono);
+  font: 500 var(--t-caption) var(--sans);
+  font-variant-numeric: tabular-nums;
 }
 .incident-card {
-  width: min(280px, 100%);
+  width: min(300px, 100%);
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--r);
   background: var(--paper);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-2);
 }
 .incident-card .band {
   display: block;
-  padding: 0 14px;
-  background: var(--warn);
-  color: #fff;
-  font: 700 11px/28px var(--sans);
-  letter-spacing: 0.12em;
+  padding: 0 16px;
+  background: var(--incident-fill);
+  color: var(--on-band);
+  font: 700 var(--t-caption) / 30px var(--sans);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .incident-card h2 {
   margin: 0;
-  padding: 18px 16px 6px;
-  font: 700 1.5rem/1.2 var(--sans);
+  padding: 16px 16px 4px;
+  font-size: 1.375rem;
+  line-height: 1.2;
 }
 .incident-card p {
   margin: 0;
-  padding: 0 16px 20px;
+  padding: 0 16px 16px;
   color: var(--muted);
 }
 .drawn {
@@ -354,15 +568,29 @@ h1.cmd {
   justify-content: center;
 }
 
+/* ---------- a label: small caps over a group (main, your branch, staged) ---------- */
+
+.k {
+  font: 600 var(--t-caption) / 1.4 var(--sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 /* ---------- the replay ---------- */
 
 .replay-nav {
   display: grid;
-  grid-template-columns: 56px 1fr 56px;
+  grid-template-columns: 48px 1fr 48px;
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
   text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.replay-nav button {
+  padding: 0;
 }
 
 /* ---------- who you are ---------- */
@@ -371,28 +599,45 @@ h1.cmd {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 10px;
+  gap: 0 10px;
   margin-bottom: 16px;
-  font-size: 0.85rem;
+  font-size: var(--t-small);
 }
 .whoami .handle {
+  font-family: var(--mono);
   font-weight: 700;
+}
+.whoami a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .avatar {
   border-radius: 50%;
 }
+/* a button that reads as a link: quiet, underlined, still a 44 px target */
 button.link {
-  min-height: 32px;
-  padding: 0;
+  min-height: 44px;
+  padding: 0 4px;
   border: none;
   background: none;
-  color: var(--accent);
+  color: var(--link);
+  font-weight: 500;
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+@media (hover: hover) {
+  button.link:hover:not(:disabled) {
+    background: none;
+    text-decoration-thickness: 2px;
+  }
 }
 .nudge {
-  padding: 10px 12px;
-  border-left: 3px solid var(--warn);
-  background: var(--raised);
+  padding: 12px 16px;
+  border: 1px solid var(--warn);
+  border-radius: var(--r-md);
+  background: var(--warn-soft);
 }
 
 /* ---------- start and rooms ---------- */
@@ -402,8 +647,66 @@ button.link {
   gap: 8px;
   margin: 16px 0 8px;
 }
-details.more {
-  margin-top: 16px;
+/* a settings row: a surface you can see is a control, with a chevron that turns */
+details.more,
+details.email {
+  margin-top: 12px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+}
+details.more > summary,
+details.email > summary {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 12px;
+  min-height: 64px;
+  padding: 12px 16px;
+  border-radius: var(--r);
+  color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+}
+details.more > summary::-webkit-details-marker,
+details.email > summary::-webkit-details-marker {
+  display: none;
+}
+details.more > summary::after,
+details.email > summary::after {
+  content: "";
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform var(--dur-2) var(--ease);
+}
+details[open].more > summary::after,
+details[open].email > summary::after {
+  transform: translateY(2px) rotate(225deg);
+}
+details.more > summary .desc,
+details.email > summary .desc {
+  grid-column: 1;
+  font-size: var(--t-small);
+  font-weight: 400;
+  color: var(--muted);
+}
+@media (hover: hover) {
+  details.more > summary:hover,
+  details.email > summary:hover {
+    background: var(--paper-hover);
+  }
+}
+details.more > :not(summary),
+details.email > :not(summary) {
+  margin: 0 16px 16px;
 }
 /* the source of this version, the privacy policy and the terms (source.js): fine print, like the notice under it */
 .legal-foot {
@@ -414,96 +717,196 @@ details.more {
 .legal-foot a {
   color: inherit;
 }
-details.more summary {
-  cursor: pointer;
-  color: var(--muted);
-  min-height: 44px;
+/* the room's link: a read-only field to copy, its copy button beside it */
+.share {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 8px;
 }
 .share code {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--r-md);
+  background: var(--paper);
   overflow-wrap: anywhere;
-  color: var(--accent);
+  color: var(--link);
+}
+button.copy {
+  flex: none;
+  width: 48px;
+  min-height: 48px;
+  padding: 0;
+}
+h1 code {
+  font-weight: 600;
+}
+/* waiting: a status to read, with a softly pulsing dot (still under reduced motion), above what it waits to enable */
+.pending {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  font-size: var(--t-small);
+  color: var(--muted);
+}
+.pending::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--warn);
+  animation: breathe 1.6s var(--ease) infinite;
+}
+@keyframes breathe {
+  50% {
+    opacity: 0.35;
+  }
 }
 
-/* ---------- your games ---------- */
+/* ---------- your games: a row is the link, its state told by a dot, a color and the words ---------- */
 
+.your-games h2 {
+  font-size: var(--t-h3);
+  margin: 24px 0 8px;
+}
 .your-games ul {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 .your-games li {
+  position: relative;
   display: grid;
-  padding: 8px 10px;
-  border-left: 3px solid var(--line);
-  background: var(--raised);
-  border-radius: 4px;
+  gap: 2px;
+  min-height: 64px;
+  align-content: center;
+  padding: 12px 40px 12px 36px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
 }
-.your-games li.due {
-  border-left-color: var(--warn);
+.your-games li::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--field-line);
 }
-.your-games li.done {
-  opacity: 0.7;
+.your-games li::after {
+  content: "";
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+}
+.your-games li.due::before {
+  background: var(--warn);
+  box-shadow: 0 0 0 4px var(--warn-soft);
+}
+.your-games li.done::before {
+  background: transparent;
+  border: 2px solid var(--field-line);
+}
+/* the whole row is the link */
+.your-games li a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+.your-games li a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.your-games li:hover {
+  background: var(--paper-hover);
 }
 .your-games .status {
-  font-size: 0.8rem;
+  font-size: var(--t-small);
   color: var(--muted);
 }
 .your-games li.due .status {
   color: var(--warn);
+  font-weight: 600;
 }
 
 .email form {
-  margin-top: 8px;
+  margin-top: 0;
 }
 label.check {
   display: flex;
-  gap: 8px;
-  align-items: center;
+  gap: 12px;
+  align-items: flex-start;
+  min-height: 44px;
+  padding: 8px 0;
+  margin: 0;
   color: var(--ink);
+  font-size: var(--t-body);
+  font-weight: 400;
+  cursor: pointer;
 }
 label.check input {
-  min-height: auto;
+  margin-top: 1px;
 }
 .action .will {
-  font-size: 0.65rem;
-  color: var(--accent);
+  font-size: var(--t-caption);
+  color: var(--link);
 }
-
-/* the bot thinking out loud (event-screens §5) */
 
 /* ---------- the guided first game ---------- */
 
 .guide {
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: var(--ok-soft);
-  border: 2px solid var(--ok);
-}
-.guide {
   display: grid;
   gap: 4px;
+  padding: 12px 16px;
+  border-radius: var(--r);
+  background: var(--ok-soft);
+  border: 1px solid var(--ok);
 }
 .guide-step {
-  font: 700 11px var(--mono);
+  font: 600 var(--t-caption) / 1.4 var(--sans);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ok);
+}
+.guide-bar {
+  display: flex;
+  gap: 3px;
+  margin: 2px 0 4px;
+}
+.guide-bar i {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ok);
+  opacity: 0.3;
+}
+.guide-bar i.on {
+  opacity: 1;
 }
 .guide p {
   margin: 0;
 }
 .guide button.link {
   justify-self: start;
-  min-height: 36px;
   padding: 0;
-  border: 0;
-  background: none;
-  color: var(--accent);
-  text-decoration: underline;
+  color: var(--link);
 }
 .guide-target {
   outline: 3px solid var(--accent);
@@ -523,8 +926,10 @@ label.check input {
   gap: 6px;
 }
 .feedback textarea {
-  padding: 10px 12px;
+  min-height: 112px;
+  padding: 12px 16px;
   resize: vertical;
+  line-height: 1.5;
 }
 .feedback-send {
   display: flex;
@@ -534,5 +939,6 @@ label.check input {
 }
 .feedback .count {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: var(--t-small);
+  font-variant-numeric: tabular-nums;
 }

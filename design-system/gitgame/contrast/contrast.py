@@ -1,0 +1,16 @@
+"""WCAG 2.x contrast for token pairs. Usage: python3 contrast.py <theme-json>  (dict: theme -> {token: hex}), pairs below."""
+import json, sys
+def lum(h):
+    h = h.lstrip("#"); r, g, b = (int(h[i:i+2], 16) / 255 for i in (0, 2, 4))
+    f = lambda c: c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+def ratio(a, b):
+    la, lb = sorted((lum(a), lum(b)), reverse=True); return (la + 0.05) / (lb + 0.05)
+themes = json.load(open(sys.argv[1])); pairs = json.load(open(sys.argv[2]))
+bad = 0
+for theme, t in themes.items():
+    for fg, bg, need, what in pairs:
+        f = t.get(fg, fg); b = t.get(bg, bg)
+        r = ratio(f, b); ok = r >= need; bad += not ok
+        print(f"{'PASS' if ok else 'FAIL'} {theme:5} {r:5.2f} (need {need}) {fg} on {bg}  [{what}]")
+print("failures:", bad)

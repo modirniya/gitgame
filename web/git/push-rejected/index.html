@@ -7,7 +7,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#14161a" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#151a22" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3f6f9" />
     <title>My push was rejected · %BRAND%</title>
     <meta
       name="description"
@@ -49,14 +50,27 @@
   </head>
   <body>
     <header class="site-head">
-      <a class="brand" href="/">$ %BRAND%</a>
-      <nav aria-label="the site">
+      <a class="brand" href="/"
+        ><img src="/icon.svg" alt="" width="28" height="28" /><span class="word">%BRAND%</span></a
+      >
+      <nav class="links" aria-label="the site">
         <a href="/new-to-git">new to Git?</a>
-        <a href="/git">what Git said</a>
+        <a aria-current="true" href="/git">what Git said</a>
         <a href="/teach">teach</a>
         <a href="/teams">teams</a>
-        <a class="button primary" href="/play">play</a>
       </nav>
+      <details class="menu">
+        <summary class="button small">
+          menu <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+        </summary>
+        <nav aria-label="the site, folded">
+          <a href="/new-to-git">new to Git?</a>
+          <a aria-current="true" href="/git">what Git said</a>
+          <a href="/teach">teach</a>
+          <a href="/teams">teams</a>
+        </nav>
+      </details>
+      <a class="button primary small" href="/play">play</a>
     </header>
 
     <main class="page">

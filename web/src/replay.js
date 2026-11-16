@@ -7,6 +7,7 @@ import { table } from "./table.js";
 import { moments } from "./moments.js";
 import { transcript } from "./transcript.js";
 import { legalFoot } from "./source.js";
+import { icon } from "./icons.js";
 
 export function replayScreen({ remote, go, id, day }) {
   const node = el("section", { class: "screen replay" });
@@ -26,9 +27,13 @@ export function replayScreen({ remote, go, id, day }) {
       el(
         "nav",
         { class: "replay-nav", "aria-label": "days" },
-        el("button", { disabled: day === 0, onclick: () => to(day - 1), "aria-label": "the day before" }, "←"),
+        el("button", { disabled: day === 0, onclick: () => to(day - 1), "aria-label": "the day before" }, icon("left")),
         el("span", {}, day === 0 ? "as created" : `after day ${day} of ${last}`),
-        el("button", { disabled: day >= last, onclick: () => to(day + 1), "aria-label": "the day after" }, "→"),
+        el(
+          "button",
+          { disabled: day >= last, onclick: () => to(day + 1), "aria-label": "the day after" },
+          icon("right"),
+        ),
       ),
       table(view),
       day > 0 && transcript(ms, you, { label: `day ${day}` }),

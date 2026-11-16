@@ -3,6 +3,22 @@
 // does. Like a game, the room is fetched again whenever the remote says it changed (charter decision 9).
 import { el, mount } from "./dom.js";
 import { legalFoot } from "./source.js";
+import { icon } from "./icons.js";
+
+// The link's copy button: an icon with a name, which turns into a check for two seconds once the link is copied.
+function copyButton(link) {
+  const button = el("button", { class: "copy small", type: "button", "aria-label": "copy the link" }, icon("copy"));
+  button.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(link);
+    button.replaceChildren(icon("check"));
+    button.setAttribute("aria-label", "copied");
+    setTimeout(() => {
+      button.replaceChildren(icon("copy"));
+      button.setAttribute("aria-label", "copy the link");
+    }, 2000);
+  });
+  return button;
+}
 
 const LENGTHS = { live: "live · 60s days", lunch: "lunch · 5m days", correspondence: "correspondence · 24h days" };
 
@@ -42,7 +58,7 @@ export function roomScreen({ remote, go, code }) {
 
     mount(
       node,
-      el("h1", {}, `room ${room.code}`),
+      el("h1", {}, "Room ", el("code", {}, room.code)),
       room.game_id
         ? el("p", {}, "This room's game has started. ", el("a", { href: `#/g/${room.game_id}` }, "watch the table"))
         : el(
@@ -51,8 +67,7 @@ export function roomScreen({ remote, go, code }) {
             "Send this link to whoever you're playing: ",
             el("code", {}, link),
             " ",
-            navigator.clipboard &&
-              el("button", { class: "link", onclick: () => navigator.clipboard.writeText(link) }, "copy"),
+            navigator.clipboard && copyButton(link),
           ),
       el(
         "ol",
@@ -112,11 +127,9 @@ export function roomScreen({ remote, go, code }) {
       bots,
       el("label", { for: "room-length" }, "day length"),
       length,
-      el(
-        "button",
-        { class: "primary", type: "submit", disabled: seats < 2 },
-        seats < 2 ? "waiting for a second seat" : "start the game",
-      ),
+      // waiting is a status to read, above the button it is waiting to enable (MASTER.md: no status drawn as a button)
+      seats < 2 && el("p", { class: "pending", role: "status" }, "waiting for a second seat"),
+      el("button", { class: "primary", type: "submit", disabled: seats < 2 }, "start the game"),
     );
   }
 

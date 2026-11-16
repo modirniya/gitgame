@@ -23,8 +23,9 @@ const manifest = () =>
     id: "/",
     start_url: "/play",
     display: "standalone",
-    background_color: "#14161a",
-    theme_color: "#14161a",
+    // the dark ground (src/styles.css): a theme follows the OS once the page is up, and dark is the default
+    background_color: "#151a22",
+    theme_color: "#151a22",
     icons: [{ src: "icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" }],
   });
 
@@ -34,6 +35,13 @@ const notice = `<p class="trademark">${trademark.before}<a href="${trademark.hre
 const links = footLinks.map(({ href, text }) => `<a href="${href}">${text}</a>`).join("\n      ");
 const withFooter = (html) =>
   html.replace(/(<footer class="site-foot">[\s\S]*?)(\n?\s*<\/footer>)/, `$1\n      ${links}\n      ${notice}$2`);
+// A page whose header folds its links into "menu" gets the few lines that close it on Escape (src/menu.js).
+// It runs before Vite reads the page's scripts, so the build bundles it like any other.
+const menu = { name: "menu", transformIndexHtml: { order: "pre", handler: (html) => withMenu(html) } };
+const withMenu = (html) =>
+  html.includes('class="menu"')
+    ? html.replace("</head>", '  <script type="module" src="/src/menu.js"></script>\n  </head>')
+    : html;
 
 const brand = {
   name: "brand",
@@ -112,7 +120,7 @@ const files = {
 };
 
 export default defineConfig({
-  plugins: [brand, captures, addresses, files],
+  plugins: [menu, brand, captures, addresses, files],
   build: {
     rollupOptions: {
       input: {

@@ -1,27 +1,37 @@
 /* The card (event-screens §4): one component at every size, everything in it scaled by its width, --w. A colored
-   band says what kind of card it is; the file is in monospace, the lines big; the BUG tag sits top left, the one
-   corner an overlapping hand never covers. A commit has two sides so it can flip in place: a hatch with its hash,
-   and the printed face. */
+   band says what kind of card it is; the file is in monospace, the lines big; the BUG tag sits at the band's right
+   end. A commit has two sides so it can flip in place: a hatch with its hash, and the printed face. Nothing on a card
+   that someone must read is under 12 px (design-system/gitgame/MASTER.md): where the deck's word or a file name won't
+   fit at 12 px, the card leaves it to its band color and its label. */
 
 .card {
   --w: var(--card-md);
   position: relative;
   flex: none;
   display: grid;
-  grid-template-rows: 1.4em 1fr;
+  grid-template-rows: max(14px, calc(var(--w) * 0.21)) 1fr;
   width: var(--w);
   height: calc(var(--w) * 1.4);
   min-height: 0;
   padding: 0;
-  font: 600 calc(var(--w) * 0.145) / 1.2 var(--mono);
+  /* a card that is a button keeps its grid: none of the button's centring or gaps */
+  justify-content: stretch;
+  align-items: stretch;
+  gap: 0;
+  text-wrap: wrap;
+  font: 600 max(12px, calc(var(--w) * 0.145)) / 1.2 var(--mono);
   text-align: center;
   color: var(--ink);
   background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: calc(var(--w) * 0.09);
+  border-radius: max(8px, calc(var(--w) * 0.11));
   box-shadow: var(--shadow);
   overflow: hidden;
   user-select: none;
+  container-type: inline-size;
+  transition:
+    transform var(--dur-2) var(--ease),
+    box-shadow var(--dur-2) var(--ease);
 }
 .card.sm {
   --w: var(--card-sm);
@@ -32,68 +42,144 @@
 .card.xl {
   --w: var(--card-xl);
 }
+/* the deck's word on the band, only where it fits at 12 px */
 .card .band {
   background: var(--band, var(--faint));
-  color: #fff;
-  font: 700 0.6em/2.35em var(--sans);
-  letter-spacing: 0.1em;
+  color: var(--on-band);
+  font: 700 0 / 1 var(--sans);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   text-align: left;
-  padding: 0 0.7em;
+  padding: 0 8px;
   white-space: nowrap;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+@container (min-width: 90px) {
+  .card .band {
+    font-size: var(--t-caption);
+  }
+  /* beside a BUG tag the word fits only on a card 100 px wide */
+  .card .band:has(~ .bug) {
+    font-size: 0;
+  }
+}
+@container (min-width: 100px) {
+  .card .band:has(~ .bug) {
+    font-size: var(--t-caption);
+  }
 }
 .card .face {
   display: grid;
   align-content: center;
   justify-items: center;
-  gap: 0.25em;
+  gap: 0.2em;
   padding: 0.3em 0.2em;
   min-width: 0;
 }
+/* a file name too long for its card breaks before its extension (cards.js), nowhere else */
 .card .file {
-  font-size: 0.86em;
-  line-height: 1.2;
-  overflow-wrap: anywhere;
+  font-size: max(12px, 0.86em);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  max-width: 100%;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
 .card .big {
-  font: 700 2.3em/1 var(--sans);
+  font: 700 2.1em/1 var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+/* a small card is a color and its lines: its file is in its label (table.js) and its aria-label */
+@container (max-width: 56px) {
+  .card .file,
+  .card .name {
+    display: none;
+  }
+  .card .big {
+    font-size: 1.1rem;
+  }
 }
 .card .bug {
   position: absolute;
-  left: 0.35em;
-  top: 2.2em;
-  padding: 0 0.5em;
-  border-radius: 0.35em;
-  background: var(--reject);
-  color: #fff;
-  font: 800 0.66em/1.8em var(--sans);
-  letter-spacing: 0.06em;
+  right: 3px;
+  top: 1px;
+  padding: 0 5px;
+  border-radius: 5px;
+  background: var(--bug-fill);
+  color: var(--on-band);
+  font: 800 var(--t-caption) / 18px var(--sans);
+  letter-spacing: 0.04em;
+}
+/* on a small card BUG is a ringed dot in the band's corner; the card's aria-label says "bug" */
+@container (max-width: 56px) {
+  .card .bug {
+    top: 1px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    padding: 0;
+    font-size: 0;
+    border-radius: 50%;
+    border: 2px solid var(--on-band);
+  }
 }
 .card.command {
   --band: var(--cmd);
+}
+.card.command .band {
+  color: var(--on-cmd);
 }
 .card.command .face {
   align-content: start;
   padding-top: 0.9em;
 }
 .card .name {
-  font-size: 0.95em;
+  font-size: max(12px, 0.95em);
   font-weight: 700;
 }
 .card .name .flag {
   white-space: nowrap;
 }
 .card.initial {
-  --band: var(--faint);
+  --band: var(--cmd);
+}
+.card.initial .band {
+  color: var(--on-cmd);
 }
 .card.initial .file {
   color: var(--muted);
 }
+/* picked: lifted, ringed and checked, and aria-pressed says so (cards.js) */
 .card.selected {
+  transform: translateY(-8px);
+  border-color: var(--accent);
   box-shadow:
-    0 0 0 3px var(--ink),
-    var(--shadow);
+    0 0 0 3px var(--accent),
+    var(--shadow-2);
+}
+.card.selected .band {
+  padding-left: 24px;
+}
+.card.selected::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 1px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--paper);
+  background: var(--accent)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E")
+    center / 11px no-repeat;
+}
+@media (hover: hover) {
+  button.card:hover:not(:disabled):not(.selected) {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-2);
+  }
 }
 .card.used {
   opacity: 0.3;
@@ -120,9 +206,9 @@
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-rows: 1.4em 1fr;
+  grid-template-rows: max(14px, calc(var(--w) * 0.21)) 1fr;
   border: 1px solid var(--line);
-  border-radius: calc(var(--w) * 0.09);
+  border-radius: max(8px, calc(var(--w) * 0.11));
   box-shadow: var(--shadow);
   overflow: hidden;
   backface-visibility: hidden;
@@ -135,12 +221,19 @@
   background: repeating-linear-gradient(135deg, var(--back-1) 0 0.3em, var(--back-2) 0.3em 0.6em);
   border-color: var(--back-2);
 }
+/* the hash: decorative (the aria-label has it), shown where it fits at 12 px */
 .card.commit .sha {
   padding: 0.1em 0.35em;
   border-radius: 0.3em;
-  background: rgb(0 0 0 / 0.18);
-  color: rgb(255 255 255 / 0.78);
-  font-size: 0.7em;
+  background: rgb(0 0 0 / 0.55);
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: -0.02em;
+}
+@container (max-width: 63px) {
+  .card.commit .sha {
+    display: none;
+  }
 }
 .card.commit .front {
   background: var(--paper);
