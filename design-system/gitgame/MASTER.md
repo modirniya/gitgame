@@ -1,13 +1,22 @@
 # Git Game design system: MASTER
 
-_Status: Proposed, awaiting review · 2026-11-16_
+_Status: Direction chosen (Studio), element review done, awaiting approval to roll out · 2026-11-16_
 
 The source of truth for the redesign. A page-specific file under `pages/` would override this one; none exist yet.
 It was made with the vendored UI/UX Pro Max skill (`.claude/skills/ui-ux-pro-max/`), but the skill's colour, font and
 style picks are suggestions only. **Git Game already has a visual identity, and the theme is derived from it.** Each
 token below says where it came from.
 
-The prototype is `design-system/gitgame/preview.html` (open it directly; it loads nothing from the network).
+The prototype is `design-system/gitgame/preview.html`: part 1 is the four screen families, part 2 is all 30 elements
+in every state. `themes.html` keeps the five directions that were compared. Both open directly and load nothing from
+the network.
+
+**Decision log**
+
+- 2026-11-16: five directions compared in `themes.html` (Terminal, Commit violet, Tabletop, Phosphor/Printout,
+  Studio). **Studio chosen.** It changes one thing §1 listed under "keep": headings become sans, and the `$ ` / `# `
+  prompts stay only where Git speaks (moments, Git's output, the hub's commands). The logo, the deck, the semantic
+  colours, the always-dark terminal and mono for Git all stay.
 
 ---
 
@@ -91,189 +100,203 @@ the start screen with a finished game, and a room.
 
 ---
 
-## 3. The template
+## 3. The template (Studio)
 
 ### Layouts
 
 **A. Site page** (landing, /git, /teach, /teams, /new-to-git, legal)
 
 ```
-┌ site header ─────────────────────────────────┐  phone: [$ Git Game]  ……  [menu ▾] [play]
-│                                              │  ≥ 900 px: brand · links inline · [play]
-├──────────────────────────────────────────────┤
-│  $ h1 (mono)                                 │  column: 68ch prose measure, 960 px for the landing's grids
-│  lede (sans, muted)                          │
-│  # h2 (mono) …  prose · transcript · callouts │
-├──────────────────────────────────────────────┤
-│ site footer: name · links · trademark notice │
-└──────────────────────────────────────────────┘
+┌ site header (60 px) ───────────────────────────────┐  phone: [logo Git Game] …… [menu ▾] [play]
+│                                                    │  header ≥ 640 px: logo · link pills · [play]
+├────────────────────────────────────────────────────┤
+│  h1 (sans 700)                                     │  68ch prose measure; 960 px for the landing's grids
+│  lede (18 px, muted)                               │
+│  h2 … prose · transcript ($ kept there) · callouts │
+├────────────────────────────────────────────────────┤
+│ site footer: name · links · trademark notice       │
+└────────────────────────────────────────────────────┘
 ```
 
-- The header is a single 56 px row at every width. On phones the six links go into a `menu` disclosure (a
-  `<details>`, no script) that drops a panel under the header. "play" always stays visible as the primary button.
-- Prose is capped at 68ch. Code and transcripts may use the full column.
+- One 60 px row at every width. Under 640 px of header the links fold into a `menu` disclosure, a raised panel under
+  the header. "play" always stays visible. Under 300 px the wordmark folds too, and the logo stays.
+- The current page is a soft accent pill (`aria-current="page"`).
 
-**B. App entry** (start, room). A phone column (max 480 px, 640 px from 600 px wide). Identity line, `$ Git Game`,
-the two primary actions, then **your games** and **settings rows**. A settings row is a full-width disclosure with a
-title, a one-line description, a chevron and a surface. The legal foot sits at the bottom.
+**B. App entry** (start, room). A phone column (max 480 px, 640 px from 600 px wide): who you are, `Git Game`, the two
+primary actions, **your games** as tappable rows, then **settings rows**.
 
-**C. The game.** Unchanged in structure, because event-screens §4 and §9 specify it: a **status bar** (day, `main`
-count, ops left, scores, table), a body, and a **sticky action bar** at the thumb. From 1000 × 560 px the table is a
-panel beside the hub. Only the components inside it change.
+**C. The game.** Unchanged in structure (event-screens §4 and §9): status bar, body, sticky action bar, and from
+1000 × 560 px the table as a panel beside the hub. Inside it, every element follows part 2 of the prototype.
 
-**D. Maintainer** (stats). Single column of panels. Only tokens and the axis text change.
+**D. Maintainer** (stats). KPI tiles, a segmented period switch, panels with bars.
 
-### Shared components
+### Element review
 
-| Component                  | Rules                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Button**                 | Primary (accent fill, `--on-accent` label), secondary (surface fill, `--field-line` border), quiet (no fill, link colour), link-button. 48 px high (44 px minimum), 8 px gaps. Disabled: a dashed border and `--muted` label, not opacity. **Pending** (e.g. waiting for a second seat): the label is a status line _above_ the button, and the button reads what it will do.                                                                                                                                                                                                                                                                                                                          |
-| **Settings row**           | `<details>` styled as a surface row: title, one-line description, chevron that turns. It opens in place. The descriptions in the prototype ("when your pack is due", "bots, people at this device, day length") are **new copy** for you to approve; every other string there is the game's own.                                                                                                                                                                                                                                                                                                                                                                                                       |
-| **Field**                  | 44 px, `--field-line` border (≥ 3:1), visible label above it (never placeholder-only), error under the field in `--reject`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| **Surface**                | `--paper` on `--ground`, 1 px `--line` border, `--r-lg` radius. Used for panels, games list rows, table seats and stat panels.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| **Callout**                | Guide (ok-soft and ok border), nudge (warn rule), incident (warn band with `--on-band` label), note (muted). Label in mono caps 12 px.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| **Chip**                   | Score delta, pointer (you, other), status. Minimum 12 px, `--r-pill`, tinted fill with a text colour that passes on that fill.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| **Playing card**           | As printed: band, file in mono, big `+N`, BUG tag. **Band and BUG text are dark (`--on-band`)** on fixed fills, so every deck colour passes. The band is 20 px (22 px on `lg`). Its word shows only from the `lg` card (96 px) up, and smaller cards keep the colour band without a word. The BUG tag sits in the band's right end on small cards, and under the band, top left, on `lg` cards. File names are 12 px minimum and never break inside a word. **On phones the hand is four cards across the column (about 80 px each), not 64 px.** The face-down hash shows only from `lg` up and is decorative (`aria-hidden`). Card labels never rotate: the wide-screen hand overlaps upright cards. |
-| **Transcript**             | Always dark in both themes, with its own `--term-*` semantic colours. Mono 13–14 px, `pre-wrap`, never side-scrolls the page.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| **Main strip**             | As now. Labels under each slot (file, +N, author) are at least 12 px. Pointer chips are at least 12 px.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| **Data table**             | Scoreboard and stats: mono numerals, right-aligned, rows 36 px, the total row ruled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| **Site header and footer** | One per family A page, generated once (the footer already is, by `vite.config.js`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+Every element the client uses was redrawn in each of its states and checked against §7, in both themes. That is 30
+elements, each with its own card in part 2 of `preview.html`, which lists what changed and why.
+
+| #   | Element                 | States covered                                                                   | What changed                                                                                                                     |
+| --- | ----------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 01  | Brand                   | default, focus                                                                   | Logo `icon.svg` at 28 px + sans wordmark; the `$` moves to Git                                                                   |
+| 02  | Site header             | wide, current page, hover, narrow, menu open                                     | One 60 px row; links fold into "menu" under 640 px; current-page pill                                                            |
+| 03  | Button                  | primary/secondary × default, hover, focus, pressed; disabled, busy, quiet, small | Pills; hover is a fill; pressed scales 0.97 (no layout shift); disabled dashed, not faded; **busy** with spinner and `aria-busy` |
+| 04  | Text link               | default, hover, focus, on tint                                                   | Always underlined; 44 px hit area when standalone                                                                                |
+| 05  | Settings row            | closed, hover, focus, open (email form)                                          | Surface row with title, description, turning chevron (**new copy**)                                                              |
+| 06  | Text field              | empty, hover, focus, error, read-only + action, disabled                         | 48 px, 3:1 border, label above; error is 2 px red border + message via `aria-describedby`; copy confirms with a check (**new**)  |
+| 07  | Select                  | default, focus                                                                   | Native, restyled, drawn chevron, padding so options never run under it                                                           |
+| 08  | Checkbox                | off, on, focus                                                                   | 22 px box in a 44 px row; whole label toggles                                                                                    |
+| 09  | Feedback box            | empty, written, sent                                                             | Tabular counter; "send" turns primary once there is text                                                                         |
+| 10  | Your games              | due, waiting, finished, hover                                                    | Whole row is the link; state told by dot, colour and words; finished games no longer faded                                       |
+| 11  | Messages                | note, error, waiting                                                             | Error panel with icon; waiting is a status line with a pulsing dot                                                               |
+| 12  | Chips                   | you, other, ok, warn, reject                                                     | 26 px pills, 12 px, true minus sign                                                                                              |
+| 13  | Guide and nudge         | guide step, nudge                                                                | Guide gains a 10-step progress bar; 1 px tinted panels                                                                           |
+| 14  | Incident                | default                                                                          | Fixed amber band, dark label (8.95:1, was 2.03:1)                                                                                |
+| 15  | Playing card            | kinds, sizes, hand: default, hover, picked, focus                                | Dark band text; BUG on the band; picked = lift + ring + check + `aria-pressed`; names break only before the extension            |
+| 16  | Main strip              | root, face-down, tip, your push waiting                                          | 12 px labels (were 8–9 px); tip is a neutral pill (red means rejected)                                                           |
+| 17  | Your branch             | empty, staged                                                                    | "empty" at 4.5:1 (was 2.2–2.6:1); filled pile turns solid                                                                        |
+| 18  | Action tile             | ready (with what it will write), hover, pressed, focus, disabled with reason     | Reason at full contrast (was 42% opacity); `.will` 12 px (was 10.4)                                                              |
+| 19  | Status bar and progress | ops left, op spent, playing back                                                 | Sans tabular 14 px; spent op is a ring; named for screen readers; wraps on 320 px phones                                         |
+| 20  | Action bar              | hub, playback, end of game                                                       | Primary always right and widest; above the safe area                                                                             |
+| 21  | Transcript              | output, landed, rejected, comment                                                | `--term-*` colours; tone as a 4 px edge, not colour alone                                                                        |
+| 22  | Moment                  | landed, rejected                                                                 | 24 px mono command with `$`, coloured by outcome                                                                                 |
+| 23  | Bot's step              | avatar, op dots, bubble                                                          | Bubble points at the avatar; op count written out too                                                                            |
+| 24  | Receipt                 | ran, landed, lost                                                                | Marks are icons from one family, with names                                                                                      |
+| 25  | Scoreboard              | rows, total, verdict                                                             | Real table with `scope`; tabular numbers; ruled total                                                                            |
+| 26  | Replay navigation       | first day, middle, focus                                                         | 48 px named icon buttons; disabled at the ends, not hidden                                                                       |
+| 27  | Table sheet and seats   | writing, pack sent                                                               | Grab handle, named close; seat state as chips with words; focus kept inside (**new**)                                            |
+| 28  | Questions (landing)     | closed, open                                                                     | 56 px rows, plus turns to ×                                                                                                      |
+| 29  | Period switch (stats)   | selected, focus                                                                  | One segmented control with `aria-pressed` (was three buttons)                                                                    |
+| 30  | Who you are             | anonymous, linked                                                                | Mono handle; "sign out" gets a 44 px target                                                                                      |
+
+**Icons.** One family, drawn for this: a 24-unit grid, 2 px round strokes, 20 px on screen (chevrons, arrows, check,
+plus, ×, copy, alert, dot). Decorative ones are `aria-hidden`; meaningful ones are named. There are no emoji and no icon
+font.
+
+**How it was checked.** `contrast/audit.js` loads a page at a width and theme and fails on any target under 44 px
+(24 px for links outside prose), any text under 12 px, any clipped label, a sideways page scroll, or a focusable element
+without a ring. `contrast/scan-contrast.js` checks every visible text node against its real background. On the
+prototype, at 320, 375, 768, 1024 and 1440 px in dark and light, both report 0 findings. The audit's first run found
+undersized "link GitHub" and copy buttons, file names clipped on 65 px hand cards, and sideways scrolls at 320 and
+375 px. All were fixed in the element specs above.
 
 ---
 
-## 4. Colour tokens
+## 4. Colour tokens (Studio)
 
-Names stay the ones `styles.css` already uses, so the rollout changes values, not call sites. **New** tokens are marked.
+Names stay the ones `styles.css` already uses where they exist, so the rollout changes values, not call sites.
 
 ### Where the palette comes from
 
-- **Teal `#3EC1B3`**: the logo's branch (`icon.svg`) and the `auth.js` file colour (`rules/deck.json`). This is
-  `--accent`.
-- **Violet `#A88BFA`**: the logo's commit and the `api.py` colour. A deck colour only, never a UI role, so a card never
-  reads as a player.
-- **Coral, blue and amber** (`#F2755C`, `#4C9BE8`, `#E9A83B`): deck file colours. Untouched, because they are rules data
-  and the printed deck.
-- **Near-black ground, warm paper light ground, pink "you", grey-blue "other", red, green and amber semantics**: the
-  existing `styles.css`, per event-screens §4. Light values are darkened just enough to pass.
+- **Teal**: the logo's branch (`#3EC1B3`), softened to `#5CD6C8` at night and deepened to `#0F7168` by day.
+- **Cool slate grounds** replace warm paper and grey-green: Studio's choice, a neutral that lets the deck colours and
+  the teal carry the colour.
+- **Deck colours** (`rules/deck.json`), the **BUG** and **INCIDENT** fills, `--on-band` and the **terminal** tokens are
+  the same as in the earlier proposal: fixed in both themes.
+- **Semantics** keep their meanings and hues (pink you, grey-blue others, red, green, amber), tuned for the new grounds.
 
-### Dark (default)
+| Token             | Dark      | Light     | Today (dark / light)  |
+| ----------------- | --------- | --------- | --------------------- |
+| `--ground`        | `#151a22` | `#f3f6f9` | `#14181c` / `#eee9df` |
+| `--ground-2`      | `#1b222c` | `#e8edf2` | `#1c2227` / `#e4ddd0` |
+| `--ground-raised` | `#1b222c` | `#ffffff` | **new**               |
+| `--paper`         | `#232b37` | `#ffffff` | `#252c33` / `#ffffff` |
+| `--paper-hover`   | `#2b3442` | `#eef3f7` | **new**               |
+| `--ink`           | `#eef2f7` | `#18202b` | `#e7ecef` / `#1b2228` |
+| `--muted`         | `#a9b4c4` | `#4f5b6b` | `#a0adb7` / `#5b6975` |
+| `--line`          | `#323c4b` | `#d5dde6` | `#343e47` / `#d3cbbd` |
+| `--field-line`    | `#8492a6` | `#7b8796` | **new**               |
+| `--accent`        | `#5cd6c8` | `#0f7168` | `#3ec1b3` / `#1d8c80` |
+| `--accent-hover`  | `#7fe1d6` | `#0c5f57` | **new**               |
+| `--accent-press`  | `#49c4b6` | `#0a5049` | **new**               |
+| `--accent-soft`   | `#123735` | `#dcf2ef` | **new**               |
+| `--on-accent`     | `#06201d` | `#ffffff` | **new**               |
+| `--link`          | `#6fdcd0` | `#0d665e` | **new**               |
+| `--you`           | `#ff7cc8` | `#b01f70` | `#ff6ac1` / `#c4267f` |
+| `--you-soft`      | `#3b1d33` | `#f8dcec` | `#3a1d31` / `#f8dcec` |
+| `--other`         | `#a8b3c6` | `#566073` | `#9aa3b5` / `#6b7385` |
+| `--other-soft`    | `#28303d` | `#e4e8ef` | `#262d38` / `#e3e6ee` |
+| `--ok`            | `#5fd39b` | `#1b7449` | `#52c98f` / `#23865a` |
+| `--ok-soft`       | `#163126` | `#dcf1e5` | `#16301f` / `#dcf1e5` |
+| `--reject`        | `#ff8473` | `#b52f1d` | `#ff6f5b` / `#cf3d29` |
+| `--reject-soft`   | `#3d2220` | `#fbe2dd` | `#3b1f1a` / `#fbe2dd` |
+| `--warn`          | `#efb24f` | `#865600` | `#eaaa42` / `#a86f0c` |
+| `--warn-soft`     | `#372b14` | `#faedd2` | `#34290f` / `#faedd2` |
+| `--cmd`           | `#3a4657` | `#2c3644` | `#3c4955` / `#2f3a44` |
+| `--term`          | `#0e1218` | `#0e1218` | `#0d0f12` / `#0d0f12` |
 
-| Token                                                         | Value                                                     | Was                   | Source / reason                                                                                                                                                                           |
-| ------------------------------------------------------------- | --------------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--ground`                                                    | `#14181c`                                                 | same                  | existing                                                                                                                                                                                  |
-| `--ground-2`                                                  | `#1c2227`                                                 | same                  | existing                                                                                                                                                                                  |
-| `--paper`                                                     | `#252c33`                                                 | same                  | existing                                                                                                                                                                                  |
-| `--ink`                                                       | `#e7ecef`                                                 | same                  | existing                                                                                                                                                                                  |
-| `--muted`                                                     | `#a7b3bc`                                                 | `#a0adb7`             | a small nudge for more margin on `--paper`                                                                                                                                                |
-| `--line`                                                      | `#343e47`                                                 | same                  | decorative dividers only                                                                                                                                                                  |
-| `--field-line` **new**                                        | `#7d8a95`                                                 | n/a                   | input and secondary-button borders, ≥ 3:1 on ground and paper                                                                                                                             |
-| `--accent`                                                    | `#3ec1b3`                                                 | same                  | logo teal                                                                                                                                                                                 |
-| `--on-accent` **new**                                         | `#0b1a18`                                                 | `var(--ground)`       | primary label                                                                                                                                                                             |
-| `--link` **new**                                              | `#3ec1b3`                                                 | `--accent`            | split out so light mode can darken links alone                                                                                                                                            |
-| `--you` / `--you-soft`                                        | `#ff6ac1` / `#3a1d31`                                     | same                  | existing                                                                                                                                                                                  |
-| `--other`                                                     | `#a3acbd`                                                 | `#9aa3b5`             | nudged for chips on `--paper`                                                                                                                                                             |
-| `--ok` / `--ok-soft`                                          | `#52c98f` / `#16301f`                                     | same                  | existing                                                                                                                                                                                  |
-| `--reject` / `--reject-soft`                                  | `#ff7a67` / `#3b1f1a`                                     | `#ff6f5b`             | nudged so the BUG tag's dark label passes                                                                                                                                                 |
-| `--warn` / `--warn-soft`                                      | `#eaaa42` / `#34290f`                                     | same                  | existing                                                                                                                                                                                  |
-| `--on-band` **new**                                           | `#11161a`                                                 | `#fff`                | text on card bands, the BUG tag and the INCIDENT band, in both themes                                                                                                                     |
-| `--bug-fill` / `--incident-fill` **new**                      | `#ff7a67` / `#eaaa42`                                     | `--reject` / `--warn` | the BUG tag and INCIDENT band are printed objects like the deck colours, so their fills stay fixed in both themes (light mode's darker `--reject`/`--warn` would fail under a dark label) |
-| `--cmd` / `--on-cmd` **new**                                  | `#3c4955` / `#ffffff`                                     | same / `#fff`         | command card band                                                                                                                                                                         |
-| `--faint`                                                     | `#5e6b75`                                                 | same                  | **non-text only** (hatches, unknown band). Text uses `--muted`.                                                                                                                           |
-| `--term`, `--term-ink`                                        | `#0d0f12`, `#d8d5ce`                                      | same                  | existing                                                                                                                                                                                  |
-| `--term-muted`                                                | `#8d929b`                                                 | `#7d828c`             | `#` comments: more margin (6.14:1)                                                                                                                                                        |
-| `--term-ok` / `-reject` / `-warn` / `-you` / `-other` **new** | `#52c98f` / `#ff7a67` / `#eaaa42` / `#ff6ac1` / `#a3acbd` | n/a                   | the dark semantics, fixed, so the terminal is the same in both themes                                                                                                                     |
-
-### Light (`prefers-color-scheme: light`, or `data-theme="light"`)
-
-| Token                        | Value                 | Was                | Note                                                                   |
-| ---------------------------- | --------------------- | ------------------ | ---------------------------------------------------------------------- |
-| `--ground`                   | `#f3efe7`             | `#eee9df`          | the same warm paper, a step lighter so everything on it gains contrast |
-| `--ground-2`                 | `#e9e3d7`             | `#e4ddd0`          |                                                                        |
-| `--paper`                    | `#ffffff`             | same               |                                                                        |
-| `--ink`                      | `#1b2228`             | same               |                                                                        |
-| `--muted`                    | `#525f6a`             | `#5b6975`          |                                                                        |
-| `--line`                     | `#d6cfc2`             | `#d3cbbd`          | decorative                                                             |
-| `--field-line`               | `#837a6c`             | n/a                |                                                                        |
-| `--accent` / `--on-accent`   | `#13756b` / `#ffffff` | `#1d8c80` / ground | the primary label goes from 3.39:1 to 5.55:1                           |
-| `--link`                     | `#106a61`             | `#1d8c80`          |                                                                        |
-| `--you` / `--you-soft`       | `#b01f70` / `#f8dcec` | `#c4267f`          |                                                                        |
-| `--other`                    | `#596173`             | `#6b7385`          |                                                                        |
-| `--ok` / `--ok-soft`         | `#1b7449` / `#dcf1e5` | `#23865a`          |                                                                        |
-| `--reject` / `--reject-soft` | `#b52f1d` / `#fbe2dd` | `#cf3d29`          |                                                                        |
-| `--warn` / `--warn-soft`     | `#865600` / `#faedd2` | `#a86f0c`          |                                                                        |
-| `--cmd`                      | `#2f3a44`             | same               |                                                                        |
-| terminal tokens              | as dark               |                    | the terminal is dark in both themes                                    |
+Fixed in both themes: `--on-band` `#11161a`, `--bug-fill` `#ff7a67`, `--incident-fill` `#eaaa42`, `--on-cmd`
+`#ffffff`, `--term-ink` `#d8d5ce`, `--term-muted` `#8d929b`, `--term-ok` `#52c98f`, `--term-reject` `#ff7a67`,
+`--term-warn` `#eaaa42`, `--term-you` `#ff6ac1`, `--term-other` `#a3acbd`. `--faint` is for non-text only.
 
 ### Contrast check (WCAG 2.x AA)
 
-Each pair is checked the way the UI actually uses it. **Before: 34 of 70 current pairs fail. After: 0 of 96 (48 per
-theme).** The checker and both token sets are in `design-system/gitgame/contrast/`
-(`python3 -I contrast.py tokens.json pairs.json`). The key pairs, as it computes them:
+68 pairs per theme, 136 in all, including hover, pressed and selected states. **0 fail** (today's tokens: 34 of 70
+fail). Reproduce it with `python3 -I contrast.py studio.json studio-pairs.json`. Key pairs:
 
-| Pair                                          | Dark                             | Light                            |
-| --------------------------------------------- | -------------------------------- | -------------------------------- |
-| ink on ground / paper                         | 14.99 / 11.87                    | 14.02 / 16.08                    |
-| muted on ground / paper                       | 8.34 / 6.60                      | 5.72 / 6.55                      |
-| link on ground / paper                        | 8.06 / 6.38                      | 5.62 / 6.45                      |
-| on-accent on accent (primary label)           | 8.07                             | 5.55                             |
-| you / other / ok / reject / warn on ground    | 6.87 / 7.81 / 8.59 / 6.99 / 8.77 | 5.59 / 5.41 / 5.03 / 5.40 / 5.47 |
-| on-band on the five deck colours              | 8.22 / 6.71 / 6.48 / 6.21 / 8.78 | same                             |
-| on-band on BUG / INCIDENT fills               | 7.14 / 8.95                      | same                             |
-| term-muted / term-reject / term-you on term   | 6.14 / 7.52 / 7.39               | same                             |
-| field-line on ground / paper (UI, 3:1)        | 5.05 / 4.00                      | 3.69 / 4.23                      |
-| accent focus ring on ground / paper (UI, 3:1) | 8.06 / 6.38                      | 4.84 / 5.55                      |
-
----
-
-## 5. Type
-
-- **Families: keep the system stacks.** `--sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif` and
-  `--mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace`. The skill suggests
-  JetBrains Mono + IBM Plex Sans. Loading them from Google Fonts would add a third party that the privacy policy
-  doesn't list, and break the PWA offline. Self-hosting them is possible (both are OFL), at about 60–90 kB. **Open
-  question for you.**
-- **Roles.** Mono is for headings, Git (commands, output, file names, hashes), numerals in data and caps labels. Sans
-  is for prose, buttons and coach lines. `font-variant-ligatures: none` stays, so `--force` shows two hyphens.
-
-| Token         | Size / line height | Use                                                        |
-| ------------- | ------------------ | ---------------------------------------------------------- |
-| `--t-caption` | 12 / 1.4           | Minimum for any readable text: chips, caps labels, footers |
-| `--t-small`   | 14 / 1.45          | Secondary lines, transcripts on phones                     |
-| `--t-body`    | 16 / 1.5           | Prose, buttons                                             |
-| `--t-lede`    | 18 / 1.5           | Ledes, coach lines (`.said`)                               |
-| `--t-h2`      | 18–20 / 1.3 mono   | `# ` headings                                              |
-| `--t-h1`      | 24 → 28 / 1.2 mono | `$ ` headings (`clamp`)                                    |
-| `--t-display` | 28 → 44 / 1.1 mono | Landing hero only                                          |
-
-Caps labels: mono, 12 px, `letter-spacing: 0.08em`, never below 12 px.
+| Pair                                                      | Dark                             | Light                            |
+| --------------------------------------------------------- | -------------------------------- | -------------------------------- |
+| ink on ground / paper                                     | 15.53 / 12.69                    | 15.12 / 16.40                    |
+| muted on ground / paper                                   | 8.32 / 6.80                      | 6.37 / 6.91                      |
+| link on ground / paper                                    | 10.66 / 8.71                     | 6.29 / 6.82                      |
+| on-accent on accent / hover / pressed                     | 9.66 / 11.07 / 8.00              | 5.86 / 7.53 / 9.31               |
+| ink on paper-hover / accent-soft (hover, selected)        | 11.17 / 11.50                    | 14.68 / 14.05                    |
+| you / other / ok / reject / warn on ground                | 7.46 / 8.25 / 9.38 / 7.32 / 9.27 | 5.91 / 5.84 / 5.32 / 5.71 / 5.79 |
+| you / other / ok / warn / reject chips on their soft fill | 6.36 / 6.28 / 7.51 / 7.35 / 6.08 | 5.02 / 5.15 / 4.88 / 5.41 / 5.02 |
+| on-band on BUG / INCIDENT fills                           | 7.14 / 8.95                      | 7.14 / 8.95                      |
+| field-line on ground / paper (UI, 3:1)                    | 5.52 / 4.51                      | 3.37 / 3.65                      |
+| accent ring on ground / paper / accent-soft (UI, 3:1)     | 9.90 / 8.09 / 7.33               | 5.40 / 5.86 / 5.02               |
 
 ---
 
-## 6. Spacing, radius, elevation, motion
+## 5. Type (Studio)
 
-- **Spacing** is a 4 px base: `--s-1` 4, `--s-2` 8, `--s-3` 12, `--s-4` 16, `--s-5` 24, `--s-6` 32, `--s-7` 48,
-  `--s-8` 64. The page gutter is 16 px on phones and 24 px from 600 px. The gap between touch targets is ≥ 8 px.
-- **Radius**: `--r-sm` 6 (transcript, chips), `--r-md` 10 (fields, buttons), `--r-lg` 14 (surfaces, today's `--r`),
-  `--r-pill` 999. Cards keep their own proportional radius.
-- **Elevation**: flat. One `--shadow` for cards and sheets only, as now.
-- **Motion** (from event-screens §4 and the skill's timing rules):
-  `--dur-1` 120 ms (press, hover), `--dur-2` 200 ms (disclosure, chips), `--dur-3` 400 ms (card moves; the spec's
-  300–600 ms), `--ease` `cubic-bezier(.2,.8,.2,1)` (existing), `--ease-exit` `cubic-bezier(.4,0,1,1)` (exits faster than
-  entries). One or two things move per view. `prefers-reduced-motion: reduce` makes all of it instant, as today, and
-  the guide's beckon becomes a steady outline.
-- **Focus**: 3 px `--accent` outline with a 2 px offset on every interactive element. It is never removed.
+- **Families:** the system stacks, unchanged (`--sans`: system-ui …; `--mono`: ui-monospace … JetBrains Mono …). Web
+  fonts remain an open question (§9).
+- **Roles.** Sans is for headings, prose, buttons, labels and numbers. Mono is only for what Git says or names:
+  commands, output, file names, hashes, handles, and `#` comments. The `$` prompt appears only before a command.
+  `font-variant-ligatures: none` stays.
+- **Numbers** use `font-variant-numeric: tabular-nums` wherever they change (status bar, scores, counters, stats).
+
+| Token         | Size / line height | Use                                                    |
+| ------------- | ------------------ | ------------------------------------------------------ |
+| `--t-caption` | 12 / 1.4           | Minimum for readable text: chips, labels, footers      |
+| `--t-small`   | 14 / 1.45          | Secondary lines, transcripts, status bar               |
+| `--t-body`    | 16 / 1.5           | Prose, buttons                                         |
+| `--t-lede`    | 18 / 1.5           | Ledes, coach lines                                     |
+| `--t-h3`      | 17 / 1.3           | Card and section titles                                |
+| `--t-h2`      | 20 / 1.25          | Section headings                                       |
+| `--t-h1`      | 26 → 32 / 1.15     | Page and screen titles (`clamp`), letter-spacing −1.5% |
+| `--t-display` | 32 → 44 / 1.1      | Landing hero only                                      |
+
+Labels: sans 600, 12 px, uppercase, `letter-spacing: 0.06em`. Headings and setting titles use sentence case ("Your
+games", "Day 1 closed"); buttons keep the game's lowercase ("play the bot now"). **The casing is a copy change for you
+to approve.**
+
+---
+
+## 6. Spacing, shape, elevation, motion (Studio)
+
+- **Spacing**: 4 px base (`--s-1` 4 … `--s-8` 64). Page gutter 16 px on phones, 24 px from 600 px. ≥ 8 px between
+  targets.
+- **Radius**: `--r-sm` 8 (inline code, small badges), `--r-md` 12 (fields, tiles, transcript), `--r-lg` 20 (surfaces,
+  sheets), `--r-pill` (buttons, chips, segmented control). Cards: 8 / 10 / 12 px at sm / md / lg.
+- **Elevation**: `--shadow-1` (surfaces, rows, cards) and `--shadow-2` (hover lift, picked card, incident, menus,
+  sheets). Dark mode uses darker, tighter shadows.
+- **Motion**: `--dur-1` 120 ms (hover, press), `--dur-2` 200 ms (chevrons, lifts), `--dur-3` 400 ms (card moves, the
+  playback bar), `--ease` and `--ease-exit` as before. Pressed is a transform (never a layout change). Reduced motion
+  makes everything instant; the pending dot and spinner hold still.
+- **Focus**: a 3 px `--accent` ring, 2 px offset (fields use an inset 3 px ring with an accent border). Never removed.
 
 ---
 
 ## 7. Acceptance rules for every phase
 
 - Each phase keeps `npm run format:check`, `npm test` (198 passing, 1 skipped at baseline) and `npm run build` green.
-- No horizontal page scroll at 375, 768, 1024 or 1440 px. Only the `main` strip scrolls sideways.
-- An automated scan reads the computed colour of every visible text node against its effective background, in both
-  themes, on every page and game screen. It must find 0 below 4.5:1 (3:1 for ≥ 24 px, or ≥ 18.66 px bold).
-- No readable text under 12 px. No placeholder-only labels. No rotated labels.
-- Only data the product has: every string and number on a screen comes from the remote's view, `copy.js`, or the
-  page's own HTML.
+- `contrast/audit.js` and `contrast/scan-contrast.js` report 0 findings on every page and game screen at 375, 768,
+  1024 and 1440 px (and 320 px for the phone screens), in dark and light.
+- Only the `main` strip scrolls sideways. No rotated labels. No placeholder-only labels.
+- Only data the product has: every string and number comes from the remote's view, `copy.js`, or the page's own HTML.
+  New copy is listed in §9 and needs your approval first.
 
 ---
 
@@ -281,19 +304,25 @@ Caps labels: mono, 12 px, `letter-spacing: 0.08em`, never below 12 px.
 
 Each phase is one commit (or a few) on `claude/ui-ux-redesign`.
 
-1. **Tokens.** Put the values above into `styles.css`. Add `--on-accent`, `--link`, `--field-line`, `--on-band`,
-   `--on-cmd`, `--term-*`, and the spacing, radius, type and motion scales. Replace raw `#fff` and `--faint`-as-text.
-   Fix `theme-color` and the manifest. Contrast is fixed everywhere by this phase alone.
-2. **Shared components.** Buttons (with disabled and pending states), fields, settings rows, callouts, chips, cards
-   (band and BUG on `--on-band`, size floors, no rotated hand), the transcript on `--term-*`, the site header (phone
-   menu) and the footer.
-3. **Family A, site pages.** `landing.css` and `pages.css` on the new header, measure and type scale.
-4. **Family B, app entry.** Start (settings rows, games list rows), room (the pending state), email reminders.
-5. **Family C, the game.** Status bar, hub (slots, actions, `.will`), main strip labels, table sheet and panel, moments
-   and playback, receipt, release and scoreboard, replay.
-6. **Family D, stats.** Axis text and panels.
-7. **Verification.** Screenshots at 375, 768, 1024 and 1440 px in light and dark across all four families, plus the
-   automated contrast scan.
+1. **Tokens.** The Studio values into `styles.css` (both themes), the new state tokens, the type, radius, shadow and
+   motion scales; replace raw `#fff`, `--faint` as text, and the `theme-color` / manifest colours.
+2. **Shared components.** Elements 01–09, 11–15 and 21: the icon sprite, buttons with busy and disabled states,
+   fields, settings rows, chips, callouts, the card, the transcript, the site header (menu) and the footer.
+3. **Family A, site pages.** `landing.css`, `pages.css`: sans headings, the header, the measure, the questions.
+4. **Family B, app entry.** Start, your games, reminders, the room's waiting state, who you are.
+5. **Family C, the game.** Elements 16–20 and 22–27: strip, branch, action tiles, status bar, action bar, moments, the
+   bot's step, receipt, scoreboard, replay, table sheet and panel.
+6. **Family D, stats.** KPI tiles, the segmented switch, the bars.
+7. **Verification.** Screenshots at 375, 768, 1024 and 1440 px in light and dark across all four families, and both
+   scans on the live app.
 
-Out of scope unless asked: the link-preview image (`web/public/og.png`, drawn by `scripts/og-image.sh`), the
-print-and-play deck, and the prototypes under `prototypes/`.
+Out of scope unless asked: the link-preview image (`web/public/og.png`), the print-and-play deck, `prototypes/`.
+
+---
+
+## 9. Open questions for you
+
+1. **Copy changes**: sentence case for headings and setting titles; the two settings-row descriptions; the copy
+   button's "copied" confirmation.
+2. **Web fonts**: keep the system stacks (proposed), or self-host a pair (about 60–90 kB, no third party).
+3. **Theme switch**: keep following the OS (today), or add a light/dark switch on the start screen.
