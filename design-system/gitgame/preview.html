@@ -1,0 +1,1724 @@
+<!doctype html>
+<!-- Git Game design-system prototype (design-system/gitgame/MASTER.md). Static: nothing loads from the network.
+     Every string and number below is taken from the running game, its pages, rules/deck.json or web/captures; the
+     handles are the kind the remote generates. The theme follows the OS; the buttons at the top force one. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Git Game design system</title>
+    <style>
+      /* ================= tokens (MASTER.md §4–6) ================= */
+      :root {
+        --ground: #14181c;
+        --ground-2: #1c2227;
+        --paper: #252c33;
+        --ink: #e7ecef;
+        --muted: #a7b3bc;
+        --line: #343e47;
+        --field-line: #7d8a95;
+        --faint: #5e6b75;
+        --accent: #3ec1b3;
+        --on-accent: #0b1a18;
+        --link: #3ec1b3;
+        --you: #ff6ac1;
+        --you-soft: #3a1d31;
+        --other: #a3acbd;
+        --other-soft: #262d38;
+        --ok: #52c98f;
+        --ok-soft: #16301f;
+        --reject: #ff7a67;
+        --reject-soft: #3b1f1a;
+        --warn: #eaaa42;
+        --warn-soft: #34290f;
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --incident-fill: #eaaa42;
+        --cmd: #3c4955;
+        --on-cmd: #ffffff;
+        --back-1: #4a5661;
+        --back-2: #404c56;
+        --shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+        --term: #0d0f12;
+        --term-ink: #d8d5ce;
+        --term-muted: #8d929b;
+        --term-ok: #52c98f;
+        --term-reject: #ff7a67;
+        --term-warn: #eaaa42;
+        --term-you: #ff6ac1;
+        --term-other: #a3acbd;
+        --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+        --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        --t-caption: 0.75rem;
+        --t-small: 0.875rem;
+        --t-body: 1rem;
+        --t-lede: 1.125rem;
+        --t-h2: 1.125rem;
+        --t-h1: clamp(1.5rem, 1.2rem + 1.2vw, 1.75rem);
+        --t-display: clamp(1.75rem, 1rem + 3vw, 2.75rem);
+        --s-1: 4px;
+        --s-2: 8px;
+        --s-3: 12px;
+        --s-4: 16px;
+        --s-5: 24px;
+        --s-6: 32px;
+        --s-7: 48px;
+        --s-8: 64px;
+        --r-sm: 6px;
+        --r-md: 10px;
+        --r-lg: 14px;
+        --r-pill: 999px;
+        --dur-1: 120ms;
+        --dur-2: 200ms;
+        --dur-3: 400ms;
+        --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+        --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+        --card-lg: 96px;
+        --card-md: 64px;
+        color-scheme: dark;
+      }
+      @media (prefers-color-scheme: light) {
+        :root:not([data-theme="dark"]) {
+          --ground: #f3efe7;
+          --ground-2: #e9e3d7;
+          --paper: #ffffff;
+          --ink: #1b2228;
+          --muted: #525f6a;
+          --line: #d6cfc2;
+          --field-line: #837a6c;
+          --faint: #a7b1ba;
+          --accent: #13756b;
+          --on-accent: #ffffff;
+          --link: #106a61;
+          --you: #b01f70;
+          --you-soft: #f8dcec;
+          --other: #596173;
+          --other-soft: #e3e6ee;
+          --ok: #1b7449;
+          --ok-soft: #dcf1e5;
+          --reject: #b52f1d;
+          --reject-soft: #fbe2dd;
+          --warn: #865600;
+          --warn-soft: #faedd2;
+          --cmd: #2f3a44;
+          --back-1: #6b7a86;
+          --back-2: #5c6b77;
+          --shadow: 0 1px 2px rgb(0 0 0 / 0.14), 0 2px 8px rgb(0 0 0 / 0.06);
+          color-scheme: light;
+        }
+      }
+      :root[data-theme="light"] {
+        --ground: #f3efe7;
+        --ground-2: #e9e3d7;
+        --paper: #ffffff;
+        --ink: #1b2228;
+        --muted: #525f6a;
+        --line: #d6cfc2;
+        --field-line: #837a6c;
+        --faint: #a7b1ba;
+        --accent: #13756b;
+        --on-accent: #ffffff;
+        --link: #106a61;
+        --you: #b01f70;
+        --you-soft: #f8dcec;
+        --other: #596173;
+        --other-soft: #e3e6ee;
+        --ok: #1b7449;
+        --ok-soft: #dcf1e5;
+        --reject: #b52f1d;
+        --reject-soft: #fbe2dd;
+        --warn: #865600;
+        --warn-soft: #faedd2;
+        --cmd: #2f3a44;
+        --back-1: #6b7a86;
+        --back-2: #5c6b77;
+        --shadow: 0 1px 2px rgb(0 0 0 / 0.14), 0 2px 8px rgb(0 0 0 / 0.06);
+        color-scheme: light;
+      }
+
+      /* ================= base ================= */
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--ground);
+        color: var(--ink);
+        font: 400 var(--t-body) / 1.5 var(--sans);
+        font-variant-ligatures: none;
+        -webkit-text-size-adjust: 100%;
+      }
+      a {
+        color: var(--link);
+        text-underline-offset: 2px;
+      }
+      code {
+        font-family: var(--mono);
+        font-size: 0.9em;
+        padding: 0 0.25em;
+        border-radius: 4px;
+        background: var(--ground-2);
+      }
+      :focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 2px;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: var(--mono);
+        font-weight: 700;
+        margin: 0 0 var(--s-2);
+        overflow-wrap: anywhere;
+        text-wrap: balance;
+      }
+      h1 {
+        font-size: var(--t-h1);
+        line-height: 1.2;
+      }
+      h1.term::before {
+        content: "$ ";
+        color: var(--accent);
+      }
+      h2 {
+        font-size: var(--t-h2);
+        line-height: 1.3;
+      }
+      h2.term::before {
+        content: "# ";
+        color: var(--muted);
+      }
+      p {
+        margin: 0 0 var(--s-3);
+      }
+      .muted,
+      .lede {
+        color: var(--muted);
+      }
+      .lede {
+        font-size: var(--t-lede);
+        max-width: 68ch;
+      }
+      .caps {
+        font: 700 var(--t-caption) / 1.4 var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      /* ================= the preview's own frame ================= */
+      .doc {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: var(--s-5) var(--s-4) var(--s-8);
+      }
+      .doc > header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--s-3);
+        margin-bottom: var(--s-6);
+      }
+      .doc > header h1 {
+        margin: 0;
+      }
+      .theme-pick {
+        display: flex;
+        gap: var(--s-2);
+      }
+      .family {
+        margin: var(--s-7) 0 0;
+        padding-top: var(--s-5);
+        border-top: 1px solid var(--line);
+      }
+      .family > .caps {
+        display: block;
+        margin-bottom: var(--s-2);
+      }
+      .family > p {
+        max-width: 68ch;
+      }
+      .frames {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--s-5);
+        align-items: flex-start;
+        margin-top: var(--s-4);
+      }
+      .frame {
+        flex: 1 1 340px;
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg);
+        background: var(--ground);
+        overflow: hidden;
+      }
+      .frame.phone {
+        flex: 0 1 375px;
+        max-width: 375px;
+      }
+      .frame > .caps {
+        display: block;
+        padding: var(--s-2) var(--s-3);
+        border-bottom: 1px solid var(--line);
+        background: var(--ground-2);
+      }
+      .frame-body {
+        padding: var(--s-4);
+      }
+
+      /* ================= buttons ================= */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--s-2);
+        min-height: 48px;
+        padding: 0 var(--s-4);
+        font: 600 var(--t-body) / 1.2 var(--sans);
+        color: var(--ink);
+        background: var(--paper);
+        border: 1px solid var(--field-line);
+        border-radius: var(--r-md);
+        text-decoration: none;
+        cursor: pointer;
+        touch-action: manipulation;
+        transition:
+          background-color var(--dur-1) var(--ease),
+          border-color var(--dur-1) var(--ease),
+          transform var(--dur-1) var(--ease);
+      }
+      .btn:active:not(:disabled) {
+        transform: translateY(1px);
+      }
+      .btn.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--on-accent);
+        font-weight: 700;
+      }
+      .btn.quiet {
+        background: none;
+        border-color: transparent;
+        color: var(--link);
+        text-decoration: underline;
+      }
+      .btn.small {
+        min-height: 44px;
+        padding: 0 var(--s-3);
+        font-size: var(--t-small);
+      }
+      .btn:disabled,
+      .btn[aria-disabled="true"] {
+        cursor: default;
+        background: transparent;
+        border: 1px dashed var(--field-line);
+        color: var(--muted);
+      }
+      @media (hover: hover) {
+        .btn:hover:not(:disabled) {
+          border-color: var(--ink);
+        }
+        .btn.primary:hover:not(:disabled) {
+          filter: brightness(1.08);
+          border-color: var(--accent);
+        }
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--s-2);
+      }
+      .stack {
+        display: grid;
+        gap: var(--s-2);
+      }
+
+      /* ================= site header (family A) ================= */
+      .site-head {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: var(--s-3);
+        min-height: 56px;
+        padding: var(--s-2) var(--s-4);
+        border-bottom: 1px solid var(--line);
+        background: var(--ground);
+      }
+      .site-head .brand {
+        font: 700 var(--t-body) / 1 var(--mono);
+        color: var(--ink);
+        text-decoration: none;
+        margin-right: auto;
+        white-space: nowrap;
+      }
+      .site-head .brand::before {
+        content: "$ ";
+        color: var(--accent);
+      }
+      .site-head .links {
+        display: none;
+        gap: var(--s-4);
+        font-size: var(--t-small);
+      }
+      .site-head .links a {
+        color: var(--ink);
+        text-decoration: none;
+        padding: var(--s-2) 0;
+      }
+      .site-head .links a:hover {
+        color: var(--link);
+        text-decoration: underline;
+      }
+      .menu > summary {
+        list-style: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 44px;
+        padding: 0 var(--s-3);
+        border: 1px solid var(--field-line);
+        border-radius: var(--r-md);
+        font: 600 var(--t-small) / 1 var(--sans);
+        cursor: pointer;
+      }
+      .menu > summary::-webkit-details-marker {
+        display: none;
+      }
+      .menu > summary::after {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-right: 2px solid currentColor;
+        border-bottom: 2px solid currentColor;
+        transform: translateY(-2px) rotate(45deg);
+        transition: transform var(--dur-2) var(--ease);
+      }
+      .menu[open] > summary::after {
+        transform: translateY(2px) rotate(225deg);
+      }
+      .menu nav {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 100%;
+        z-index: 2;
+        display: grid;
+        padding: var(--s-2) var(--s-4) var(--s-3);
+        background: var(--ground);
+        border-bottom: 1px solid var(--line);
+        box-shadow: var(--shadow);
+      }
+      .menu nav a {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+        color: var(--ink);
+        text-decoration: none;
+        border-bottom: 1px solid var(--line);
+      }
+      .menu nav a:last-child {
+        border-bottom: 0;
+      }
+      /* the header picks links or menu by the room it has, not by the device */
+      .frame {
+        container-type: inline-size;
+      }
+      @container (min-width: 600px) {
+        .site-head.wide .links {
+          display: flex;
+        }
+        .site-head.wide .menu {
+          display: none;
+        }
+      }
+
+      /* ================= prose page ================= */
+      .prose {
+        max-width: 68ch;
+      }
+      .hero h1 {
+        font-size: var(--t-display);
+        line-height: 1.12;
+      }
+      .site-foot {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--s-1) var(--s-4);
+        padding: var(--s-4);
+        border-top: 1px solid var(--line);
+        font-size: var(--t-caption);
+        color: var(--muted);
+      }
+      .site-foot a {
+        color: inherit;
+      }
+      .site-foot .trademark {
+        flex-basis: 100%;
+        margin: 0;
+      }
+
+      /* ================= transcript ================= */
+      .transcript {
+        margin: 0 0 var(--s-4);
+        padding: var(--s-3);
+        border-radius: var(--r-sm);
+        background: var(--term);
+        color: var(--term-ink);
+        font: 400 var(--t-small) / 1.55 var(--mono);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      .transcript .who {
+        color: var(--term-other);
+      }
+      .transcript .mine .who {
+        color: var(--term-you);
+      }
+      .transcript .ok .out {
+        color: var(--term-ok);
+      }
+      .transcript .reject .out {
+        color: var(--term-reject);
+      }
+      .transcript .warn .out {
+        color: var(--term-warn);
+      }
+      .transcript .note {
+        color: var(--term-muted);
+      }
+      .transcript .lines + .lines {
+        margin-top: var(--s-2);
+      }
+      .transcript .prompt-line {
+        color: var(--term-ink);
+      }
+      .transcript .prompt-line .sigil {
+        color: #3ec1b3;
+      }
+
+      /* ================= playing cards ================= */
+      .hand {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--s-2);
+      }
+      .card {
+        --w: var(--card-md);
+        position: relative;
+        flex: none;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        width: var(--w);
+        height: calc(var(--w) * 1.4);
+        font: 600 max(12px, calc(var(--w) * 0.145)) / 1.2 var(--mono);
+        text-align: center;
+        color: var(--ink);
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: calc(var(--w) * 0.09);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .card.lg {
+        --w: var(--card-lg);
+      }
+      .card .band {
+        display: block;
+        height: 20px;
+        line-height: 20px;
+        background: var(--band, var(--faint));
+        color: var(--on-band);
+        font: 700 12px/1 var(--sans);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-align: left;
+        padding: 0 8px;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      /* the word on the band only where it fits at 12 px: from the lg card up */
+      .card.lg .band {
+        height: 22px;
+        line-height: 22px;
+      }
+      .card:not(.lg) .band {
+        font-size: 0;
+      }
+      .card.command .band {
+        --band: var(--cmd);
+        color: var(--on-cmd);
+      }
+      .card .face {
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        gap: 2px;
+        padding: 4px 2px;
+        min-width: 0;
+      }
+      .card .file {
+        font-size: max(12px, 0.86em);
+        letter-spacing: -0.02em;
+        white-space: nowrap;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: clip;
+      }
+      /* the hand on a phone: four cards across the column, each as wide as a quarter of it (about 80 px) */
+      .hand.four {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .hand.four .card {
+        --w: 100%;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1 / 1.4;
+        font-size: 13px;
+        border-radius: 8px;
+      }
+      .hand.four .card .big {
+        font-size: 1.75rem;
+      }
+      .card .big {
+        font: 700 calc(var(--w) * 0.3) / 1 var(--sans);
+      }
+      .card.command .face {
+        align-content: start;
+        padding-top: 10px;
+      }
+      .card .bug {
+        position: absolute;
+        right: 3px;
+        top: 1px;
+        padding: 0 5px;
+        border-radius: 4px;
+        background: var(--bug-fill);
+        color: var(--on-band);
+        font: 800 12px/18px var(--sans);
+        letter-spacing: 0.04em;
+      }
+      /* on a large card the band carries its word, so BUG sits under the band, top left, as the printed card has it */
+      .card.lg .bug {
+        top: 26px;
+        left: 6px;
+        right: auto;
+      }
+      .card.back {
+        background: repeating-linear-gradient(135deg, var(--back-1) 0 6px, var(--back-2) 6px 12px);
+      }
+      .card.back .band {
+        --band: var(--cmd);
+      }
+      .card.root .face {
+        font-size: 12px;
+        color: var(--muted);
+        font-family: var(--sans);
+      }
+
+      /* ================= surfaces, rows, callouts, chips, fields ================= */
+      .surface {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg);
+      }
+      details.setting {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg);
+      }
+      details.setting > summary {
+        list-style: none;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 2px var(--s-3);
+        min-height: 56px;
+        padding: var(--s-3) var(--s-4);
+        cursor: pointer;
+      }
+      details.setting > summary::-webkit-details-marker {
+        display: none;
+      }
+      details.setting > summary .title {
+        font-weight: 600;
+      }
+      details.setting > summary .desc {
+        grid-column: 1;
+        font-size: var(--t-small);
+        color: var(--muted);
+      }
+      details.setting > summary::after {
+        content: "";
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        width: 8px;
+        height: 8px;
+        border-right: 2px solid var(--muted);
+        border-bottom: 2px solid var(--muted);
+        transform: rotate(-45deg);
+        transition: transform var(--dur-2) var(--ease);
+      }
+      details.setting[open] > summary::after {
+        transform: rotate(45deg);
+      }
+      details.setting > .body {
+        padding: 0 var(--s-4) var(--s-4);
+        display: grid;
+        gap: var(--s-2);
+      }
+      .field {
+        display: grid;
+        gap: var(--s-1);
+      }
+      .field label {
+        font-size: var(--t-small);
+        color: var(--muted);
+      }
+      .field input,
+      .field select {
+        font: inherit;
+        color: inherit;
+        min-height: 44px;
+        padding: 0 var(--s-3);
+        border: 1px solid var(--field-line);
+        border-radius: var(--r-md);
+        background: var(--paper);
+      }
+      .field .err {
+        font-size: var(--t-small);
+        color: var(--reject);
+        font-family: var(--mono);
+      }
+      .callout {
+        display: grid;
+        gap: var(--s-1);
+        padding: var(--s-3) var(--s-4);
+        border-radius: var(--r-lg);
+      }
+      .callout p {
+        margin: 0;
+      }
+      .callout.guide {
+        background: var(--ok-soft);
+        border: 2px solid var(--ok);
+      }
+      .callout.guide .caps {
+        color: var(--ok);
+      }
+      .callout.nudge {
+        background: var(--warn-soft);
+        border-left: 4px solid var(--warn);
+        border-radius: var(--r-sm);
+      }
+      .incident {
+        width: min(280px, 100%);
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg);
+        background: var(--paper);
+        box-shadow: var(--shadow);
+      }
+      .incident .band {
+        display: block;
+        padding: 0 14px;
+        background: var(--incident-fill);
+        color: var(--on-band);
+        font: 700 12px/28px var(--sans);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .incident h3 {
+        font: 700 1.375rem/1.2 var(--sans);
+        padding: 14px 16px 4px;
+        margin: 0;
+      }
+      .incident p {
+        padding: 0 16px 16px;
+        margin: 0;
+        color: var(--muted);
+      }
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 0 10px;
+        border-radius: var(--r-pill);
+        font: 700 var(--t-caption) / 1 var(--mono);
+        border: 1px solid currentColor;
+      }
+      .chip.you {
+        color: var(--you);
+        background: var(--you-soft);
+      }
+      .chip.other {
+        color: var(--other);
+        background: var(--other-soft);
+      }
+      .chip.ok {
+        color: var(--ok);
+        background: var(--ok-soft);
+      }
+      .chip.warn {
+        color: var(--warn);
+        background: var(--warn-soft);
+      }
+      .chip.reject {
+        color: var(--reject);
+        background: var(--reject-soft);
+      }
+
+      /* ================= app entry (family B) ================= */
+      .who-line {
+        display: flex;
+        align-items: center;
+        gap: var(--s-2);
+        font-size: var(--t-small);
+        margin-bottom: var(--s-4);
+      }
+      .who-line b {
+        font-family: var(--mono);
+      }
+      .games {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: var(--s-2);
+      }
+      .games a {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 2px var(--s-3);
+        min-height: 56px;
+        padding: var(--s-2) var(--s-4);
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--line);
+        border-radius: var(--r-md);
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .games .due a {
+        border-left-color: var(--warn);
+      }
+      .games .name {
+        font-weight: 600;
+      }
+      .games .status {
+        grid-column: 1;
+        font-size: var(--t-small);
+        color: var(--muted);
+      }
+      .games a::after {
+        content: "›";
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        font-size: 1.4rem;
+        color: var(--muted);
+      }
+      .pending {
+        display: flex;
+        align-items: center;
+        gap: var(--s-2);
+        font-size: var(--t-small);
+        color: var(--muted);
+      }
+      .pending::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--warn);
+        animation: breathe 1.6s var(--ease) infinite;
+      }
+      @keyframes breathe {
+        50% {
+          opacity: 0.35;
+        }
+      }
+      .share {
+        padding: var(--s-3);
+        overflow-wrap: anywhere;
+      }
+      .share code {
+        background: none;
+        padding: 0;
+        color: var(--link);
+      }
+
+      /* ================= the game (family C) ================= */
+      .statusbar {
+        display: flex;
+        align-items: center;
+        gap: var(--s-3);
+        min-height: 52px;
+        padding: 0 var(--s-2) 0 var(--s-3);
+        border-bottom: 1px solid var(--line);
+        font: 500 var(--t-caption) / 1 var(--mono);
+        color: var(--muted);
+      }
+      .statusbar > span {
+        white-space: nowrap;
+      }
+      .statusbar b {
+        color: var(--ink);
+      }
+      .statusbar .ops {
+        display: inline-flex;
+        gap: 3px;
+      }
+      .statusbar .ops i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--you);
+      }
+      .statusbar .score {
+        margin-left: auto;
+        white-space: nowrap;
+      }
+      .statusbar .score .me {
+        color: var(--you);
+      }
+      .statusbar .btn {
+        min-height: 40px;
+        font: 600 var(--t-caption) / 1 var(--mono);
+      }
+      .game-body {
+        display: grid;
+        gap: var(--s-4);
+        padding: var(--s-4);
+      }
+      .strip {
+        padding: var(--s-3);
+        background: var(--ground-2);
+        border-radius: var(--r-lg);
+      }
+      .strip .head {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: var(--s-2);
+      }
+      .strip .slots {
+        display: flex;
+        gap: var(--s-2);
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 2px;
+      }
+      .slot {
+        display: grid;
+        justify-items: center;
+        gap: 4px;
+        scroll-snap-align: end;
+        font: 500 var(--t-caption) / 1.3 var(--mono);
+        color: var(--muted);
+        text-align: center;
+      }
+      .slot .tip {
+        color: var(--reject);
+        font-weight: 700;
+      }
+      .slot .tip.none {
+        visibility: hidden;
+      }
+      .slot .chips {
+        display: flex;
+        gap: 4px;
+      }
+      .branch {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--s-2);
+      }
+      .branch .caps:first-child {
+        grid-column: 1;
+      }
+      .branch .where {
+        grid-column: 2;
+        justify-self: end;
+        font: 700 var(--t-caption) / 1.4 var(--mono);
+        color: var(--ok);
+      }
+      .pile {
+        min-height: 72px;
+        padding: var(--s-2) var(--s-3);
+        border: 1px dashed var(--field-line);
+        border-radius: var(--r-md);
+      }
+      .pile .empty {
+        font: 400 var(--t-caption) / 1.4 var(--mono);
+        color: var(--muted);
+      }
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--s-2);
+      }
+      .action {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-content: start;
+        gap: 2px var(--s-2);
+        min-height: 64px;
+        padding: var(--s-2) var(--s-3);
+        text-align: left;
+        font: inherit;
+        color: var(--ink);
+        background: var(--paper);
+        border: 1px solid var(--field-line);
+        border-radius: var(--r-md);
+        cursor: pointer;
+      }
+      .action .cmd {
+        font: 700 var(--t-body) / 1.3 var(--mono);
+      }
+      .action .cost {
+        font: 500 var(--t-caption) / 1.6 var(--mono);
+        color: var(--muted);
+      }
+      .action .why {
+        grid-column: 1 / -1;
+        font-size: var(--t-caption);
+        line-height: 1.35;
+        color: var(--muted);
+      }
+      .action:disabled {
+        background: transparent;
+        border-style: dashed;
+        cursor: default;
+      }
+      .action:disabled .cmd {
+        color: var(--muted);
+      }
+      .actionbar {
+        display: grid;
+        grid-template-columns: 1fr 1fr 2fr;
+        gap: var(--s-2);
+        padding: var(--s-3) var(--s-4) var(--s-4);
+        border-top: 1px solid var(--line);
+        background: var(--ground);
+      }
+      .moment-cmd {
+        font: 700 1.375rem/1.2 var(--mono);
+        margin: 0;
+        color: var(--ok);
+      }
+      .moment-cmd::before {
+        content: "$ ";
+        color: var(--accent);
+      }
+      .moment .transcript {
+        box-shadow: inset 3px 0 0 var(--term-ok);
+        margin: 0;
+      }
+      .said {
+        font-size: var(--t-lede);
+        line-height: 1.45;
+        margin: 0;
+      }
+      .receipt {
+        list-style: none;
+        margin: 0;
+        padding: var(--s-3);
+        font: 400 var(--t-small) / 1.45 var(--mono);
+      }
+      .receipt li {
+        display: grid;
+        grid-template-columns: 16px 1fr;
+        padding: 4px 0;
+      }
+      .receipt li .what {
+        grid-column: 2;
+        color: var(--muted);
+      }
+      .receipt .mark.ok {
+        color: var(--ok);
+      }
+      .receipt .mark.warn {
+        color: var(--warn);
+      }
+      table.score {
+        width: 100%;
+        border-collapse: collapse;
+        font: 400 var(--t-small) / 1 var(--mono);
+      }
+      table.score th,
+      table.score td {
+        height: 36px;
+        padding: 0 var(--s-2);
+        border-bottom: 1px solid var(--line);
+        text-align: right;
+      }
+      table.score th:first-child,
+      table.score td:first-child {
+        text-align: left;
+        color: var(--muted);
+      }
+      table.score thead th {
+        font-weight: 700;
+        color: var(--other);
+      }
+      table.score thead th.me {
+        color: var(--you);
+      }
+      table.score tr.total td {
+        border-top: 2px solid var(--ink);
+        border-bottom: 0;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .verdict {
+        font: 700 var(--t-h1) / 1.2 var(--mono);
+        color: var(--you);
+        margin: 0 0 var(--s-3);
+      }
+
+      /* ================= tokens sheet ================= */
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: var(--s-2);
+      }
+      .swatch {
+        display: grid;
+        grid-template-rows: 48px auto;
+        border: 1px solid var(--line);
+        border-radius: var(--r-md);
+        overflow: hidden;
+        background: var(--paper);
+      }
+      .swatch .chipcolor {
+        display: flex;
+        align-items: center;
+        padding: 0 var(--s-2);
+        font: 700 var(--t-small) / 1 var(--mono);
+      }
+      .swatch .meta {
+        padding: 6px var(--s-2);
+        font: 400 var(--t-caption) / 1.4 var(--mono);
+        color: var(--muted);
+      }
+      .swatch .meta b {
+        color: var(--ink);
+      }
+      .scale {
+        display: grid;
+        gap: var(--s-2);
+      }
+      .scale .step {
+        display: grid;
+        grid-template-columns: 110px 1fr;
+        align-items: baseline;
+        gap: var(--s-3);
+      }
+
+      @media (min-width: 900px) {
+        .doc {
+          padding: var(--s-6) var(--s-5) var(--s-8);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition: none !important;
+          animation: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="doc">
+      <header>
+        <h1 class="term">Git Game design system</h1>
+        <div class="theme-pick" role="group" aria-label="theme">
+          <button class="btn small" type="button" data-set="">follow the OS</button>
+          <button class="btn small" type="button" data-set="dark">dark</button>
+          <button class="btn small" type="button" data-set="light">light</button>
+        </div>
+      </header>
+      <p class="lede">
+        A prototype of <code>design-system/gitgame/MASTER.md</code>: the four families of screens drawn with the
+        proposed tokens and shared components. The words and numbers come from the running game and its pages.
+      </p>
+
+      <!-- ===================================================== A. SITE PAGES -->
+      <section class="family" aria-labelledby="fa">
+        <span class="caps">family A</span>
+        <h2 id="fa" class="term">Site pages</h2>
+        <p class="muted">
+          One 56 px header at every width. On a phone the six links fold into “menu”, so “play” stays in view. Prose is
+          capped at 68ch.
+        </p>
+        <div class="frames">
+          <div class="frame phone">
+            <span class="caps">phone · landing</span>
+            <header class="site-head">
+              <a class="brand" href="#">Git Game</a>
+              <details class="menu">
+                <summary>menu</summary>
+                <nav aria-label="site">
+                  <a href="#">new to Git?</a>
+                  <a href="#">how it plays</a>
+                  <a href="#">questions</a>
+                  <a href="#">what Git said</a>
+                  <a href="#">teach</a>
+                  <a href="#">teams</a>
+                </nav>
+              </details>
+              <a class="btn primary small" href="#">play</a>
+            </header>
+            <div class="frame-body hero">
+              <h1 class="term">A multiplayer card game whose rules are Git.</h1>
+              <p class="lede">
+                Ship commits to a shared <code>main</code>. Pull before you push, blame the bugs you can't see, and
+                survive <code>git push --force</code>. Free, in your browser, with nothing to sign up for.
+              </p>
+              <div class="stack" style="margin-bottom: var(--s-4)">
+                <a class="btn primary" href="#">play the bot now</a>
+                <a class="btn" href="#">or open a room for friends</a>
+              </div>
+              <!-- prettier-ignore -->
+              <div class="transcript"><div class="lines mine ok"><span class="who">ana@main</span> $ git pull --rebase -X ours
+<span class="out">Successfully rebased and updated refs/heads/main.</span></div><div class="lines reject"><span class="who">bot@main</span> $ git push
+<span class="out"> ! [rejected]        main -&gt; main (non-fast-forward)</span></div><div class="lines warn"><span class="who">bot@main</span> $ git push --force
+<span class="out"> + 8e1da02...b0ba026 main -&gt; main (forced update)</span></div><div class="lines mine"><span class="who">ana@main</span> $ git reflog
+<span class="note"># restored 8e1da02: back on top of main</span></div></div>
+              <div class="hand" aria-label="a hand of cards">
+                <span class="card lg" style="--band: #3ec1b3"
+                  ><span class="band">commit</span
+                  ><span class="face"><span class="file">auth.js</span><span class="big">+5</span></span></span
+                >
+                <span class="card lg" style="--band: #a88bfa"
+                  ><span class="band">commit</span
+                  ><span class="face"><span class="file">api.py</span><span class="big">+6</span></span
+                  ><span class="bug">BUG</span></span
+                >
+                <span class="card lg" style="--band: #f2755c"
+                  ><span class="band">commit</span
+                  ><span class="face"><span class="file">styles.css</span><span class="big">+3</span></span></span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="frame">
+            <span class="caps">desktop · a page under /git</span>
+            <header class="site-head wide">
+              <a class="brand" href="#">Git Game</a>
+              <nav class="links" aria-label="site">
+                <a href="#">new to Git?</a>
+                <a href="#">what Git said</a>
+                <a href="#">teach</a>
+                <a href="#">teams</a>
+              </nav>
+              <details class="menu">
+                <summary>menu</summary>
+                <nav aria-label="site, folded">
+                  <a href="#">new to Git?</a>
+                  <a href="#">what Git said</a>
+                  <a href="#">teach</a>
+                  <a href="#">teams</a>
+                </nav>
+              </details>
+              <a class="btn primary small" href="#">play</a>
+            </header>
+            <div class="frame-body prose">
+              <h1 class="term"><code>git push</code> rejected: non-fast-forward</h1>
+              <p class="lede">
+                Someone else's commit reached <code>main</code> before yours, and your commit doesn't have theirs in its
+                history. Git won't move a branch backwards, so the remote refuses. Here is the line, what Git checked,
+                and the pull that fixes it.
+              </p>
+              <!-- web/captures/push-non-fast-forward.txt -->
+              <!-- prettier-ignore -->
+              <div class="transcript"><span class="prompt-line"><span class="sigil">$</span> git push</span>
+To ../origin.git
+<span class="lines reject"><span class="out"> ! [rejected]        main -&gt; main (non-fast-forward)</span></span>
+error: failed to push some refs to '../origin.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. If you want to integrate the remote changes,
+hint: use 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.</div>
+              <h2 class="term">What Git checked</h2>
+              <p>
+                A push asks the remote to move its <code>main</code> from the tip it has to the commit you're sending.
+                Git moves a branch forward only: the commit you send must have the remote's tip among its ancestors, so
+                that nothing already on <code>main</code> falls off it. A move like that is a fast-forward.
+              </p>
+            </div>
+            <footer class="site-foot">
+              <span>Git Game</span><a href="#">releases</a><a href="#">NeuEra Apps LLC</a
+              ><a href="#">source of v0.5.4 (AGPL-3.0)</a><a href="#">privacy</a><a href="#">terms</a>
+              <p class="trademark">
+                Git® is a trademark of
+                <a href="#">Software Freedom Conservancy</a>. Used with permission.
+              </p>
+            </footer>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================== B. APP ENTRY -->
+      <section class="family" aria-labelledby="fb">
+        <span class="caps">family B</span>
+        <h2 id="fb" class="term">App entry: start and room</h2>
+        <p class="muted">
+          “Reminders” and “set up by hand” become settings rows you can see are controls. Your games are tappable rows.
+          A room's wait is a status line, not a disabled button.
+        </p>
+        <div class="frames">
+          <div class="frame phone">
+            <span class="caps">phone · /play</span>
+            <div class="frame-body">
+              <div class="who-line"><b>calm-crane-13</b><span class="muted">·</span><a href="#">link GitHub</a></div>
+              <h1 class="term">Git Game</h1>
+              <p class="lede">A card game about Git. Ship commits to main; survive push --force.</p>
+              <div class="stack" style="margin: var(--s-4) 0 var(--s-5)">
+                <button class="btn primary" type="button">play the bot now</button>
+                <button class="btn" type="button">invite someone</button>
+              </div>
+              <h2 class="term">your games</h2>
+              <ul class="games" style="margin-bottom: var(--s-5)">
+                <li>
+                  <a href="#"
+                    ><span class="name">vs bot</span><span class="status">v1.0 shipped · you lost, 26</span></a
+                  >
+                </li>
+              </ul>
+              <div class="stack">
+                <details class="setting">
+                  <summary>
+                    <span class="title">reminders by email</span>
+                    <span class="desc">when your pack is due</span>
+                  </summary>
+                </details>
+                <details class="setting" open>
+                  <summary>
+                    <span class="title">more: set up a game by hand</span>
+                    <span class="desc">bots, people at this device, day length</span>
+                  </summary>
+                  <div class="body">
+                    <div class="field">
+                      <label for="p-bots">bots</label>
+                      <select id="p-bots">
+                        <option>1</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="p-others">others at this device (hotseat), comma-separated</label>
+                      <input id="p-others" value="ana, ana" />
+                      <span class="err">fatal: every seat needs its own name</span>
+                    </div>
+                    <div class="field">
+                      <label for="p-len">day length</label>
+                      <select id="p-len">
+                        <option>live · 60s days</option>
+                      </select>
+                    </div>
+                    <button class="btn primary" type="button">git init</button>
+                  </div>
+                </details>
+              </div>
+            </div>
+          </div>
+
+          <div class="frame phone">
+            <span class="caps">phone · a room</span>
+            <div class="frame-body stack" style="gap: var(--s-3)">
+              <h1 class="term">room zckyrqgc</h1>
+              <p style="margin: 0">Send this link to whoever you're playing:</p>
+              <div class="surface share">
+                <code>http://localhost:5173/play#/room/zckyrqgc</code>
+                <div style="margin-top: var(--s-2)">
+                  <button class="btn small" type="button">copy</button>
+                </div>
+              </div>
+              <div class="surface" style="padding: var(--s-3) var(--s-4)">
+                <b style="font-family: var(--mono)">calm-crane-13</b>
+                <div class="muted" style="font-size: var(--t-small)">host</div>
+              </div>
+              <p class="muted" style="margin: 0">1 of 5 seats · live · 60s days</p>
+              <div class="field">
+                <label for="r-bots">bots</label>
+                <select id="r-bots">
+                  <option>0</option>
+                </select>
+              </div>
+              <p class="pending" role="status" style="margin: var(--s-2) 0 0">waiting for a second seat</p>
+              <button class="btn primary" type="button" disabled>start the game</button>
+              <a href="#" style="justify-self: start; min-height: 44px; display: inline-flex; align-items: center"
+                >home</a
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================== C. THE GAME -->
+      <section class="family" aria-labelledby="fc">
+        <span class="caps">family C</span>
+        <h2 id="fc" class="term">The game</h2>
+        <p class="muted">
+          The structure stays as event-screens §4 and §9 lay it out. Inside it, nothing readable is under 12 px, card
+          labels are dark on their bands, disabled actions are dashed instead of faded, and the terminal keeps its
+          dark-theme colours.
+        </p>
+        <div class="frames">
+          <div class="frame phone">
+            <span class="caps">phone · hub, day 1</span>
+            <div class="statusbar">
+              <span>day <b>1</b>/12</span><span>main <b>0</b>/10</span>
+              <span class="ops" aria-label="3 ops left"><i></i><i></i><i></i></span>
+              <span class="score"><span class="me">you 0</span> · bot 0</span>
+              <button class="btn small" type="button">table</button>
+            </div>
+            <div class="game-body">
+              <div class="callout guide">
+                <span class="caps">guide · 1 of 10</span>
+                <p>Pick a card from your hand: lines of code, in one file. One without a BUG tag is a safe start.</p>
+                <a href="#">skip the guide</a>
+              </div>
+              <div class="strip">
+                <div class="head"><span class="caps">main</span><span class="caps">0/10 commits</span></div>
+                <div class="slots">
+                  <div class="slot">
+                    <span class="tip">tip</span>
+                    <span class="card root"
+                      ><span class="band" style="--band: var(--cmd)"></span
+                      ><span class="face">initial commit</span></span
+                    >
+                    <span class="chips"><span class="chip you">you</span><span class="chip other">bot</span></span>
+                  </div>
+                </div>
+              </div>
+              <div class="branch">
+                <span class="caps">your branch</span><span class="where">at the tip</span>
+                <div class="pile"><span class="caps">staged</span><br /><span class="empty">empty</span></div>
+                <div class="pile"><span class="caps">to push</span><br /><span class="empty">empty</span></div>
+              </div>
+              <div class="hand four" aria-label="your hand">
+                <span class="card" style="--band: #f2755c"
+                  ><span class="band">commit</span
+                  ><span class="face"><span class="file">styles.css</span><span class="big">+3</span></span
+                  ><span class="bug">BUG</span></span
+                >
+                <span class="card" style="--band: #a88bfa"
+                  ><span class="band">commit</span
+                  ><span class="face"><span class="file">api.py</span><span class="big">+1</span></span></span
+                >
+                <span class="card" style="--band: #e9a83b"
+                  ><span class="band">commit</span
+                  ><span class="face"><span class="file">README.md</span><span class="big">+8</span></span></span
+                >
+                <span class="card" style="--band: #4c9be8"
+                  ><span class="band">commit</span
+                  ><span class="face"><span class="file">Dockerfile</span><span class="big">+3</span></span></span
+                >
+              </div>
+              <div class="actions">
+                <button class="action" type="button" disabled>
+                  <span class="cmd">git add</span><span class="cost">1 op</span
+                  ><span class="why">select cards in your hand</span>
+                </button>
+                <button class="action" type="button" disabled>
+                  <span class="cmd">git commit</span><span class="cost">1 op</span
+                  ><span class="why">nothing added to commit</span>
+                </button>
+                <button class="action" type="button">
+                  <span class="cmd">git push</span><span class="cost">free</span
+                  ><span class="why">nothing to push yet</span>
+                </button>
+                <button class="action" type="button">
+                  <span class="cmd">git pull</span><span class="cost">0–1 ops</span
+                  ><span class="why">at the tip: free unless main moves</span>
+                </button>
+              </div>
+            </div>
+            <div class="actionbar">
+              <button class="btn" type="button">hint</button>
+              <button class="btn" type="button" disabled>undo</button>
+              <button class="btn primary" type="button">send pack</button>
+            </div>
+          </div>
+
+          <div class="frame phone">
+            <span class="caps">phone · the day plays back</span>
+            <div class="statusbar">
+              <span>day <b>1</b>/12</span><span>main <b>1</b>/10</span>
+              <span class="score"><span class="me">you 0</span> · bot 0</span>
+              <button class="btn small" type="button">table</button>
+            </div>
+            <div class="game-body moment">
+              <div class="incident">
+                <span class="band">incident</span>
+                <h3>Coffee Machine Fixed</h3>
+                <p>Nothing special. Morale is high.</p>
+              </div>
+              <span class="caps">day 1 · your pack</span>
+              <p class="moment-cmd">git push</p>
+              <!-- prettier-ignore -->
+              <div class="transcript"><span class="lines ok"><span class="out">   94da114..baa9c75  main -&gt; main</span></span></div>
+              <div class="strip">
+                <div class="head"><span class="caps">main</span><span class="caps">1/10 commits</span></div>
+                <div class="slots">
+                  <div class="slot">
+                    <span class="tip none">tip</span>
+                    <span class="card root"
+                      ><span class="band" style="--band: var(--cmd)"></span
+                      ><span class="face">initial commit</span></span
+                    >
+                    <span class="chips"><span class="chip other">bot</span></span>
+                  </div>
+                  <div class="slot">
+                    <span class="tip">tip</span>
+                    <span class="card back"><span class="band"></span><span class="face"></span></span>
+                    <span>you · styles.css +8</span>
+                    <span class="chips"><span class="chip you">you</span></span>
+                  </div>
+                </div>
+              </div>
+              <p class="said">Your commit is on main, face-down. Nobody knows yet whether it holds a bug.</p>
+            </div>
+            <div class="actionbar" style="grid-template-columns: 1fr 1fr">
+              <button class="btn" type="button">skip to the day's end</button>
+              <button class="btn primary" type="button">continue</button>
+            </div>
+          </div>
+
+          <div class="frame phone">
+            <span class="caps">phone · receipt and release</span>
+            <div class="game-body">
+              <h1 style="margin: 0">day 1 closed</h1>
+              <span class="caps">the remote ran yours first, then bot's</span>
+              <ol class="receipt surface">
+                <li><span class="mark">·</span>git add styles.css<span class="what">staged</span></li>
+                <li>
+                  <span class="mark">·</span>git commit -m "style(ui): align the card grid"<span class="what"
+                    >baa9c75 on your branch</span
+                  >
+                </li>
+                <li><span class="mark">·</span>git pull<span class="what">already up to date</span></li>
+                <li><span class="mark ok">✓</span>git push<span class="what">baa9c75 on main</span></li>
+              </ol>
+              <div class="row"><span class="chip you">you +8</span><span class="chip reject">bot −1</span></div>
+              <hr style="border: 0; border-top: 1px solid var(--line); width: 100%; margin: var(--s-2) 0" />
+              <h1 style="margin: 0">The release shipped.</h1>
+              <p class="verdict">You win.</p>
+              <table class="score">
+                <thead>
+                  <tr>
+                    <th scope="col">
+                      <span class="visually-hidden">score</span>
+                    </th>
+                    <th scope="col" class="me">you</th>
+                    <th scope="col">bot</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>lines on main</td>
+                    <td>47</td>
+                    <td>17</td>
+                  </tr>
+                  <tr>
+                    <td>fixes</td>
+                    <td>0</td>
+                    <td>0</td>
+                  </tr>
+                  <tr>
+                    <td>blame</td>
+                    <td>0</td>
+                    <td>0</td>
+                  </tr>
+                  <tr>
+                    <td>merge tokens</td>
+                    <td>−2</td>
+                    <td>−3</td>
+                  </tr>
+                  <tr>
+                    <td>grudges</td>
+                    <td>−1</td>
+                    <td>0</td>
+                  </tr>
+                  <tr>
+                    <td>sins</td>
+                    <td>0</td>
+                    <td>−1</td>
+                  </tr>
+                  <tr class="total">
+                    <td>total</td>
+                    <td>44</td>
+                    <td>13</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p style="margin: 0">
+                What decided it: sleepy-puffin-38 won by 31, most of it in lines shipped (+30 over bot).
+              </p>
+            </div>
+            <div class="actionbar" style="grid-template-columns: 1fr 1fr">
+              <button class="btn" type="button">replay it</button>
+              <button class="btn primary" type="button">new game</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================== COMPONENTS & TOKENS -->
+      <section class="family" aria-labelledby="fk">
+        <span class="caps">shared</span>
+        <h2 id="fk" class="term">Components and tokens</h2>
+        <div class="frames">
+          <div class="frame">
+            <span class="caps">buttons · chips · callouts</span>
+            <div class="frame-body stack" style="gap: var(--s-4)">
+              <div class="row">
+                <button class="btn primary" type="button">primary</button>
+                <button class="btn" type="button">secondary</button>
+                <button class="btn quiet" type="button">quiet</button>
+                <button class="btn primary" type="button" disabled>disabled</button>
+              </div>
+              <div class="row">
+                <span class="chip you">you +8</span><span class="chip other">bot ±0</span
+                ><span class="chip ok">at the tip</span><span class="chip warn">your pack is due</span
+                ><span class="chip reject">bot −1</span>
+              </div>
+              <div class="callout nudge">
+                <p>bot pushed, so the tip moved. Unless you pull first, your next push is rejected.</p>
+              </div>
+              <div class="hand">
+                <span class="card lg command"
+                  ><span class="band">command</span
+                  ><span class="face"><span class="file">push --force</span></span></span
+                >
+                <span class="card lg" style="--band: #4c9be8"
+                  ><span class="band">commit</span
+                  ><span class="face"><span class="file">Dockerfile</span><span class="big">+7</span></span></span
+                >
+                <span class="card lg" style="--band: #e9a83b"
+                  ><span class="band">commit</span
+                  ><span class="face"><span class="file">README.md</span><span class="big">+2</span></span
+                  ><span class="bug">BUG</span></span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="frame">
+            <span class="caps">type scale</span>
+            <div class="frame-body scale">
+              <div class="step">
+                <span class="caps">display</span
+                ><span style="font: 700 var(--t-display)/1.1 var(--mono)">$ Git Game</span>
+              </div>
+              <div class="step">
+                <span class="caps">h1 · mono</span
+                ><span style="font: 700 var(--t-h1)/1.2 var(--mono)">$ What Git said</span>
+              </div>
+              <div class="step">
+                <span class="caps">h2 · mono</span><span style="font: 700 var(--t-h2)/1.3 var(--mono)"># The fix</span>
+              </div>
+              <div class="step">
+                <span class="caps">lede 18</span
+                ><span style="font-size: var(--t-lede)">Pull with a rebase, then push again.</span>
+              </div>
+              <div class="step">
+                <span class="caps">body 16</span><span>Your commit is replayed on top of theirs.</span>
+              </div>
+              <div class="step">
+                <span class="caps">small 14</span
+                ><span style="font-size: var(--t-small)" class="muted">at the tip: free unless main moves</span>
+              </div>
+              <div class="step">
+                <span class="caps">caption 12</span><span class="caps">your branch · at the tip</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swatches" style="margin-top: var(--s-5)" id="swatches"></div>
+      </section>
+    </div>
+
+    <script>
+      // Theme forcing for the preview, and the swatches with their live contrast against the ground.
+      const root = document.documentElement;
+      for (const b of document.querySelectorAll("[data-set]"))
+        b.addEventListener("click", () => {
+          if (b.dataset.set) root.dataset.theme = b.dataset.set;
+          else delete root.dataset.theme;
+          drawSwatches();
+        });
+
+      const lum = (rgb) => {
+        const [r, g, b] = rgb.map((c) => {
+          c /= 255;
+          return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      };
+      const rgbOf = (value) => {
+        const probe = document.createElement("i");
+        probe.style.color = value;
+        document.body.append(probe);
+        const m = getComputedStyle(probe).color.match(/\d+/g).slice(0, 3).map(Number);
+        probe.remove();
+        return m;
+      };
+      const ratio = (a, b) => {
+        const [x, y] = [lum(rgbOf(a)), lum(rgbOf(b))].sort((p, q) => q - p);
+        return (x + 0.05) / (y + 0.05);
+      };
+      const SW = [
+        ["ink", "ground"],
+        ["muted", "ground"],
+        ["link", "ground"],
+        ["on-accent", "accent"],
+        ["you", "ground"],
+        ["other", "ground"],
+        ["ok", "ground"],
+        ["reject", "ground"],
+        ["warn", "ground"],
+        ["on-band", "bug-fill"],
+        ["on-band", "incident-fill"],
+        ["term-muted", "term"],
+        ["field-line", "paper"],
+      ];
+      function drawSwatches() {
+        const box = document.getElementById("swatches");
+        const css = getComputedStyle(root);
+        box.replaceChildren(
+          ...SW.map(([fg, bg]) => {
+            const f = css.getPropertyValue(`--${fg}`).trim();
+            const b = css.getPropertyValue(`--${bg}`).trim();
+            const r = ratio(f, b);
+            const need = fg === "field-line" ? 3 : 4.5;
+            const el = document.createElement("div");
+            el.className = "swatch";
+            // a border token is shown as a border, since it is never text
+            const sample =
+              need === 3
+                ? `background:${b};color:var(--ink);box-shadow:inset 0 0 0 3px ${f}`
+                : `background:${b};color:${f}`;
+            el.innerHTML = `<span class="chipcolor" style="${sample}">${need === 3 ? "border" : "Aa"} ${fg}</span>
+              <span class="meta"><b>${r.toFixed(2)}:1</b> ${r >= need ? "AA" : "FAIL"}<br>--${fg} ${f}<br>on --${bg}</span>`;
+            return el;
+          }),
+        );
+      }
+      drawSwatches();
+    </script>
+  </body>
+</html>
