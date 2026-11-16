@@ -331,15 +331,15 @@ Out of scope unless asked: the link-preview image (`web/public/og.png`), the pri
 
 ## 10. Rollout record
 
-| Phase                | Commit      | What changed                                                                                  |
-| -------------------- | ----------- | --------------------------------------------------------------------------------------------- |
-| 1. Tokens            | `499a8de`   | Studio colours, state tokens, scales, the terminal's own colours, theme-color per OS theme    |
-| 2. Shared components | `6c2a944`   | Type, buttons, fields, settings rows, chips, cards, transcript, site header and menu          |
-| 3. Site pages        | `e45dee4`   | Landing, /git, /teach, /teams, /new-to-git, legal pages                                       |
-| 4. App entry         | `f8f5e06`   | Start, your games, reminders, busy buttons, room waiting state and copy button                |
-| 5. The game          | `62abc12`   | Status bar, strip, branch, actions, pack, table, playback, receipt, scoreboard, replay, guide |
-| 6. Stats             | `5077987`   | Tiles, segmented switch, charts                                                               |
-| 7. Verification      | this commit | `contrast/scan-site.js` at 375, 768, 1024 and 1440 px in dark and light                       |
+| Phase                | Commit        | What changed                                                                                                                                                |
+| -------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Tokens            | `499a8de`     | Studio colours, state tokens, scales, the terminal's own colours, theme-color per OS theme                                                                  |
+| 2. Shared components | `6c2a944`     | Type, buttons, fields, settings rows, chips, cards, transcript, site header and menu                                                                        |
+| 3. Site pages        | `e45dee4`     | Landing, /git, /teach, /teams, /new-to-git, legal pages                                                                                                     |
+| 4. App entry         | `f8f5e06`     | Start, your games, reminders, busy buttons, room waiting state and copy button                                                                              |
+| 5. The game          | `62abc12`     | Status bar, strip, branch, actions, pack, table, playback, receipt, scoreboard, replay, guide                                                               |
+| 6. Stats             | `5077987`     | Tiles, segmented switch, charts                                                                                                                             |
+| 7. Verification      | `this commit` | `contrast/scan-site.js` at 375, 768, 1024 and 1440 px in dark and light: 220 screens, **0 findings** (contrast, text under 12 px, targets, sideways scroll) |
 
 Where the implementation refined the spec:
 
