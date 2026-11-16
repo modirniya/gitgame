@@ -18,6 +18,9 @@ if [[ -z "$browser" ]]; then
 fi
 [[ -n "$browser" ]] || { echo "no Chromium-based browser found; name one: scripts/og-image.sh /path/to/it" >&2; exit 1; }
 
-"$browser" --headless=new --disable-gpu --hide-scrollbars --force-device-scale-factor=1 --window-size=1200,630 \
+# Chromium won't start its sandbox as root (a container, CI); it says so on stderr, which is hidden below
+sandbox=()
+[[ "$(id -u)" == 0 ]] && sandbox=(--no-sandbox)
+"$browser" --headless=new "${sandbox[@]}" --disable-gpu --hide-scrollbars --force-device-scale-factor=1 --window-size=1200,630 \
   --screenshot="$PWD/web/public/og.png" "file://$PWD/scripts/og-image.html" 2>/dev/null
 echo "web/public/og.png: $(sips -g pixelWidth -g pixelHeight web/public/og.png 2>/dev/null | awk '/pixel/ {print $2}' | paste -sd x - || true)"

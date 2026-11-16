@@ -9,6 +9,7 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ### Changed
 - A new look, "Studio", for every page and every screen of the game. It uses cool slate grounds, the logo's teal for actions, pill buttons, sans headings and mono for what Git says, and it follows the device's light or dark setting. All text meets WCAG AA contrast in both themes, nothing anyone must read is under 12 px, and every control is at least 44 px. On wide screens the hand wraps onto a second row instead of turning its labels sideways. The header menu closes with Escape or a tap outside it.
+- The link-preview image (`og.png`) is redrawn in the Studio look.
 
 ## [0.5.4] - 2026-10-30
 

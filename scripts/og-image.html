@@ -1,11 +1,33 @@
 <!doctype html>
 <!-- The landing page's link-preview image (ADR-0009), drawn at 1200×630 by scripts/og-image.sh into web/public/og.png.
-     The game's colors (web/src/styles.css) and the deck's file colors (rules/deck.json); the name is drawn in, so a
-     rename (docs/branding.md) runs the script again. -->
+     The Studio look's dark theme (web/src/styles.css, design-system/gitgame/MASTER.md), the game's card
+     (web/src/cards.css) and the deck's file colors (rules/deck.json); the name is drawn in, so a rename
+     (docs/branding.md) runs the script again. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <style>
+      :root {
+        --ground: #151a22;
+        --paper: #232b37;
+        --ink: #eef2f7;
+        --muted: #a9b4c4;
+        --line: #323c4b;
+        --accent: #5cd6c8;
+        --on-accent: #06201d;
+        --on-band: #11161a;
+        --bug-fill: #ff7a67;
+        --term: #0e1218;
+        --term-ink: #d8d5ce;
+        --term-ok: #52c98f;
+        --term-reject: #ff7a67;
+        --term-you: #ff6ac1;
+        --term-other: #a3acbd;
+        --mono:
+          ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo,
+          Consolas, monospace;
+        --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
       * {
         box-sizing: border-box;
       }
@@ -17,132 +39,146 @@
         overflow: hidden;
       }
       body {
-        background: #14181c;
-        color: #e7ecef;
-        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-        font-variant-ligatures: none;
-        padding: 64px 72px;
+        background: var(--ground);
+        color: var(--ink);
+        font-family: var(--sans);
+        padding: 64px 72px 60px;
         display: grid;
         grid-template-columns: 1fr auto;
-        grid-template-rows: auto 1fr auto;
-        column-gap: 48px;
+        grid-template-rows: auto auto 1fr auto;
+        column-gap: 40px;
+      }
+      .mark {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        gap: 22px;
+      }
+      .mark img {
+        width: 76px;
+        height: 76px;
       }
       h1 {
-        grid-column: 1 / -1;
         margin: 0;
-        font-size: 76px;
-      }
-      h1 span {
-        color: #3ec1b3;
+        font-size: 72px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1;
       }
       .lede {
         grid-column: 1 / -1;
-        margin: 14px 0 0;
-        font-size: 30px;
-        color: #8a8f99;
+        margin: 22px 0 0;
+        font-size: 32px;
+        color: var(--muted);
       }
       .term {
         align-self: end;
-        background: #0d0f12;
+        margin: 0;
+        background: var(--term);
         border-radius: 12px;
-        padding: 22px 26px;
-        font-size: 22px;
-        line-height: 1.55;
+        box-shadow: inset 5px 0 0 var(--term-reject);
+        padding: 22px 28px 22px 32px;
+        font: 22px/1.6 var(--mono);
+        font-variant-ligatures: none;
         white-space: pre;
-        color: #d8d5ce;
+        color: var(--term-ink);
       }
       .who {
-        color: #ff6ac1;
+        color: var(--term-you);
       }
       .bot {
-        color: #9aa3b5;
+        color: var(--term-other);
       }
       .ok {
-        color: #52c98f;
+        color: var(--term-ok);
       }
       .no {
-        color: #ff6f5b;
+        color: var(--term-reject);
       }
       .cards {
         align-self: end;
         display: flex;
-        gap: 14px;
+        gap: 16px;
       }
-      /* the game's card (web/src/cards.css) at 124 px wide */
+      /* the game's card (web/src/cards.css) at 128 px wide */
       .card {
         position: relative;
-        width: 124px;
-        height: 174px;
-        border-radius: 11px;
-        border: 1px solid #343e47;
-        background: #252c33;
+        width: 128px;
+        height: 179px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: var(--paper);
+        box-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
         display: grid;
-        grid-template-rows: 25px 1fr;
+        grid-template-rows: 27px 1fr;
         overflow: hidden;
         text-align: center;
       }
       .band {
         background: var(--band);
-        color: #fff;
-        font:
-          700 11px/25px system-ui,
-          -apple-system,
-          "Segoe UI",
-          sans-serif;
-        letter-spacing: 0.1em;
+        color: var(--on-band);
+        font: 700 12px/27px var(--sans);
+        letter-spacing: 0.08em;
         text-transform: uppercase;
         text-align: left;
-        padding: 0 12px;
+        padding: 0 10px;
       }
       .face {
         display: grid;
         align-content: center;
-        gap: 6px;
+        gap: 8px;
       }
       .file {
-        font-size: 16px;
-        font-weight: 600;
+        font: 600 18px/1.15 var(--mono);
+        letter-spacing: -0.02em;
       }
       .big {
-        font:
-          700 42px/1 system-ui,
-          -apple-system,
-          "Segoe UI",
-          sans-serif;
+        font: 700 44px/1 var(--sans);
+        font-variant-numeric: tabular-nums;
       }
       .bug {
         position: absolute;
-        left: 6px;
-        top: 32px;
-        padding: 0 7px;
-        border-radius: 6px;
-        background: #ff6f5b;
-        color: #fff;
-        font:
-          800 12px/22px system-ui,
-          -apple-system,
-          "Segoe UI",
-          sans-serif;
-        letter-spacing: 0.06em;
+        right: 4px;
+        top: 4px;
+        padding: 0 6px;
+        border-radius: 5px;
+        background: var(--bug-fill);
+        color: var(--on-band);
+        font: 800 12px/19px var(--sans);
+        letter-spacing: 0.04em;
       }
-      .domain {
+      .foot {
         grid-column: 1 / -1;
         align-self: end;
-        margin-top: 26px;
+        margin-top: 28px;
+        display: flex;
+        align-items: center;
+        gap: 22px;
+      }
+      .play {
+        background: var(--accent);
+        color: var(--on-accent);
+        border-radius: 999px;
+        padding: 0 30px;
+        font: 700 26px/58px var(--sans);
+      }
+      .domain {
         font-size: 26px;
-        color: #3ec1b3;
+        color: var(--muted);
       }
     </style>
   </head>
   <body>
-    <h1><span>$</span> Git Game</h1>
-    <p class="lede">a multiplayer card game whose rules are Git</p>
-    <div class="term">
-      <span class="who">ana@main</span> $ git push
-      <span class="ok"> 3f2c1d9..8e1da02 main -&gt; main</span>
-      <span class="bot">bot@main</span> $ git push
-      <span class="no"> ! [rejected] main -&gt; main (non-fast-forward)</span>
+    <div class="mark">
+      <img src="../web/public/icon.svg" alt="" />
+      <h1>Git Game</h1>
     </div>
+    <p class="lede">A multiplayer card game whose rules are Git.</p>
+    <pre class="term">
+<span class="who">ana@main</span> $ git push
+<span class="ok">   3f2c1d9..8e1da02  main -&gt; main</span>
+<span class="bot">bot@main</span> $ git push
+<span class="no"> ! [rejected]        main -&gt; main (non-fast-forward)</span></pre>
     <div class="cards">
       <div class="card" style="--band: #3ec1b3">
         <span class="band">commit</span
@@ -157,6 +193,9 @@
         ><span class="bug">BUG</span>
       </div>
     </div>
-    <p class="domain">gitgame.online · play free in your browser</p>
+    <div class="foot">
+      <span class="play">Play free in your browser</span>
+      <span class="domain">gitgame.online</span>
+    </div>
   </body>
 </html>

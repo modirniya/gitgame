@@ -316,7 +316,7 @@ Each phase is one commit (or a few) on `claude/ui-ux-redesign`.
 7. **Verification.** Screenshots at 375, 768, 1024 and 1440 px in light and dark across all four families, and both
    scans on the live app.
 
-Out of scope unless asked: the link-preview image (`web/public/og.png`), the print-and-play deck, `prototypes/`.
+Out of scope unless asked: the print-and-play deck, `prototypes/`. The link-preview image (`web/public/og.png`) was redrawn in Studio afterwards, from `scripts/og-image.html`.
 
 ---
 
