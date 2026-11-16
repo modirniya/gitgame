@@ -126,12 +126,15 @@ it("ends the day on its receipt: the order, your ops, the score, and where you s
   ];
   const { node, steps: ss } = show([push, ...mine], {}, 2);
   expect(ss.at(-1).kind).toBe("summary");
-  expect(node.querySelector("h1").textContent).toBe("day 2 closed");
+  expect(node.querySelector("h1").textContent).toBe("Day 2 closed");
   expect(node.querySelector(".order").textContent).toBe("the remote ran bot's first, then yours");
   expect([...node.querySelectorAll(".receipt-list li")].map((li) => li.textContent)).toEqual([
-    "·git pullalready up to date",
-    "✗git pushrejected: main had moved",
+    "git pullalready up to date",
+    "git pushrejected: main had moved",
   ]);
+  // a failed op's mark is named; a plain op's is decoration
+  const marks = [...node.querySelectorAll(".receipt-list .mark svg")].map((s) => s.getAttribute("aria-label"));
+  expect(marks).toEqual([null, "failed"]);
   expect(node.querySelector(".said").textContent).toMatch(/^The tip moved: you are 1 behind/);
 });
 

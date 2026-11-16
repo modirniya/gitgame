@@ -7,6 +7,8 @@ const PATHS = {
   right: "M9 6l6 6-6 6",
   down: "M6 9l6 6 6-6",
   close: "M6 6l12 12M18 6L6 18",
+  bang: "M12 5v9M12 18.5v.01",
+  dot: "M12 12h.01",
 };
 const NS = "http://www.w3.org/2000/svg";
 

@@ -37,7 +37,7 @@
 }
 @keyframes slide-in {
   from {
-    transform: translateX(calc(var(--from) * (var(--card-md) + 8px)));
+    transform: translateX(calc(var(--from) * (var(--slot, 72px) + 8px)));
   }
 }
 ol.fallen {
@@ -104,8 +104,8 @@ ol.fallen li {
   animation: from-right 640ms var(--ease) both;
 }
 .clash-file {
-  padding: 4px 8px;
-  border-radius: 8px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
   background: var(--reject-soft);
   color: var(--reject);
   font: 700 13px var(--mono);
@@ -155,7 +155,7 @@ ol.fallen li {
 .stamp {
   padding: 4px 12px;
   border: 2px solid currentColor;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   font: 800 15px var(--mono);
   letter-spacing: 0.04em;
   color: var(--muted);
@@ -181,7 +181,8 @@ ol.fallen li {
   left: 0;
   z-index: 3;
   height: 3px;
-  background: var(--other);
+  border-radius: 0 2px 2px 0;
+  background: var(--accent);
   animation: auto-bar 1200ms linear forwards;
 }
 @keyframes auto-bar {
@@ -199,14 +200,20 @@ ol.fallen li {
 }
 ol.receipt-list {
   display: grid;
-  gap: 4px;
   margin: 0;
-  padding: 12px 14px;
+  padding: 4px 16px;
   list-style: none;
-  border: 1px dashed var(--line);
-  border-radius: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
   background: var(--paper);
-  font: 13px/1.5 var(--mono);
+  box-shadow: var(--shadow);
+  font: var(--t-small) / 1.5 var(--mono);
+}
+.receipt-list li + li {
+  border-top: 1px solid var(--line);
+}
+.receipt-list li {
+  padding: 8px 0;
 }
 .receipt-list li {
   display: grid;
@@ -217,6 +224,7 @@ ol.receipt-list {
 /* what it did under the command, so a long commit message never squeezes it */
 .receipt-list .did {
   grid-column: 2;
+  font-family: var(--sans);
   color: var(--muted);
 }
 .receipt-list .ok .mark {
@@ -235,12 +243,14 @@ ol.receipt-list {
   gap: 8px;
   margin: 0;
 }
+/* what a day did to each score: a tinted pill */
 .delta {
   max-width: 100%;
-  padding: 2px 10px;
-  border: 1.5px solid currentColor;
-  border-radius: 8px;
-  font: 700 14px var(--mono);
+  padding: 2px 12px;
+  border-radius: var(--r-pill);
+  background: var(--other-soft);
+  font: 700 var(--t-small) / 24px var(--sans);
+  font-variant-numeric: tabular-nums;
   color: var(--other);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -248,9 +258,11 @@ ol.receipt-list {
 }
 .delta.you {
   color: var(--you);
+  background: var(--you-soft);
 }
 .delta.bad {
   color: var(--reject);
+  background: var(--reject-soft);
 }
 .said.warn {
   color: var(--warn);
@@ -268,23 +280,25 @@ ol.receipt-list {
   place-items: center;
   width: 40px;
   height: 40px;
+  border: 2px solid var(--other);
   border-radius: 50%;
-  background: var(--other);
-  color: var(--ground);
-  font: 700 12px var(--mono);
+  background: var(--other-soft);
+  color: var(--other);
+  font: 700 var(--t-caption) var(--sans);
 }
 .dots {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font: 500 12px var(--mono);
+  gap: 4px;
+  font: 500 var(--t-small) var(--sans);
+  font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
 .dots i {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--line);
+  background: var(--field-line);
 }
 .dots i.on {
   background: var(--other);
@@ -295,11 +309,14 @@ ol.receipt-list {
 .moment.bot h1.cmd {
   color: var(--other);
 }
+/* the bot's speech: its squared top-left corner points at the avatar */
 .bubble {
   margin: 0;
-  padding: 10px 14px;
-  border-radius: 4px 14px 14px 14px;
-  background: var(--other-soft);
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px var(--r) var(--r) var(--r);
+  background: var(--paper);
+  box-shadow: var(--shadow);
   font-size: 1rem;
   line-height: 1.45;
 }

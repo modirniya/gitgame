@@ -14,6 +14,11 @@
   height: calc(var(--w) * 1.4);
   min-height: 0;
   padding: 0;
+  /* a card that is a button keeps its grid: none of the button's centring or gaps */
+  justify-content: stretch;
+  align-items: stretch;
+  gap: 0;
+  text-wrap: wrap;
   font: 600 max(12px, calc(var(--w) * 0.145)) / 1.2 var(--mono);
   text-align: center;
   color: var(--ink);
@@ -153,6 +158,9 @@
   box-shadow:
     0 0 0 3px var(--accent),
     var(--shadow-2);
+}
+.card.selected .band {
+  padding-left: 24px;
 }
 .card.selected::after {
   content: "";
