@@ -42,7 +42,7 @@
 }
 .zone .empty {
   font: 12px var(--mono);
-  color: var(--faint);
+  color: var(--muted);
 }
 /* a commit the pack pushes, waiting past the tip */
 .slot.ghost .card {

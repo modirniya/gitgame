@@ -23,8 +23,9 @@ const manifest = () =>
     id: "/",
     start_url: "/play",
     display: "standalone",
-    background_color: "#14161a",
-    theme_color: "#14161a",
+    // the dark ground (src/styles.css): a theme follows the OS once the page is up, and dark is the default
+    background_color: "#151a22",
+    theme_color: "#151a22",
     icons: [{ src: "icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" }],
   });
 

@@ -34,7 +34,7 @@
 }
 .card .band {
   background: var(--band, var(--faint));
-  color: #fff;
+  color: var(--on-band);
   font: 700 0.6em/2.35em var(--sans);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -65,13 +65,16 @@
   top: 2.2em;
   padding: 0 0.5em;
   border-radius: 0.35em;
-  background: var(--reject);
-  color: #fff;
+  background: var(--bug-fill);
+  color: var(--on-band);
   font: 800 0.66em/1.8em var(--sans);
   letter-spacing: 0.06em;
 }
 .card.command {
   --band: var(--cmd);
+}
+.card.command .band {
+  color: var(--on-cmd);
 }
 .card.command .face {
   align-content: start;
@@ -85,7 +88,10 @@
   white-space: nowrap;
 }
 .card.initial {
-  --band: var(--faint);
+  --band: var(--cmd);
+}
+.card.initial .band {
+  color: var(--on-cmd);
 }
 .card.initial .file {
   color: var(--muted);
