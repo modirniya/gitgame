@@ -7,6 +7,10 @@ Every user-visible change lands under *Unreleased* in the same pull request that
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-27
+
+Studio, a new look for every page and screen of the game.
+
 ### Changed
 - A new look, "Studio", for every page and every screen of the game. It uses cool slate grounds, the logo's teal for actions, pill buttons, sans headings and mono for what Git says, and it follows the device's light or dark setting. All text meets WCAG AA contrast in both themes, nothing anyone must read is under 12 px, and every control is at least 44 px. On wide screens the hand wraps onto a second row instead of turning its labels sideways. The header menu closes with Escape or a tap outside it.
 - The link-preview image (`og.png`) is redrawn in the Studio look.
@@ -288,7 +292,8 @@ The first version on the hosted service: the beta ADR-0002 makes the playtest, l
 - Writes from the game's own page were refused wherever the address people use differs from the server's configured one (behind a proxy, or on another port): the origin check now compares the page's host with the host the request was sent to.
 - A force-push answered by a reflog printed the restored commit as its new tip (`+ b0ba026...b0ba026`). The forced-update line now shows what the force-push itself made the tip, as Git does; the reflog is its own event.
 
-[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.5.4...HEAD
+[Unreleased]: https://github.com/modirniya/gitgame/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/modirniya/gitgame/compare/v0.5.4...v0.6.0
 [0.5.4]: https://github.com/modirniya/gitgame/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/modirniya/gitgame/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/modirniya/gitgame/compare/v0.5.1...v0.5.2
